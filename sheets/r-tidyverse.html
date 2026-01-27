@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire R Tidyverse : dplyr, tidyr et manipulation de données avec la grammaire tidy.">
+    <title>R Tidyverse - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-500/20 mb-4 icon-glow">
+                    <i class="fab fa-r-project text-3xl text-blue-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">R Tidyverse</h1>
+                <p class="text-slate-400">Grammaire de manipulation des données avec dplyr & tidyr</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'select',
+                title: 'Sélection (dplyr)',
+                icon: 'fa-hand-pointer',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'select(df, col1, col2)',
+                        desc: 'Sélectionner des colonnes',
+                        details: {
+                            explanation: 'Extrait des colonnes spécifiques d\'un data frame. Équivalent de SELECT en SQL.',
+                            syntax: 'select(data, colonnes)',
+                            options: [
+                                { flag: 'starts_with("x")', desc: 'Colonnes commençant par "x"' },
+                                { flag: 'ends_with("y")', desc: 'Colonnes finissant par "y"' },
+                                { flag: 'contains("z")', desc: 'Colonnes contenant "z"' },
+                                { flag: 'matches("regex")', desc: 'Colonnes correspondant à un regex' },
+                                { flag: 'num_range("x", 1:3)', desc: 'Colonnes x1, x2, x3' },
+                                { flag: 'everything()', desc: 'Toutes les colonnes restantes' },
+                                { flag: '-col', desc: 'Exclure une colonne' }
+                            ],
+                            examples: [
+                                { code: 'library(tidyverse)', desc: 'Charger le tidyverse' },
+                                { code: 'df %>% select(nom, age)', desc: 'Garder nom et age' },
+                                { code: 'df %>% select(-id, -created_at)', desc: 'Tout sauf id et created_at' },
+                                { code: 'df %>% select(starts_with("date"))', desc: 'Colonnes date_*' },
+                                { code: 'df %>% select(nom, everything())', desc: 'nom en premier, puis le reste' }
+                            ],
+                            tips: ['Utilisez le pipe %>% (Ctrl+Shift+M) pour enchaîner', 'R 4.1+ supporte aussi |> (pipe natif)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'filter(df, condition)',
+                        desc: 'Filtrer les lignes',
+                        details: {
+                            explanation: 'Garde uniquement les lignes qui satisfont une condition. Équivalent de WHERE en SQL.',
+                            syntax: 'filter(data, condition)',
+                            options: [
+                                { flag: '==', desc: 'Égalité' },
+                                { flag: '!=', desc: 'Différent' },
+                                { flag: '<, >, <=, >=', desc: 'Comparaisons' },
+                                { flag: '%in%', desc: 'Dans un vecteur' },
+                                { flag: 'between(col, a, b)', desc: 'Entre deux valeurs' },
+                                { flag: 'is.na() / !is.na()', desc: 'Valeurs NA ou non-NA' }
+                            ],
+                            examples: [
+                                { code: 'df %>% filter(age > 18)', desc: 'Personnes majeures' },
+                                { code: 'df %>% filter(ville == "Paris" & age > 25)', desc: 'Parisiens > 25 ans' },
+                                { code: 'df %>% filter(ville %in% c("Paris", "Lyon"))', desc: 'Paris ou Lyon' },
+                                { code: 'df %>% filter(between(age, 20, 30))', desc: 'Âge entre 20 et 30' },
+                                { code: 'df %>% filter(!is.na(email))', desc: 'Avec email renseigné' }
+                            ],
+                            tips: ['& = ET, | = OU', 'Plusieurs conditions séparées par virgule = ET'],
+                            warnings: ['Utilisez == pour l\'égalité, pas =']
+                        }
+                    },
+                    {
+                        cmd: 'slice(df, rows)',
+                        desc: 'Sélectionner par position',
+                        details: {
+                            explanation: 'Sélectionne des lignes par leur position (numéro de ligne).',
+                            syntax: 'slice(data, positions)',
+                            options: [
+                                { flag: 'slice_head(n=)', desc: 'Premières n lignes' },
+                                { flag: 'slice_tail(n=)', desc: 'Dernières n lignes' },
+                                { flag: 'slice_sample(n=)', desc: 'n lignes aléatoires' },
+                                { flag: 'slice_min(col, n=)', desc: 'n lignes avec plus petites valeurs' },
+                                { flag: 'slice_max(col, n=)', desc: 'n lignes avec plus grandes valeurs' }
+                            ],
+                            examples: [
+                                { code: 'df %>% slice(1:10)', desc: 'Lignes 1 à 10' },
+                                { code: 'df %>% slice_head(n = 5)', desc: '5 premières lignes' },
+                                { code: 'df %>% slice_sample(n = 100)', desc: '100 lignes aléatoires' },
+                                { code: 'df %>% slice_max(salaire, n = 10)', desc: 'Top 10 salaires' },
+                                { code: 'df %>% group_by(dept) %>% slice_max(salaire, n = 1)', desc: 'Top salaire par département' }
+                            ],
+                            tips: ['slice_min/max avec by_group=TRUE pour chaque groupe'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'distinct(df, col)',
+                        desc: 'Valeurs uniques',
+                        details: {
+                            explanation: 'Garde les lignes avec des combinaisons uniques de valeurs.',
+                            syntax: 'distinct(data, colonnes, .keep_all = FALSE)',
+                            options: [
+                                { flag: '.keep_all', desc: 'Garder toutes les colonnes (pas seulement celles spécifiées)' }
+                            ],
+                            examples: [
+                                { code: 'df %>% distinct(ville)', desc: 'Villes uniques' },
+                                { code: 'df %>% distinct(ville, pays)', desc: 'Combinaisons ville-pays uniques' },
+                                { code: 'df %>% distinct(ville, .keep_all = TRUE)', desc: 'Première ligne de chaque ville' }
+                            ],
+                            tips: ['.keep_all = TRUE pour garder les autres colonnes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'rename(df, new = old)',
+                        desc: 'Renommer des colonnes',
+                        details: {
+                            explanation: 'Change le nom d\'une ou plusieurs colonnes.',
+                            syntax: 'rename(data, nouveau_nom = ancien_nom)',
+                            options: [
+                                { flag: 'rename_with()', desc: 'Renommer avec une fonction' }
+                            ],
+                            examples: [
+                                { code: 'df %>% rename(prenom = first_name)', desc: 'Renommer une colonne' },
+                                { code: 'df %>% rename(nom = name, age = years)', desc: 'Plusieurs colonnes' },
+                                { code: 'df %>% rename_with(toupper)', desc: 'Tout en majuscules' },
+                                { code: 'df %>% rename_with(~ str_replace(., "_", "."), everything())', desc: 'Remplacer _ par .' }
+                            ],
+                            tips: ['Syntaxe: nouveau_nom = ancien_nom (inverse de mutate)'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'transform',
+                title: 'Transformation',
+                icon: 'fa-random',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'mutate(df, new_col = expr)',
+                        desc: 'Créer/modifier des colonnes',
+                        details: {
+                            explanation: 'Ajoute de nouvelles colonnes ou modifie des colonnes existantes.',
+                            syntax: 'mutate(data, nouvelle_col = expression)',
+                            options: [],
+                            examples: [
+                                { code: 'df %>% mutate(age_mois = age * 12)', desc: 'Âge en mois' },
+                                { code: 'df %>% mutate(nom = toupper(nom))', desc: 'Nom en majuscules' },
+                                { code: 'df %>% mutate(\n  total = prix * quantite,\n  tva = total * 0.2,\n  ttc = total + tva\n)', desc: 'Plusieurs colonnes (peuvent se référencer)' },
+                                { code: 'df %>% transmute(total = prix * quantite)', desc: 'Garder seulement la nouvelle colonne' }
+                            ],
+                            tips: ['transmute() = mutate + select (garde seulement les nouvelles colonnes)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'mutate(across(...))',
+                        desc: 'Appliquer sur plusieurs colonnes',
+                        details: {
+                            explanation: 'Applique une fonction à plusieurs colonnes à la fois.',
+                            syntax: 'mutate(across(colonnes, fonction))',
+                            options: [
+                                { flag: 'where(is.numeric)', desc: 'Toutes les colonnes numériques' },
+                                { flag: 'where(is.character)', desc: 'Toutes les colonnes texte' },
+                                { flag: 'starts_with("x")', desc: 'Colonnes commençant par x' }
+                            ],
+                            examples: [
+                                { code: 'df %>% mutate(across(where(is.numeric), round, 2))', desc: 'Arrondir tous les numériques' },
+                                { code: 'df %>% mutate(across(c(col1, col2), ~ .x * 100))', desc: 'Multiplier col1 et col2 par 100' },
+                                { code: 'df %>% mutate(across(where(is.character), toupper))', desc: 'Majuscules sur texte' },
+                                { code: 'df %>% mutate(across(starts_with("prix"), ~ replace_na(.x, 0)))', desc: 'Remplacer NA par 0' }
+                            ],
+                            tips: ['~ .x est la syntaxe pour une fonction anonyme', '.x représente la valeur de la colonne'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'case_when()',
+                        desc: 'Conditions multiples (if-else)',
+                        details: {
+                            explanation: 'Équivalent de CASE WHEN en SQL ou de plusieurs if-else imbriqués.',
+                            syntax: 'case_when(condition1 ~ resultat1, condition2 ~ resultat2, TRUE ~ default)',
+                            options: [],
+                            examples: [
+                                { code: 'df %>% mutate(\n  categorie = case_when(\n    age < 18 ~ "Mineur",\n    age < 65 ~ "Adulte",\n    TRUE ~ "Senior"\n  )\n)', desc: 'Catégoriser par âge' },
+                                { code: 'df %>% mutate(\n  note = case_when(\n    score >= 90 ~ "A",\n    score >= 80 ~ "B",\n    score >= 70 ~ "C",\n    score >= 60 ~ "D",\n    TRUE ~ "F"\n  )\n)', desc: 'Convertir score en note' }
+                            ],
+                            tips: ['TRUE ~ valeur est le cas par défaut (ELSE)', 'Les conditions sont évaluées dans l\'ordre'],
+                            warnings: ['Oubliez pas le cas TRUE ~ pour éviter les NA']
+                        }
+                    },
+                    {
+                        cmd: 'if_else() / coalesce()',
+                        desc: 'Conditions simples et NA',
+                        details: {
+                            explanation: 'if_else pour une condition simple, coalesce pour la première valeur non-NA.',
+                            syntax: 'if_else(condition, vrai, faux, missing)',
+                            options: [],
+                            examples: [
+                                { code: 'df %>% mutate(type = if_else(age >= 18, "Adulte", "Mineur"))', desc: 'If-else simple' },
+                                { code: 'df %>% mutate(score = if_else(is.na(score), 0, score))', desc: 'Remplacer NA' },
+                                { code: 'df %>% mutate(contact = coalesce(tel, email, "N/A"))', desc: 'Premier non-NA' },
+                                { code: 'df %>% mutate(prix = coalesce(prix_promo, prix_normal))', desc: 'Prix promo sinon normal' }
+                            ],
+                            tips: ['coalesce() = premier non-NA parmi les arguments'],
+                            warnings: ['if_else plus strict que ifelse (types doivent correspondre)']
+                        }
+                    },
+                    {
+                        cmd: 'arrange(df, col)',
+                        desc: 'Trier les données',
+                        details: {
+                            explanation: 'Trie les lignes selon une ou plusieurs colonnes.',
+                            syntax: 'arrange(data, col1, col2)',
+                            options: [
+                                { flag: 'desc(col)', desc: 'Tri décroissant' }
+                            ],
+                            examples: [
+                                { code: 'df %>% arrange(age)', desc: 'Tri croissant par âge' },
+                                { code: 'df %>% arrange(desc(salaire))', desc: 'Plus gros salaires en premier' },
+                                { code: 'df %>% arrange(ville, desc(age))', desc: 'Par ville, puis âge décroissant' },
+                                { code: 'df %>% group_by(dept) %>% arrange(desc(salaire), .by_group = TRUE)', desc: 'Trier dans chaque groupe' }
+                            ],
+                            tips: ['Par défaut croissant (ASC)', '.by_group = TRUE pour respecter les groupes'],
+                            warnings: ['Les NA sont toujours à la fin']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'aggregate',
+                title: 'Agrégation',
+                icon: 'fa-calculator',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'group_by(df, col)',
+                        desc: 'Grouper les données',
+                        details: {
+                            explanation: 'Groupe les données par une ou plusieurs colonnes pour appliquer des calculs par groupe.',
+                            syntax: 'group_by(data, col1, col2)',
+                            options: [
+                                { flag: '.add', desc: 'Ajouter au groupement existant' },
+                                { flag: '.drop', desc: 'Supprimer les groupes vides (facteurs)' }
+                            ],
+                            examples: [
+                                { code: 'df %>% group_by(ville)', desc: 'Grouper par ville' },
+                                { code: 'df %>% group_by(annee, mois)', desc: 'Par année et mois' },
+                                { code: 'df %>% group_by(dept) %>% mutate(rang = row_number())', desc: 'Numéroter dans chaque groupe' }
+                            ],
+                            tips: ['ungroup() pour retirer le groupement', 'group_by affecte mutate, filter, summarize...'],
+                            warnings: ['N\'oubliez pas ungroup() après les opérations']
+                        }
+                    },
+                    {
+                        cmd: 'summarize(df, stat = func())',
+                        desc: 'Calculer des statistiques',
+                        details: {
+                            explanation: 'Calcule des statistiques résumées, souvent après un group_by().',
+                            syntax: 'summarize(data, nom = fonction(col))',
+                            options: [
+                                { flag: 'n()', desc: 'Nombre de lignes' },
+                                { flag: 'n_distinct(col)', desc: 'Nombre de valeurs uniques' },
+                                { flag: 'mean() / median()', desc: 'Moyenne / Médiane' },
+                                { flag: 'sum()', desc: 'Somme' },
+                                { flag: 'min() / max()', desc: 'Min / Max' },
+                                { flag: 'sd() / var()', desc: 'Écart-type / Variance' },
+                                { flag: 'first() / last() / nth()', desc: 'Première / Dernière / Nième valeur' }
+                            ],
+                            examples: [
+                                { code: 'df %>% \n  group_by(ville) %>% \n  summarize(\n    n = n(),\n    moy_age = mean(age, na.rm = TRUE),\n    max_salaire = max(salaire)\n  )', desc: 'Stats par ville' },
+                                { code: 'df %>% summarize(across(where(is.numeric), mean, na.rm = TRUE))', desc: 'Moyenne de toutes les colonnes numériques' },
+                                { code: 'df %>% \n  group_by(dept) %>%\n  summarize(\n    n = n(),\n    n_uniq = n_distinct(poste),\n    .groups = "drop"\n  )', desc: 'Avec drop du groupement' }
+                            ],
+                            tips: ['na.rm = TRUE pour ignorer les NA', '.groups = "drop" pour ungrouper automatiquement'],
+                            warnings: ['summarize réduit à une ligne par groupe']
+                        }
+                    },
+                    {
+                        cmd: 'count(df, col)',
+                        desc: 'Compter rapidement',
+                        details: {
+                            explanation: 'Raccourci pour group_by + summarize(n = n()). Compte les occurrences.',
+                            syntax: 'count(data, colonnes, sort = FALSE, name = "n")',
+                            options: [
+                                { flag: 'sort', desc: 'Trier par fréquence décroissante' },
+                                { flag: 'wt', desc: 'Pondération (somme au lieu de comptage)' },
+                                { flag: 'name', desc: 'Nom de la colonne de comptage' }
+                            ],
+                            examples: [
+                                { code: 'df %>% count(ville)', desc: 'Nombre par ville' },
+                                { code: 'df %>% count(ville, sort = TRUE)', desc: 'Trié par fréquence' },
+                                { code: 'df %>% count(dept, poste)', desc: 'Par département et poste' },
+                                { code: 'df %>% count(dept, wt = salaire, name = "total_salaires")', desc: 'Somme des salaires' },
+                                { code: 'df %>% add_count(ville, name = "n_ville")', desc: 'Ajouter le compte sans réduire' }
+                            ],
+                            tips: ['add_count() ajoute une colonne sans réduire', 'tally() compte le groupe actuel'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'join',
+                title: 'Jointures',
+                icon: 'fa-link',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'left_join(x, y)',
+                        desc: 'Jointure gauche',
+                        details: {
+                            explanation: 'Garde toutes les lignes de x, ajoute les colonnes de y. NA si pas de correspondance.',
+                            syntax: 'left_join(x, y, by = "col")',
+                            options: [
+                                { flag: 'by', desc: 'Colonne(s) de jointure' },
+                                { flag: 'suffix', desc: 'Suffixes pour colonnes dupliquées' },
+                                { flag: 'keep', desc: 'Garder les colonnes de jointure des deux tables' }
+                            ],
+                            examples: [
+                                { code: 'clients %>% left_join(commandes, by = "client_id")', desc: 'Clients avec leurs commandes' },
+                                { code: 'df1 %>% left_join(df2, by = c("id" = "client_id"))', desc: 'Noms de colonnes différents' },
+                                { code: 'df1 %>% left_join(df2, by = c("annee", "mois"))', desc: 'Jointure sur plusieurs colonnes' }
+                            ],
+                            tips: ['Équivalent SQL: LEFT JOIN', 'by = c("x_col" = "y_col") si noms différents'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'inner_join(x, y)',
+                        desc: 'Jointure interne',
+                        details: {
+                            explanation: 'Garde uniquement les lignes avec correspondance dans les deux tables.',
+                            syntax: 'inner_join(x, y, by = "col")',
+                            options: [],
+                            examples: [
+                                { code: 'clients %>% inner_join(commandes, by = "client_id")', desc: 'Clients ayant commandé' },
+                                { code: 'df1 %>% inner_join(df2, by = c("a" = "b"))', desc: 'Correspondance a = b' }
+                            ],
+                            tips: ['Équivalent SQL: INNER JOIN', 'Perd les lignes sans correspondance'],
+                            warnings: ['Attention: réduit le nombre de lignes']
+                        }
+                    },
+                    {
+                        cmd: 'right_join(x, y)',
+                        desc: 'Jointure droite',
+                        details: {
+                            explanation: 'Garde toutes les lignes de y, ajoute les colonnes de x.',
+                            syntax: 'right_join(x, y, by = "col")',
+                            options: [],
+                            examples: [
+                                { code: 'clients %>% right_join(commandes, by = "client_id")', desc: 'Toutes les commandes' }
+                            ],
+                            tips: ['Peut toujours être réécrit en left_join en inversant x et y'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'full_join(x, y)',
+                        desc: 'Jointure complète',
+                        details: {
+                            explanation: 'Garde toutes les lignes des deux tables. NA si pas de correspondance.',
+                            syntax: 'full_join(x, y, by = "col")',
+                            options: [],
+                            examples: [
+                                { code: 'df1 %>% full_join(df2, by = "id")', desc: 'Union complète' },
+                                { code: 'budget %>% full_join(depenses, by = c("annee", "mois"))', desc: 'Budget et dépenses complets' }
+                            ],
+                            tips: ['Équivalent SQL: FULL OUTER JOIN', 'Utile pour comparer deux tables'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'semi_join(x, y)',
+                        desc: 'Filtrer par existence',
+                        details: {
+                            explanation: 'Garde les lignes de x qui ont une correspondance dans y (sans ajouter de colonnes).',
+                            syntax: 'semi_join(x, y, by = "col")',
+                            options: [],
+                            examples: [
+                                { code: 'clients %>% semi_join(commandes, by = "client_id")', desc: 'Clients ayant commandé' },
+                                { code: 'produits %>% semi_join(ventes_2024, by = "produit_id")', desc: 'Produits vendus en 2024' }
+                            ],
+                            tips: ['Équivalent SQL: WHERE EXISTS', 'Filtre sans dupliquer les lignes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'anti_join(x, y)',
+                        desc: 'Filtrer par non-existence',
+                        details: {
+                            explanation: 'Garde les lignes de x qui N\'ONT PAS de correspondance dans y.',
+                            syntax: 'anti_join(x, y, by = "col")',
+                            options: [],
+                            examples: [
+                                { code: 'clients %>% anti_join(commandes, by = "client_id")', desc: 'Clients n\'ayant jamais commandé' },
+                                { code: 'produits %>% anti_join(ventes, by = "produit_id")', desc: 'Produits jamais vendus' }
+                            ],
+                            tips: ['Équivalent SQL: WHERE NOT EXISTS', 'Très utile pour trouver les "orphelins"'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'reshape',
+                title: 'Restructuration (tidyr)',
+                icon: 'fa-th',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'pivot_longer()',
+                        desc: 'Format large → long',
+                        details: {
+                            explanation: 'Transforme plusieurs colonnes en paires clé-valeur (format "tidy"). L\'inverse de pivot_wider.',
+                            syntax: 'pivot_longer(data, cols, names_to, values_to)',
+                            options: [
+                                { flag: 'cols', desc: 'Colonnes à pivoter' },
+                                { flag: 'names_to', desc: 'Nom de la nouvelle colonne (noms)' },
+                                { flag: 'values_to', desc: 'Nom de la nouvelle colonne (valeurs)' },
+                                { flag: 'values_drop_na', desc: 'Supprimer les lignes avec NA' },
+                                { flag: 'names_prefix', desc: 'Préfixe à retirer des noms' }
+                            ],
+                            examples: [
+                                { code: 'df %>% pivot_longer(\n  cols = c(jan, fev, mar),\n  names_to = "mois",\n  values_to = "ventes"\n)', desc: 'Mois en lignes' },
+                                { code: 'df %>% pivot_longer(\n  cols = starts_with("annee_"),\n  names_to = "annee",\n  names_prefix = "annee_",\n  values_to = "valeur"\n)', desc: 'Retirer le préfixe "annee_"' },
+                                { code: 'df %>% pivot_longer(\n  cols = -c(id, nom),\n  names_to = "variable",\n  values_to = "valeur"\n)', desc: 'Tout sauf id et nom' }
+                            ],
+                            tips: ['Anciennement gather()', 'cols = -id pour tout sauf id'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'pivot_wider()',
+                        desc: 'Format long → large',
+                        details: {
+                            explanation: 'Transforme des paires clé-valeur en colonnes séparées. L\'inverse de pivot_longer.',
+                            syntax: 'pivot_wider(data, names_from, values_from)',
+                            options: [
+                                { flag: 'names_from', desc: 'Colonne pour les noms' },
+                                { flag: 'values_from', desc: 'Colonne pour les valeurs' },
+                                { flag: 'values_fill', desc: 'Valeur pour les NA' },
+                                { flag: 'names_prefix', desc: 'Préfixe pour les noms de colonnes' }
+                            ],
+                            examples: [
+                                { code: 'df %>% pivot_wider(\n  names_from = mois,\n  values_from = ventes\n)', desc: 'Mois en colonnes' },
+                                { code: 'df %>% pivot_wider(\n  names_from = produit,\n  values_from = ventes,\n  values_fill = 0\n)', desc: 'Remplacer NA par 0' },
+                                { code: 'df %>% pivot_wider(\n  names_from = c(annee, mois),\n  values_from = ventes\n)', desc: 'Combinaison année_mois' }
+                            ],
+                            tips: ['Anciennement spread()', 'values_fill pour éviter les NA'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'separate()',
+                        desc: 'Séparer une colonne',
+                        details: {
+                            explanation: 'Divise une colonne en plusieurs colonnes selon un séparateur.',
+                            syntax: 'separate(data, col, into, sep)',
+                            options: [
+                                { flag: 'into', desc: 'Noms des nouvelles colonnes' },
+                                { flag: 'sep', desc: 'Séparateur (regex ou position)' },
+                                { flag: 'remove', desc: 'Supprimer la colonne originale' },
+                                { flag: 'convert', desc: 'Convertir automatiquement les types' }
+                            ],
+                            examples: [
+                                { code: 'df %>% separate(date, into = c("annee", "mois", "jour"), sep = "-")', desc: '2024-01-15 → 3 colonnes' },
+                                { code: 'df %>% separate(nom_complet, into = c("prenom", "nom"), sep = " ")', desc: 'Séparer prénom et nom' },
+                                { code: 'df %>% separate_wider_delim(col, delim = "_", names = c("a", "b"))', desc: 'Version moderne (tidyr 1.3+)' }
+                            ],
+                            tips: ['convert = TRUE pour conversion automatique en numeric/integer'],
+                            warnings: ['sep peut être un regex']
+                        }
+                    },
+                    {
+                        cmd: 'unite()',
+                        desc: 'Combiner des colonnes',
+                        details: {
+                            explanation: 'Fusionne plusieurs colonnes en une seule. L\'inverse de separate.',
+                            syntax: 'unite(data, col, colonnes, sep)',
+                            options: [
+                                { flag: 'col', desc: 'Nom de la nouvelle colonne' },
+                                { flag: 'sep', desc: 'Séparateur (défaut: "_")' },
+                                { flag: 'remove', desc: 'Supprimer les colonnes sources' },
+                                { flag: 'na.rm', desc: 'Ignorer les NA' }
+                            ],
+                            examples: [
+                                { code: 'df %>% unite(date, annee, mois, jour, sep = "-")', desc: 'Créer une date' },
+                                { code: 'df %>% unite(nom_complet, prenom, nom, sep = " ", remove = FALSE)', desc: 'Garder les colonnes originales' }
+                            ],
+                            tips: ['Opposé de separate()'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'complete() / fill()',
+                        desc: 'Compléter les données manquantes',
+                        details: {
+                            explanation: 'complete() crée toutes les combinaisons. fill() propage les valeurs pour remplir les NA.',
+                            syntax: 'complete(data, colonnes, fill = list()) / fill(data, colonnes, .direction)',
+                            options: [
+                                { flag: 'fill', desc: 'Valeurs par défaut pour complete()' },
+                                { flag: '.direction', desc: '"down", "up", "downup", "updown" pour fill()' }
+                            ],
+                            examples: [
+                                { code: 'df %>% complete(annee, mois, fill = list(ventes = 0))', desc: 'Toutes combinaisons année × mois' },
+                                { code: 'df %>% fill(region, .direction = "down")', desc: 'Propager vers le bas' },
+                                { code: 'df %>% \n  group_by(client) %>%\n  complete(date = seq(min(date), max(date), by = "day"))', desc: 'Toutes les dates par client' }
+                            ],
+                            tips: ['complete() génère les combinaisons manquantes', 'fill() propage les valeurs existantes'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'dates',
+                title: 'Dates (lubridate)',
+                icon: 'fa-calendar',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'ymd() / dmy() / mdy()',
+                        desc: 'Parser des dates',
+                        details: {
+                            explanation: 'Convertit des chaînes de caractères en dates. Le nom de la fonction indique l\'ordre: y=year, m=month, d=day.',
+                            syntax: 'ymd("2024-01-15") / dmy("15/01/2024") / mdy("01-15-2024")',
+                            options: [
+                                { flag: 'ymd()', desc: 'Année-Mois-Jour' },
+                                { flag: 'dmy()', desc: 'Jour-Mois-Année' },
+                                { flag: 'mdy()', desc: 'Mois-Jour-Année (US)' },
+                                { flag: 'ymd_hms()', desc: 'Avec heure:min:sec' }
+                            ],
+                            examples: [
+                                { code: 'library(lubridate)', desc: 'Charger lubridate' },
+                                { code: 'ymd("2024-01-15")', desc: '2024-01-15' },
+                                { code: 'dmy("15/01/2024")', desc: 'Format français' },
+                                { code: 'ymd_hms("2024-01-15 14:30:00")', desc: 'Avec heure' },
+                                { code: 'df %>% mutate(date = ymd(date_string))', desc: 'Convertir une colonne' }
+                            ],
+                            tips: ['Intelligent: ymd("2024/01/15") et ymd("20240115") marchent aussi', 'Retourne NA si format invalide'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'today() / now()',
+                        desc: 'Date et heure actuelles',
+                        details: {
+                            explanation: 'Retourne la date ou l\'heure actuelle.',
+                            syntax: 'today() / now(tzone = "UTC")',
+                            options: [
+                                { flag: 'tzone', desc: 'Fuseau horaire' }
+                            ],
+                            examples: [
+                                { code: 'today()', desc: 'Date actuelle' },
+                                { code: 'now()', desc: 'Date et heure actuelles' },
+                                { code: 'now("Europe/Paris")', desc: 'Heure de Paris' },
+                                { code: 'df %>% filter(date >= today() - days(30))', desc: '30 derniers jours' }
+                            ],
+                            tips: ['Sys.Date() et Sys.time() en R base'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'year() / month() / day()',
+                        desc: 'Extraire des composantes',
+                        details: {
+                            explanation: 'Extrait une partie de la date (année, mois, jour, etc.).',
+                            syntax: 'year(date) / month(date) / day(date)',
+                            options: [
+                                { flag: 'year()', desc: 'Année' },
+                                { flag: 'month()', desc: 'Mois (1-12)' },
+                                { flag: 'day()', desc: 'Jour du mois (1-31)' },
+                                { flag: 'wday()', desc: 'Jour de la semaine (1=dim, 7=sam)' },
+                                { flag: 'hour() / minute() / second()', desc: 'Heure, minute, seconde' },
+                                { flag: 'week() / quarter()', desc: 'Semaine, trimestre' }
+                            ],
+                            examples: [
+                                { code: 'df %>% mutate(\n  annee = year(date),\n  mois = month(date),\n  jour_semaine = wday(date, label = TRUE)\n)', desc: 'Extraire année, mois, jour semaine' },
+                                { code: 'df %>% filter(month(date) == 12)', desc: 'Seulement décembre' },
+                                { code: 'df %>% filter(wday(date) %in% c(1, 7))', desc: 'Week-ends seulement' },
+                                { code: 'month(date, label = TRUE, abbr = FALSE)', desc: '"janvier" au lieu de 1' }
+                            ],
+                            tips: ['label = TRUE pour noms au lieu de nombres', 'wday: 1=dimanche en anglais!'],
+                            warnings: ['wday commence à dimanche=1 par défaut (week_start=1 pour lundi)']
+                        }
+                    },
+                    {
+                        cmd: 'days() / months() / years()',
+                        desc: 'Arithmétique de dates',
+                        details: {
+                            explanation: 'Périodes pour ajouter ou soustraire du temps aux dates.',
+                            syntax: 'date + days(n) / date - months(n)',
+                            options: [
+                                { flag: 'days()', desc: 'n jours' },
+                                { flag: 'weeks()', desc: 'n semaines' },
+                                { flag: 'months()', desc: 'n mois' },
+                                { flag: 'years()', desc: 'n années' },
+                                { flag: 'hours() / minutes() / seconds()', desc: 'Durées courtes' }
+                            ],
+                            examples: [
+                                { code: 'today() + days(30)', desc: 'Dans 30 jours' },
+                                { code: 'today() - years(1)', desc: 'Il y a un an' },
+                                { code: 'df %>% filter(date >= today() - months(3))', desc: '3 derniers mois' },
+                                { code: 'interval(start, end) / days(1)', desc: 'Nombre de jours entre deux dates' }
+                            ],
+                            tips: ['Utilisez %--% pour créer un intervalle: start %--% end'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'floor_date() / ceiling_date()',
+                        desc: 'Arrondir des dates',
+                        details: {
+                            explanation: 'Arrondit une date au début ou à la fin d\'une période.',
+                            syntax: 'floor_date(date, unit) / ceiling_date(date, unit)',
+                            options: [
+                                { flag: 'unit', desc: '"day", "week", "month", "quarter", "year"' }
+                            ],
+                            examples: [
+                                { code: 'floor_date(today(), "month")', desc: 'Premier jour du mois' },
+                                { code: 'ceiling_date(today(), "year")', desc: 'Premier jour de l\'année suivante' },
+                                { code: 'df %>% mutate(mois = floor_date(date, "month"))', desc: 'Grouper par mois' },
+                                { code: 'df %>%\n  mutate(semaine = floor_date(date, "week")) %>%\n  group_by(semaine) %>%\n  summarize(total = sum(ventes))', desc: 'Ventes par semaine' }
+                            ],
+                            tips: ['Très utile pour agréger par période', 'round_date() pour l\'arrondi au plus proche'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'strings',
+                title: 'Texte (stringr)',
+                icon: 'fa-font',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'str_detect()',
+                        desc: 'Détecter un motif',
+                        details: {
+                            explanation: 'Retourne TRUE si le motif est présent dans la chaîne.',
+                            syntax: 'str_detect(string, pattern)',
+                            options: [
+                                { flag: 'negate', desc: 'Inverser (TRUE si pas trouvé)' }
+                            ],
+                            examples: [
+                                { code: 'str_detect("hello world", "world")', desc: 'TRUE' },
+                                { code: 'df %>% filter(str_detect(email, "@gmail\\\\.com"))', desc: 'Filtrer les Gmail' },
+                                { code: 'df %>% filter(str_detect(nom, "(?i)jean"))', desc: 'Insensible à la casse' },
+                                { code: 'str_detect(nom, "^A")', desc: 'Commence par A' }
+                            ],
+                            tips: ['(?i) pour case-insensitive', 'Utilise des regex par défaut'],
+                            warnings: ['Échapper les caractères spéciaux regex avec \\\\']
+                        }
+                    },
+                    {
+                        cmd: 'str_replace() / str_replace_all()',
+                        desc: 'Remplacer du texte',
+                        details: {
+                            explanation: 'Remplace la première occurrence (str_replace) ou toutes (str_replace_all).',
+                            syntax: 'str_replace(string, pattern, replacement)',
+                            options: [],
+                            examples: [
+                                { code: 'str_replace("hello world", "world", "R")', desc: '"hello R"' },
+                                { code: 'df %>% mutate(tel = str_replace_all(tel, " ", ""))', desc: 'Supprimer les espaces' },
+                                { code: 'str_replace_all(text, "\\\\d+", "X")', desc: 'Remplacer nombres par X' },
+                                { code: 'str_replace(nom, "^(.).*", "\\\\1.")', desc: 'Initiale seulement' }
+                            ],
+                            tips: ['\\\\1 pour référencer un groupe capturé', 'str_remove(s, pattern) = str_replace(s, pattern, "")'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'str_extract() / str_extract_all()',
+                        desc: 'Extraire un motif',
+                        details: {
+                            explanation: 'Extrait la partie de la chaîne correspondant au motif.',
+                            syntax: 'str_extract(string, pattern)',
+                            options: [],
+                            examples: [
+                                { code: 'str_extract("Prix: 99.99€", "\\\\d+\\\\.\\\\d+")', desc: '"99.99"' },
+                                { code: 'df %>% mutate(code_postal = str_extract(adresse, "\\\\d{5}"))', desc: 'Extraire code postal' },
+                                { code: 'str_extract_all("a1b2c3", "\\\\d")', desc: 'Liste: c("1", "2", "3")' },
+                                { code: 'str_match(email, "(.+)@(.+)")', desc: 'Matrice avec groupes capturés' }
+                            ],
+                            tips: ['str_extract_all retourne une liste', 'str_match pour extraire les groupes'],
+                            warnings: ['Retourne NA si pas de correspondance']
+                        }
+                    },
+                    {
+                        cmd: 'str_c() / str_glue()',
+                        desc: 'Concaténer du texte',
+                        details: {
+                            explanation: 'str_c pour concaténation simple, str_glue pour interpolation de variables.',
+                            syntax: 'str_c(s1, s2, sep = " ") / str_glue("{var1} {var2}")',
+                            options: [
+                                { flag: 'sep', desc: 'Séparateur entre éléments' },
+                                { flag: 'collapse', desc: 'Fusionner un vecteur en une chaîne' }
+                            ],
+                            examples: [
+                                { code: 'str_c("Hello", "World", sep = " ")', desc: '"Hello World"' },
+                                { code: 'str_c(c("a", "b", "c"), collapse = ", ")', desc: '"a, b, c"' },
+                                { code: 'nom <- "Alice"\nstr_glue("Bonjour {nom}!")', desc: '"Bonjour Alice!"' },
+                                { code: 'df %>% mutate(full = str_glue("{prenom} {nom}"))', desc: 'Créer nom complet' }
+                            ],
+                            tips: ['str_glue = équivalent de f-strings Python', 'paste() et paste0() en R base'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'str_to_lower/upper/title()',
+                        desc: 'Changer la casse',
+                        details: {
+                            explanation: 'Convertit en minuscules, majuscules ou titre.',
+                            syntax: 'str_to_lower(string) / str_to_upper(string) / str_to_title(string)',
+                            options: [],
+                            examples: [
+                                { code: 'str_to_lower("HELLO")', desc: '"hello"' },
+                                { code: 'str_to_upper("hello")', desc: '"HELLO"' },
+                                { code: 'str_to_title("hello world")', desc: '"Hello World"' },
+                                { code: 'df %>% mutate(nom = str_to_upper(nom))', desc: 'Noms en majuscules' }
+                            ],
+                            tips: ['str_to_sentence() pour majuscule seulement au début'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'str_trim() / str_squish()',
+                        desc: 'Nettoyer les espaces',
+                        details: {
+                            explanation: 'str_trim enlève les espaces aux extrémités, str_squish réduit aussi les espaces internes.',
+                            syntax: 'str_trim(string) / str_squish(string)',
+                            options: [
+                                { flag: 'side', desc: '"both", "left", "right" pour str_trim' }
+                            ],
+                            examples: [
+                                { code: 'str_trim("  hello  ")', desc: '"hello"' },
+                                { code: 'str_squish("  hello    world  ")', desc: '"hello world"' },
+                                { code: 'df %>% mutate(nom = str_squish(nom))', desc: 'Nettoyer les noms' },
+                                { code: 'str_pad("42", width = 5, pad = "0")', desc: '"00042"' }
+                            ],
+                            tips: ['str_squish = trim + remplacer espaces multiples par un seul'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'ggplot',
+                title: 'Visualisation (ggplot2)',
+                icon: 'fa-chart-bar',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'ggplot() + aes() + geom_*()',
+                        desc: 'Structure de base',
+                        details: {
+                            explanation: 'ggplot2 utilise une "grammaire des graphiques": données + esthétiques (aes) + géométries (geom).',
+                            syntax: 'ggplot(data, aes(x, y, color, fill, size)) + geom_*() + ...',
+                            options: [
+                                { flag: 'aes(x, y)', desc: 'Mapping des variables aux axes' },
+                                { flag: 'aes(color = var)', desc: 'Couleur selon une variable' },
+                                { flag: 'aes(fill = var)', desc: 'Remplissage selon une variable' },
+                                { flag: 'aes(size = var)', desc: 'Taille selon une variable' },
+                                { flag: 'aes(shape = var)', desc: 'Forme selon une variable' }
+                            ],
+                            examples: [
+                                { code: 'library(ggplot2)', desc: 'Charger ggplot2' },
+                                { code: 'ggplot(df, aes(x = age, y = salaire)) +\n  geom_point()', desc: 'Nuage de points basique' },
+                                { code: 'ggplot(df, aes(x = age, y = salaire, color = dept)) +\n  geom_point(size = 3)', desc: 'Points colorés par département' },
+                                { code: 'ggplot(df, aes(x = categorie, fill = categorie)) +\n  geom_bar()', desc: 'Barres avec couleurs' }
+                            ],
+                            tips: ['Le + ajoute des couches au graphique', 'aes() dans ggplot() = global, dans geom_() = local'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'geom_point() / geom_line()',
+                        desc: 'Points et lignes',
+                        details: {
+                            explanation: 'geom_point pour scatter plots, geom_line pour séries temporelles.',
+                            syntax: 'geom_point(aes(), color, size, alpha, shape)',
+                            options: [
+                                { flag: 'color', desc: 'Couleur des points/lignes' },
+                                { flag: 'size', desc: 'Taille des points' },
+                                { flag: 'alpha', desc: 'Transparence (0-1)' },
+                                { flag: 'shape', desc: 'Forme des points (0-25)' }
+                            ],
+                            examples: [
+                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point(color = "blue", size = 3, alpha = 0.5)', desc: 'Points bleus transparents' },
+                                { code: 'ggplot(df, aes(date, valeur)) +\n  geom_line(linewidth = 1) +\n  geom_point()', desc: 'Ligne avec points' },
+                                { code: 'ggplot(df, aes(date, valeur, color = groupe)) +\n  geom_line() +\n  geom_point()', desc: 'Plusieurs séries' }
+                            ],
+                            tips: ['geom_smooth() pour ajouter une tendance', 'geom_smooth(method = "lm") pour régression linéaire'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'geom_bar() / geom_col()',
+                        desc: 'Graphiques en barres',
+                        details: {
+                            explanation: 'geom_bar compte automatiquement, geom_col utilise une valeur y.',
+                            syntax: 'geom_bar(stat = "count") / geom_col()',
+                            options: [
+                                { flag: 'fill', desc: 'Couleur de remplissage' },
+                                { flag: 'position', desc: '"stack", "dodge", "fill"' },
+                                { flag: 'width', desc: 'Largeur des barres' }
+                            ],
+                            examples: [
+                                { code: 'ggplot(df, aes(x = categorie)) +\n  geom_bar()', desc: 'Compter les catégories' },
+                                { code: 'ggplot(df, aes(x = categorie, y = ventes)) +\n  geom_col(fill = "steelblue")', desc: 'Avec valeurs y' },
+                                { code: 'ggplot(df, aes(x = cat, fill = groupe)) +\n  geom_bar(position = "dodge")', desc: 'Barres groupées' },
+                                { code: 'ggplot(df, aes(x = cat, fill = groupe)) +\n  geom_bar(position = "fill")', desc: '100% stacked' }
+                            ],
+                            tips: ['geom_bar: stat="count" par défaut', 'geom_col: stat="identity" par défaut'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'geom_histogram() / geom_density()',
+                        desc: 'Distributions',
+                        details: {
+                            explanation: 'Histogramme pour distribution discrète, densité pour continue.',
+                            syntax: 'geom_histogram(bins, binwidth) / geom_density()',
+                            options: [
+                                { flag: 'bins', desc: 'Nombre d\'intervalles' },
+                                { flag: 'binwidth', desc: 'Largeur des intervalles' },
+                                { flag: 'fill / color', desc: 'Couleurs' }
+                            ],
+                            examples: [
+                                { code: 'ggplot(df, aes(x = age)) +\n  geom_histogram(bins = 30, fill = "steelblue")', desc: 'Histogramme' },
+                                { code: 'ggplot(df, aes(x = age, fill = genre)) +\n  geom_histogram(position = "identity", alpha = 0.5)', desc: 'Superposé par groupe' },
+                                { code: 'ggplot(df, aes(x = salaire)) +\n  geom_density(fill = "lightblue", alpha = 0.5)', desc: 'Densité' },
+                                { code: 'ggplot(df, aes(x = salaire, fill = dept)) +\n  geom_density(alpha = 0.3)', desc: 'Densités par groupe' }
+                            ],
+                            tips: ['geom_freqpoly() pour des lignes au lieu de barres'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'geom_boxplot() / geom_violin()',
+                        desc: 'Boîtes à moustaches',
+                        details: {
+                            explanation: 'Boxplot pour résumé statistique, violin pour distribution complète.',
+                            syntax: 'geom_boxplot() / geom_violin()',
+                            options: [
+                                { flag: 'fill', desc: 'Couleur de remplissage' },
+                                { flag: 'outlier.color', desc: 'Couleur des outliers' }
+                            ],
+                            examples: [
+                                { code: 'ggplot(df, aes(x = dept, y = salaire)) +\n  geom_boxplot()', desc: 'Boxplot par département' },
+                                { code: 'ggplot(df, aes(x = dept, y = salaire, fill = dept)) +\n  geom_boxplot() +\n  geom_jitter(width = 0.2, alpha = 0.3)', desc: 'Avec les points' },
+                                { code: 'ggplot(df, aes(x = dept, y = salaire)) +\n  geom_violin() +\n  geom_boxplot(width = 0.2)', desc: 'Violin + boxplot' }
+                            ],
+                            tips: ['geom_jitter() pour voir les points individuels'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'facet_wrap() / facet_grid()',
+                        desc: 'Graphiques multiples',
+                        details: {
+                            explanation: 'Crée des petits multiples (un graphique par catégorie).',
+                            syntax: 'facet_wrap(~var) / facet_grid(row~col)',
+                            options: [
+                                { flag: 'ncol / nrow', desc: 'Nombre de colonnes/lignes' },
+                                { flag: 'scales', desc: '"free", "free_x", "free_y"' }
+                            ],
+                            examples: [
+                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point() +\n  facet_wrap(~categorie)', desc: 'Un graphique par catégorie' },
+                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point() +\n  facet_wrap(~categorie, ncol = 2)', desc: 'En 2 colonnes' },
+                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point() +\n  facet_grid(row_var ~ col_var)', desc: 'Grille 2D' },
+                                { code: 'facet_wrap(~cat, scales = "free_y")', desc: 'Échelles Y indépendantes' }
+                            ],
+                            tips: ['scales = "free" pour des axes indépendants', 'facet_grid pour grille rigide 2D'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'labs() + theme()',
+                        desc: 'Titres et thème',
+                        details: {
+                            explanation: 'labs() pour les textes (titre, axes), theme() pour le style.',
+                            syntax: 'labs(title, x, y, color, fill) + theme_*()',
+                            options: [
+                                { flag: 'theme_minimal()', desc: 'Thème épuré' },
+                                { flag: 'theme_classic()', desc: 'Thème classique' },
+                                { flag: 'theme_bw()', desc: 'Noir et blanc' },
+                                { flag: 'theme_dark()', desc: 'Fond sombre' }
+                            ],
+                            examples: [
+                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point() +\n  labs(\n    title = "Mon graphique",\n    x = "Axe X",\n    y = "Axe Y"\n  )', desc: 'Ajouter titre et labels' },
+                                { code: 'ggplot(df, aes(x, y, color = cat)) +\n  geom_point() +\n  labs(color = "Catégorie") +\n  theme_minimal()', desc: 'Avec thème minimal' },
+                                { code: '+ theme(\n  axis.text.x = element_text(angle = 45, hjust = 1),\n  legend.position = "bottom"\n)', desc: 'Personnalisation fine' },
+                                { code: 'ggsave("plot.png", width = 10, height = 6, dpi = 300)', desc: 'Sauvegarder' }
+                            ],
+                            tips: ['theme() après theme_*() pour surcharger', 'ggsave() sauvegarde le dernier plot'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'readr',
+                title: 'Import/Export (readr)',
+                icon: 'fa-file-import',
+                color: 'border-l-4 border-gray-500',
+                commands: [
+                    {
+                        cmd: 'read_csv() / read_tsv()',
+                        desc: 'Lire des fichiers CSV',
+                        details: {
+                            explanation: 'Lit des fichiers CSV (virgule) ou TSV (tabulation). Plus rapide que read.csv de R base.',
+                            syntax: 'read_csv(file, col_names = TRUE, col_types = NULL)',
+                            options: [
+                                { flag: 'col_names', desc: 'TRUE si la première ligne est l\'en-tête' },
+                                { flag: 'col_types', desc: 'Spécifier les types de colonnes' },
+                                { flag: 'skip', desc: 'Sauter n lignes au début' },
+                                { flag: 'n_max', desc: 'Lire maximum n lignes' },
+                                { flag: 'na', desc: 'Valeurs à considérer comme NA' }
+                            ],
+                            examples: [
+                                { code: 'df <- read_csv("data.csv")', desc: 'Lire un CSV' },
+                                { code: 'df <- read_csv("data.csv", col_types = cols(\n  id = col_integer(),\n  date = col_date(),\n  prix = col_double()\n))', desc: 'Avec types explicites' },
+                                { code: 'df <- read_delim("data.txt", delim = ";")', desc: 'Délimiteur personnalisé' },
+                                { code: 'df <- read_csv("data.csv", na = c("", "NA", "N/A"))', desc: 'Valeurs NA' }
+                            ],
+                            tips: ['read_csv2() pour format européen (;)', 'locale = locale(decimal_mark = ",") pour décimales françaises'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'write_csv()',
+                        desc: 'Écrire des fichiers CSV',
+                        details: {
+                            explanation: 'Exporte un data frame vers un fichier CSV.',
+                            syntax: 'write_csv(df, file, na = "NA")',
+                            options: [
+                                { flag: 'na', desc: 'Comment écrire les NA' },
+                                { flag: 'append', desc: 'Ajouter à un fichier existant' },
+                                { flag: 'col_names', desc: 'Écrire les noms de colonnes' }
+                            ],
+                            examples: [
+                                { code: 'write_csv(df, "output.csv")', desc: 'Exporter en CSV' },
+                                { code: 'write_csv(df, "output.csv", na = "")', desc: 'NA comme chaînes vides' },
+                                { code: 'write_excel_csv(df, "output.csv")', desc: 'Compatible Excel (BOM UTF-8)' },
+                                { code: 'write_rds(df, "data.rds")', desc: 'Format R natif (compression)' }
+                            ],
+                            tips: ['write_rds() / read_rds() pour format R natif (conserve les types)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'read_excel()',
+                        desc: 'Lire des fichiers Excel',
+                        details: {
+                            explanation: 'Lit des fichiers Excel (.xlsx, .xls). Package readxl.',
+                            syntax: 'read_excel(path, sheet = 1, range = NULL)',
+                            options: [
+                                { flag: 'sheet', desc: 'Numéro ou nom de la feuille' },
+                                { flag: 'range', desc: 'Plage de cellules (ex: "A1:D100")' },
+                                { flag: 'skip', desc: 'Sauter n lignes' },
+                                { flag: 'col_names', desc: 'Première ligne = en-tête' }
+                            ],
+                            examples: [
+                                { code: 'library(readxl)', desc: 'Charger readxl' },
+                                { code: 'df <- read_excel("data.xlsx")', desc: 'Première feuille' },
+                                { code: 'df <- read_excel("data.xlsx", sheet = "Ventes")', desc: 'Feuille par nom' },
+                                { code: 'df <- read_excel("data.xlsx", range = "B2:E50")', desc: 'Plage spécifique' },
+                                { code: 'excel_sheets("data.xlsx")', desc: 'Lister les feuilles' }
+                            ],
+                            tips: ['excel_sheets() pour voir les noms des feuilles', 'writexl::write_xlsx() pour écrire'],
+                            warnings: ['readxl est dans tidyverse mais pas chargé automatiquement']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

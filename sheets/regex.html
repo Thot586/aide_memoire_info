@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Regex : guide de survie pour les expressions régulières.">
+    <title>Regex (Expressions) - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-pink-500/20 mb-4 icon-glow">
+                    <i class="fas fa-code text-3xl text-pink-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Regex (Expressions)</h1>
+                <p class="text-slate-400">Guide de survie pour les expressions régulières</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'basic',
+                title: 'Caractères de base',
+                icon: 'fa-font',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: '. (point)',
+                        desc: 'N\'importe quel caractère',
+                        details: {
+                            explanation: 'Le point correspond à n\'importe quel caractère sauf le saut de ligne.',
+                            syntax: '.',
+                            options: [],
+                            examples: [
+                                { code: 'a.c', desc: 'Correspond à "abc", "a1c", "a@c"...' },
+                                { code: '...', desc: 'Exactement 3 caractères quelconques' }
+                            ],
+                            tips: ['Utilisez \\. pour matcher un point littéral'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '\\d \\w \\s',
+                        desc: 'Classes de caractères courantes',
+                        details: {
+                            explanation: 'Raccourcis pour des ensembles de caractères fréquemment utilisés.',
+                            syntax: '\\d, \\w, \\s (minuscule = correspond, majuscule = inverse)',
+                            options: [
+                                { flag: '\\d', desc: 'Chiffre [0-9]' },
+                                { flag: '\\D', desc: 'Non-chiffre [^0-9]' },
+                                { flag: '\\w', desc: 'Mot [a-zA-Z0-9_]' },
+                                { flag: '\\W', desc: 'Non-mot' },
+                                { flag: '\\s', desc: 'Espace blanc (espace, tab, newline)' },
+                                { flag: '\\S', desc: 'Non-espace' }
+                            ],
+                            examples: [
+                                { code: '\\d{3}', desc: 'Exactement 3 chiffres' },
+                                { code: '\\w+', desc: 'Un ou plusieurs caractères de mot' },
+                                { code: '\\s+', desc: 'Un ou plusieurs espaces' }
+                            ],
+                            tips: ['\\d est équivalent à [0-9]'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '[abc] [a-z] [^abc]',
+                        desc: 'Classes de caractères personnalisées',
+                        details: {
+                            explanation: 'Définit un ensemble de caractères autorisés ou interdits.',
+                            syntax: '[caractères] ou [^caractères]',
+                            options: [
+                                { flag: '[abc]', desc: 'a, b ou c' },
+                                { flag: '[a-z]', desc: 'Lettres minuscules a à z' },
+                                { flag: '[A-Z]', desc: 'Lettres majuscules' },
+                                { flag: '[0-9]', desc: 'Chiffres' },
+                                { flag: '[^abc]', desc: 'Tout SAUF a, b, c' }
+                            ],
+                            examples: [
+                                { code: '[aeiou]', desc: 'Une voyelle' },
+                                { code: '[a-zA-Z]', desc: 'Une lettre (minuscule ou majuscule)' },
+                                { code: '[^0-9]', desc: 'Tout sauf un chiffre' }
+                            ],
+                            tips: ['Le ^ en début de classe inverse la sélection'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'quantifiers',
+                title: 'Quantificateurs',
+                icon: 'fa-sort-numeric-up',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: '* + ?',
+                        desc: 'Répétitions de base',
+                        details: {
+                            explanation: 'Définit combien de fois l\'élément précédent peut apparaître.',
+                            syntax: 'élément*, élément+, élément?',
+                            options: [
+                                { flag: '*', desc: '0 ou plus (gourmand)' },
+                                { flag: '+', desc: '1 ou plus (gourmand)' },
+                                { flag: '?', desc: '0 ou 1 (optionnel)' }
+                            ],
+                            examples: [
+                                { code: 'ab*c', desc: '"ac", "abc", "abbc", "abbbc"...' },
+                                { code: 'ab+c', desc: '"abc", "abbc", "abbbc"... (pas "ac")' },
+                                { code: 'colou?r', desc: '"color" ou "colour"' }
+                            ],
+                            tips: ['Ajoutez ? après pour mode non-gourmand: *? +? ??'],
+                            warnings: ['* peut matcher une chaîne vide !']
+                        }
+                    },
+                    {
+                        cmd: '{n} {n,} {n,m}',
+                        desc: 'Répétitions exactes',
+                        details: {
+                            explanation: 'Spécifie un nombre exact ou une plage de répétitions.',
+                            syntax: '{min,max}',
+                            options: [
+                                { flag: '{3}', desc: 'Exactement 3 fois' },
+                                { flag: '{3,}', desc: '3 fois ou plus' },
+                                { flag: '{3,5}', desc: 'Entre 3 et 5 fois' }
+                            ],
+                            examples: [
+                                { code: '\\d{4}', desc: 'Code à 4 chiffres' },
+                                { code: '\\d{2,4}', desc: '2 à 4 chiffres' },
+                                { code: '[a-z]{1,}', desc: 'Équivalent à [a-z]+' }
+                            ],
+                            tips: ['{0,1} équivaut à ?, {0,} à *, {1,} à +'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'anchors',
+                title: 'Ancres & Limites',
+                icon: 'fa-anchor',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: '^ $',
+                        desc: 'Début et fin de ligne',
+                        details: {
+                            explanation: 'Ancre le pattern au début (^) ou à la fin ($) de la chaîne.',
+                            syntax: '^pattern ou pattern$',
+                            options: [
+                                { flag: '^', desc: 'Début de chaîne/ligne' },
+                                { flag: '$', desc: 'Fin de chaîne/ligne' }
+                            ],
+                            examples: [
+                                { code: '^Bonjour', desc: 'Commence par "Bonjour"' },
+                                { code: 'fin$', desc: 'Termine par "fin"' },
+                                { code: '^exact$', desc: 'Correspond exactement à "exact"' }
+                            ],
+                            tips: ['En mode multiligne (m), ^ et $ matchent aussi les débuts/fins de ligne'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '\\b',
+                        desc: 'Limite de mot',
+                        details: {
+                            explanation: 'Correspond à une position entre un caractère de mot et un non-mot (ou début/fin).',
+                            syntax: '\\b',
+                            options: [
+                                { flag: '\\b', desc: 'Limite de mot' },
+                                { flag: '\\B', desc: 'Non-limite de mot' }
+                            ],
+                            examples: [
+                                { code: '\\bcat\\b', desc: '"cat" mais pas "category" ou "bobcat"' },
+                                { code: '\\btest', desc: 'Mots commençant par "test"' }
+                            ],
+                            tips: ['Essentiel pour éviter les correspondances partielles'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'groups',
+                title: 'Groupes & Alternatives',
+                icon: 'fa-object-group',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: '(abc)',
+                        desc: 'Groupe de capture',
+                        details: {
+                            explanation: 'Groupe des éléments et capture le contenu pour référence.',
+                            syntax: '(pattern)',
+                            options: [
+                                { flag: '(abc)', desc: 'Groupe capturant' },
+                                { flag: '(?:abc)', desc: 'Groupe non-capturant' },
+                                { flag: '\\1, \\2', desc: 'Références aux groupes capturés' }
+                            ],
+                            examples: [
+                                { code: '(ab)+', desc: '"ab", "abab", "ababab"...' },
+                                { code: '(\\d{2})-(\\d{2})', desc: 'Capture jour et mois' },
+                                { code: '(\\w+)\\s+\\1', desc: 'Mot répété (ex: "le le")' }
+                            ],
+                            tips: ['Les groupes permettent d\'extraire des sous-parties'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'a|b',
+                        desc: 'Alternative (OU)',
+                        details: {
+                            explanation: 'Correspond à l\'un ou l\'autre des patterns.',
+                            syntax: 'pattern1|pattern2',
+                            options: [],
+                            examples: [
+                                { code: 'chat|chien', desc: '"chat" ou "chien"' },
+                                { code: '(lundi|mardi|mercredi)', desc: 'Un jour de la semaine' },
+                                { code: 'gr(a|e)y', desc: '"gray" ou "grey"' }
+                            ],
+                            tips: ['Utilisez des parenthèses pour limiter la portée du |'],
+                            warnings: ['Sans parenthèses, | s\'applique à toute l\'expression']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'common',
+                title: 'Patterns courants',
+                icon: 'fa-star',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Email',
+                        desc: 'Validation email simple',
+                        details: {
+                            explanation: 'Pattern basique pour valider un format email (simplifié).',
+                            syntax: '[\\w.-]+@[\\w.-]+\\.\\w+',
+                            options: [],
+                            examples: [
+                                { code: '[\\w.-]+@[\\w.-]+\\.\\w{2,}', desc: 'email@domaine.com' },
+                                { code: '^[\\w.-]+@[\\w.-]+\\.\\w{2,}$', desc: 'Validation stricte' }
+                            ],
+                            tips: ['Une vraie validation email est beaucoup plus complexe'],
+                            warnings: ['Ce pattern simplifié ne couvre pas tous les cas valides']
+                        }
+                    },
+                    {
+                        cmd: 'Téléphone FR',
+                        desc: 'Numéro français',
+                        details: {
+                            explanation: 'Patterns pour les numéros de téléphone français.',
+                            syntax: '0[1-9](\\s?\\d{2}){4}',
+                            options: [],
+                            examples: [
+                                { code: '0[1-9]\\d{8}', desc: '10 chiffres sans espaces' },
+                                { code: '0[1-9](\\s?\\d{2}){4}', desc: 'Avec espaces optionnels' },
+                                { code: '(\\+33|0)[1-9](\\d{2}){4}', desc: 'Avec indicatif +33' }
+                            ],
+                            tips: ['Adaptez selon le format attendu (espaces, tirets, etc.)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'URL',
+                        desc: 'Validation URL basique',
+                        details: {
+                            explanation: 'Pattern pour détecter des URLs (simplifié).',
+                            syntax: 'https?://[\\w.-]+(/[\\w.-]*)*',
+                            options: [],
+                            examples: [
+                                { code: 'https?://[\\w.-]+', desc: 'URL basique' },
+                                { code: 'https?://[\\w.-]+(/[\\w./-]*)*(\\?[\\w=&]*)?', desc: 'Avec chemin et query' }
+                            ],
+                            tips: ['Une URL valide peut contenir beaucoup plus de caractères'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'lookaround',
+                title: 'Lookahead & Lookbehind',
+                icon: 'fa-eye',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: '(?=...) (?!...)',
+                        desc: 'Lookahead positif et négatif',
+                        details: {
+                            explanation: 'Vérifie ce qui suit sans l\'inclure dans le match. "Regarde devant".',
+                            syntax: '(?=pattern) - positif\n(?!pattern) - négatif',
+                            options: [
+                                { flag: '(?=...)', desc: 'Suivi par... (positif)' },
+                                { flag: '(?!...)', desc: 'NON suivi par... (négatif)' }
+                            ],
+                            examples: [
+                                { code: '\\d+(?=€)', desc: 'Nombre suivi de € (mais € non capturé): "100€" → "100"' },
+                                { code: '\\w+(?=\\s+said)', desc: 'Mot avant "said": "John said" → "John"' },
+                                { code: 'foo(?!bar)', desc: '"foo" non suivi de "bar": match "fooX" mais pas "foobar"' },
+                                { code: '\\b\\w+(?!ing\\b)\\b', desc: 'Mots ne finissant pas par "ing"' }
+                            ],
+                            tips: ['Les lookahead sont "zero-width" - ils ne consomment pas de caractères'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '(?<=...) (?<!...)',
+                        desc: 'Lookbehind positif et négatif',
+                        details: {
+                            explanation: 'Vérifie ce qui précède sans l\'inclure dans le match. "Regarde derrière".',
+                            syntax: '(?<=pattern) - positif\n(?<!pattern) - négatif',
+                            options: [
+                                { flag: '(?<=...)', desc: 'Précédé par... (positif)' },
+                                { flag: '(?<!...)', desc: 'NON précédé par... (négatif)' }
+                            ],
+                            examples: [
+                                { code: '(?<=\\$)\\d+', desc: 'Nombre après $: "$100" → "100"' },
+                                { code: '(?<=@)\\w+', desc: 'Mot après @: "@user" → "user"' },
+                                { code: '(?<!\\d)\\d{3}(?!\\d)', desc: 'Exactement 3 chiffres (pas entouré de chiffres)' },
+                                { code: '(?<!un)happy', desc: '"happy" non précédé de "un"' }
+                            ],
+                            tips: ['En JavaScript, lookbehind nécessite ES2018+'],
+                            warnings: ['Certains moteurs regex ne supportent pas les lookbehind à largeur variable']
+                        }
+                    },
+                    {
+                        cmd: 'Combinaisons avancées',
+                        desc: 'Lookaround multiples',
+                        details: {
+                            explanation: 'Combiner plusieurs assertions pour des patterns complexes.',
+                            syntax: '(?=...)(?=...)pattern',
+                            options: [],
+                            examples: [
+                                { code: '(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}', desc: 'Mot de passe: majuscule + minuscule + chiffre + 8 chars' },
+                                { code: '(?=.*[A-Z])(?=.*[!@#$%])(?=.*\\d).{10,}', desc: 'Mot de passe fort' },
+                                { code: '(?<=\\s|^)\\w+(?=\\s|$)', desc: 'Mots complets (bordures espace/début/fin)' },
+                                { code: '\\b(?!(?:if|else|for|while)\\b)\\w+\\b', desc: 'Identifiants sauf mots-clés' }
+                            ],
+                            tips: ['Les lookahead multiples au début permettent de vérifier plusieurs conditions'],
+                            warnings: ['Peut impacter les performances sur de longues chaînes']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'flags',
+                title: 'Flags & Modificateurs',
+                icon: 'fa-flag',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'i g m s',
+                        desc: 'Flags principaux',
+                        details: {
+                            explanation: 'Les flags modifient le comportement global du pattern.',
+                            syntax: '/pattern/flags ou (?flags)pattern',
+                            options: [
+                                { flag: 'i', desc: 'Case insensitive (ignore majuscules/minuscules)' },
+                                { flag: 'g', desc: 'Global (toutes les occurrences)' },
+                                { flag: 'm', desc: 'Multiline (^ et $ matchent les lignes)' },
+                                { flag: 's', desc: 'Dotall (. matche aussi \\n)' }
+                            ],
+                            examples: [
+                                { code: '/hello/i', desc: 'Match "hello", "HELLO", "HeLLo"...' },
+                                { code: '/\\d+/g', desc: 'Trouve TOUS les nombres dans la chaîne' },
+                                { code: '/^ligne/m', desc: 'Match "ligne" au début de chaque ligne' },
+                                { code: '/<div>.*?<\\/div>/s', desc: 'Match div sur plusieurs lignes' }
+                            ],
+                            tips: ['En Python: re.IGNORECASE, re.MULTILINE, re.DOTALL'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'x u',
+                        desc: 'Flags additionnels',
+                        details: {
+                            explanation: 'Flags moins courants mais utiles.',
+                            syntax: '/pattern/x ou (?x)pattern',
+                            options: [
+                                { flag: 'x', desc: 'Extended (espaces et commentaires ignorés)' },
+                                { flag: 'u', desc: 'Unicode (support complet Unicode)' },
+                                { flag: 'y', desc: 'Sticky (match depuis lastIndex seulement)' }
+                            ],
+                            examples: [
+                                { code: '/\n  \\d{4}  # année\n  -\n  \\d{2}  # mois\n  -\n  \\d{2}  # jour\n/x', desc: 'Regex commentée (mode étendu)' },
+                                { code: '/\\p{L}+/u', desc: 'Lettres Unicode (accents, cyrillique, etc.)' },
+                                { code: '/[\\u0600-\\u06FF]+/u', desc: 'Caractères arabes' },
+                                { code: '/^\\p{Script=Greek}+$/u', desc: 'Texte grec seulement' }
+                            ],
+                            tips: ['Mode x permet d\'écrire des regex lisibles et documentées'],
+                            warnings: ['En mode x, les espaces littéraux doivent être échappés ou en classe']
+                        }
+                    },
+                    {
+                        cmd: 'Modificateurs inline',
+                        desc: '(?i) (?m) dans le pattern',
+                        details: {
+                            explanation: 'Activer/désactiver des flags pour une partie du pattern seulement.',
+                            syntax: '(?i)pattern ou (?i:pattern)',
+                            options: [
+                                { flag: '(?i)', desc: 'Active case insensitive' },
+                                { flag: '(?-i)', desc: 'Désactive case insensitive' },
+                                { flag: '(?i:...)', desc: 'Case insensitive pour ce groupe seulement' }
+                            ],
+                            examples: [
+                                { code: '(?i)hello', desc: 'Équivalent à /hello/i' },
+                                { code: 'Hello(?i:world)', desc: '"Hello" sensible, "world" insensible' },
+                                { code: '(?i)start(?-i)EXACT(?i)end', desc: 'Mixer sensibilité dans le même pattern' },
+                                { code: '(?m)^ligne$', desc: 'Mode multiligne inline' }
+                            ],
+                            tips: ['Utile quand vous ne contrôlez pas les flags globaux'],
+                            warnings: ['Syntaxe non supportée par tous les moteurs (pas en JavaScript natif)']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'replacement',
+                title: 'Remplacement & Capture',
+                icon: 'fa-exchange-alt',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: '$1 $2 \\1 \\2',
+                        desc: 'Références aux groupes',
+                        details: {
+                            explanation: 'Réutiliser les groupes capturés dans le remplacement ou le pattern.',
+                            syntax: '$1 ou \\1 (selon le langage)',
+                            options: [
+                                { flag: '$1, $2...', desc: 'Référence dans le remplacement (JS, PHP)' },
+                                { flag: '\\1, \\2...', desc: 'Backreference dans le pattern' },
+                                { flag: '$&', desc: 'Tout le match (JS)' },
+                                { flag: '$`', desc: 'Avant le match (JS)' },
+                                { flag: "$'", desc: 'Après le match (JS)' }
+                            ],
+                            examples: [
+                                { code: 's/(\\w+) (\\w+)/$2 $1/', desc: 'Inverser deux mots: "Jean Dupont" → "Dupont Jean"' },
+                                { code: '(\\w+)\\s+\\1', desc: 'Mot répété: match "le le" ou "test test"' },
+                                { code: 's/(["\'])(.*)\\1/<q>$2<\\/q>/', desc: 'Guillemets identiques: "texte" → <q>texte</q>' },
+                                { code: 's/(\\d+)/<b>$1<\\/b>/g', desc: 'Entourer les nombres de balises' }
+                            ],
+                            tips: ['$0 ou $& représente le match complet'],
+                            warnings: ['\\1 dans le pattern vs $1 dans le remplacement']
+                        }
+                    },
+                    {
+                        cmd: '(?<nom>...)',
+                        desc: 'Groupes nommés',
+                        details: {
+                            explanation: 'Nommer les groupes pour plus de lisibilité.',
+                            syntax: '(?<name>pattern) ou (?P<name>pattern)',
+                            options: [
+                                { flag: '(?<name>...)', desc: 'Groupe nommé (JS, .NET, Java 7+)' },
+                                { flag: '(?P<name>...)', desc: 'Groupe nommé (Python, PHP)' },
+                                { flag: '$<name>', desc: 'Référence dans le remplacement' },
+                                { flag: '\\k<name>', desc: 'Backreference nommée' }
+                            ],
+                            examples: [
+                                { code: '(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})', desc: 'Date avec noms' },
+                                { code: 's/(?<first>\\w+) (?<last>\\w+)/$<last>, $<first>/', desc: 'Reformater nom: "Jean Dupont" → "Dupont, Jean"' },
+                                { code: "# Python\nmatch.group('year')", desc: 'Accès par nom en Python' },
+                                { code: '// JavaScript\nmatch.groups.year', desc: 'Accès par nom en JS (ES2018)' }
+                            ],
+                            tips: ['Les groupes nommés rendent le code plus lisible et maintenable'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Fonctions de callback',
+                        desc: 'Remplacement dynamique',
+                        details: {
+                            explanation: 'Utiliser une fonction pour calculer le remplacement.',
+                            syntax: 'str.replace(regex, function)',
+                            options: [],
+                            examples: [
+                                { code: '// JavaScript\ntext.replace(/\\d+/g, match => parseInt(match) * 2)', desc: 'Doubler tous les nombres' },
+                                { code: '// JavaScript\ntext.replace(/\\b\\w/g, c => c.toUpperCase())', desc: 'Première lettre en majuscule' },
+                                { code: '# Python\nre.sub(r"\\d+", lambda m: str(int(m.group()) * 2), text)', desc: 'Doubler les nombres (Python)' },
+                                { code: '# Python\nre.sub(r"(?P<n>\\d+)", lambda m: f\'[{m.group("n")}]\', text)', desc: 'Avec groupe nommé' }
+                            ],
+                            tips: ['Les callbacks permettent des transformations complexes impossibles avec des patterns simples'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'by-language',
+                title: 'Regex par Langage',
+                icon: 'fa-language',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'JavaScript',
+                        desc: 'Regex en JavaScript',
+                        details: {
+                            explanation: 'Syntaxe et méthodes regex en JavaScript.',
+                            syntax: '/pattern/flags ou new RegExp("pattern", "flags")',
+                            options: [
+                                { flag: 'test()', desc: 'Retourne true/false' },
+                                { flag: 'match()', desc: 'Retourne les matches' },
+                                { flag: 'replace()', desc: 'Remplace les matches' },
+                                { flag: 'split()', desc: 'Découpe selon le pattern' },
+                                { flag: 'exec()', desc: 'Itération avec groupes' }
+                            ],
+                            examples: [
+                                { code: '/\\d+/.test("abc123")  // true', desc: 'Test de correspondance' },
+                                { code: '"abc123def456".match(/\\d+/g)  // ["123", "456"]', desc: 'Trouver toutes les occurrences' },
+                                { code: '"hello world".replace(/\\w+/g, s => s.toUpperCase())', desc: 'Remplacement avec fonction' },
+                                { code: 'const regex = /(?<year>\\d{4})-(?<month>\\d{2})/\nconst {groups} = regex.exec("2024-01")\nconsole.log(groups.year)  // "2024"', desc: 'Groupes nommés (ES2018)' }
+                            ],
+                            tips: ['Utilisez /pattern/g pour matchAll ou replace global'],
+                            warnings: ['new RegExp() nécessite d\'échapper les backslashes']
+                        }
+                    },
+                    {
+                        cmd: 'Python',
+                        desc: 'Module re en Python',
+                        details: {
+                            explanation: 'Le module re pour les expressions régulières en Python.',
+                            syntax: 'import re\nre.search(pattern, string)',
+                            options: [
+                                { flag: 're.search()', desc: 'Première correspondance' },
+                                { flag: 're.match()', desc: 'Match au début seulement' },
+                                { flag: 're.findall()', desc: 'Toutes les correspondances' },
+                                { flag: 're.sub()', desc: 'Remplacement' },
+                                { flag: 're.compile()', desc: 'Compiler pour réutilisation' }
+                            ],
+                            examples: [
+                                { code: 'import re\nre.search(r"\\d+", "abc123").group()  # "123"', desc: 'Recherche basique' },
+                                { code: 're.findall(r"\\d+", "a1b2c3")  # ["1", "2", "3"]', desc: 'Toutes les occurrences' },
+                                { code: 're.sub(r"(\\w+)", r"[\\1]", "hello world")  # "[hello] [world]"', desc: 'Remplacement avec groupe' },
+                                { code: 'pattern = re.compile(r"(?P<name>\\w+)@(?P<domain>\\w+\\.\\w+)")\nmatch = pattern.search("email@example.com")\nmatch.group("name")  # "email"', desc: 'Pattern compilé avec groupes nommés' }
+                            ],
+                            tips: ['Utilisez r"..." pour les raw strings (évite d\'échapper les backslashes)'],
+                            warnings: ['re.match() ne matche que le début, utilisez re.search() pour chercher partout']
+                        }
+                    },
+                    {
+                        cmd: 'PHP / Java',
+                        desc: 'Regex en PHP et Java',
+                        details: {
+                            explanation: 'Syntaxe regex pour PHP (PCRE) et Java.',
+                            syntax: 'preg_match() / Pattern.compile()',
+                            options: [
+                                { flag: 'preg_match()', desc: 'PHP: premier match' },
+                                { flag: 'preg_match_all()', desc: 'PHP: tous les matches' },
+                                { flag: 'preg_replace()', desc: 'PHP: remplacement' },
+                                { flag: 'Pattern.compile()', desc: 'Java: compiler le pattern' },
+                                { flag: 'Matcher.find()', desc: 'Java: trouver les matches' }
+                            ],
+                            examples: [
+                                { code: '// PHP\npreg_match(\'/\\d+/\', "abc123", $matches);\necho $matches[0];  // "123"', desc: 'Match PHP' },
+                                { code: '// PHP\n$result = preg_replace(\'/(\\w+)/\', \'[$1]\', "hello world");\n// "[hello] [world]"', desc: 'Remplacement PHP' },
+                                { code: '// Java\nPattern pattern = Pattern.compile("\\\\d+");\nMatcher matcher = pattern.matcher("abc123");\nif (matcher.find()) {\n    System.out.println(matcher.group());  // "123"\n}', desc: 'Match Java' },
+                                { code: '// Java\nString result = "hello world".replaceAll("(\\\\w+)", "[$1]");\n// "[hello] [world]"', desc: 'Remplacement Java' }
+                            ],
+                            tips: ['PHP: délimiteurs requis (/pattern/). Java: doubles backslashes dans les strings'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Bash / Sed / Grep',
+                        desc: 'Regex en ligne de commande',
+                        details: {
+                            explanation: 'Utiliser les regex avec grep, sed et dans Bash.',
+                            syntax: 'grep -E "pattern"\nsed -E "s/pattern/replace/"',
+                            options: [
+                                { flag: 'grep -E', desc: 'Extended regex (ERE)' },
+                                { flag: 'grep -P', desc: 'Perl-compatible regex (PCRE)' },
+                                { flag: 'sed -E', desc: 'Extended regex dans sed' },
+                                { flag: '[[ =~ ]]', desc: 'Regex dans les conditions Bash' }
+                            ],
+                            examples: [
+                                { code: 'grep -E "\\b[A-Z]{2,}\\b" file.txt', desc: 'Mots en majuscules (2+ lettres)' },
+                                { code: 'grep -oP "(?<=email: )\\S+" file.txt', desc: 'Extraire après "email: " (PCRE)' },
+                                { code: 'sed -E \'s/([0-9]+)/[\\1]/g\' file.txt', desc: 'Entourer les nombres de crochets' },
+                                { code: 'if [[ "$email" =~ ^[a-z]+@[a-z]+\\.[a-z]+$ ]]; then\n  echo "Email valide"\nfi', desc: 'Validation en Bash' }
+                            ],
+                            tips: ['grep -P offre plus de fonctionnalités (lookahead, etc.)'],
+                            warnings: ['La syntaxe varie selon les outils (BRE vs ERE vs PCRE)']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'performance',
+                title: 'Optimisation & Pièges',
+                icon: 'fa-tachometer-alt',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Catastrophic backtracking',
+                        desc: 'Éviter les regex lentes',
+                        details: {
+                            explanation: 'Certains patterns peuvent exploser en temps d\'exécution (ReDoS).',
+                            syntax: 'Éviter: (a+)+, (a|a)+, (.*a){10}',
+                            options: [
+                                { flag: '(a+)+', desc: 'DANGEREUX: imbrication de quantificateurs' },
+                                { flag: '(a|aa)+', desc: 'DANGEREUX: alternatives qui se chevauchent' },
+                                { flag: '.*.*', desc: 'SUSPECT: multiples .* consécutifs' }
+                            ],
+                            examples: [
+                                { code: '# ❌ Pattern vulnérable au ReDoS\n(a+)+$\n\n# Avec "aaaaaaaaaaaaaaaaaaaaX" → catastrophique!', desc: 'Exemple ReDoS' },
+                                { code: '# ❌ Mauvais: email vulnérable\n^([a-zA-Z0-9]+)*@\n\n# ✅ Mieux: pas d\'imbrication\n^[a-zA-Z0-9]+@', desc: 'Correction' },
+                                { code: '# ❌ Lent: gourmand puis backtrack\n.*foo.*bar\n\n# ✅ Plus rapide: non-gourmand\n.*?foo.*?bar', desc: 'Utiliser non-gourmand' }
+                            ],
+                            tips: ['Testez vos regex avec des entrées longues et malformées'],
+                            warnings: ['Les regex vulnérables peuvent être exploitées pour des attaques DoS']
+                        }
+                    },
+                    {
+                        cmd: 'Gourmand vs Paresseux',
+                        desc: '* vs *? et + vs +?',
+                        details: {
+                            explanation: 'Les quantificateurs gourmands matchent le maximum, les paresseux le minimum.',
+                            syntax: '*? +? ?? {n,m}?',
+                            options: [
+                                { flag: '.*', desc: 'Gourmand: match le maximum' },
+                                { flag: '.*?', desc: 'Paresseux: match le minimum' },
+                                { flag: '.+?', desc: 'Au moins 1, mais minimum' },
+                                { flag: '.{2,5}?', desc: 'Entre 2 et 5, mais préfère 2' }
+                            ],
+                            examples: [
+                                { code: '# Chaîne: "<div>foo</div><div>bar</div>"\n\n<div>.*</div>   # Match TOUT (gourmand)\n# → "<div>foo</div><div>bar</div>"\n\n<div>.*?</div>  # Match minimum (paresseux)\n# → "<div>foo</div>" (premier seulement)', desc: 'Différence gourmand/paresseux' },
+                                { code: '# Extraire le contenu entre guillemets\n".*"   # Gourmand: "foo" et "bar" → "foo" et "bar"\n".*?"  # Paresseux: "foo" → "foo", puis "bar" → "bar"', desc: 'Guillemets' }
+                            ],
+                            tips: ['Pour le HTML/XML, préférez un parser dédié plutôt que regex'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Atomic groups',
+                        desc: 'Empêcher le backtracking',
+                        details: {
+                            explanation: 'Les groupes atomiques ne permettent pas de backtracking une fois matchés.',
+                            syntax: '(?>pattern) ou possessive: a++',
+                            options: [
+                                { flag: '(?>...)', desc: 'Groupe atomique' },
+                                { flag: 'a++', desc: 'Possessif: comme a+ mais sans backtrack' },
+                                { flag: 'a*+', desc: 'Possessif: comme a* mais sans backtrack' }
+                            ],
+                            examples: [
+                                { code: '# Avec (?>...) - pas de backtracking\n(?>\\d+)X   # Match "123X" mais PAS "123" seul', desc: 'Groupe atomique' },
+                                { code: '# Équivalent possessif\n\\d++X      # Même comportement, syntaxe plus courte', desc: 'Quantificateur possessif' },
+                                { code: '# ❌ Lent: peut backtracker\n\\d+:\\d+\n\n# ✅ Rapide: pas de backtrack possible\n\\d++:\\d++', desc: 'Optimisation avec possessif' }
+                            ],
+                            tips: ['Les possessifs sont plus rapides mais peuvent échouer sur des matches valides'],
+                            warnings: ['Non supporté par tous les moteurs (pas en JavaScript natif)']
+                        }
+                    },
+                    {
+                        cmd: 'Bonnes pratiques',
+                        desc: 'Écrire des regex maintenables',
+                        details: {
+                            explanation: 'Conseils pour des regex lisibles, performantes et sûres.',
+                            syntax: 'Commenter, tester, simplifier',
+                            options: [
+                                { flag: 'Mode x', desc: 'Utiliser le mode étendu pour commenter' },
+                                { flag: 'Ancres', desc: 'Utiliser ^ et $ quand possible' },
+                                { flag: 'Spécificité', desc: 'Éviter .* quand [^X]* est possible' },
+                                { flag: 'Tests', desc: 'Tester avec des cas limites' }
+                            ],
+                            examples: [
+                                { code: '# ❌ Trop générique\n.*@.*\n\n# ✅ Plus spécifique\n[^@]+@[^@]+', desc: 'Être spécifique' },
+                                { code: '# ❌ Sans ancres\n\\d{4}-\\d{2}-\\d{2}\n\n# ✅ Avec ancres\n^\\d{4}-\\d{2}-\\d{2}$', desc: 'Utiliser les ancres' },
+                                { code: '# ❌ Illisible\n^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$\n\n# ✅ Mode étendu\n(?x)\n^(?=.*[A-Z])     # Au moins une majuscule\n (?=.*[a-z])     # Au moins une minuscule\n (?=.*\\d)        # Au moins un chiffre\n (?=.*[@$!%*?&]) # Au moins un spécial\n [A-Za-z\\d@$!%*?&]{8,}$  # 8+ caractères', desc: 'Mode étendu pour lisibilité' }
+                            ],
+                            tips: ['regex101.com est excellent pour tester et débugger vos regex'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'advanced-patterns',
+                title: 'Patterns Avancés',
+                icon: 'fa-puzzle-piece',
+                color: 'border-l-4 border-violet-500',
+                commands: [
+                    {
+                        cmd: 'Dates & Heures',
+                        desc: 'Patterns pour dates/heures',
+                        details: {
+                            explanation: 'Patterns pour valider et extraire des dates et heures.',
+                            syntax: 'Formats ISO, français, américain',
+                            options: [],
+                            examples: [
+                                { code: '# Date ISO (YYYY-MM-DD)\n^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$', desc: 'Date ISO avec validation basique' },
+                                { code: '# Date française (DD/MM/YYYY)\n^(0[1-9]|[12]\\d|3[01])/(0[1-9]|1[0-2])/\\d{4}$', desc: 'Format français' },
+                                { code: '# Heure (HH:MM ou HH:MM:SS)\n^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$', desc: 'Format 24h' },
+                                { code: '# Datetime ISO\n^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:?\\d{2})?$', desc: 'ISO 8601 complet' }
+                            ],
+                            tips: ['Pour une vraie validation de date, utilisez une librairie (dates invalides comme 31/02)'],
+                            warnings: ['Ces patterns ne valident pas la cohérence (ex: 30 février)']
+                        }
+                    },
+                    {
+                        cmd: 'IPv4 / IPv6 / MAC',
+                        desc: 'Adresses réseau',
+                        details: {
+                            explanation: 'Patterns pour les adresses réseau.',
+                            syntax: 'IP, sous-réseau, MAC',
+                            options: [],
+                            examples: [
+                                { code: '# IPv4 simple\n^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$', desc: 'IPv4 basique' },
+                                { code: '# IPv4 stricte (0-255)\n^((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)$', desc: 'IPv4 validée' },
+                                { code: '# CIDR notation\n^((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)/(3[0-2]|[12]?\\d)$', desc: 'IPv4 avec masque CIDR' },
+                                { code: '# Adresse MAC\n^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$', desc: 'MAC address (00:1A:2B:3C:4D:5E)' }
+                            ],
+                            tips: ['IPv6 est très complexe - utilisez une librairie pour la validation complète'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Mots de passe',
+                        desc: 'Validation de force',
+                        details: {
+                            explanation: 'Patterns pour valider la complexité des mots de passe.',
+                            syntax: 'Lookaheads multiples',
+                            options: [
+                                { flag: '(?=.*[a-z])', desc: 'Au moins une minuscule' },
+                                { flag: '(?=.*[A-Z])', desc: 'Au moins une majuscule' },
+                                { flag: '(?=.*\\d)', desc: 'Au moins un chiffre' },
+                                { flag: '(?=.*[!@#$%])', desc: 'Au moins un caractère spécial' }
+                            ],
+                            examples: [
+                                { code: '# Minimum 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre\n^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$', desc: 'Force moyenne' },
+                                { code: '# Fort: 10+ chars, maj, min, chiffre, spécial\n^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{10,}$', desc: 'Force élevée' },
+                                { code: '# Pas de caractères répétés 3+ fois\n^(?!.*(.)\\1\\1).{8,}$', desc: 'Anti-répétition' },
+                                { code: '# Combinaison complète\n^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*])(?!.*(.)\\1\\1)[A-Za-z\\d!@#$%^&*]{10,20}$', desc: 'Validation complète' }
+                            ],
+                            tips: ['Affichez des indicateurs de force progressifs plutôt que juste valide/invalide'],
+                            warnings: ['La longueur est plus importante que la complexité pour la sécurité']
+                        }
+                    },
+                    {
+                        cmd: 'Nettoyage de texte',
+                        desc: 'Patterns de transformation',
+                        details: {
+                            explanation: 'Patterns utiles pour nettoyer et transformer du texte.',
+                            syntax: 'Espaces, HTML, caractères spéciaux',
+                            options: [],
+                            examples: [
+                                { code: '# Supprimer espaces multiples\ns/\\s+/ /g', desc: 'Normaliser les espaces' },
+                                { code: '# Trim (espaces début/fin)\ns/^\\s+|\\s+$//g', desc: 'Équivalent trim()' },
+                                { code: '# Supprimer balises HTML\ns/<[^>]+>//g', desc: 'Retirer le HTML (basique)' },
+                                { code: '# Slug pour URL\ns/[^a-zA-Z0-9]+/-/g\ns/^-|-$//g', desc: 'Créer un slug' },
+                                { code: '# CamelCase vers snake_case\ns/([a-z])([A-Z])/$1_$2/g', desc: 'myVarName → my_Var_Name (puis lowercase)' }
+                            ],
+                            tips: ['Pour le HTML, utilisez un vrai parser plutôt que regex'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-parser',
+                title: '🚀 Projet: Parser de Logs',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Analyser le format',
+                        desc: 'Comprendre la structure des logs',
+                        details: {
+                            explanation: 'Identifier les composants d\'une ligne de log et créer le pattern.',
+                            syntax: 'Exemple: Apache Combined Log Format',
+                            options: [],
+                            examples: [
+                                { code: '# Format Apache Combined Log:\n# 192.168.1.1 - - [10/Oct/2024:13:55:36 +0000] "GET /page.html HTTP/1.1" 200 2326 "http://referer.com" "Mozilla/5.0"\n\n# Composants:\n# - IP: 192.168.1.1\n# - Identité: - (ou username)\n# - User: - (ou username)\n# - Date: [10/Oct/2024:13:55:36 +0000]\n# - Requête: "GET /page.html HTTP/1.1"\n# - Status: 200\n# - Taille: 2326\n# - Referer: "http://referer.com"\n# - User-Agent: "Mozilla/5.0..."', desc: 'Analyse du format' }
+                            ],
+                            tips: ['Décomposez chaque partie avant d\'assembler le pattern complet'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: Patterns par composant',
+                        desc: 'Créer les sous-patterns',
+                        details: {
+                            explanation: 'Créer un pattern pour chaque partie du log.',
+                            syntax: 'Groupes nommés pour chaque composant',
+                            options: [],
+                            examples: [
+                                { code: '# IP Address\n(?<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\n\n# Date entre crochets\n\\[(?<datetime>[^\\]]+)\\]\n\n# Requête entre guillemets\n"(?<method>\\w+)\\s+(?<path>[^\\s]+)\\s+(?<protocol>[^"]+)"\n\n# Status code\n(?<status>\\d{3})\n\n# Taille (nombre ou -)\n(?<size>\\d+|-)\n\n# Champ entre guillemets (referer, user-agent)\n"(?<referer>[^"]*)"\n"(?<useragent>[^"]*)"', desc: 'Patterns individuels' }
+                            ],
+                            tips: ['Testez chaque pattern individuellement avant de les combiner'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Pattern complet',
+                        desc: 'Assembler le pattern final',
+                        details: {
+                            explanation: 'Combiner tous les sous-patterns en un pattern complet.',
+                            syntax: 'Pattern avec groupes nommés',
+                            options: [],
+                            examples: [
+                                { code: '# Pattern complet Apache Combined Log\n^(?<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+\n(?<ident>[^\\s]+)\\s+\n(?<user>[^\\s]+)\\s+\n\\[(?<datetime>[^\\]]+)\\]\\s+\n"(?<method>\\w+)\\s+(?<path>[^\\s]+)\\s+(?<protocol>[^"]+)"\\s+\n(?<status>\\d{3})\\s+\n(?<size>\\d+|-)\\s*\n(?:"(?<referer>[^"]*)"\\s*)?\n(?:"(?<useragent>[^"]*)")?$', desc: 'Pattern assemblé (mode étendu)' },
+                                { code: '# Version compacte (une ligne)\n^(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+([^\\s]+)\\s+([^\\s]+)\\s+\\[([^\\]]+)\\]\\s+"(\\w+)\\s+([^\\s]+)\\s+([^"]+)"\\s+(\\d{3})\\s+(\\d+|-)\\s*(?:"([^"]*)"\\s*)?(?:"([^"]*)")?$', desc: 'Version compacte' }
+                            ],
+                            tips: ['Utilisez le mode étendu (x) pour la lisibilité'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Script Python',
+                        desc: 'Parser avec extraction',
+                        details: {
+                            explanation: 'Script Python pour parser et analyser les logs.',
+                            syntax: 'import re',
+                            options: [],
+                            examples: [
+                                { code: 'import re\nfrom collections import defaultdict\nfrom datetime import datetime\n\n# Pattern Apache Combined Log\nLOG_PATTERN = re.compile(r\'\'\'\n    ^(?P<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+\n    (?P<ident>[^\\s]+)\\s+\n    (?P<user>[^\\s]+)\\s+\n    \\[(?P<datetime>[^\\]]+)\\]\\s+\n    "(?P<method>\\w+)\\s+(?P<path>[^\\s]+)\\s+(?P<protocol>[^"]+)"\\s+\n    (?P<status>\\d{3})\\s+\n    (?P<size>\\d+|-)\\s*\n    (?:"(?P<referer>[^"]*)"\\s*)?\n    (?:"(?P<useragent>[^"]*)")?$\n\'\'\', re.VERBOSE)\n\ndef parse_log_line(line):\n    """Parse une ligne de log et retourne un dict."""\n    match = LOG_PATTERN.match(line.strip())\n    if match:\n        data = match.groupdict()\n        # Convertir la taille en int\n        data[\'size\'] = int(data[\'size\']) if data[\'size\'] != \'-\' else 0\n        data[\'status\'] = int(data[\'status\'])\n        return data\n    return None', desc: 'Fonction de parsing' }
+                            ],
+                            tips: ['Utilisez groupdict() pour obtenir un dictionnaire avec les groupes nommés'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Analyse statistique',
+                        desc: 'Extraire des métriques',
+                        details: {
+                            explanation: 'Analyser les logs parsés pour extraire des statistiques.',
+                            syntax: 'Comptages, regroupements, filtres',
+                            options: [],
+                            examples: [
+                                { code: 'def analyze_logs(log_file):\n    """Analyse un fichier de logs."""\n    stats = {\n        \'total\': 0,\n        \'by_status\': defaultdict(int),\n        \'by_ip\': defaultdict(int),\n        \'by_method\': defaultdict(int),\n        \'errors\': [],\n        \'total_bytes\': 0\n    }\n    \n    with open(log_file, \'r\') as f:\n        for line in f:\n            data = parse_log_line(line)\n            if data:\n                stats[\'total\'] += 1\n                stats[\'by_status\'][data[\'status\']] += 1\n                stats[\'by_ip\'][data[\'ip\']] += 1\n                stats[\'by_method\'][data[\'method\']] += 1\n                stats[\'total_bytes\'] += data[\'size\']\n                \n                # Collecter les erreurs (4xx et 5xx)\n                if data[\'status\'] >= 400:\n                    stats[\'errors\'].append({\n                        \'status\': data[\'status\'],\n                        \'path\': data[\'path\'],\n                        \'ip\': data[\'ip\']\n                    })\n    \n    return stats', desc: 'Fonction d\'analyse' }
+                            ],
+                            tips: ['Utilisez defaultdict pour simplifier les comptages'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Rapport',
+                        desc: 'Générer un rapport',
+                        details: {
+                            explanation: 'Formater et afficher les résultats de l\'analyse.',
+                            syntax: 'Sortie console ou fichier',
+                            options: [],
+                            examples: [
+                                { code: 'def print_report(stats):\n    """Affiche un rapport d\'analyse."""\n    print("=" * 50)\n    print("  RAPPORT D\'ANALYSE DES LOGS")\n    print("=" * 50)\n    \n    print(f"\\nTotal requêtes: {stats[\'total\']}\")\n    print(f"Données transférées: {stats[\'total_bytes\'] / (1024*1024):.2f} MB")\n    \n    print("\\n--- Répartition par status ---")\n    for status, count in sorted(stats[\'by_status\'].items()):\n        pct = (count / stats[\'total\']) * 100\n        bar = \'█\' * int(pct / 2)\n        print(f"  {status}: {count:6d} ({pct:5.1f}%) {bar}")\n    \n    print("\\n--- Top 10 IPs ---")\n    top_ips = sorted(stats[\'by_ip\'].items(), key=lambda x: x[1], reverse=True)[:10]\n    for ip, count in top_ips:\n        print(f"  {ip:20s}: {count}")\n    \n    print("\\n--- Méthodes HTTP ---")\n    for method, count in sorted(stats[\'by_method\'].items(), key=lambda x: x[1], reverse=True):\n        print(f"  {method:6s}: {count}")\n    \n    if stats[\'errors\']:\n        print(f"\\n--- Dernières erreurs ({len(stats[\'errors\'])} total) ---")\n        for err in stats[\'errors\'][-5:]:\n            print(f"  [{err[\'status\']}] {err[\'path\']} (from {err[\'ip\']})")', desc: 'Fonction de rapport' }
+                            ],
+                            tips: ['Utilisez des barres de progression ASCII pour visualiser les proportions'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Script complet',
+                        desc: 'Programme final utilisable',
+                        details: {
+                            explanation: 'Script complet avec arguments et point d\'entrée.',
+                            syntax: 'python log_parser.py access.log',
+                            options: [],
+                            examples: [
+                                { code: '#!/usr/bin/env python3\n"""\nLog Parser - Analyseur de logs Apache\nUsage: python log_parser.py <fichier_log> [options]\n"""\nimport argparse\nimport sys\n\ndef main():\n    parser = argparse.ArgumentParser(description=\'Analyseur de logs Apache\')\n    parser.add_argument(\'logfile\', help=\'Fichier de log à analyser\')\n    parser.add_argument(\'-e\', \'--errors-only\', action=\'store_true\',\n                        help=\'Afficher uniquement les erreurs\')\n    parser.add_argument(\'-i\', \'--filter-ip\', help=\'Filtrer par IP\')\n    parser.add_argument(\'-s\', \'--filter-status\', type=int, help=\'Filtrer par status\')\n    args = parser.parse_args()\n    \n    try:\n        stats = analyze_logs(args.logfile)\n        \n        if args.filter_ip:\n            stats[\'errors\'] = [e for e in stats[\'errors\'] if e[\'ip\'] == args.filter_ip]\n        if args.filter_status:\n            stats[\'errors\'] = [e for e in stats[\'errors\'] if e[\'status\'] == args.filter_status]\n        \n        print_report(stats)\n        \n    except FileNotFoundError:\n        print(f"Erreur: Fichier \'{args.logfile}\' introuvable", file=sys.stderr)\n        sys.exit(1)\n    except Exception as e:\n        print(f"Erreur: {e}", file=sys.stderr)\n        sys.exit(1)\n\nif __name__ == \'__main__\':\n    main()', desc: 'Point d\'entrée' },
+                                { code: '# Exemples d\'utilisation\n$ python log_parser.py /var/log/apache2/access.log\n$ python log_parser.py access.log --errors-only\n$ python log_parser.py access.log --filter-ip 192.168.1.100\n$ python log_parser.py access.log --filter-status 404', desc: 'Utilisation CLI' }
+                            ],
+                            tips: ['Ajoutez une option pour exporter en JSON ou CSV'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

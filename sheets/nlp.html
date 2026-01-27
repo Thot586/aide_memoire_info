@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire NLP Python : Spacy, BERTopic, sentiment analysis, POS tagging et topic modeling.">
+    <title>NLP Python - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-violet-500/20 mb-4 icon-glow">
+                    <i class="fas fa-language text-3xl text-violet-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">NLP avec Python</h1>
+                <p class="text-slate-400">Traitement du langage naturel : Spacy, BERTopic, Sentiment Analysis</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'spacy',
+                title: 'Spacy - Fondamentaux',
+                icon: 'fa-spell-check',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'nlp = spacy.load("fr_core_news_md")',
+                        desc: 'Charger un modèle de langue',
+                        details: {
+                            explanation: 'Charge un modèle Spacy pré-entraîné. Les modèles français incluent fr_core_news_sm (petit), fr_core_news_md (moyen) et fr_core_news_lg (grand).',
+                            syntax: 'nlp = spacy.load("nom_modele")',
+                            options: [
+                                { flag: 'fr_core_news_sm', desc: 'Petit modèle français (~15MB)' },
+                                { flag: 'fr_core_news_md', desc: 'Modèle moyen avec vecteurs (~50MB)' },
+                                { flag: 'fr_core_news_lg', desc: 'Grand modèle (~550MB)' },
+                                { flag: 'en_core_web_sm', desc: 'Modèle anglais petit' }
+                            ],
+                            examples: [
+                                { code: 'python -m spacy download fr_core_news_md', desc: 'Télécharger le modèle (terminal)' },
+                                { code: 'import spacy\nnlp = spacy.load("fr_core_news_md")', desc: 'Charger dans Python' },
+                                { code: 'doc = nlp("Bonjour le monde")', desc: 'Traiter un texte' }
+                            ],
+                            tips: ['Les modèles _md et _lg incluent des word vectors pour la similarité'],
+                            warnings: ['Téléchargez le modèle avant de l\'utiliser']
+                        }
+                    },
+                    {
+                        cmd: 'doc = nlp(texte)',
+                        desc: 'Créer un document Spacy',
+                        details: {
+                            explanation: 'Traite un texte et retourne un objet Doc contenant les tokens, entités, et annotations linguistiques.',
+                            syntax: 'doc = nlp(texte)',
+                            options: [],
+                            examples: [
+                                { code: 'doc = nlp("Paris est la capitale de la France.")', desc: 'Traiter une phrase' },
+                                { code: 'for token in doc:\n    print(token.text, token.pos_)', desc: 'Parcourir les tokens' }
+                            ],
+                            tips: ['Le traitement inclut tokenization, POS tagging, NER automatiquement'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'token.pos_, token.dep_, token.lemma_',
+                        desc: 'Attributs linguistiques d\'un token',
+                        details: {
+                            explanation: 'Chaque token possède des attributs linguistiques : partie du discours (POS), dépendance syntaxique, lemme, etc.',
+                            syntax: 'token.attribut',
+                            options: [
+                                { flag: '.text', desc: 'Texte brut du token' },
+                                { flag: '.lemma_', desc: 'Forme canonique (lemme)' },
+                                { flag: '.pos_', desc: 'Part-of-speech (NOUN, VERB, ADJ...)' },
+                                { flag: '.dep_', desc: 'Relation de dépendance syntaxique' },
+                                { flag: '.is_stop', desc: 'True si mot vide (stop word)' },
+                                { flag: '.ent_type_', desc: 'Type d\'entité nommée (si applicable)' }
+                            ],
+                            examples: [
+                                { code: 'for token in doc:\n    print(f"{token.text}: {token.pos_} / {token.lemma_}")', desc: 'Afficher POS et lemmes' },
+                                { code: '[t.text for t in doc if not t.is_stop]', desc: 'Filtrer les stop words' }
+                            ],
+                            tips: ['pos_ = Universal POS tags, tag_ = POS tags détaillés'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'doc.ents',
+                        desc: 'Extraction d\'entités nommées (NER)',
+                        details: {
+                            explanation: 'Extrait les entités nommées : personnes, lieux, organisations, dates, etc.',
+                            syntax: 'for ent in doc.ents: ...',
+                            options: [
+                                { flag: 'PER', desc: 'Personne' },
+                                { flag: 'LOC', desc: 'Lieu' },
+                                { flag: 'ORG', desc: 'Organisation' },
+                                { flag: 'DATE', desc: 'Date' },
+                                { flag: 'MISC', desc: 'Divers' }
+                            ],
+                            examples: [
+                                { code: 'for ent in doc.ents:\n    print(ent.text, ent.label_)', desc: 'Lister les entités' },
+                                { code: 'from spacy import displacy\ndisplacy.render(doc, style="ent")', desc: 'Visualiser les entités' }
+                            ],
+                            tips: ['displacy permet une visualisation interactive dans Jupyter'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'sentiment',
+                title: 'Analyse de Sentiments',
+                icon: 'fa-heart',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'classifier = pipeline("sentiment-analysis")',
+                        desc: 'Pipeline Hugging Face pour sentiments',
+                        details: {
+                            explanation: 'Utilise un modèle pré-entraîné Transformers pour classifier le sentiment (positif/négatif).',
+                            syntax: 'from transformers import pipeline\nclassifier = pipeline("sentiment-analysis")',
+                            options: [
+                                { flag: 'model=...', desc: 'Spécifier un modèle particulier' },
+                                { flag: 'device=0', desc: 'Utiliser GPU (CUDA)' }
+                            ],
+                            examples: [
+                                { code: 'classifier("J\'adore ce produit !")', desc: 'Analyse simple' },
+                                { code: 'classifier(["Super !", "Nul..."])', desc: 'Analyse par batch' }
+                            ],
+                            tips: ['Les modèles multilingues fonctionnent souvent pour le français'],
+                            warnings: ['Premier appel télécharge le modèle (~500MB)']
+                        }
+                    },
+                    {
+                        cmd: 'camembert_sentiment(texte)',
+                        desc: 'Sentiment avec CamemBERT (français)',
+                        details: {
+                            explanation: 'CamemBERT est un modèle BERT entraîné spécifiquement sur du texte français.',
+                            syntax: 'pipeline("sentiment-analysis", model="tblard/tf-allocine")',
+                            options: [
+                                { flag: 'tblard/tf-allocine', desc: 'Modèle entraîné sur critiques Allociné' },
+                                { flag: 'nlptown/bert-base-multilingual', desc: 'Modèle multilingue 5 étoiles' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\nclassifier = pipeline("sentiment-analysis", model="tblard/tf-allocine")\nclassifier("Ce film est excellent !")', desc: 'Sentiment français' },
+                                { code: '# Résultat: [{\'label\': \'POSITIVE\', \'score\': 0.98}]', desc: 'Format de sortie' }
+                            ],
+                            tips: ['tblard/tf-allocine est optimisé pour les avis français'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'emotion_classifier(texte)',
+                        desc: 'Détection d\'émotions (joie, colère, peur...)',
+                        details: {
+                            explanation: 'Classifie le texte selon plusieurs émotions : joie, tristesse, colère, peur, surprise, dégoût.',
+                            syntax: 'pipeline("text-classification", model="..._emotion")',
+                            options: [
+                                { flag: 'j-hartmann/emotion-english', desc: 'Émotions en anglais (6 classes)' },
+                                { flag: 'michellejieli/emotion_text', desc: 'Alternative anglaise' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\nemotion = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base")\nemotion("I am so happy today!")', desc: 'Détection d\'émotion' },
+                                { code: '# Pour le français, traduire ou utiliser un modèle multilingue', desc: 'Note pour le français' }
+                            ],
+                            tips: ['Combinez avec de la traduction pour le français'],
+                            warnings: ['Peu de modèles d\'émotions français disponibles']
+                        }
+                    },
+                    {
+                        cmd: 'TextBlob(texte).sentiment',
+                        desc: 'Analyse simple avec TextBlob',
+                        details: {
+                            explanation: 'TextBlob fournit une analyse de sentiment basique avec polarité (-1 à 1) et subjectivité (0 à 1).',
+                            syntax: 'from textblob import TextBlob\nblob = TextBlob(texte)',
+                            options: [
+                                { flag: '.sentiment.polarity', desc: 'Score de -1 (négatif) à 1 (positif)' },
+                                { flag: '.sentiment.subjectivity', desc: 'Score de 0 (objectif) à 1 (subjectif)' }
+                            ],
+                            examples: [
+                                { code: 'from textblob import TextBlob\nblob = TextBlob("I love this!")\nprint(blob.sentiment)', desc: 'Analyse basique' },
+                                { code: 'from textblob_fr import TextBlobFR\nblob = TextBlobFR("J\'adore !")', desc: 'Version française' }
+                            ],
+                            tips: ['Installez textblob-fr pour le français'],
+                            warnings: ['Moins précis que les modèles Transformers']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'topic',
+                title: 'Topic Modeling',
+                icon: 'fa-sitemap',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'BERTopic()',
+                        desc: 'Créer un modèle BERTopic',
+                        details: {
+                            explanation: 'BERTopic utilise des embeddings de phrases (sentence-transformers) + UMAP + HDBSCAN pour découvrir des topics.',
+                            syntax: 'from bertopic import BERTopic\ntopic_model = BERTopic()',
+                            options: [
+                                { flag: 'language="french"', desc: 'Optimisé pour le français' },
+                                { flag: 'min_topic_size=10', desc: 'Taille minimum d\'un topic' },
+                                { flag: 'nr_topics="auto"', desc: 'Réduction automatique des topics' },
+                                { flag: 'embedding_model=...', desc: 'Modèle d\'embeddings personnalisé' }
+                            ],
+                            examples: [
+                                { code: 'from bertopic import BERTopic\ntopic_model = BERTopic(language="french")\ntopics, probs = topic_model.fit_transform(documents)', desc: 'Entraînement basique' },
+                                { code: 'topic_model.get_topic_info()', desc: 'Voir les topics découverts' }
+                            ],
+                            tips: ['Utilisez language="multilingual" pour du texte mixte'],
+                            warnings: ['Nécessite au moins 100+ documents pour de bons résultats']
+                        }
+                    },
+                    {
+                        cmd: 'topic_model.fit_transform(docs)',
+                        desc: 'Entraîner et transformer',
+                        details: {
+                            explanation: 'Entraîne le modèle sur une liste de documents et retourne les topics assignés.',
+                            syntax: 'topics, probabilities = topic_model.fit_transform(documents)',
+                            options: [],
+                            examples: [
+                                { code: 'docs = ["Document 1...", "Document 2...", ...]\ntopics, probs = topic_model.fit_transform(docs)', desc: 'Fit + transform' },
+                                { code: 'topic_model.transform(["Nouveau texte"])', desc: 'Prédire sur nouveau texte' }
+                            ],
+                            tips: ['topics contient l\'ID du topic (-1 = outlier)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'topic_model.visualize_topics()',
+                        desc: 'Visualisation interactive des topics',
+                        details: {
+                            explanation: 'Génère des visualisations interactives avec Plotly pour explorer les topics.',
+                            syntax: 'topic_model.visualize_*()',
+                            options: [
+                                { flag: 'visualize_topics()', desc: 'Carte 2D des topics' },
+                                { flag: 'visualize_barchart()', desc: 'Mots-clés par topic' },
+                                { flag: 'visualize_hierarchy()', desc: 'Hiérarchie des topics' },
+                                { flag: 'visualize_heatmap()', desc: 'Similarité entre topics' }
+                            ],
+                            examples: [
+                                { code: 'fig = topic_model.visualize_topics()\nfig.show()', desc: 'Afficher la carte' },
+                                { code: 'topic_model.visualize_barchart(top_n_topics=10)', desc: 'Top 10 topics' }
+                            ],
+                            tips: ['Fonctionne parfaitement dans Jupyter Notebook'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'LdaModel(corpus, num_topics=10)',
+                        desc: 'LDA classique avec Gensim',
+                        details: {
+                            explanation: 'Latent Dirichlet Allocation : méthode probabiliste classique pour le topic modeling.',
+                            syntax: 'from gensim.models import LdaModel',
+                            options: [
+                                { flag: 'num_topics', desc: 'Nombre de topics à extraire' },
+                                { flag: 'passes', desc: 'Nombre d\'itérations' },
+                                { flag: 'alpha', desc: 'Prior sur la distribution de topics' }
+                            ],
+                            examples: [
+                                { code: 'from gensim import corpora\nfrom gensim.models import LdaModel\n\ndictionary = corpora.Dictionary(tokenized_docs)\ncorpus = [dictionary.doc2bow(doc) for doc in tokenized_docs]\nlda = LdaModel(corpus, num_topics=5, id2word=dictionary)', desc: 'Pipeline LDA complet' },
+                                { code: 'lda.print_topics()', desc: 'Afficher les topics' }
+                            ],
+                            tips: ['Prétraitez bien le texte (lemmatisation, stop words)'],
+                            warnings: ['Nécessite de choisir le nombre de topics à l\'avance']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'embeddings',
+                title: 'Embeddings & Similarité',
+                icon: 'fa-vector-square',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'SentenceTransformer(model)',
+                        desc: 'Charger un modèle d\'embeddings',
+                        details: {
+                            explanation: 'Sentence-Transformers génère des vecteurs denses pour des phrases/paragraphes entiers.',
+                            syntax: 'from sentence_transformers import SentenceTransformer\nmodel = SentenceTransformer("model_name")',
+                            options: [
+                                { flag: 'paraphrase-multilingual-MiniLM-L12-v2', desc: 'Multilingue rapide' },
+                                { flag: 'dangvantuan/sentence-camembert-large', desc: 'Français optimisé' },
+                                { flag: 'all-MiniLM-L6-v2', desc: 'Anglais rapide et efficace' }
+                            ],
+                            examples: [
+                                { code: 'from sentence_transformers import SentenceTransformer\nmodel = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")', desc: 'Charger modèle multilingue' },
+                                { code: 'embeddings = model.encode(["phrase 1", "phrase 2"])', desc: 'Encoder des phrases' }
+                            ],
+                            tips: ['Les modèles multilingues fonctionnent bien pour le français'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'model.encode(sentences)',
+                        desc: 'Générer des embeddings',
+                        details: {
+                            explanation: 'Convertit une liste de phrases en vecteurs numériques de dimension fixe.',
+                            syntax: 'embeddings = model.encode(sentences)',
+                            options: [
+                                { flag: 'convert_to_tensor=True', desc: 'Retourne un tensor PyTorch' },
+                                { flag: 'show_progress_bar=True', desc: 'Affiche la progression' },
+                                { flag: 'batch_size=32', desc: 'Taille des batchs' }
+                            ],
+                            examples: [
+                                { code: 'sentences = ["Bonjour", "Hello", "Salut"]\nembeddings = model.encode(sentences)\nprint(embeddings.shape)  # (3, 384)', desc: 'Encoder 3 phrases' }
+                            ],
+                            tips: ['Les embeddings ont généralement 384-768 dimensions'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cosine_similarity(emb1, emb2)',
+                        desc: 'Calculer la similarité cosinus',
+                        details: {
+                            explanation: 'Mesure la similarité entre deux vecteurs (1 = identique, 0 = orthogonal, -1 = opposé).',
+                            syntax: 'from sklearn.metrics.pairwise import cosine_similarity',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.metrics.pairwise import cosine_similarity\nsim = cosine_similarity([emb1], [emb2])[0][0]', desc: 'Similarité entre 2 phrases' },
+                                { code: 'from sentence_transformers import util\nscores = util.cos_sim(embeddings, embeddings)', desc: 'Matrice de similarité' }
+                            ],
+                            tips: ['util.cos_sim de sentence-transformers est optimisé'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'doc1.similarity(doc2)',
+                        desc: 'Similarité avec Spacy',
+                        details: {
+                            explanation: 'Spacy calcule la similarité basée sur les word vectors moyennés du document.',
+                            syntax: 'doc1.similarity(doc2)',
+                            options: [],
+                            examples: [
+                                { code: 'doc1 = nlp("J\'aime les chats")\ndoc2 = nlp("J\'adore les félins")\nprint(doc1.similarity(doc2))  # ~0.85', desc: 'Similarité sémantique' },
+                                { code: 'token1.similarity(token2)', desc: 'Similarité entre tokens' }
+                            ],
+                            tips: ['Nécessite un modèle _md ou _lg avec word vectors'],
+                            warnings: ['Les modèles _sm n\'ont pas de vectors (retourne 0)']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'preprocess',
+                title: 'Prétraitement NLP',
+                icon: 'fa-broom',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'nltk.word_tokenize(texte)',
+                        desc: 'Tokenisation avec NLTK',
+                        details: {
+                            explanation: 'Découpe un texte en tokens (mots et ponctuations).',
+                            syntax: 'from nltk.tokenize import word_tokenize',
+                            options: [
+                                { flag: 'word_tokenize()', desc: 'Tokenisation en mots' },
+                                { flag: 'sent_tokenize()', desc: 'Tokenisation en phrases' }
+                            ],
+                            examples: [
+                                { code: 'import nltk\nnltk.download("punkt")\nfrom nltk.tokenize import word_tokenize\ntokens = word_tokenize("Bonjour le monde !", language="french")', desc: 'Tokenisation française' }
+                            ],
+                            tips: ['Téléchargez les ressources avec nltk.download()'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'lemmatizer.lemmatize(word)',
+                        desc: 'Lemmatisation',
+                        details: {
+                            explanation: 'Réduit les mots à leur forme canonique (lemme) : "mangeons" → "manger".',
+                            syntax: 'lemmatizer.lemmatize(word, pos)',
+                            options: [
+                                { flag: 'pos="v"', desc: 'Verbe' },
+                                { flag: 'pos="n"', desc: 'Nom' },
+                                { flag: 'pos="a"', desc: 'Adjectif' }
+                            ],
+                            examples: [
+                                { code: '# Avec NLTK (anglais)\nfrom nltk.stem import WordNetLemmatizer\nlemmatizer = WordNetLemmatizer()\nlemmatizer.lemmatize("running", pos="v")  # "run"', desc: 'NLTK (anglais)' },
+                                { code: '# Avec Spacy (français)\n[token.lemma_ for token in nlp("Les chats mangent")]', desc: 'Spacy (français)' }
+                            ],
+                            tips: ['Spacy est meilleur pour le français'],
+                            warnings: ['NLTK WordNetLemmatizer est anglais uniquement']
+                        }
+                    },
+                    {
+                        cmd: 'stopwords.words("french")',
+                        desc: 'Liste de stop words',
+                        details: {
+                            explanation: 'Mots vides à filtrer : "le", "de", "et", "est", etc.',
+                            syntax: 'from nltk.corpus import stopwords',
+                            options: [],
+                            examples: [
+                                { code: 'from nltk.corpus import stopwords\nnltk.download("stopwords")\nstop_fr = set(stopwords.words("french"))', desc: 'Stop words NLTK' },
+                                { code: '# Avec Spacy\n[t.text for t in doc if not t.is_stop]', desc: 'Filtrage Spacy' }
+                            ],
+                            tips: ['Personnalisez la liste selon votre domaine'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 're.sub(pattern, repl, text)',
+                        desc: 'Nettoyage avec regex',
+                        details: {
+                            explanation: 'Nettoie le texte : supprime URLs, emails, caractères spéciaux, etc.',
+                            syntax: 'import re\nre.sub(pattern, replacement, text)',
+                            options: [],
+                            examples: [
+                                { code: 'import re\ntext = re.sub(r"http\\S+", "", text)  # Supprimer URLs', desc: 'Supprimer URLs' },
+                                { code: 'text = re.sub(r"[^a-zA-ZÀ-ÿ\\s]", "", text)  # Garder lettres', desc: 'Garder lettres uniquement' },
+                                { code: 'text = re.sub(r"\\s+", " ", text).strip()  # Normaliser espaces', desc: 'Normaliser espaces' }
+                            ],
+                            tips: ['Combinez plusieurs re.sub() pour un nettoyage complet'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'ner',
+                title: 'NER & POS Tagging',
+                icon: 'fa-tags',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'ner_pipeline(texte)',
+                        desc: 'NER avec Transformers',
+                        details: {
+                            explanation: 'Pipeline Hugging Face pour l\'extraction d\'entités nommées avec des modèles BERT.',
+                            syntax: 'pipeline("ner", model="...", aggregation_strategy="simple")',
+                            options: [
+                                { flag: 'Jean-Baptiste/camembert-ner', desc: 'CamemBERT NER français' },
+                                { flag: 'dslim/bert-base-NER', desc: 'BERT NER anglais' },
+                                { flag: 'aggregation_strategy="simple"', desc: 'Regroupe les tokens B-I' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\nner = pipeline("ner", model="Jean-Baptiste/camembert-ner", aggregation_strategy="simple")\nner("Emmanuel Macron est à Paris.")', desc: 'NER français' },
+                                { code: '# [{\'entity_group\': \'PER\', \'word\': \'Emmanuel Macron\', \'score\': 0.99}, ...]', desc: 'Format de sortie' }
+                            ],
+                            tips: ['aggregation_strategy regroupe les sous-tokens'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'nltk.pos_tag(tokens)',
+                        desc: 'POS Tagging avec NLTK',
+                        details: {
+                            explanation: 'Assigne une partie du discours (POS) à chaque token.',
+                            syntax: 'nltk.pos_tag(tokens, tagset="universal")',
+                            options: [
+                                { flag: 'tagset="universal"', desc: 'Tags universels (NOUN, VERB, ADJ...)' },
+                                { flag: 'lang="fra"', desc: 'Pour le français (avec ressources)' }
+                            ],
+                            examples: [
+                                { code: 'import nltk\ntokens = nltk.word_tokenize("The cat sat")\nnltk.pos_tag(tokens)', desc: 'POS tagging anglais' },
+                                { code: '# [("The", "DT"), ("cat", "NN"), ("sat", "VBD")]', desc: 'Format de sortie' }
+                            ],
+                            tips: ['Spacy est préférable pour le français'],
+                            warnings: ['NLTK pos_tag est optimisé pour l\'anglais']
+                        }
+                    },
+                    {
+                        cmd: 'spacy.explain(tag)',
+                        desc: 'Expliquer un tag POS/NER',
+                        details: {
+                            explanation: 'Retourne la signification d\'un tag POS ou d\'un label NER.',
+                            syntax: 'spacy.explain("TAG")',
+                            options: [],
+                            examples: [
+                                { code: 'spacy.explain("VERB")  # "verb"', desc: 'Expliquer POS' },
+                                { code: 'spacy.explain("nsubj")  # "nominal subject"', desc: 'Expliquer dépendance' },
+                                { code: 'spacy.explain("ORG")  # "Companies, agencies, institutions"', desc: 'Expliquer entité' }
+                            ],
+                            tips: ['Utile pour comprendre les annotations automatiques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'displacy.render(doc, style="dep")',
+                        desc: 'Visualiser l\'arbre de dépendances',
+                        details: {
+                            explanation: 'Génère une visualisation SVG de l\'analyse syntaxique.',
+                            syntax: 'from spacy import displacy',
+                            options: [
+                                { flag: 'style="dep"', desc: 'Arbre de dépendances' },
+                                { flag: 'style="ent"', desc: 'Entités nommées' },
+                                { flag: 'jupyter=True', desc: 'Rendu dans Jupyter' }
+                            ],
+                            examples: [
+                                { code: 'from spacy import displacy\ndisplacy.render(doc, style="dep", jupyter=True)', desc: 'Dans Jupyter' },
+                                { code: 'displacy.serve(doc, style="dep")', desc: 'Serveur web local' }
+                            ],
+                            tips: ['Parfait pour le débogage et l\'enseignement'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'transformers',
+                title: 'Transformers Avancés',
+                icon: 'fa-robot',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'pipeline("text-generation")',
+                        desc: 'Génération de texte',
+                        details: {
+                            explanation: 'Génère du texte à partir d\'un prompt en utilisant des modèles de type GPT.',
+                            syntax: 'generator = pipeline("text-generation", model="...")',
+                            options: [
+                                { flag: 'max_length', desc: 'Longueur maximale du texte généré' },
+                                { flag: 'max_new_tokens', desc: 'Nombre de tokens à générer' },
+                                { flag: 'temperature', desc: 'Créativité (0=déterministe, 1=créatif)' },
+                                { flag: 'top_k', desc: 'Limiter aux k tokens les plus probables' },
+                                { flag: 'top_p', desc: 'Nucleus sampling (probabilité cumulative)' },
+                                { flag: 'do_sample', desc: 'True pour échantillonnage aléatoire' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\ngenerator = pipeline("text-generation", model="gpt2")\nresult = generator("Il était une fois", max_length=50, do_sample=True)', desc: 'Génération avec GPT-2' },
+                                { code: 'generator = pipeline("text-generation", model="bigscience/bloom-560m")\ngenerator("Python est", max_new_tokens=30)', desc: 'Avec BLOOM (multilingue)' },
+                                { code: '# Contrôle créativité\ngenerator(prompt, temperature=0.7, top_p=0.9)', desc: 'Paramètres de sampling' }
+                            ],
+                            tips: ['temperature=0 pour réponses déterministes', 'BLOOM et mGPT supportent le français'],
+                            warnings: ['Modèles lourds, préférez GPU']
+                        }
+                    },
+                    {
+                        cmd: 'pipeline("summarization")',
+                        desc: 'Résumé automatique',
+                        details: {
+                            explanation: 'Génère un résumé condensé d\'un texte long.',
+                            syntax: 'summarizer = pipeline("summarization", model="...")',
+                            options: [
+                                { flag: 'max_length', desc: 'Longueur max du résumé' },
+                                { flag: 'min_length', desc: 'Longueur min du résumé' },
+                                { flag: 'do_sample', desc: 'Échantillonnage pour variété' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\nsummarizer = pipeline("summarization", model="facebook/bart-large-cnn")\ntext = "Long article here..."\nresume = summarizer(text, max_length=130, min_length=30)', desc: 'Résumé anglais' },
+                                { code: '# Pour le français\nsummarizer = pipeline("summarization", model="moussaKam/barthez-orangesum-abstract")\nsummarizer(texte_francais)', desc: 'Résumé français avec BARThez' },
+                                { code: '# Alternative multilingue\nsummarizer = pipeline("summarization", model="csebuetnlp/mT5_multilingual_XLSum")', desc: 'mT5 multilingue' }
+                            ],
+                            tips: ['BARThez et mT5 fonctionnent pour le français'],
+                            warnings: ['Texte trop long? Découpez en chunks']
+                        }
+                    },
+                    {
+                        cmd: 'pipeline("question-answering")',
+                        desc: 'Question-Answering extractif',
+                        details: {
+                            explanation: 'Extrait la réponse à une question depuis un contexte donné.',
+                            syntax: 'qa = pipeline("question-answering", model="...")',
+                            options: [
+                                { flag: 'question', desc: 'La question posée' },
+                                { flag: 'context', desc: 'Le texte contenant la réponse' },
+                                { flag: 'top_k', desc: 'Nombre de réponses candidates' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\nqa = pipeline("question-answering", model="deepset/roberta-base-squad2")\nresult = qa(\n    question="Quelle est la capitale de la France?",\n    context="Paris est la capitale de la France. C\'est une grande ville."\n)\nprint(result["answer"])  # "Paris"', desc: 'QA anglais' },
+                                { code: '# Pour le français\nqa = pipeline("question-answering", model="etalab-ia/camembert-base-squadFR-fquad-piaf")\nqa(question="Qui a écrit Les Misérables?", context="Victor Hugo a écrit Les Misérables en 1862.")', desc: 'QA français avec CamemBERT' }
+                            ],
+                            tips: ['Retourne answer, score, start, end'],
+                            warnings: ['Ne génère pas de réponse, extrait du contexte']
+                        }
+                    },
+                    {
+                        cmd: 'pipeline("text2text-generation")',
+                        desc: 'Génération texte-à-texte (T5/FLAN)',
+                        details: {
+                            explanation: 'Modèles polyvalents qui transforment du texte en texte (résumé, traduction, QA, etc.).',
+                            syntax: 'generator = pipeline("text2text-generation", model="google/flan-t5-base")',
+                            options: [
+                                { flag: 'max_length', desc: 'Longueur max de sortie' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\nflan = pipeline("text2text-generation", model="google/flan-t5-base")\n\n# Résumé\nflan("summarize: " + long_text)\n\n# Traduction\nflan("translate English to French: Hello world")\n\n# Question\nflan("answer: What is Python? context: Python is a programming language.")', desc: 'FLAN-T5 polyvalent' },
+                                { code: '# Instruction following\nflan("Explain machine learning in simple terms")', desc: 'Suivi d\'instructions' }
+                            ],
+                            tips: ['FLAN-T5 est entraîné pour suivre des instructions'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'pipeline("fill-mask")',
+                        desc: 'Prédiction de mots masqués',
+                        details: {
+                            explanation: 'Prédit le mot manquant dans une phrase (tâche MLM de BERT).',
+                            syntax: 'unmasker = pipeline("fill-mask", model="...")',
+                            options: [
+                                { flag: 'top_k', desc: 'Nombre de prédictions' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\nunmasker = pipeline("fill-mask", model="camembert-base")\nresult = unmasker("Paris est la <mask> de la France.")\nfor r in result:\n    print(f"{r[\'token_str\']}: {r[\'score\']:.3f}")', desc: 'CamemBERT fill-mask' },
+                                { code: 'unmasker = pipeline("fill-mask", model="bert-base-uncased")\nunmasker("The capital of France is [MASK].")', desc: 'BERT anglais' }
+                            ],
+                            tips: ['<mask> pour CamemBERT/RoBERTa, [MASK] pour BERT'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'translation',
+                title: 'Traduction automatique',
+                icon: 'fa-globe',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'pipeline("translation")',
+                        desc: 'Traduction avec Transformers',
+                        details: {
+                            explanation: 'Traduit du texte entre différentes langues avec des modèles Seq2Seq.',
+                            syntax: 'translator = pipeline("translation", model="Helsinki-NLP/opus-mt-fr-en")',
+                            options: [
+                                { flag: 'max_length', desc: 'Longueur max de la traduction' },
+                                { flag: 'src_lang', desc: 'Langue source (modèles multilingues)' },
+                                { flag: 'tgt_lang', desc: 'Langue cible (modèles multilingues)' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\n# Français → Anglais\nfr_en = pipeline("translation", model="Helsinki-NLP/opus-mt-fr-en")\nfr_en("Bonjour, comment allez-vous?")', desc: 'FR→EN' },
+                                { code: '# Anglais → Français\nen_fr = pipeline("translation", model="Helsinki-NLP/opus-mt-en-fr")\nen_fr("Hello, how are you?")', desc: 'EN→FR' },
+                                { code: '# Multilingue avec mBART\nfrom transformers import MBartForConditionalGeneration, MBart50Tokenizer\n\nmodel = MBartForConditionalGeneration.from_pretrained("facebook/mbart-large-50-many-to-many-mmt")\ntokenizer = MBart50Tokenizer.from_pretrained("facebook/mbart-large-50-many-to-many-mmt")', desc: 'mBART 50 langues' }
+                            ],
+                            tips: ['Helsinki-NLP a des modèles pour +1000 paires de langues'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'GoogleTranslator().translate()',
+                        desc: 'Traduction avec deep-translator',
+                        details: {
+                            explanation: 'Bibliothèque simple pour accéder à plusieurs services de traduction.',
+                            syntax: 'from deep_translator import GoogleTranslator',
+                            options: [
+                                { flag: 'source', desc: 'Langue source ("auto" pour détection)' },
+                                { flag: 'target', desc: 'Langue cible' }
+                            ],
+                            examples: [
+                                { code: 'from deep_translator import GoogleTranslator\n\ntranslator = GoogleTranslator(source="auto", target="fr")\nresult = translator.translate("Hello world!")\nprint(result)  # "Bonjour le monde!"', desc: 'Google Translate' },
+                                { code: 'from deep_translator import DeeplTranslator\n\ndeep = DeeplTranslator(api_key="...", source="en", target="fr")\ndeep.translate("Hello")', desc: 'DeepL (meilleure qualité)' },
+                                { code: '# Traduction par batch\ntexts = ["Hello", "Goodbye", "Thank you"]\nresults = GoogleTranslator(source="en", target="fr").translate_batch(texts)', desc: 'Batch translation' }
+                            ],
+                            tips: ['pip install deep-translator', 'DeepL offre souvent de meilleurs résultats'],
+                            warnings: ['Google Translate peut avoir des limites de requêtes']
+                        }
+                    },
+                    {
+                        cmd: 'langdetect.detect(text)',
+                        desc: 'Détection de langue',
+                        details: {
+                            explanation: 'Identifie automatiquement la langue d\'un texte.',
+                            syntax: 'from langdetect import detect, detect_langs',
+                            options: [],
+                            examples: [
+                                { code: 'from langdetect import detect, detect_langs\n\ndetect("Bonjour le monde")  # "fr"\ndetect("Hello world")  # "en"\n\n# Avec probabilités\ndetect_langs("Bonjour")  # [fr:0.999...]', desc: 'Détection simple' },
+                                { code: '# Alternative avec lingua\nfrom lingua import LanguageDetectorBuilder\n\ndetector = LanguageDetectorBuilder.from_all_languages().build()\ndetector.detect_language_of("Bonjour")', desc: 'Lingua (plus précis)' }
+                            ],
+                            tips: ['pip install langdetect', 'lingua-language-detector est plus précis sur textes courts'],
+                            warnings: ['Peut être imprécis sur textes très courts']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'classification',
+                title: 'Classification de texte',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'pipeline("zero-shot-classification")',
+                        desc: 'Classification sans entraînement',
+                        details: {
+                            explanation: 'Classifie du texte dans des catégories définies sans avoir besoin de données d\'entraînement.',
+                            syntax: 'classifier = pipeline("zero-shot-classification", model="...")',
+                            options: [
+                                { flag: 'candidate_labels', desc: 'Liste des catégories possibles' },
+                                { flag: 'multi_label', desc: 'True pour plusieurs labels possibles' },
+                                { flag: 'hypothesis_template', desc: 'Template pour le NLI' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\nclassifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")\n\nresult = classifier(\n    "J\'ai adoré ce restaurant, la cuisine était excellente!",\n    candidate_labels=["positif", "négatif", "neutre"]\n)\nprint(result["labels"][0])  # "positif"', desc: 'Sentiment zero-shot' },
+                                { code: '# Classification de thèmes\nclassifier(\n    "Apple lance un nouveau MacBook avec puce M3",\n    candidate_labels=["technologie", "sport", "politique", "finance"]\n)', desc: 'Classification thématique' },
+                                { code: '# Multi-label\nclassifier(\n    text,\n    candidate_labels=["urgent", "question", "bug", "feature"],\n    multi_label=True\n)', desc: 'Plusieurs labels possibles' }
+                            ],
+                            tips: ['Parfait pour prototypage rapide sans données d\'entraînement'],
+                            warnings: ['Plus lent que les classifieurs entraînés']
+                        }
+                    },
+                    {
+                        cmd: 'Trainer.train()',
+                        desc: 'Fine-tuning de classifieur',
+                        details: {
+                            explanation: 'Entraîne un modèle de classification sur vos propres données.',
+                            syntax: 'from transformers import Trainer, TrainingArguments',
+                            options: [
+                                { flag: 'output_dir', desc: 'Dossier de sauvegarde' },
+                                { flag: 'num_train_epochs', desc: 'Nombre d\'époques' },
+                                { flag: 'per_device_train_batch_size', desc: 'Taille de batch' },
+                                { flag: 'learning_rate', desc: 'Taux d\'apprentissage' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import AutoModelForSequenceClassification, AutoTokenizer\nfrom transformers import Trainer, TrainingArguments\nfrom datasets import Dataset\n\n# Charger modèle\nmodel = AutoModelForSequenceClassification.from_pretrained(\n    "camembert-base", num_labels=3\n)\ntokenizer = AutoTokenizer.from_pretrained("camembert-base")\n\n# Préparer données\ndataset = Dataset.from_dict({"text": texts, "label": labels})\ndataset = dataset.map(lambda x: tokenizer(x["text"], truncation=True, padding=True), batched=True)\n\n# Entraîner\nargs = TrainingArguments(output_dir="./results", num_train_epochs=3)\ntrainer = Trainer(model=model, args=args, train_dataset=dataset)\ntrainer.train()', desc: 'Fine-tuning CamemBERT' }
+                            ],
+                            tips: ['Utilisez datasets de Hugging Face pour charger vos données'],
+                            warnings: ['Nécessite un GPU pour un entraînement rapide']
+                        }
+                    },
+                    {
+                        cmd: 'SetFitModel.from_pretrained()',
+                        desc: 'SetFit (few-shot classification)',
+                        details: {
+                            explanation: 'Entraîne un classifieur performant avec très peu d\'exemples (8-16 par classe).',
+                            syntax: 'from setfit import SetFitModel, SetFitTrainer',
+                            options: [
+                                { flag: 'num_iterations', desc: 'Itérations de contrastive learning' },
+                                { flag: 'num_epochs', desc: 'Époques pour la tête de classification' }
+                            ],
+                            examples: [
+                                { code: 'from setfit import SetFitModel, SetFitTrainer\nfrom datasets import Dataset\n\n# Données (peu d\'exemples suffisent!)\ntrain_data = Dataset.from_dict({\n    "text": ["Super produit!", "Nul...", "Excellent", "Décevant"],\n    "label": [1, 0, 1, 0]\n})\n\n# Entraînement\nmodel = SetFitModel.from_pretrained("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")\ntrainer = SetFitTrainer(model=model, train_dataset=train_data)\ntrainer.train()\n\n# Prédiction\nmodel.predict(["Ce film est génial!"])', desc: 'Classification few-shot' }
+                            ],
+                            tips: ['pip install setfit', 'Idéal quand vous avez peu de données labellisées'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'TfidfVectorizer + LogisticRegression',
+                        desc: 'Classification classique ML',
+                        details: {
+                            explanation: 'Approche traditionnelle rapide et efficace pour la classification de texte.',
+                            syntax: 'from sklearn.feature_extraction.text import TfidfVectorizer',
+                            options: [
+                                { flag: 'max_features', desc: 'Nombre max de features' },
+                                { flag: 'ngram_range', desc: 'Unigrammes et bigrammes: (1,2)' },
+                                { flag: 'min_df', desc: 'Fréquence minimum du terme' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.pipeline import Pipeline\n\n# Pipeline complet\npipeline = Pipeline([\n    ("tfidf", TfidfVectorizer(max_features=5000, ngram_range=(1,2))),\n    ("clf", LogisticRegression(max_iter=1000))\n])\n\n# Entraînement\npipeline.fit(X_train, y_train)\n\n# Prédiction\npipeline.predict(["Nouveau texte à classifier"])', desc: 'Pipeline TF-IDF + LR' },
+                                { code: '# Avec Naive Bayes (souvent meilleur pour texte)\nfrom sklearn.naive_bayes import MultinomialNB\npipeline = Pipeline([\n    ("tfidf", TfidfVectorizer()),\n    ("clf", MultinomialNB())\n])', desc: 'Alternative Naive Bayes' }
+                            ],
+                            tips: ['Rapide et efficace pour de nombreux cas', 'Essayez ngram_range=(1,2) pour capturer des expressions'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'rag',
+                title: 'RAG & LLM',
+                icon: 'fa-brain',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'RecursiveCharacterTextSplitter()',
+                        desc: 'Découpage de documents',
+                        details: {
+                            explanation: 'Découpe des documents longs en chunks pour le RAG.',
+                            syntax: 'from langchain.text_splitter import RecursiveCharacterTextSplitter',
+                            options: [
+                                { flag: 'chunk_size', desc: 'Taille cible des chunks' },
+                                { flag: 'chunk_overlap', desc: 'Chevauchement entre chunks' },
+                                { flag: 'separators', desc: 'Séparateurs de priorité' }
+                            ],
+                            examples: [
+                                { code: 'from langchain.text_splitter import RecursiveCharacterTextSplitter\n\nsplitter = RecursiveCharacterTextSplitter(\n    chunk_size=1000,\n    chunk_overlap=200,\n    separators=["\\n\\n", "\\n", ". ", " ", ""]\n)\n\nchunks = splitter.split_text(long_document)\nprint(f"{len(chunks)} chunks créés")', desc: 'Découpage intelligent' },
+                                { code: '# Pour des documents LangChain\nfrom langchain.document_loaders import PyPDFLoader\n\nloader = PyPDFLoader("document.pdf")\npages = loader.load()\nchunks = splitter.split_documents(pages)', desc: 'Depuis un PDF' }
+                            ],
+                            tips: ['chunk_overlap évite de couper des idées', 'Ajustez chunk_size selon votre embedding model'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'RetrievalQA.from_chain_type()',
+                        desc: 'Pipeline RAG complet',
+                        details: {
+                            explanation: 'Crée une chaîne RAG qui récupère des documents puis génère une réponse.',
+                            syntax: 'from langchain.chains import RetrievalQA',
+                            options: [
+                                { flag: 'chain_type', desc: '"stuff", "map_reduce", "refine"' },
+                                { flag: 'return_source_documents', desc: 'Retourner les sources' }
+                            ],
+                            examples: [
+                                { code: 'from langchain.chains import RetrievalQA\nfrom langchain_openai import ChatOpenAI\n\n# Créer le retriever depuis un vectorstore\nretriever = vectorstore.as_retriever(search_kwargs={"k": 4})\n\n# Créer la chaîne RAG\nqa_chain = RetrievalQA.from_chain_type(\n    llm=ChatOpenAI(model="gpt-3.5-turbo"),\n    chain_type="stuff",\n    retriever=retriever,\n    return_source_documents=True\n)\n\n# Poser une question\nresult = qa_chain.invoke({"query": "Comment fonctionne X?"})\nprint(result["result"])\nprint(result["source_documents"])', desc: 'RAG avec OpenAI' }
+                            ],
+                            tips: ['stuff = tout dans le prompt, map_reduce = pour longs docs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ConversationalRetrievalChain()',
+                        desc: 'RAG conversationnel',
+                        details: {
+                            explanation: 'RAG avec mémoire de conversation pour des échanges multi-tours.',
+                            syntax: 'from langchain.chains import ConversationalRetrievalChain',
+                            options: [
+                                { flag: 'memory', desc: 'Objet mémoire pour l\'historique' },
+                                { flag: 'return_source_documents', desc: 'Inclure les sources' }
+                            ],
+                            examples: [
+                                { code: 'from langchain.chains import ConversationalRetrievalChain\nfrom langchain.memory import ConversationBufferMemory\n\nmemory = ConversationBufferMemory(\n    memory_key="chat_history",\n    return_messages=True\n)\n\nqa = ConversationalRetrievalChain.from_llm(\n    llm=llm,\n    retriever=retriever,\n    memory=memory\n)\n\n# Conversation\nqa.invoke({"question": "Qu\'est-ce que Python?"})\nqa.invoke({"question": "Et quels sont ses avantages?"})  # Contexte conservé', desc: 'Chat avec mémoire' }
+                            ],
+                            tips: ['La mémoire permet les références pronominales (il, elle, ça...)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'HuggingFacePipeline.from_model_id()',
+                        desc: 'LLM local avec LangChain',
+                        details: {
+                            explanation: 'Utilise un modèle Hugging Face local comme LLM dans LangChain.',
+                            syntax: 'from langchain_community.llms import HuggingFacePipeline',
+                            options: [
+                                { flag: 'model_id', desc: 'ID du modèle sur HF Hub' },
+                                { flag: 'task', desc: '"text-generation", "text2text-generation"' },
+                                { flag: 'model_kwargs', desc: 'Arguments pour le modèle' }
+                            ],
+                            examples: [
+                                { code: 'from langchain_community.llms import HuggingFacePipeline\n\nllm = HuggingFacePipeline.from_model_id(\n    model_id="google/flan-t5-large",\n    task="text2text-generation",\n    model_kwargs={"temperature": 0.1, "max_length": 512}\n)\n\n# Utilisation\nllm.invoke("Résume ce texte: ...")', desc: 'FLAN-T5 local' },
+                                { code: '# Avec quantization pour GPU limité\nfrom transformers import BitsAndBytesConfig\n\nquantization_config = BitsAndBytesConfig(load_in_4bit=True)\nllm = HuggingFacePipeline.from_model_id(\n    model_id="mistralai/Mistral-7B-Instruct-v0.1",\n    task="text-generation",\n    model_kwargs={"quantization_config": quantization_config}\n)', desc: 'Mistral quantifié 4-bit' }
+                            ],
+                            tips: ['Quantification 4-bit pour faire tourner des gros modèles'],
+                            warnings: ['Modèles 7B+ nécessitent GPU avec >8GB VRAM']
+                        }
+                    }
+                ]
+            },
+            // ========== PROJETS COMPLETS ==========
+            {
+                id: 'project_bertopic',
+                title: '🔬 Projet: Topic Modeling BERTopic',
+                icon: 'fa-flask',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: '1. Installation & Imports',
+                        desc: 'Étape 1: Préparer l\'environnement',
+                        details: {
+                            explanation: 'Installer les dépendances et importer les modules nécessaires pour BERTopic.',
+                            syntax: 'pip install bertopic sentence-transformers umap-learn hdbscan',
+                            options: [
+                                { flag: 'bertopic', desc: 'Framework principal' },
+                                { flag: 'sentence-transformers', desc: 'Pour les embeddings' },
+                                { flag: 'umap-learn', desc: 'Réduction de dimensionnalité' },
+                                { flag: 'hdbscan', desc: 'Clustering' }
+                            ],
+                            examples: [
+                                { code: '# Installation\npip install bertopic sentence-transformers umap-learn hdbscan plotly\n\n# Imports\nimport pandas as pd\nfrom bertopic import BERTopic\nfrom sentence_transformers import SentenceTransformer\nfrom umap import UMAP\nfrom hdbscan import HDBSCAN\nfrom sklearn.feature_extraction.text import CountVectorizer', desc: 'Setup complet' }
+                            ],
+                            tips: ['GPU recommandé pour les grands corpus'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '2. Charger et nettoyer les données',
+                        desc: 'Étape 2: Préparation du corpus',
+                        details: {
+                            explanation: 'Charger les documents et effectuer un nettoyage basique du texte.',
+                            syntax: 'documents = df["text"].tolist()',
+                            options: [],
+                            examples: [
+                                { code: 'import pandas as pd\nimport re\n\n# Charger les données\ndf = pd.read_csv("corpus.csv")\n\n# Fonction de nettoyage\ndef clean_text(text):\n    text = str(text).lower()\n    text = re.sub(r"http\\S+", "", text)  # URLs\n    text = re.sub(r"@\\w+", "", text)     # Mentions\n    text = re.sub(r"#\\w+", "", text)     # Hashtags\n    text = re.sub(r"[^a-zàâäéèêëïîôùûüç\\s]", "", text)\n    text = re.sub(r"\\s+", " ", text).strip()\n    return text\n\ndf["clean_text"] = df["text"].apply(clean_text)\n\n# Filtrer les textes trop courts\ndf = df[df["clean_text"].str.len() > 50]\n\n# Liste de documents\ndocuments = df["clean_text"].tolist()\nprint(f"{len(documents)} documents chargés")', desc: 'Chargement et nettoyage' }
+                            ],
+                            tips: ['Gardez les textes originaux pour l\'interprétation finale'],
+                            warnings: ['Filtrez les documents trop courts (<50 caractères)']
+                        }
+                    },
+                    {
+                        cmd: '3. Configurer le modèle d\'embeddings',
+                        desc: 'Étape 3: Choisir et configurer les embeddings',
+                        details: {
+                            explanation: 'Sélectionner un modèle d\'embeddings adapté à la langue du corpus.',
+                            syntax: 'embedding_model = SentenceTransformer("model_name")',
+                            options: [
+                                { flag: 'paraphrase-multilingual-MiniLM-L12-v2', desc: 'Multilingue, rapide' },
+                                { flag: 'dangvantuan/sentence-camembert-large', desc: 'Français optimisé' },
+                                { flag: 'all-MiniLM-L6-v2', desc: 'Anglais, très rapide' },
+                                { flag: 'intfloat/multilingual-e5-large', desc: 'Multilingue, haute qualité' }
+                            ],
+                            examples: [
+                                { code: 'from sentence_transformers import SentenceTransformer\n\n# Pour le français\nembedding_model = SentenceTransformer("dangvantuan/sentence-camembert-large")\n\n# OU multilingue (plus rapide)\nembedding_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")\n\n# Pré-calculer les embeddings (optionnel mais recommandé)\nprint("Calcul des embeddings...")\nembeddings = embedding_model.encode(documents, show_progress_bar=True)\nprint(f"Shape: {embeddings.shape}")', desc: 'Configuration embeddings' }
+                            ],
+                            tips: ['Pré-calculez les embeddings pour réutilisation et debugging'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '4. Configurer UMAP et HDBSCAN',
+                        desc: 'Étape 4: Paramétrer la réduction et le clustering',
+                        details: {
+                            explanation: 'UMAP réduit la dimensionnalité, HDBSCAN regroupe les documents similaires.',
+                            syntax: 'umap_model = UMAP(...)\nhdbscan_model = HDBSCAN(...)',
+                            options: [
+                                { flag: 'n_neighbors (UMAP)', desc: '15-50, influence locale/globale' },
+                                { flag: 'n_components (UMAP)', desc: 'Dimensions réduites (5-15)' },
+                                { flag: 'min_cluster_size (HDBSCAN)', desc: 'Taille min d\'un topic' },
+                                { flag: 'min_samples (HDBSCAN)', desc: 'Densité requise' }
+                            ],
+                            examples: [
+                                { code: 'from umap import UMAP\nfrom hdbscan import HDBSCAN\n\n# UMAP: réduction de dimensionnalité\numap_model = UMAP(\n    n_neighbors=15,      # Taille du voisinage\n    n_components=5,      # Dimensions cibles\n    min_dist=0.0,        # Compacité des clusters\n    metric="cosine",     # Distance cosinus\n    random_state=42\n)\n\n# HDBSCAN: clustering\nhdbscan_model = HDBSCAN(\n    min_cluster_size=15,     # Min docs par topic\n    min_samples=5,           # Densité minimum\n    metric="euclidean",\n    cluster_selection_method="eom",  # Excess of Mass\n    prediction_data=True\n)', desc: 'Configuration UMAP + HDBSCAN' }
+                            ],
+                            tips: ['Augmentez min_cluster_size pour moins de topics', 'metric="cosine" pour UMAP avec embeddings'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '5. Configurer le Vectorizer',
+                        desc: 'Étape 5: Extraction des mots-clés représentatifs',
+                        details: {
+                            explanation: 'CountVectorizer extrait les termes représentatifs de chaque topic.',
+                            syntax: 'vectorizer_model = CountVectorizer(...)',
+                            options: [
+                                { flag: 'stop_words', desc: 'Liste de mots à ignorer' },
+                                { flag: 'ngram_range', desc: '(1,2) pour uni+bigrammes' },
+                                { flag: 'min_df', desc: 'Fréquence minimum' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.feature_extraction.text import CountVectorizer\n\n# Stop words français personnalisés\nfrench_stopwords = [\n    "le", "la", "les", "un", "une", "des", "du", "de", "et", "est",\n    "en", "que", "qui", "dans", "pour", "sur", "avec", "par", "au",\n    "ce", "cette", "ces", "son", "sa", "ses", "leur", "leurs",\n    "plus", "pas", "ne", "se", "ou", "mais", "donc", "car", "ni",\n    "être", "avoir", "faire", "dit", "fait", "tout", "tous", "bien"\n]\n\nvectorizer_model = CountVectorizer(\n    stop_words=french_stopwords,\n    ngram_range=(1, 2),    # Unigrammes + bigrammes\n    min_df=5,              # Apparaît dans au moins 5 docs\n    max_df=0.95            # Pas dans plus de 95% des docs\n)', desc: 'Vectorizer français' }
+                            ],
+                            tips: ['ngram_range=(1,2) capture des expressions comme "intelligence artificielle"'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '6. Créer et entraîner BERTopic',
+                        desc: 'Étape 6: Assembler et fit le modèle',
+                        details: {
+                            explanation: 'Combiner tous les composants et entraîner BERTopic sur le corpus.',
+                            syntax: 'topic_model = BERTopic(...)\ntopics, probs = topic_model.fit_transform(docs)',
+                            options: [
+                                { flag: 'nr_topics', desc: '"auto" ou nombre fixe' },
+                                { flag: 'top_n_words', desc: 'Mots par topic (défaut: 10)' },
+                                { flag: 'verbose', desc: 'Afficher la progression' }
+                            ],
+                            examples: [
+                                { code: 'from bertopic import BERTopic\n\n# Créer le modèle avec tous les composants\ntopic_model = BERTopic(\n    embedding_model=embedding_model,\n    umap_model=umap_model,\n    hdbscan_model=hdbscan_model,\n    vectorizer_model=vectorizer_model,\n    top_n_words=10,\n    verbose=True\n)\n\n# Entraîner (avec embeddings pré-calculés)\nprint("Entraînement BERTopic...")\ntopics, probs = topic_model.fit_transform(documents, embeddings)\n\n# Résumé\nprint(f"\\n{len(set(topics)) - 1} topics découverts")\nprint(f"Documents outliers (topic -1): {topics.count(-1)}")', desc: 'Entraînement BERTopic' }
+                            ],
+                            tips: ['Passez les embeddings pré-calculés pour éviter le recalcul'],
+                            warnings: ['Topic -1 = outliers (documents non classés)']
+                        }
+                    },
+                    {
+                        cmd: '7. Explorer les résultats',
+                        desc: 'Étape 7: Analyser les topics découverts',
+                        details: {
+                            explanation: 'Examiner les topics, leurs mots-clés et leur distribution.',
+                            syntax: 'topic_model.get_topic_info()',
+                            options: [],
+                            examples: [
+                                { code: '# Vue d\'ensemble des topics\ntopic_info = topic_model.get_topic_info()\nprint(topic_info.head(15))\n\n# Détails d\'un topic spécifique\nprint("\\nTopic 0:")\nfor word, score in topic_model.get_topic(0):\n    print(f"  {word}: {score:.4f}")\n\n# Documents représentatifs d\'un topic\nrepresentative_docs = topic_model.get_representative_docs(0)\nfor i, doc in enumerate(representative_docs[:3]):\n    print(f"\\nDoc {i+1}: {doc[:200]}...")\n\n# Ajouter les topics au DataFrame\ndf["topic"] = topics\ndf["topic_prob"] = probs.max(axis=1) if len(probs.shape) > 1 else probs\n\n# Distribution des topics\nprint("\\nDistribution des topics:")\nprint(df["topic"].value_counts().head(10))', desc: 'Exploration des topics' }
+                            ],
+                            tips: ['get_representative_docs() montre les documents typiques de chaque topic'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '8. Visualisations',
+                        desc: 'Étape 8: Créer des visualisations interactives',
+                        details: {
+                            explanation: 'BERTopic génère des visualisations Plotly interactives.',
+                            syntax: 'topic_model.visualize_*()',
+                            options: [
+                                { flag: 'visualize_topics()', desc: 'Carte 2D des topics' },
+                                { flag: 'visualize_barchart()', desc: 'Top mots par topic' },
+                                { flag: 'visualize_heatmap()', desc: 'Similarité entre topics' },
+                                { flag: 'visualize_hierarchy()', desc: 'Dendrogramme des topics' },
+                                { flag: 'visualize_documents()', desc: 'Documents sur la carte' }
+                            ],
+                            examples: [
+                                { code: '# 1. Carte des topics (distance et taille)\nfig_topics = topic_model.visualize_topics()\nfig_topics.write_html("topics_map.html")\nfig_topics.show()\n\n# 2. Mots-clés par topic (barchart)\nfig_barchart = topic_model.visualize_barchart(top_n_topics=12, n_words=8)\nfig_barchart.write_html("topics_barchart.html")\n\n# 3. Hiérarchie des topics\nfig_hierarchy = topic_model.visualize_hierarchy()\nfig_hierarchy.write_html("topics_hierarchy.html")\n\n# 4. Heatmap de similarité\nfig_heatmap = topic_model.visualize_heatmap()\nfig_heatmap.write_html("topics_heatmap.html")\n\n# 5. Documents sur la carte 2D\nfig_docs = topic_model.visualize_documents(\n    documents, \n    embeddings=embeddings,\n    hide_annotations=True\n)\nfig_docs.write_html("documents_map.html")', desc: 'Visualisations complètes' }
+                            ],
+                            tips: ['write_html() pour sauvegarder les graphiques interactifs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '9. Affiner les topics',
+                        desc: 'Étape 9: Réduire, fusionner ou renommer',
+                        details: {
+                            explanation: 'Post-traitement pour affiner la structure des topics.',
+                            syntax: 'topic_model.reduce_topics() / merge_topics()',
+                            options: [
+                                { flag: 'reduce_topics(nr_topics=N)', desc: 'Réduire à N topics' },
+                                { flag: 'merge_topics(topics_to_merge)', desc: 'Fusionner des topics' },
+                                { flag: 'set_topic_labels(labels)', desc: 'Renommer les topics' }
+                            ],
+                            examples: [
+                                { code: '# Réduire le nombre de topics\ntopic_model.reduce_topics(documents, nr_topics=15)\n\n# Fusionner des topics similaires\ntopics_to_merge = [[1, 3], [5, 7, 9]]  # Fusionner 1+3 et 5+7+9\ntopic_model.merge_topics(documents, topics_to_merge)\n\n# Créer des labels personnalisés\ncustom_labels = {\n    0: "Intelligence Artificielle",\n    1: "Développement Web",\n    2: "Data Science",\n    3: "Cybersécurité",\n    # ...\n}\ntopic_model.set_topic_labels(custom_labels)\n\n# Récupérer les nouveaux topics\nnew_topics = topic_model.topics_\ndf["topic_refined"] = new_topics', desc: 'Affinage des topics' }
+                            ],
+                            tips: ['Utilisez visualize_hierarchy() pour identifier les topics à fusionner'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '10. Sauvegarder et réutiliser',
+                        desc: 'Étape 10: Persistance du modèle',
+                        details: {
+                            explanation: 'Sauvegarder le modèle pour prédiction sur de nouveaux documents.',
+                            syntax: 'topic_model.save() / BERTopic.load()',
+                            options: [
+                                { flag: 'save(path)', desc: 'Sauvegarder le modèle' },
+                                { flag: 'load(path)', desc: 'Charger un modèle' },
+                                { flag: 'transform(docs)', desc: 'Prédire sur nouveaux docs' }
+                            ],
+                            examples: [
+                                { code: '# Sauvegarder le modèle\ntopic_model.save("bertopic_model")\n\n# Sauvegarder les embeddings séparément\nimport numpy as np\nnp.save("embeddings.npy", embeddings)\n\n# --- Plus tard: Charger et utiliser ---\n\n# Charger le modèle\nloaded_model = BERTopic.load("bertopic_model")\n\n# Prédire sur de nouveaux documents\nnew_docs = ["Nouveau texte à classifier...", "Autre document..."]\nnew_topics, new_probs = loaded_model.transform(new_docs)\n\nfor doc, topic in zip(new_docs, new_topics):\n    topic_words = loaded_model.get_topic(topic)\n    print(f"Topic {topic}: {[w for w, _ in topic_words[:3]]}")\n    print(f"  → {doc[:100]}...\\n")', desc: 'Sauvegarde et prédiction' }
+                            ],
+                            tips: ['Sauvegardez aussi les embeddings pour accélérer transform()'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project_bertopic_llm',
+                title: '🤖 Projet: BERTopic + LLM Local',
+                icon: 'fa-microchip',
+                color: 'border-l-4 border-violet-500',
+                commands: [
+                    {
+                        cmd: '1. Setup LLM local',
+                        desc: 'Étape 1: Configurer un LLM local',
+                        details: {
+                            explanation: 'Installer et configurer Ollama ou llama.cpp pour le LLM local.',
+                            syntax: 'pip install ollama',
+                            options: [
+                                { flag: 'Ollama', desc: 'Simple, modèles pré-packagés' },
+                                { flag: 'llama-cpp-python', desc: 'Plus de contrôle, GGUF' },
+                                { flag: 'transformers + bitsandbytes', desc: 'HuggingFace avec quantification' }
+                            ],
+                            examples: [
+                                { code: '# Option 1: Ollama (recommandé)\n# Terminal: ollama pull mistral\n# Terminal: ollama pull llama3\n\npip install ollama\n\nimport ollama\n\n# Test rapide\nresponse = ollama.generate(\n    model="mistral",\n    prompt="Résume en 3 mots: intelligence artificielle"\n)\nprint(response["response"])', desc: 'Setup Ollama' },
+                                { code: '# Option 2: llama-cpp-python (GGUF)\npip install llama-cpp-python\n\nfrom llama_cpp import Llama\n\nllm = Llama(\n    model_path="./models/mistral-7b-instruct-v0.2.Q4_K_M.gguf",\n    n_ctx=4096,\n    n_gpu_layers=35  # GPU acceleration\n)', desc: 'Setup llama.cpp' }
+                            ],
+                            tips: ['Ollama est le plus simple pour démarrer', 'Mistral 7B et Llama 3 8B sont excellents'],
+                            warnings: ['Minimum 8GB RAM, 16GB+ recommandé']
+                        }
+                    },
+                    {
+                        cmd: '2. Créer la représentation LLM',
+                        desc: 'Étape 2: Configurer BERTopic avec LLM',
+                        details: {
+                            explanation: 'Utiliser un LLM pour générer des labels et descriptions de topics.',
+                            syntax: 'from bertopic.representation import LlamaCPP, OpenAI',
+                            options: [
+                                { flag: 'LlamaCPP', desc: 'Pour llama.cpp' },
+                                { flag: 'OpenAI', desc: 'API compatible (Ollama, vLLM)' },
+                                { flag: 'TextGeneration', desc: 'Pipeline HuggingFace' }
+                            ],
+                            examples: [
+                                { code: '# Avec Ollama (API compatible OpenAI)\nfrom bertopic.representation import OpenAI\nimport openai\n\n# Configurer le client pour Ollama\nclient = openai.OpenAI(\n    base_url="http://localhost:11434/v1",\n    api_key="ollama"  # Pas utilisé mais requis\n)\n\n# Prompt pour générer des labels\nprompt = """\nJ\'ai un topic contenant les documents suivants:\n[DOCUMENTS]\n\nLes mots-clés principaux sont: [KEYWORDS]\n\nBasé sur ces informations, génère un label court (2-4 mots) \nqui résume ce topic. Réponds uniquement avec le label.\n"""\n\nllm_representation = OpenAI(\n    client=client,\n    model="mistral",\n    prompt=prompt,\n    nr_docs=5,\n    delay_in_seconds=0\n)', desc: 'Config LLM avec Ollama' }
+                            ],
+                            tips: ['Personnalisez le prompt selon vos besoins'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '3. Pipeline BERTopic complet',
+                        desc: 'Étape 3: Entraîner avec représentation LLM',
+                        details: {
+                            explanation: 'Combiner BERTopic classique avec la génération de labels via LLM.',
+                            syntax: 'topic_model = BERTopic(representation_model=llm)',
+                            options: [],
+                            examples: [
+                                { code: 'from bertopic import BERTopic\nfrom bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance, OpenAI\nfrom sentence_transformers import SentenceTransformer\n\n# Embeddings\nembedding_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")\n\n# Représentations multiples (chaînées)\nkeybert = KeyBERTInspired()\nmmr = MaximalMarginalRelevance(diversity=0.3)\n\nrepresentation_models = {\n    "KeyBERT": keybert,\n    "MMR": mmr,\n    "LLM": llm_representation  # Défini à l\'étape 2\n}\n\n# Créer BERTopic\ntopic_model = BERTopic(\n    embedding_model=embedding_model,\n    representation_model=representation_models,\n    verbose=True\n)\n\n# Entraîner\ntopics, probs = topic_model.fit_transform(documents)\n\n# Voir les différentes représentations\ntopic_info = topic_model.get_topic_info()\nprint(topic_info[[\"Topic\", \"Count\", \"KeyBERT\", \"MMR\", \"LLM"]])', desc: 'BERTopic multi-représentation' }
+                            ],
+                            tips: ['Utilisez plusieurs représentations pour comparer'],
+                            warnings: ['La génération LLM peut être lente sur CPU']
+                        }
+                    },
+                    {
+                        cmd: '4. Génération de résumés par topic',
+                        desc: 'Étape 4: Résumer chaque topic avec le LLM',
+                        details: {
+                            explanation: 'Utiliser le LLM pour générer des descriptions détaillées de chaque topic.',
+                            syntax: 'ollama.generate(prompt=...)',
+                            options: [],
+                            examples: [
+                                { code: 'import ollama\n\ndef generate_topic_summary(topic_id, topic_model, documents, topics):\n    """Génère un résumé détaillé pour un topic."""\n    # Mots-clés du topic\n    keywords = [word for word, _ in topic_model.get_topic(topic_id)[:10]]\n    \n    # Documents représentatifs\n    topic_docs = [doc for doc, t in zip(documents, topics) if t == topic_id][:5]\n    docs_text = "\\n---\\n".join(topic_docs)\n    \n    prompt = f"""Analyse ce topic et fournis:\n1. Un titre court (3-5 mots)\n2. Une description en 2-3 phrases\n3. Les thèmes principaux abordés\n\nMots-clés: {", ".join(keywords)}\n\nExemples de documents:\n{docs_text}\n\nFormat ta réponse ainsi:\nTITRE: [titre]\nDESCRIPTION: [description]\nTHÈMES: [thème1, thème2, thème3]\n"""\n    \n    response = ollama.generate(model="mistral", prompt=prompt)\n    return response["response"]\n\n# Générer les résumés pour les top topics\ntopic_summaries = {}\nfor topic_id in range(min(10, len(set(topics)) - 1)):\n    print(f"Traitement topic {topic_id}...")\n    topic_summaries[topic_id] = generate_topic_summary(\n        topic_id, topic_model, documents, topics\n    )\n    print(topic_summaries[topic_id])\n    print("-" * 50)', desc: 'Résumés LLM par topic' }
+                            ],
+                            tips: ['Limitez le nombre de documents pour des prompts plus courts'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '5. Mise à jour dynamique des labels',
+                        desc: 'Étape 5: Appliquer les labels LLM au modèle',
+                        details: {
+                            explanation: 'Mettre à jour les labels du modèle avec les résultats du LLM.',
+                            syntax: 'topic_model.set_topic_labels(labels)',
+                            options: [],
+                            examples: [
+                                { code: 'import re\n\ndef extract_title(llm_response):\n    """Extrait le titre de la réponse LLM."""\n    match = re.search(r"TITRE:\\s*(.+)", llm_response)\n    if match:\n        return match.group(1).strip()\n    return llm_response.split("\\n")[0][:50]\n\n# Créer le dictionnaire de labels\ncustom_labels = {}\nfor topic_id, summary in topic_summaries.items():\n    custom_labels[topic_id] = extract_title(summary)\n\nprint("Labels générés:")\nfor tid, label in custom_labels.items():\n    print(f"  Topic {tid}: {label}")\n\n# Appliquer au modèle\ntopic_model.set_topic_labels(custom_labels)\n\n# Vérifier\nprint("\\nTopics avec nouveaux labels:")\nprint(topic_model.get_topic_info()[[\"Topic\", \"CustomName\", \"Count"]].head(10))', desc: 'Application des labels' }
+                            ],
+                            tips: ['Vérifiez manuellement les labels générés'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '6. Export et rapport',
+                        desc: 'Étape 6: Générer un rapport final',
+                        details: {
+                            explanation: 'Créer un rapport complet avec visualisations et descriptions LLM.',
+                            syntax: 'Export vers HTML/CSV/Excel',
+                            options: [],
+                            examples: [
+                                { code: 'import pandas as pd\nfrom datetime import datetime\n\n# Créer le rapport\nreport_data = []\nfor topic_id in range(len(set(topics)) - 1):\n    if topic_id == -1:\n        continue\n    \n    keywords = [w for w, _ in topic_model.get_topic(topic_id)[:10]]\n    count = topics.count(topic_id)\n    \n    report_data.append({\n        "topic_id": topic_id,\n        "label": custom_labels.get(topic_id, f"Topic {topic_id}"),\n        "count": count,\n        "percentage": f"{count/len(topics)*100:.1f}%",\n        "keywords": ", ".join(keywords),\n        "summary": topic_summaries.get(topic_id, "")\n    })\n\nreport_df = pd.DataFrame(report_data)\nreport_df = report_df.sort_values("count", ascending=False)\n\n# Sauvegarder\nreport_df.to_csv("topic_report.csv", index=False)\nreport_df.to_excel("topic_report.xlsx", index=False)\n\n# Générer HTML avec visualisations\nhtml_report = f"""\n<html>\n<head><title>Topic Modeling Report</title></head>\n<body>\n<h1>Rapport Topic Modeling - {datetime.now().strftime("%Y-%m-%d")}</h1>\n<h2>{len(report_data)} topics découverts sur {len(documents)} documents</h2>\n{report_df.to_html()}\n</body>\n</html>\n"""\n\nwith open("topic_report.html", "w") as f:\n    f.write(html_report)\n\nprint("Rapport généré: topic_report.html")', desc: 'Génération du rapport' }
+                            ],
+                            tips: ['Incluez les visualisations BERTopic dans le rapport HTML'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project_sentiment',
+                title: '❤️ Projet: Sentiment Analysis',
+                icon: 'fa-heart-pulse',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: '1. Setup et chargement',
+                        desc: 'Étape 1: Préparer l\'environnement',
+                        details: {
+                            explanation: 'Installer les dépendances et charger les données.',
+                            syntax: 'pip install transformers torch pandas',
+                            options: [],
+                            examples: [
+                                { code: '# Installation\npip install transformers torch pandas matplotlib seaborn tqdm\n\n# Imports\nimport pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom tqdm import tqdm\nfrom transformers import pipeline\nimport torch\n\n# Vérifier GPU\ndevice = 0 if torch.cuda.is_available() else -1\nprint(f"Device: {\'GPU\' if device == 0 else \'CPU\'}")\n\n# Charger les données\ndf = pd.read_csv("reviews.csv")  # colonnes: text, date, source...\nprint(f"{len(df)} documents chargés")\nprint(df.head())', desc: 'Setup projet sentiment' }
+                            ],
+                            tips: ['GPU accélère significativement l\'analyse'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '2. Choisir le modèle',
+                        desc: 'Étape 2: Sélectionner le modèle de sentiment',
+                        details: {
+                            explanation: 'Choisir un modèle adapté à la langue et au domaine.',
+                            syntax: 'pipeline("sentiment-analysis", model=...)',
+                            options: [
+                                { flag: 'tblard/tf-allocine', desc: 'Français, binaire (pos/neg)' },
+                                { flag: 'nlptown/bert-base-multilingual-uncased-sentiment', desc: 'Multilingue, 5 étoiles' },
+                                { flag: 'cardiffnlp/twitter-roberta-base-sentiment', desc: 'Anglais Twitter, 3 classes' },
+                                { flag: 'lxyuan/distilbert-base-multilingual-cased-sentiments-student', desc: 'Multilingue, 3 classes' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\n# Option 1: Français binaire (Allociné)\nsentiment_fr = pipeline(\n    "sentiment-analysis",\n    model="tblard/tf-allocine",\n    device=device\n)\n\n# Option 2: Multilingue 5 étoiles\nsentiment_stars = pipeline(\n    "sentiment-analysis",\n    model="nlptown/bert-base-multilingual-uncased-sentiment",\n    device=device\n)\n\n# Option 3: Multilingue 3 classes (pos/neu/neg)\nsentiment_3class = pipeline(\n    "sentiment-analysis",\n    model="lxyuan/distilbert-base-multilingual-cased-sentiments-student",\n    device=device\n)\n\n# Test\ntest_text = "Ce produit est vraiment excellent !"\nprint("Allociné:", sentiment_fr(test_text))\nprint("5 étoiles:", sentiment_stars(test_text))\nprint("3 classes:", sentiment_3class(test_text))', desc: 'Choix du modèle' }
+                            ],
+                            tips: ['tblard/tf-allocine est très bon pour le français'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '3. Analyse par batch',
+                        desc: 'Étape 3: Analyser tout le corpus',
+                        details: {
+                            explanation: 'Traiter le corpus efficacement par batches avec gestion des textes longs.',
+                            syntax: 'pipeline(texts, batch_size=32, truncation=True)',
+                            options: [
+                                { flag: 'batch_size', desc: 'Taille des batches (16-64)' },
+                                { flag: 'truncation', desc: 'Tronquer les textes longs' },
+                                { flag: 'max_length', desc: 'Longueur max (512 tokens)' }
+                            ],
+                            examples: [
+                                { code: 'from tqdm import tqdm\n\ndef analyze_sentiment_batch(texts, classifier, batch_size=32):\n    """Analyse le sentiment par batch avec barre de progression."""\n    results = []\n    \n    for i in tqdm(range(0, len(texts), batch_size), desc="Analyse"):\n        batch = texts[i:i+batch_size]\n        \n        # Nettoyer et tronquer\n        batch_clean = [\n            str(t)[:1000] if pd.notna(t) else "" \n            for t in batch\n        ]\n        \n        try:\n            batch_results = classifier(\n                batch_clean, \n                truncation=True,\n                max_length=512\n            )\n            results.extend(batch_results)\n        except Exception as e:\n            print(f"Erreur batch {i}: {e}")\n            results.extend([{"label": "ERROR", "score": 0}] * len(batch))\n    \n    return results\n\n# Analyser tout le corpus\nprint("Analyse du corpus...")\nresults = analyze_sentiment_batch(\n    df["text"].tolist(), \n    sentiment_fr, \n    batch_size=32\n)\n\n# Ajouter au DataFrame\ndf["sentiment"] = [r["label"] for r in results]\ndf["confidence"] = [r["score"] for r in results]\n\nprint(f"\\nDistribution:")\nprint(df["sentiment"].value_counts())', desc: 'Analyse batch optimisée' }
+                            ],
+                            tips: ['Tronquez les textes longs pour éviter les erreurs'],
+                            warnings: ['Textes > 512 tokens sont tronqués']
+                        }
+                    },
+                    {
+                        cmd: '4. Score de valence numérique',
+                        desc: 'Étape 4: Convertir en score numérique',
+                        details: {
+                            explanation: 'Transformer les labels en scores numériques pour l\'analyse statistique.',
+                            syntax: 'Mapping label → score numérique',
+                            options: [
+                                { flag: 'Binaire', desc: 'NEGATIVE=-1, POSITIVE=1' },
+                                { flag: '3 classes', desc: 'negative=-1, neutral=0, positive=1' },
+                                { flag: '5 étoiles', desc: '1 star=-1 ... 5 stars=1' }
+                            ],
+                            examples: [
+                                { code: '# Mapping selon le modèle utilisé\n\n# Pour modèle binaire (Allociné)\ndef valence_binary(row):\n    if row["sentiment"] == "POSITIVE":\n        return row["confidence"]\n    elif row["sentiment"] == "NEGATIVE":\n        return -row["confidence"]\n    return 0\n\n# Pour modèle 3 classes\ndef valence_3class(row):\n    mapping = {"positive": 1, "neutral": 0, "negative": -1}\n    base = mapping.get(row["sentiment"].lower(), 0)\n    return base * row["confidence"]\n\n# Pour modèle 5 étoiles\ndef valence_5stars(row):\n    # "1 star" → -1, "3 stars" → 0, "5 stars" → 1\n    stars = int(row["sentiment"].split()[0])\n    return ((stars - 3) / 2) * row["confidence"]\n\n# Appliquer\ndf["valence"] = df.apply(valence_binary, axis=1)\n\nprint(f"Valence moyenne: {df[\'valence\'].mean():.3f}")\nprint(f"Écart-type: {df[\'valence\'].std():.3f}")\nprint(f"\\nDistribution valence:")\nprint(df["valence"].describe())', desc: 'Conversion en valence' }
+                            ],
+                            tips: ['La valence permet des analyses statistiques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '5. Analyses et visualisations',
+                        desc: 'Étape 5: Explorer les résultats',
+                        details: {
+                            explanation: 'Créer des visualisations et analyses statistiques.',
+                            syntax: 'matplotlib / seaborn',
+                            options: [],
+                            examples: [
+                                { code: 'import matplotlib.pyplot as plt\nimport seaborn as sns\n\nfig, axes = plt.subplots(2, 2, figsize=(14, 10))\n\n# 1. Distribution des sentiments\nax1 = axes[0, 0]\ndf["sentiment"].value_counts().plot(kind="pie", ax=ax1, autopct="%1.1f%%")\nax1.set_title("Distribution des Sentiments")\n\n# 2. Distribution de la valence\nax2 = axes[0, 1]\nsns.histplot(df["valence"], bins=50, ax=ax2, kde=True)\nax2.axvline(x=0, color="red", linestyle="--", label="Neutre")\nax2.axvline(x=df["valence"].mean(), color="green", linestyle="-", label="Moyenne")\nax2.set_title("Distribution de la Valence")\nax2.legend()\n\n# 3. Confidence par sentiment\nax3 = axes[1, 0]\nsns.boxplot(data=df, x="sentiment", y="confidence", ax=ax3)\nax3.set_title("Confiance par Sentiment")\n\n# 4. Valence par source (si disponible)\nax4 = axes[1, 1]\nif "source" in df.columns:\n    df.groupby("source")["valence"].mean().sort_values().plot(\n        kind="barh", ax=ax4\n    )\n    ax4.axvline(x=0, color="red", linestyle="--")\n    ax4.set_title("Valence moyenne par Source")\n\nplt.tight_layout()\nplt.savefig("sentiment_analysis.png", dpi=150)\nplt.show()', desc: 'Visualisations sentiment' }
+                            ],
+                            tips: ['Combinez plusieurs visualisations dans une figure'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '6. Analyse des extrêmes',
+                        desc: 'Étape 6: Examiner les cas extrêmes',
+                        details: {
+                            explanation: 'Identifier et analyser les textes les plus positifs/négatifs.',
+                            syntax: 'df.nlargest() / df.nsmallest()',
+                            options: [],
+                            examples: [
+                                { code: '# Top 10 plus positifs\nprint("=" * 50)\nprint("TOP 10 PLUS POSITIFS")\nprint("=" * 50)\ntop_positive = df.nlargest(10, "valence")\nfor _, row in top_positive.iterrows():\n    print(f"\\nValence: {row[\'valence\']:.3f} | Conf: {row[\'confidence\']:.3f}")\n    print(f"Texte: {row[\'text\'][:200]}...")\n\n# Top 10 plus négatifs\nprint("\\n" + "=" * 50)\nprint("TOP 10 PLUS NÉGATIFS")\nprint("=" * 50)\ntop_negative = df.nsmallest(10, "valence")\nfor _, row in top_negative.iterrows():\n    print(f"\\nValence: {row[\'valence\']:.3f} | Conf: {row[\'confidence\']:.3f}")\n    print(f"Texte: {row[\'text\'][:200]}...")\n\n# Cas ambigus (faible confiance)\nprint("\\n" + "=" * 50)\nprint("CAS AMBIGUS (faible confiance)")\nprint("=" * 50)\nambiguous = df[(df["confidence"] < 0.6)].sample(min(5, len(df)))\nfor _, row in ambiguous.iterrows():\n    print(f"\\nSentiment: {row[\'sentiment\']} | Conf: {row[\'confidence\']:.3f}")\n    print(f"Texte: {row[\'text\'][:200]}...")', desc: 'Analyse des extrêmes' }
+                            ],
+                            tips: ['Les cas ambigus peuvent révéler des limites du modèle'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '7. Export des résultats',
+                        desc: 'Étape 7: Sauvegarder et exporter',
+                        details: {
+                            explanation: 'Exporter les résultats pour usage ultérieur.',
+                            syntax: 'df.to_csv() / df.to_excel()',
+                            options: [],
+                            examples: [
+                                { code: '# Sauvegarder le DataFrame enrichi\ndf.to_csv("sentiment_results.csv", index=False)\ndf.to_excel("sentiment_results.xlsx", index=False)\n\n# Créer un résumé\nsummary = {\n    "total_documents": len(df),\n    "positive_count": len(df[df["sentiment"] == "POSITIVE"]),\n    "negative_count": len(df[df["sentiment"] == "NEGATIVE"]),\n    "positive_pct": len(df[df["sentiment"] == "POSITIVE"]) / len(df) * 100,\n    "negative_pct": len(df[df["sentiment"] == "NEGATIVE"]) / len(df) * 100,\n    "mean_valence": df["valence"].mean(),\n    "std_valence": df["valence"].std(),\n    "mean_confidence": df["confidence"].mean(),\n}\n\nprint("\\nRÉSUMÉ DE L\'ANALYSE")\nprint("=" * 40)\nfor key, value in summary.items():\n    if isinstance(value, float):\n        print(f"{key}: {value:.3f}")\n    else:\n        print(f"{key}: {value}")\n\n# Sauvegarder le résumé\nimport json\nwith open("sentiment_summary.json", "w") as f:\n    json.dump(summary, f, indent=2)', desc: 'Export des résultats' }
+                            ],
+                            tips: ['Gardez le CSV pour analyses ultérieures'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project_temporal',
+                title: '📈 Projet: Analyse Temporelle',
+                icon: 'fa-chart-line',
+                color: 'border-l-4 border-sky-500',
+                commands: [
+                    {
+                        cmd: '1. Préparation des données temporelles',
+                        desc: 'Étape 1: Parser et indexer les dates',
+                        details: {
+                            explanation: 'Convertir les dates et créer des colonnes temporelles.',
+                            syntax: 'pd.to_datetime() + dt accessor',
+                            options: [
+                                { flag: 'dt.year', desc: 'Extraire l\'année' },
+                                { flag: 'dt.month', desc: 'Extraire le mois' },
+                                { flag: 'dt.week', desc: 'Numéro de semaine' },
+                                { flag: 'dt.date', desc: 'Date sans heure' }
+                            ],
+                            examples: [
+                                { code: 'import pandas as pd\n\n# Charger les données\ndf = pd.read_csv("corpus_dated.csv")\n\n# Convertir la colonne date\ndf["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")\n\n# Créer des colonnes temporelles\ndf["year"] = df["date"].dt.year\ndf["month"] = df["date"].dt.month\ndf["year_month"] = df["date"].dt.to_period("M")\ndf["week"] = df["date"].dt.isocalendar().week\ndf["year_week"] = df["date"].dt.to_period("W")\ndf["quarter"] = df["date"].dt.quarter\n\n# Trier par date\ndf = df.sort_values("date")\n\nprint(f"Période: {df[\'date\'].min()} → {df[\'date\'].max()}")\nprint(f"Documents par année:\\n{df[\'year\'].value_counts().sort_index()}")', desc: 'Préparation temporelle' }
+                            ],
+                            tips: ['Utilisez to_period() pour grouper par mois/semaine'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '2. Évolution de la valence',
+                        desc: 'Étape 2: Analyser l\'évolution du sentiment',
+                        details: {
+                            explanation: 'Calculer et visualiser l\'évolution de la valence dans le temps.',
+                            syntax: 'df.groupby("period")["valence"].mean()',
+                            options: [],
+                            examples: [
+                                { code: 'import matplotlib.pyplot as plt\nimport seaborn as sns\n\n# Supposons que df contient déjà une colonne "valence"\n# (issue de l\'analyse de sentiment)\n\n# Agréger par mois\nmonthly_sentiment = df.groupby("year_month").agg({\n    "valence": ["mean", "std", "count"],\n    "confidence": "mean"\n}).reset_index()\nmonthly_sentiment.columns = ["period", "valence_mean", "valence_std", "count", "confidence"]\nmonthly_sentiment["period"] = monthly_sentiment["period"].astype(str)\n\n# Visualisation\nfig, axes = plt.subplots(2, 1, figsize=(14, 10), sharex=True)\n\n# Évolution de la valence avec intervalle de confiance\nax1 = axes[0]\nax1.plot(monthly_sentiment["period"], monthly_sentiment["valence_mean"], \n         "b-o", linewidth=2, markersize=6)\nax1.fill_between(\n    monthly_sentiment["period"],\n    monthly_sentiment["valence_mean"] - monthly_sentiment["valence_std"],\n    monthly_sentiment["valence_mean"] + monthly_sentiment["valence_std"],\n    alpha=0.2\n)\nax1.axhline(y=0, color="red", linestyle="--", alpha=0.5)\nax1.set_ylabel("Valence moyenne")\nax1.set_title("Évolution du Sentiment dans le Temps")\nax1.tick_params(axis="x", rotation=45)\n\n# Volume de documents\nax2 = axes[1]\nax2.bar(monthly_sentiment["period"], monthly_sentiment["count"], color="steelblue", alpha=0.7)\nax2.set_ylabel("Nombre de documents")\nax2.set_xlabel("Période")\nax2.tick_params(axis="x", rotation=45)\n\nplt.tight_layout()\nplt.savefig("sentiment_evolution.png", dpi=150)\nplt.show()', desc: 'Évolution sentiment' }
+                            ],
+                            tips: ['Ajoutez l\'écart-type pour voir la variabilité'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '3. Topics over Time',
+                        desc: 'Étape 3: Évolution des topics BERTopic',
+                        details: {
+                            explanation: 'Utiliser BERTopic pour analyser l\'évolution des thèmes.',
+                            syntax: 'topic_model.topics_over_time(docs, timestamps)',
+                            options: [
+                                { flag: 'datetime_format', desc: 'Format des dates' },
+                                { flag: 'nr_bins', desc: 'Nombre de périodes' },
+                                { flag: 'evolution_tuning', desc: 'Lisser l\'évolution' }
+                            ],
+                            examples: [
+                                { code: 'from bertopic import BERTopic\n\n# Créer et entraîner BERTopic (voir projet précédent)\ntopic_model = BERTopic(language="french", verbose=True)\ntopics, probs = topic_model.fit_transform(df["text"].tolist())\n\n# Convertir les dates en timestamps\ntimestamps = df["date"].tolist()\n\n# Calculer les topics over time\ntopics_over_time = topic_model.topics_over_time(\n    docs=df["text"].tolist(),\n    timestamps=timestamps,\n    nr_bins=20,  # Nombre de périodes\n    datetime_format="%Y-%m-%d"\n)\n\nprint(topics_over_time.head(20))\nprint(f"\\nPériodes: {topics_over_time[\'Timestamp\'].nunique()}")\nprint(f"Topics: {topics_over_time[\'Topic\'].nunique()}")', desc: 'Topics over time' }
+                            ],
+                            tips: ['nr_bins contrôle la granularité temporelle'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '4. Visualiser l\'évolution des topics',
+                        desc: 'Étape 4: Graphiques temporels BERTopic',
+                        details: {
+                            explanation: 'Créer des visualisations de l\'évolution des thèmes.',
+                            syntax: 'topic_model.visualize_topics_over_time()',
+                            options: [
+                                { flag: 'top_n_topics', desc: 'Nombre de topics à afficher' },
+                                { flag: 'custom_labels', desc: 'Labels personnalisés' },
+                                { flag: 'width / height', desc: 'Dimensions' }
+                            ],
+                            examples: [
+                                { code: '# Visualisation interactive\nfig = topic_model.visualize_topics_over_time(\n    topics_over_time,\n    top_n_topics=10,\n    width=1200,\n    height=600\n)\nfig.write_html("topics_evolution.html")\nfig.show()\n\n# Analyse manuelle des trends\nprint("\\nÉVOLUTION DES PRINCIPAUX TOPICS")\nprint("=" * 60)\n\nfor topic_id in range(5):  # Top 5 topics\n    topic_data = topics_over_time[topics_over_time["Topic"] == topic_id]\n    \n    # Tendance (début vs fin)\n    first_freq = topic_data.iloc[0]["Frequency"] if len(topic_data) > 0 else 0\n    last_freq = topic_data.iloc[-1]["Frequency"] if len(topic_data) > 0 else 0\n    trend = "↑" if last_freq > first_freq else "↓" if last_freq < first_freq else "→"\n    \n    keywords = [w for w, _ in topic_model.get_topic(topic_id)[:5]]\n    print(f"\\nTopic {topic_id}: {keywords}")\n    print(f"  Tendance: {trend} ({first_freq:.1f}% → {last_freq:.1f}%)")', desc: 'Visualisation évolution' }
+                            ],
+                            tips: ['Exportez en HTML pour un graphique interactif'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '5. Dynamic Topic Modeling',
+                        desc: 'Étape 5: Évolution sémantique des topics',
+                        details: {
+                            explanation: 'Analyser comment le contenu des topics change dans le temps.',
+                            syntax: 'topic_model.topics_per_class()',
+                            options: [],
+                            examples: [
+                                { code: '# Créer des périodes discrètes\ndf["period"] = pd.cut(\n    df["date"].astype(int) // 10**9,  # Unix timestamp\n    bins=5,\n    labels=["P1", "P2", "P3", "P4", "P5"]\n)\n\n# Topics par période\ntopics_per_period = topic_model.topics_per_class(\n    docs=df["text"].tolist(),\n    classes=df["period"].tolist()\n)\n\nprint(topics_per_period.head(20))\n\n# Analyser l\'évolution des mots-clés d\'un topic\ndef analyze_topic_evolution(topic_id, topics_per_period):\n    """Analyse comment les mots-clés d\'un topic évoluent."""\n    topic_data = topics_per_period[topics_per_period["Topic"] == topic_id]\n    \n    print(f"\\nÉvolution du Topic {topic_id}:")\n    for _, row in topic_data.iterrows():\n        words = row["Words"].split(", ")[:5]\n        print(f"  {row[\'Class\']}: {words}")\n\n# Analyser les 3 principaux topics\nfor tid in range(3):\n    analyze_topic_evolution(tid, topics_per_period)', desc: 'Dynamic topic modeling' }
+                            ],
+                            tips: ['Observez comment les mots-clés changent par période'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '6. Détection d\'événements',
+                        desc: 'Étape 6: Identifier les pics et anomalies',
+                        details: {
+                            explanation: 'Détecter les changements brusques de sentiment ou de topics.',
+                            syntax: 'Analyse des dérivées et z-scores',
+                            options: [],
+                            examples: [
+                                { code: 'import numpy as np\nfrom scipy import stats\n\n# Calculer les variations de sentiment\nmonthly = df.groupby("year_month")["valence"].mean().reset_index()\nmonthly["valence_change"] = monthly["valence"].diff()\nmonthly["valence_pct_change"] = monthly["valence"].pct_change()\n\n# Z-score pour détecter les anomalies\nmonthly["z_score"] = stats.zscore(monthly["valence"].fillna(0))\n\n# Identifier les pics (|z| > 2)\nanomalies = monthly[abs(monthly["z_score"]) > 2]\n\nprint("ANOMALIES DÉTECTÉES (|z-score| > 2)")\nprint("=" * 50)\nfor _, row in anomalies.iterrows():\n    direction = "📈 HAUSSE" if row["z_score"] > 0 else "📉 BAISSE"\n    print(f"\\n{row[\'year_month\']}: {direction}")\n    print(f"  Valence: {row[\'valence\']:.3f} (z={row[\'z_score\']:.2f})")\n    \n    # Trouver les documents de cette période\n    period_docs = df[df["year_month"] == row["year_month"]]\n    extreme = period_docs.nlargest(1, "valence") if row["z_score"] > 0 else period_docs.nsmallest(1, "valence")\n    if len(extreme) > 0:\n        print(f"  Exemple: {extreme.iloc[0][\'text\'][:150]}...")\n\n# Visualisation des anomalies\nplt.figure(figsize=(14, 6))\nplt.plot(monthly["year_month"].astype(str), monthly["valence"], "b-o")\nplt.scatter(\n    anomalies["year_month"].astype(str), \n    anomalies["valence"], \n    c="red", s=200, zorder=5, label="Anomalies"\n)\nplt.axhline(y=monthly["valence"].mean(), color="green", linestyle="--", label="Moyenne")\nplt.xticks(rotation=45)\nplt.legend()\nplt.title("Évolution du Sentiment avec Anomalies Détectées")\nplt.tight_layout()\nplt.savefig("sentiment_anomalies.png", dpi=150)\nplt.show()', desc: 'Détection d\'événements' }
+                            ],
+                            tips: ['z-score > 2 indique une anomalie significative'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '7. Dashboard récapitulatif',
+                        desc: 'Étape 7: Créer un dashboard complet',
+                        details: {
+                            explanation: 'Combiner toutes les analyses dans un dashboard.',
+                            syntax: 'matplotlib subplots ou Plotly',
+                            options: [],
+                            examples: [
+                                { code: 'import matplotlib.pyplot as plt\nimport matplotlib.gridspec as gridspec\n\nfig = plt.figure(figsize=(20, 16))\ngs = gridspec.GridSpec(3, 3, figure=fig, hspace=0.3, wspace=0.3)\n\n# 1. Évolution sentiment (grande)\nax1 = fig.add_subplot(gs[0, :])\nax1.plot(monthly["year_month"].astype(str), monthly["valence"], "b-o", linewidth=2)\nax1.fill_between(monthly["year_month"].astype(str), monthly["valence"], alpha=0.3)\nax1.axhline(y=0, color="red", linestyle="--")\nax1.set_title("Évolution de la Valence", fontsize=14, fontweight="bold")\nax1.tick_params(axis="x", rotation=45)\n\n# 2. Distribution globale\nax2 = fig.add_subplot(gs[1, 0])\ndf["sentiment"].value_counts().plot(kind="pie", ax=ax2, autopct="%1.1f%%")\nax2.set_title("Distribution Sentiments")\n\n# 3. Histogramme valence\nax3 = fig.add_subplot(gs[1, 1])\ndf["valence"].hist(bins=50, ax=ax3, color="steelblue", edgecolor="white")\nax3.axvline(x=0, color="red", linestyle="--")\nax3.set_title("Distribution Valence")\n\n# 4. Volume temporel\nax4 = fig.add_subplot(gs[1, 2])\ndf.groupby("year_month").size().plot(kind="bar", ax=ax4, color="teal")\nax4.set_title("Volume par Période")\nax4.tick_params(axis="x", rotation=45)\n\n# 5. Sentiment par source (si disponible)\nax5 = fig.add_subplot(gs[2, 0])\nif "source" in df.columns:\n    df.groupby("source")["valence"].mean().sort_values().plot(kind="barh", ax=ax5)\n    ax5.axvline(x=0, color="red", linestyle="--")\nax5.set_title("Valence par Source")\n\n# 6. Top topics\nax6 = fig.add_subplot(gs[2, 1])\nif "topic" in df.columns:\n    df["topic"].value_counts().head(10).plot(kind="barh", ax=ax6)\nax6.set_title("Principaux Topics")\n\n# 7. Métriques clés\nax7 = fig.add_subplot(gs[2, 2])\nax7.axis("off")\nmetrics_text = f"""\nMÉTRIQUES CLÉS\n{"="*30}\n\nPériode: {df["date"].min().strftime("%Y-%m")} → {df["date"].max().strftime("%Y-%m")}\nDocuments: {len(df):,}\n\nValence moyenne: {df["valence"].mean():.3f}\nÉcart-type: {df["valence"].std():.3f}\n\n% Positif: {(df["sentiment"]=="POSITIVE").mean()*100:.1f}%\n% Négatif: {(df["sentiment"]=="NEGATIVE").mean()*100:.1f}%\n\nConfiance moyenne: {df["confidence"].mean():.3f}\n"""\nax7.text(0.1, 0.9, metrics_text, transform=ax7.transAxes, fontsize=12,\n         verticalalignment="top", fontfamily="monospace",\n         bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5))\n\nplt.suptitle("Dashboard Analyse Temporelle NLP", fontsize=18, fontweight="bold", y=1.02)\nplt.savefig("temporal_dashboard.png", dpi=150, bbox_inches="tight")\nplt.show()\n\nprint("Dashboard sauvegardé: temporal_dashboard.png")', desc: 'Dashboard complet' }
+                            ],
+                            tips: ['Utilisez GridSpec pour des layouts flexibles'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire JavaScript : fondamentaux, DOM, async/await, ES6+ et manipulation de données.">
+    <title>JavaScript - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-yellow-500/20 mb-4 icon-glow">
+                    <i class="fab fa-js text-3xl text-yellow-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">JavaScript</h1>
+                <p class="text-slate-400">Fondamentaux ES6+, DOM, async/await et manipulation de données</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'variables',
+                title: 'Variables & Types',
+                icon: 'fa-box',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'let / const / var',
+                        desc: 'Déclaration de variables',
+                        details: {
+                            explanation: 'let et const sont block-scoped (ES6+), var est function-scoped. const ne peut pas être réassigné.',
+                            syntax: 'let variable = valeur\nconst CONSTANTE = valeur',
+                            options: [
+                                { flag: 'let', desc: 'Variable modifiable, block-scoped' },
+                                { flag: 'const', desc: 'Constante, block-scoped (obligatoire si pas de réassignation)' },
+                                { flag: 'var', desc: 'Ancienne syntaxe, function-scoped (éviter)' }
+                            ],
+                            examples: [
+                                { code: 'let count = 0\ncount = 1 // OK', desc: 'let modifiable' },
+                                { code: 'const PI = 3.14159\n// PI = 3 // Erreur!', desc: 'const non réassignable' },
+                                { code: 'const user = { name: "Alice" }\nuser.name = "Bob" // OK - propriété modifiable', desc: 'const objet' }
+                            ],
+                            tips: ['Préférez const par défaut, let uniquement si réassignation nécessaire'],
+                            warnings: ['Évitez var - problèmes de hoisting et scope']
+                        }
+                    },
+                    {
+                        cmd: 'typeof / instanceof',
+                        desc: 'Vérifier le type',
+                        details: {
+                            explanation: 'typeof retourne le type primitif, instanceof vérifie l\'appartenance à une classe.',
+                            syntax: 'typeof variable\nobj instanceof Class',
+                            options: [
+                                { flag: 'typeof', desc: 'Retourne: string, number, boolean, object, function, undefined' },
+                                { flag: 'instanceof', desc: 'Vérifie la chaîne de prototypes' }
+                            ],
+                            examples: [
+                                { code: 'typeof "hello" // "string"\ntypeof 42 // "number"\ntypeof true // "boolean"', desc: 'Types primitifs' },
+                                { code: 'typeof null // "object" (bug historique)\ntypeof undefined // "undefined"', desc: 'Cas spéciaux' },
+                                { code: '[1,2] instanceof Array // true\nnew Date() instanceof Date // true', desc: 'instanceof' }
+                            ],
+                            tips: ['Utilisez Array.isArray() pour vérifier les tableaux'],
+                            warnings: ['typeof null retourne "object" - c\'est un bug historique de JS']
+                        }
+                    },
+                    {
+                        cmd: 'Destructuring',
+                        desc: 'Extraire des valeurs',
+                        details: {
+                            explanation: 'Syntaxe ES6 pour extraire des valeurs d\'objets ou tableaux en une seule instruction.',
+                            syntax: 'const { prop1, prop2 } = objet\nconst [a, b] = tableau',
+                            options: [
+                                { flag: '{ }', desc: 'Destructuring d\'objet' },
+                                { flag: '[ ]', desc: 'Destructuring de tableau' },
+                                { flag: '= default', desc: 'Valeur par défaut' },
+                                { flag: ': alias', desc: 'Renommer la variable' }
+                            ],
+                            examples: [
+                                { code: 'const { name, age } = user', desc: 'Objet simple' },
+                                { code: 'const { name: userName, age = 18 } = user', desc: 'Avec alias et défaut' },
+                                { code: 'const [first, second, ...rest] = [1, 2, 3, 4]', desc: 'Tableau avec rest' },
+                                { code: 'function greet({ name, age }) { ... }', desc: 'Dans les paramètres' }
+                            ],
+                            tips: ['Très utile pour les paramètres de fonction et les imports'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'functions',
+                title: 'Fonctions',
+                icon: 'fa-code',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Arrow Functions',
+                        desc: 'Syntaxe courte ES6',
+                        details: {
+                            explanation: 'Fonctions fléchées : syntaxe concise avec this lexical (hérite du contexte parent).',
+                            syntax: 'const fn = (params) => expression\nconst fn = (params) => { instructions }',
+                            options: [
+                                { flag: '() =>', desc: 'Sans paramètres' },
+                                { flag: 'x =>', desc: 'Un paramètre (parenthèses optionnelles)' },
+                                { flag: '(x, y) =>', desc: 'Plusieurs paramètres' },
+                                { flag: '=> expr', desc: 'Return implicite' },
+                                { flag: '=> { }', desc: 'Return explicite nécessaire' }
+                            ],
+                            examples: [
+                                { code: 'const double = x => x * 2', desc: 'Un paramètre, return implicite' },
+                                { code: 'const add = (a, b) => a + b', desc: 'Deux paramètres' },
+                                { code: 'const greet = name => {\n  const msg = `Hello ${name}`\n  return msg\n}', desc: 'Avec bloc' },
+                                { code: 'const getUser = () => ({ name: "Alice" })', desc: 'Retourner un objet' }
+                            ],
+                            tips: ['Pour retourner un objet directement: () => ({ key: value })'],
+                            warnings: ['Pas de this propre - ne pas utiliser pour les méthodes d\'objet']
+                        }
+                    },
+                    {
+                        cmd: 'Rest / Spread',
+                        desc: 'Opérateur ... pour collecter/étaler',
+                        details: {
+                            explanation: 'Rest (...) collecte plusieurs éléments en un tableau. Spread (...) étale un tableau/objet.',
+                            syntax: 'function fn(...args) { }\nconst copy = [...array]',
+                            options: [
+                                { flag: '...rest', desc: 'Collecte les arguments restants (paramètres)' },
+                                { flag: '...spread', desc: 'Étale un itérable (appels, tableaux, objets)' }
+                            ],
+                            examples: [
+                                { code: 'function sum(...numbers) {\n  return numbers.reduce((a, b) => a + b, 0)\n}', desc: 'Rest parameters' },
+                                { code: 'const arr1 = [1, 2]\nconst arr2 = [...arr1, 3, 4] // [1,2,3,4]', desc: 'Spread tableau' },
+                                { code: 'const obj2 = { ...obj1, newProp: "value" }', desc: 'Spread objet (copie + ajout)' },
+                                { code: 'Math.max(...[1, 5, 3]) // 5', desc: 'Spread dans un appel' }
+                            ],
+                            tips: ['Spread crée une copie superficielle (shallow copy)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Closures',
+                        desc: 'Fonction avec accès au scope parent',
+                        details: {
+                            explanation: 'Une closure est une fonction qui se souvient de son environnement lexical (variables du scope parent).',
+                            syntax: 'function outer() {\n  let x = 10\n  return function inner() { return x }\n}',
+                            options: [],
+                            examples: [
+                                { code: 'function createCounter() {\n  let count = 0\n  return () => ++count\n}\nconst counter = createCounter()\ncounter() // 1\ncounter() // 2', desc: 'Compteur privé' },
+                                { code: 'function multiply(factor) {\n  return num => num * factor\n}\nconst double = multiply(2)\ndouble(5) // 10', desc: 'Factory function' }
+                            ],
+                            tips: ['Les closures permettent de créer des variables "privées"'],
+                            warnings: ['Attention aux fuites mémoire si closures mal gérées']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'arrays',
+                title: 'Tableaux',
+                icon: 'fa-list',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'map / filter / reduce',
+                        desc: 'Transformation de tableaux',
+                        details: {
+                            explanation: 'Méthodes fonctionnelles pour transformer des tableaux sans mutation.',
+                            syntax: 'array.map(fn)\narray.filter(fn)\narray.reduce(fn, initial)',
+                            options: [
+                                { flag: 'map', desc: 'Transforme chaque élément' },
+                                { flag: 'filter', desc: 'Garde les éléments qui passent le test' },
+                                { flag: 'reduce', desc: 'Réduit à une seule valeur' }
+                            ],
+                            examples: [
+                                { code: '[1, 2, 3].map(x => x * 2)\n// [2, 4, 6]', desc: 'map - doubler' },
+                                { code: '[1, 2, 3, 4].filter(x => x % 2 === 0)\n// [2, 4]', desc: 'filter - pairs' },
+                                { code: '[1, 2, 3].reduce((acc, x) => acc + x, 0)\n// 6', desc: 'reduce - somme' },
+                                { code: 'users.map(u => u.name).filter(n => n.startsWith("A"))', desc: 'Chaînage' }
+                            ],
+                            tips: ['Ces méthodes ne modifient pas le tableau original'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'find / findIndex / includes',
+                        desc: 'Recherche dans un tableau',
+                        details: {
+                            explanation: 'Méthodes pour rechercher des éléments dans un tableau.',
+                            syntax: 'array.find(fn)\narray.findIndex(fn)\narray.includes(value)',
+                            options: [
+                                { flag: 'find', desc: 'Retourne le premier élément trouvé (ou undefined)' },
+                                { flag: 'findIndex', desc: 'Retourne l\'index du premier trouvé (ou -1)' },
+                                { flag: 'includes', desc: 'Retourne true/false' }
+                            ],
+                            examples: [
+                                { code: 'users.find(u => u.id === 5)', desc: 'Trouver par ID' },
+                                { code: '[1, 2, 3].findIndex(x => x > 2) // 2', desc: 'Index du premier > 2' },
+                                { code: '["a", "b"].includes("a") // true', desc: 'Vérifier présence' }
+                            ],
+                            tips: ['find retourne undefined si non trouvé, pas null'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sort / reverse',
+                        desc: 'Tri et inversion',
+                        details: {
+                            explanation: 'sort() trie le tableau en place (mutation!). Par défaut, tri alphabétique.',
+                            syntax: 'array.sort(compareFn)\narray.reverse()',
+                            options: [
+                                { flag: 'sort()', desc: 'Tri alphabétique par défaut' },
+                                { flag: 'sort((a,b) => a-b)', desc: 'Tri numérique croissant' },
+                                { flag: 'sort((a,b) => b-a)', desc: 'Tri numérique décroissant' }
+                            ],
+                            examples: [
+                                { code: '[3, 1, 2].sort((a, b) => a - b)\n// [1, 2, 3]', desc: 'Tri numérique' },
+                                { code: 'users.sort((a, b) => a.name.localeCompare(b.name))', desc: 'Tri alphabétique' },
+                                { code: '[...arr].sort() // Copie triée', desc: 'Sans muter l\'original' }
+                            ],
+                            tips: ['Toujours fournir une fonction de comparaison pour les nombres'],
+                            warnings: ['sort() et reverse() modifient le tableau original!']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'dom',
+                title: 'DOM',
+                icon: 'fa-sitemap',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'querySelector / querySelectorAll',
+                        desc: 'Sélectionner des éléments',
+                        details: {
+                            explanation: 'Sélectionne des éléments DOM avec des sélecteurs CSS.',
+                            syntax: 'document.querySelector(selector)\ndocument.querySelectorAll(selector)',
+                            options: [
+                                { flag: 'querySelector', desc: 'Retourne le premier élément trouvé (ou null)' },
+                                { flag: 'querySelectorAll', desc: 'Retourne une NodeList de tous les éléments' }
+                            ],
+                            examples: [
+                                { code: 'document.querySelector("#id")', desc: 'Par ID' },
+                                { code: 'document.querySelector(".class")', desc: 'Par classe' },
+                                { code: 'document.querySelectorAll("button")', desc: 'Tous les boutons' },
+                                { code: 'element.querySelector(".child")', desc: 'Dans un élément' }
+                            ],
+                            tips: ['querySelectorAll retourne une NodeList, pas un Array - utiliser [...nodeList] pour convertir'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'addEventListener',
+                        desc: 'Écouter les événements',
+                        details: {
+                            explanation: 'Attache un gestionnaire d\'événements à un élément.',
+                            syntax: 'element.addEventListener(event, handler, options)',
+                            options: [
+                                { flag: 'click', desc: 'Clic souris' },
+                                { flag: 'submit', desc: 'Soumission de formulaire' },
+                                { flag: 'keydown/keyup', desc: 'Touches clavier' },
+                                { flag: 'change/input', desc: 'Changement de valeur' },
+                                { flag: '{ once: true }', desc: 'Exécute une seule fois' }
+                            ],
+                            examples: [
+                                { code: 'btn.addEventListener("click", () => {\n  console.log("Cliqué!")\n})', desc: 'Clic simple' },
+                                { code: 'form.addEventListener("submit", e => {\n  e.preventDefault()\n  // traitement\n})', desc: 'Formulaire' },
+                                { code: 'input.addEventListener("input", e => {\n  console.log(e.target.value)\n})', desc: 'Input en temps réel' }
+                            ],
+                            tips: ['e.preventDefault() empêche le comportement par défaut'],
+                            warnings: ['Pensez à removeEventListener pour éviter les fuites mémoire']
+                        }
+                    },
+                    {
+                        cmd: 'classList',
+                        desc: 'Manipuler les classes CSS',
+                        details: {
+                            explanation: 'API pour ajouter, supprimer et basculer les classes CSS d\'un élément.',
+                            syntax: 'element.classList.add/remove/toggle/contains()',
+                            options: [
+                                { flag: 'add("class")', desc: 'Ajoute une classe' },
+                                { flag: 'remove("class")', desc: 'Supprime une classe' },
+                                { flag: 'toggle("class")', desc: 'Bascule (ajoute si absente, retire si présente)' },
+                                { flag: 'contains("class")', desc: 'Vérifie si présente (boolean)' }
+                            ],
+                            examples: [
+                                { code: 'el.classList.add("active", "visible")', desc: 'Ajouter plusieurs' },
+                                { code: 'el.classList.toggle("dark-mode")', desc: 'Basculer' },
+                                { code: 'if (el.classList.contains("open")) { ... }', desc: 'Vérifier' }
+                            ],
+                            tips: ['toggle() peut prendre un 2e argument booléen pour forcer l\'état'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'async',
+                title: 'Asynchrone',
+                icon: 'fa-clock',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'async / await',
+                        desc: 'Code asynchrone lisible',
+                        details: {
+                            explanation: 'Syntaxe ES2017 pour écrire du code asynchrone de manière synchrone.',
+                            syntax: 'async function fn() {\n  const result = await promise\n}',
+                            options: [
+                                { flag: 'async', desc: 'Déclare une fonction asynchrone (retourne une Promise)' },
+                                { flag: 'await', desc: 'Attend la résolution d\'une Promise' }
+                            ],
+                            examples: [
+                                { code: 'async function fetchUser(id) {\n  const res = await fetch(`/api/users/${id}`)\n  const user = await res.json()\n  return user\n}', desc: 'Fetch async' },
+                                { code: 'try {\n  const data = await fetchData()\n} catch (error) {\n  console.error(error)\n}', desc: 'Gestion d\'erreurs' },
+                                { code: 'const [user, posts] = await Promise.all([\n  fetchUser(id),\n  fetchPosts(id)\n])', desc: 'Requêtes parallèles' }
+                            ],
+                            tips: ['await ne peut être utilisé que dans une fonction async'],
+                            warnings: ['N\'oubliez pas try/catch pour gérer les erreurs']
+                        }
+                    },
+                    {
+                        cmd: 'Promise',
+                        desc: 'Objet représentant une valeur future',
+                        details: {
+                            explanation: 'Une Promise représente une opération asynchrone et son résultat éventuel.',
+                            syntax: 'new Promise((resolve, reject) => { })\npromise.then().catch().finally()',
+                            options: [
+                                { flag: 'resolve(value)', desc: 'Résout avec succès' },
+                                { flag: 'reject(error)', desc: 'Rejette avec erreur' },
+                                { flag: '.then()', desc: 'Callback de succès' },
+                                { flag: '.catch()', desc: 'Callback d\'erreur' },
+                                { flag: '.finally()', desc: 'Callback toujours exécuté' }
+                            ],
+                            examples: [
+                                { code: 'const promise = new Promise((resolve, reject) => {\n  setTimeout(() => resolve("done"), 1000)\n})', desc: 'Créer une Promise' },
+                                { code: 'fetch(url)\n  .then(res => res.json())\n  .then(data => console.log(data))\n  .catch(err => console.error(err))', desc: 'Chaînage .then()' },
+                                { code: 'Promise.all([p1, p2, p3]) // Attend toutes\nPromise.race([p1, p2]) // Première résolue', desc: 'Combinateurs' }
+                            ],
+                            tips: ['Préférez async/await pour la lisibilité'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'fetch',
+                        desc: 'Requêtes HTTP',
+                        details: {
+                            explanation: 'API native pour effectuer des requêtes HTTP (remplace XMLHttpRequest).',
+                            syntax: 'fetch(url, options)',
+                            options: [
+                                { flag: 'method', desc: 'GET, POST, PUT, DELETE...' },
+                                { flag: 'headers', desc: 'En-têtes HTTP' },
+                                { flag: 'body', desc: 'Corps de la requête (JSON.stringify pour objets)' }
+                            ],
+                            examples: [
+                                { code: 'const res = await fetch("/api/users")\nconst users = await res.json()', desc: 'GET simple' },
+                                { code: 'const res = await fetch("/api/users", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ name: "Alice" })\n})', desc: 'POST JSON' },
+                                { code: 'if (!res.ok) throw new Error(res.statusText)', desc: 'Vérifier le statut' }
+                            ],
+                            tips: ['fetch ne rejette que sur erreur réseau, pas sur 404/500 - vérifiez res.ok'],
+                            warnings: ['res.json() est aussi une Promise, n\'oubliez pas await']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'modules',
+                title: 'Modules ES6',
+                icon: 'fa-puzzle-piece',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'import / export',
+                        desc: 'Importer et exporter des modules',
+                        details: {
+                            explanation: 'Système de modules ES6 pour organiser le code en fichiers séparés.',
+                            syntax: 'export { fn }\nexport default fn\nimport { fn } from "./module"',
+                            options: [
+                                { flag: 'export', desc: 'Exporte une valeur nommée' },
+                                { flag: 'export default', desc: 'Export par défaut (un seul par fichier)' },
+                                { flag: 'import { }', desc: 'Import nommé' },
+                                { flag: 'import x', desc: 'Import du default' },
+                                { flag: 'import * as', desc: 'Import de tout le module' }
+                            ],
+                            examples: [
+                                { code: '// utils.js\nexport const add = (a, b) => a + b\nexport const PI = 3.14', desc: 'Exports nommés' },
+                                { code: '// main.js\nimport { add, PI } from "./utils"', desc: 'Imports nommés' },
+                                { code: '// Component.js\nexport default function Component() { }\n// main.js\nimport Component from "./Component"', desc: 'Export/import default' },
+                                { code: 'import * as utils from "./utils"\nutils.add(1, 2)', desc: 'Import namespace' }
+                            ],
+                            tips: ['Utilisez export default pour l\'export principal d\'un module'],
+                            warnings: ['Ajoutez type="module" dans le script HTML pour utiliser les modules']
+                        }
+                    },
+                    {
+                        cmd: 'Dynamic import()',
+                        desc: 'Import dynamique asynchrone',
+                        details: {
+                            explanation: 'Charge un module de manière asynchrone (code splitting, lazy loading).',
+                            syntax: 'const module = await import("./module")',
+                            options: [],
+                            examples: [
+                                { code: 'const { default: Chart } = await import("./chart")', desc: 'Import conditionnel' },
+                                { code: 'if (condition) {\n  const module = await import("./heavy-module")\n  module.init()\n}', desc: 'Lazy loading' }
+                            ],
+                            tips: ['Utile pour le code splitting et améliorer le temps de chargement initial'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'classes',
+                title: 'Classes & POO',
+                icon: 'fa-sitemap',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'class / constructor',
+                        desc: 'Définir une classe',
+                        details: {
+                            explanation: 'Syntaxe ES6 pour créer des classes avec constructeur, méthodes et propriétés.',
+                            syntax: 'class NomClasse {\n  constructor(params) { }\n  methode() { }\n}',
+                            options: [
+                                { flag: 'constructor()', desc: 'Méthode d\'initialisation' },
+                                { flag: 'this.prop', desc: 'Propriété d\'instance' },
+                                { flag: 'static', desc: 'Méthode/propriété de classe' },
+                                { flag: '#private', desc: 'Champ privé (ES2022)' }
+                            ],
+                            examples: [
+                                { code: 'class User {\n  constructor(name, email) {\n    this.name = name\n    this.email = email\n  }\n  \n  greet() {\n    return `Hello, ${this.name}`\n  }\n}', desc: 'Classe basique' },
+                                { code: 'class Counter {\n  #count = 0 // Privé\n  \n  increment() { this.#count++ }\n  get value() { return this.#count }\n}', desc: 'Champ privé et getter' },
+                                { code: 'class MathUtils {\n  static PI = 3.14159\n  static square(x) { return x * x }\n}\nMathUtils.square(5) // 25', desc: 'Membres statiques' }
+                            ],
+                            tips: ['Les champs privés # ne sont pas accessibles depuis l\'extérieur'],
+                            warnings: ['Les classes JS sont du sucre syntaxique sur les prototypes']
+                        }
+                    },
+                    {
+                        cmd: 'extends / super',
+                        desc: 'Héritage de classe',
+                        details: {
+                            explanation: 'extends crée une sous-classe, super appelle le constructeur/méthode parent.',
+                            syntax: 'class Child extends Parent {\n  constructor() { super() }\n}',
+                            options: [
+                                { flag: 'extends', desc: 'Hérite d\'une classe parent' },
+                                { flag: 'super()', desc: 'Appelle le constructeur parent' },
+                                { flag: 'super.method()', desc: 'Appelle une méthode parent' }
+                            ],
+                            examples: [
+                                { code: 'class Animal {\n  constructor(name) { this.name = name }\n  speak() { console.log(`${this.name} fait du bruit`) }\n}\n\nclass Dog extends Animal {\n  constructor(name, breed) {\n    super(name)\n    this.breed = breed\n  }\n  speak() { console.log(`${this.name} aboie!`) }\n}', desc: 'Héritage et override' },
+                                { code: 'const dog = new Dog("Rex", "Berger")\ndog.speak() // "Rex aboie!"', desc: 'Utilisation' }
+                            ],
+                            tips: ['super() doit être appelé avant d\'utiliser this dans le constructeur enfant'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'get / set',
+                        desc: 'Accesseurs de propriété',
+                        details: {
+                            explanation: 'Getters et setters permettent de définir une logique lors de l\'accès/modification d\'une propriété.',
+                            syntax: 'get prop() { return this._prop }\nset prop(value) { this._prop = value }',
+                            options: [
+                                { flag: 'get', desc: 'Appelé lors de la lecture' },
+                                { flag: 'set', desc: 'Appelé lors de l\'assignation' }
+                            ],
+                            examples: [
+                                { code: 'class Circle {\n  constructor(radius) { this._radius = radius }\n  \n  get radius() { return this._radius }\n  set radius(value) {\n    if (value < 0) throw new Error("Rayon négatif")\n    this._radius = value\n  }\n  \n  get area() { return Math.PI * this._radius ** 2 }\n}', desc: 'Getters/setters avec validation' },
+                                { code: 'const c = new Circle(5)\nc.radius = 10 // Setter\nconsole.log(c.area) // Getter (78.54...)', desc: 'Utilisation transparente' }
+                            ],
+                            tips: ['Les getters sont parfaits pour les propriétés calculées'],
+                            warnings: ['Évitez les effets de bord dans les getters']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'errors',
+                title: 'Gestion d\'Erreurs',
+                icon: 'fa-exclamation-triangle',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'try / catch / finally',
+                        desc: 'Capturer les erreurs',
+                        details: {
+                            explanation: 'Bloc try-catch pour gérer les erreurs sans crasher l\'application.',
+                            syntax: 'try {\n  // code risqué\n} catch (error) {\n  // gestion erreur\n} finally {\n  // toujours exécuté\n}',
+                            options: [
+                                { flag: 'try', desc: 'Bloc de code à essayer' },
+                                { flag: 'catch(e)', desc: 'Gère l\'erreur capturée' },
+                                { flag: 'finally', desc: 'Exécuté dans tous les cas (optionnel)' }
+                            ],
+                            examples: [
+                                { code: 'try {\n  const data = JSON.parse(jsonString)\n} catch (error) {\n  console.error("JSON invalide:", error.message)\n  data = {}\n}', desc: 'Parse JSON sécurisé' },
+                                { code: 'async function fetchData() {\n  try {\n    const res = await fetch(url)\n    if (!res.ok) throw new Error(`HTTP ${res.status}`)\n    return await res.json()\n  } catch (error) {\n    console.error(error)\n    return null\n  }\n}', desc: 'Async avec try-catch' }
+                            ],
+                            tips: ['Utilisez finally pour le nettoyage (fermer connexions, etc.)'],
+                            warnings: ['Ne pas ignorer silencieusement les erreurs (catch vide)']
+                        }
+                    },
+                    {
+                        cmd: 'throw / Error',
+                        desc: 'Lancer une erreur',
+                        details: {
+                            explanation: 'throw lance une exception, Error crée un objet erreur avec message et stack trace.',
+                            syntax: 'throw new Error("message")\nthrow new TypeError("message")',
+                            options: [
+                                { flag: 'Error', desc: 'Erreur générique' },
+                                { flag: 'TypeError', desc: 'Type incorrect' },
+                                { flag: 'RangeError', desc: 'Valeur hors limites' },
+                                { flag: 'ReferenceError', desc: 'Variable non définie' }
+                            ],
+                            examples: [
+                                { code: 'function divide(a, b) {\n  if (b === 0) throw new Error("Division par zéro")\n  return a / b\n}', desc: 'Validation avec throw' },
+                                { code: 'class ValidationError extends Error {\n  constructor(field, message) {\n    super(message)\n    this.name = "ValidationError"\n    this.field = field\n  }\n}', desc: 'Erreur personnalisée' },
+                                { code: 'throw new ValidationError("email", "Email invalide")', desc: 'Lancer erreur custom' }
+                            ],
+                            tips: ['Créez des erreurs personnalisées pour différencier les types d\'erreurs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Optional Chaining ?.',
+                        desc: 'Accès sécurisé aux propriétés',
+                        details: {
+                            explanation: 'Accède à des propriétés imbriquées sans erreur si une valeur intermédiaire est null/undefined.',
+                            syntax: 'obj?.prop\nobj?.[expr]\nfunc?.(args)',
+                            options: [
+                                { flag: '?.', desc: 'Accès propriété optionnel' },
+                                { flag: '?.[]', desc: 'Accès index optionnel' },
+                                { flag: '?.()', desc: 'Appel fonction optionnel' }
+                            ],
+                            examples: [
+                                { code: 'const city = user?.address?.city\n// undefined si user ou address est null/undefined', desc: 'Chaînage profond' },
+                                { code: 'const first = arr?.[0]', desc: 'Index optionnel' },
+                                { code: 'callback?.(data) // Appelle si callback existe', desc: 'Appel optionnel' },
+                                { code: 'const name = user?.name ?? "Anonyme"', desc: 'Avec nullish coalescing' }
+                            ],
+                            tips: ['Combine bien avec ?? (nullish coalescing) pour les valeurs par défaut'],
+                            warnings: ['Retourne undefined, pas une erreur - peut masquer des bugs']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'storage',
+                title: 'Stockage Local',
+                icon: 'fa-hdd',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'localStorage',
+                        desc: 'Stockage persistant',
+                        details: {
+                            explanation: 'Stocke des données dans le navigateur de façon persistante (survit à la fermeture).',
+                            syntax: 'localStorage.setItem(key, value)\nlocalStorage.getItem(key)',
+                            options: [
+                                { flag: 'setItem(k, v)', desc: 'Enregistre une valeur' },
+                                { flag: 'getItem(k)', desc: 'Récupère une valeur' },
+                                { flag: 'removeItem(k)', desc: 'Supprime une clé' },
+                                { flag: 'clear()', desc: 'Vide tout le storage' }
+                            ],
+                            examples: [
+                                { code: '// Stocker un objet\nconst user = { name: "Alice", theme: "dark" }\nlocalStorage.setItem("user", JSON.stringify(user))', desc: 'Sauvegarder un objet' },
+                                { code: '// Récupérer\nconst user = JSON.parse(localStorage.getItem("user"))\n// ou avec valeur par défaut\nconst theme = localStorage.getItem("theme") ?? "light"', desc: 'Lire avec défaut' },
+                                { code: '// Vérifier existence\nif (localStorage.getItem("token")) {\n  // Utilisateur connecté\n}', desc: 'Vérifier présence' }
+                            ],
+                            tips: ['localStorage ne stocke que des strings - utilisez JSON.stringify/parse'],
+                            warnings: ['Limite ~5MB, ne pas stocker de données sensibles (pas chiffré)']
+                        }
+                    },
+                    {
+                        cmd: 'sessionStorage',
+                        desc: 'Stockage de session',
+                        details: {
+                            explanation: 'Comme localStorage mais les données sont supprimées à la fermeture de l\'onglet.',
+                            syntax: 'sessionStorage.setItem(key, value)\nsessionStorage.getItem(key)',
+                            options: [
+                                { flag: 'setItem/getItem', desc: 'Mêmes méthodes que localStorage' }
+                            ],
+                            examples: [
+                                { code: '// Données temporaires de session\nsessionStorage.setItem("formDraft", JSON.stringify(formData))', desc: 'Brouillon de formulaire' },
+                                { code: '// Restaurer si l\'onglet est rechargé\nconst draft = sessionStorage.getItem("formDraft")\nif (draft) populateForm(JSON.parse(draft))', desc: 'Restaurer au chargement' }
+                            ],
+                            tips: ['Idéal pour les données temporaires qui ne doivent pas persister'],
+                            warnings: ['Les données sont perdues à la fermeture de l\'onglet']
+                        }
+                    },
+                    {
+                        cmd: 'Cookies',
+                        desc: 'Stockage avec expiration',
+                        details: {
+                            explanation: 'Stockage envoyé automatiquement avec les requêtes HTTP. Permet de définir une expiration.',
+                            syntax: 'document.cookie = "key=value; expires=date; path=/"',
+                            options: [
+                                { flag: 'expires', desc: 'Date d\'expiration' },
+                                { flag: 'max-age', desc: 'Durée de vie en secondes' },
+                                { flag: 'path', desc: 'Chemin de validité' },
+                                { flag: 'secure', desc: 'HTTPS uniquement' },
+                                { flag: 'SameSite', desc: 'Protection CSRF' }
+                            ],
+                            examples: [
+                                { code: '// Créer un cookie (expire dans 7 jours)\nconst expires = new Date(Date.now() + 7*24*60*60*1000).toUTCString()\ndocument.cookie = `token=abc123; expires=${expires}; path=/; SameSite=Strict`', desc: 'Cookie avec expiration' },
+                                { code: '// Lire les cookies\nconst cookies = Object.fromEntries(\n  document.cookie.split("; ").map(c => c.split("="))\n)\nconst token = cookies.token', desc: 'Parser les cookies' },
+                                { code: '// Supprimer (expiration passée)\ndocument.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT"', desc: 'Supprimer un cookie' }
+                            ],
+                            tips: ['Utilisez les librairies comme js-cookie pour simplifier la gestion'],
+                            warnings: ['Limite ~4KB par cookie, envoyés à chaque requête HTTP']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'regex',
+                title: 'Expressions Régulières',
+                icon: 'fa-asterisk',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'RegExp / test / match',
+                        desc: 'Créer et tester des regex',
+                        details: {
+                            explanation: 'Les expressions régulières permettent de rechercher et manipuler des patterns dans les strings.',
+                            syntax: '/pattern/flags\nnew RegExp("pattern", "flags")',
+                            options: [
+                                { flag: 'g', desc: 'Global (toutes les occurrences)' },
+                                { flag: 'i', desc: 'Insensible à la casse' },
+                                { flag: 'm', desc: 'Multilignes (^ et $ par ligne)' },
+                                { flag: 's', desc: 'Dotall (. inclut newlines)' }
+                            ],
+                            examples: [
+                                { code: 'const emailRegex = /^[\\w.-]+@[\\w.-]+\\.\\w{2,}$/i\nemailRegex.test("user@example.com") // true', desc: 'Validation email basique' },
+                                { code: '"hello world".match(/\\w+/g)\n// ["hello", "world"]', desc: 'Trouver tous les mots' },
+                                { code: 'const phone = /^(\\+33|0)[1-9](\\d{2}){4}$/\nphone.test("0612345678") // true', desc: 'Téléphone français' }
+                            ],
+                            tips: ['test() pour vérifier, match() pour extraire'],
+                            warnings: ['Les regex sont puissantes mais peuvent devenir illisibles']
+                        }
+                    },
+                    {
+                        cmd: 'replace / replaceAll',
+                        desc: 'Remplacer avec regex',
+                        details: {
+                            explanation: 'Remplace les correspondances d\'un pattern par une nouvelle valeur.',
+                            syntax: 'str.replace(regex, replacement)\nstr.replaceAll(regex, replacement)',
+                            options: [
+                                { flag: '$1, $2...', desc: 'Groupes capturés dans le remplacement' },
+                                { flag: '$&', desc: 'Correspondance complète' },
+                                { flag: 'function', desc: 'Fonction de remplacement' }
+                            ],
+                            examples: [
+                                { code: '"Hello World".replace(/world/i, "JS")\n// "Hello JS"', desc: 'Remplacement simple' },
+                                { code: '"2024-01-15".replace(/(\\d{4})-(\\d{2})-(\\d{2})/, "$3/$2/$1")\n// "15/01/2024"', desc: 'Reformater une date' },
+                                { code: '"abc".replace(/./g, (char, i) => char.toUpperCase() + i)\n// "A0B1C2"', desc: 'Fonction de remplacement' },
+                                { code: '"foo bar foo".replaceAll("foo", "baz")\n// "baz bar baz"', desc: 'replaceAll (ES2021)' }
+                            ],
+                            tips: ['replaceAll est plus lisible que replace avec flag g pour les strings'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Patterns courants',
+                        desc: 'Regex fréquemment utilisées',
+                        details: {
+                            explanation: 'Collection de patterns regex utiles pour la validation.',
+                            syntax: 'Différents patterns prêts à l\'emploi',
+                            options: [
+                                { flag: '\\d', desc: 'Chiffre [0-9]' },
+                                { flag: '\\w', desc: 'Mot [a-zA-Z0-9_]' },
+                                { flag: '\\s', desc: 'Espace blanc' },
+                                { flag: '.', desc: 'N\'importe quel caractère' },
+                                { flag: '+', desc: 'Un ou plusieurs' },
+                                { flag: '*', desc: 'Zéro ou plusieurs' },
+                                { flag: '?', desc: 'Zéro ou un (optionnel)' }
+                            ],
+                            examples: [
+                                { code: '/^[a-zA-Z0-9_]{3,20}$/ // Username', desc: 'Nom utilisateur' },
+                                { code: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/ // Password fort', desc: 'Mot de passe' },
+                                { code: '/^https?:\\/\\/[\\w.-]+\\.\\w{2,}.*$/ // URL', desc: 'URL basique' },
+                                { code: '/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/ // Couleur hex', desc: 'Code couleur' },
+                                { code: '/^\\d{5}$/ // Code postal FR', desc: 'Code postal' }
+                            ],
+                            tips: ['Testez vos regex sur regex101.com pour les déboguer'],
+                            warnings: ['Les regex complexes peuvent impacter les performances']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project',
+                title: '🚀 Projet: App TODO',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-gradient-to-r from-yellow-500 to-orange-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Structure HTML',
+                        desc: 'Créer l\'interface utilisateur',
+                        details: {
+                            explanation: 'Mise en place du HTML avec formulaire et liste de tâches.',
+                            syntax: 'Structure de base de l\'application TODO',
+                            options: [],
+                            examples: [
+                                { code: '<!DOCTYPE html>\n<html>\n<head>\n  <title>TODO App</title>\n  <style>\n    .completed { text-decoration: line-through; opacity: 0.6; }\n    .todo-item { display: flex; gap: 10px; padding: 8px; }\n  </style>\n</head>\n<body>\n  <div id="app">\n    <h1>Mes Tâches</h1>\n    <form id="todoForm">\n      <input type="text" id="todoInput" placeholder="Nouvelle tâche..." required>\n      <button type="submit">Ajouter</button>\n    </form>\n    <ul id="todoList"></ul>\n    <div id="stats"></div>\n  </div>\n  <script src="app.js"></script>\n</body>\n</html>', desc: 'index.html complet' }
+                            ],
+                            tips: ['Gardez le HTML simple, la logique sera dans le JS'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: État & Stockage',
+                        desc: 'Gérer les données avec localStorage',
+                        details: {
+                            explanation: 'Initialiser l\'état et persister les données dans localStorage.',
+                            syntax: 'Gestion de l\'état de l\'application',
+                            options: [],
+                            examples: [
+                                { code: '// app.js - État et persistence\nconst STORAGE_KEY = "todos"\n\nlet todos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []\n\nfunction saveTodos() {\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))\n}\n\nfunction generateId() {\n  return Date.now().toString(36) + Math.random().toString(36).substr(2)\n}', desc: 'Initialisation et helpers' }
+                            ],
+                            tips: ['Utilisez un ID unique pour chaque tâche pour faciliter les opérations'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: CRUD Operations',
+                        desc: 'Ajouter, modifier, supprimer',
+                        details: {
+                            explanation: 'Fonctions pour manipuler les tâches (Create, Read, Update, Delete).',
+                            syntax: 'Opérations CRUD sur les todos',
+                            options: [],
+                            examples: [
+                                { code: 'function addTodo(text) {\n  const todo = {\n    id: generateId(),\n    text: text.trim(),\n    completed: false,\n    createdAt: new Date().toISOString()\n  }\n  todos.push(todo)\n  saveTodos()\n  render()\n}\n\nfunction toggleTodo(id) {\n  const todo = todos.find(t => t.id === id)\n  if (todo) {\n    todo.completed = !todo.completed\n    saveTodos()\n    render()\n  }\n}\n\nfunction deleteTodo(id) {\n  todos = todos.filter(t => t.id !== id)\n  saveTodos()\n  render()\n}', desc: 'Fonctions CRUD' }
+                            ],
+                            tips: ['Toujours appeler saveTodos() et render() après modification'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Rendu DOM',
+                        desc: 'Afficher les tâches dynamiquement',
+                        details: {
+                            explanation: 'Fonction de rendu qui met à jour le DOM à partir de l\'état.',
+                            syntax: 'Rendu déclaratif du DOM',
+                            options: [],
+                            examples: [
+                                { code: 'function render() {\n  const list = document.getElementById("todoList")\n  const stats = document.getElementById("stats")\n  \n  list.innerHTML = todos.map(todo => `\n    <li class="todo-item ${todo.completed ? "completed" : ""}">\n      <input type="checkbox" \n             ${todo.completed ? "checked" : ""}\n             onchange="toggleTodo(\'${todo.id}\')">\n      <span>${escapeHtml(todo.text)}</span>\n      <button onclick="deleteTodo(\'${todo.id}\')">🗑️</button>\n    </li>\n  `).join("")\n  \n  const completed = todos.filter(t => t.completed).length\n  stats.textContent = `${completed}/${todos.length} terminées`\n}\n\nfunction escapeHtml(text) {\n  const div = document.createElement("div")\n  div.textContent = text\n  return div.innerHTML\n}', desc: 'Fonction render()' }
+                            ],
+                            tips: ['Toujours échapper le HTML pour éviter les failles XSS'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Event Listeners',
+                        desc: 'Gérer les interactions utilisateur',
+                        details: {
+                            explanation: 'Attacher les événements au formulaire et initialiser l\'app.',
+                            syntax: 'Gestion des événements',
+                            options: [],
+                            examples: [
+                                { code: '// Initialisation\ndocument.addEventListener("DOMContentLoaded", () => {\n  const form = document.getElementById("todoForm")\n  const input = document.getElementById("todoInput")\n  \n  form.addEventListener("submit", (e) => {\n    e.preventDefault()\n    const text = input.value\n    if (text.trim()) {\n      addTodo(text)\n      input.value = ""\n      input.focus()\n    }\n  })\n  \n  // Rendu initial\n  render()\n})', desc: 'Initialisation et événements' }
+                            ],
+                            tips: ['Utilisez DOMContentLoaded pour s\'assurer que le DOM est prêt'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Filtres & Bonus',
+                        desc: 'Ajouter des filtres et améliorations',
+                        details: {
+                            explanation: 'Fonctionnalités avancées : filtres, suppression en masse, édition.',
+                            syntax: 'Améliorations de l\'application',
+                            options: [],
+                            examples: [
+                                { code: '// Filtres\nlet filter = "all" // all, active, completed\n\nfunction getFilteredTodos() {\n  switch(filter) {\n    case "active": return todos.filter(t => !t.completed)\n    case "completed": return todos.filter(t => t.completed)\n    default: return todos\n  }\n}\n\nfunction setFilter(newFilter) {\n  filter = newFilter\n  render()\n}\n\n// Suppression en masse\nfunction clearCompleted() {\n  todos = todos.filter(t => !t.completed)\n  saveTodos()\n  render()\n}\n\n// Édition inline\nfunction editTodo(id, newText) {\n  const todo = todos.find(t => t.id === id)\n  if (todo && newText.trim()) {\n    todo.text = newText.trim()\n    saveTodos()\n    render()\n  }\n}', desc: 'Fonctionnalités bonus' }
+                            ],
+                            tips: ['Utilisez getFilteredTodos() dans render() pour afficher les tâches filtrées'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

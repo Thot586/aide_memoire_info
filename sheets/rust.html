@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Rust : syntaxe de base, ownership, borrowing, cargo et patterns courants.">
+    <title>Rust - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-orange-500/20 mb-4 icon-glow">
+                    <i class="fab fa-rust text-3xl text-orange-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Rust</h1>
+                <p class="text-slate-400">Syntaxe, ownership, borrowing et Cargo</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'cargo',
+                title: 'Cargo (Gestionnaire)',
+                icon: 'fa-box',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'cargo new mon_projet',
+                        desc: 'Créer un nouveau projet',
+                        details: {
+                            explanation: 'Crée un nouveau projet Rust avec la structure de fichiers standard et un fichier Cargo.toml.',
+                            syntax: 'cargo new <nom> [options]',
+                            options: [
+                                { flag: '--bin', desc: 'Créer un exécutable (par défaut)' },
+                                { flag: '--lib', desc: 'Créer une bibliothèque' },
+                                { flag: '--vcs none', desc: 'Sans initialisation git' }
+                            ],
+                            examples: [
+                                { code: 'cargo new mon_app', desc: 'Nouveau projet exécutable' },
+                                { code: 'cargo new ma_lib --lib', desc: 'Nouvelle bibliothèque' }
+                            ],
+                            tips: ['Cargo initialise automatiquement un dépôt git'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cargo build',
+                        desc: 'Compiler le projet',
+                        details: {
+                            explanation: 'Compile le projet et ses dépendances. Le binaire est dans target/debug/.',
+                            syntax: 'cargo build [options]',
+                            options: [
+                                { flag: '--release', desc: 'Compilation optimisée (target/release/)' },
+                                { flag: '--target', desc: 'Cross-compilation' }
+                            ],
+                            examples: [
+                                { code: 'cargo build', desc: 'Compilation debug' },
+                                { code: 'cargo build --release', desc: 'Compilation production' }
+                            ],
+                            tips: ['--release active les optimisations et désactive les assertions debug'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cargo run',
+                        desc: 'Compiler et exécuter',
+                        details: {
+                            explanation: 'Compile (si nécessaire) et exécute le projet en une seule commande.',
+                            syntax: 'cargo run [options] [-- args]',
+                            options: [
+                                { flag: '--release', desc: 'Exécuter en mode release' },
+                                { flag: '-- args', desc: 'Arguments passés au programme' }
+                            ],
+                            examples: [
+                                { code: 'cargo run', desc: 'Exécution simple' },
+                                { code: 'cargo run -- arg1 arg2', desc: 'Avec arguments' },
+                                { code: 'cargo run --release', desc: 'Mode production' }
+                            ],
+                            tips: ['Idéal pour le développement rapide'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cargo test',
+                        desc: 'Lancer les tests',
+                        details: {
+                            explanation: 'Compile et exécute tous les tests unitaires et d\'intégration.',
+                            syntax: 'cargo test [nom_test] [options]',
+                            options: [
+                                { flag: '-- --nocapture', desc: 'Afficher les println! des tests' },
+                                { flag: '--test nom', desc: 'Exécuter un test spécifique' }
+                            ],
+                            examples: [
+                                { code: 'cargo test', desc: 'Tous les tests' },
+                                { code: 'cargo test mon_test', desc: 'Tests contenant "mon_test"' },
+                                { code: 'cargo test -- --nocapture', desc: 'Avec output visible' }
+                            ],
+                            tips: ['Les tests sont des fonctions annotées avec #[test]'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cargo add <crate>',
+                        desc: 'Ajouter une dépendance',
+                        details: {
+                            explanation: 'Ajoute une dépendance au Cargo.toml (disponible depuis Rust 1.62).',
+                            syntax: 'cargo add <crate> [options]',
+                            options: [
+                                { flag: '--dev', desc: 'Dépendance de développement uniquement' },
+                                { flag: '--features', desc: 'Activer des features' },
+                                { flag: '--version', desc: 'Version spécifique' }
+                            ],
+                            examples: [
+                                { code: 'cargo add serde', desc: 'Ajouter serde' },
+                                { code: 'cargo add serde --features derive', desc: 'Avec feature derive' },
+                                { code: 'cargo add tokio --features full', desc: 'Tokio avec toutes les features' }
+                            ],
+                            tips: ['Consultez crates.io pour trouver des bibliothèques'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'variables',
+                title: 'Variables & Types',
+                icon: 'fa-cube',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'let x = 5;',
+                        desc: 'Déclarer une variable immutable',
+                        details: {
+                            explanation: 'En Rust, les variables sont immutables par défaut. Cela garantit la sécurité mémoire.',
+                            syntax: 'let nom: Type = valeur;',
+                            options: [],
+                            examples: [
+                                { code: 'let x = 5;', desc: 'Inférence de type (i32)' },
+                                { code: 'let x: i64 = 5;', desc: 'Type explicite' },
+                                { code: 'let s = "hello";', desc: 'String slice (&str)' },
+                                { code: 'let s = String::from("hello");', desc: 'String owned' }
+                            ],
+                            tips: ['Le type est souvent inféré automatiquement'],
+                            warnings: ['Tenter de modifier une variable immutable cause une erreur de compilation']
+                        }
+                    },
+                    {
+                        cmd: 'let mut x = 5;',
+                        desc: 'Déclarer une variable mutable',
+                        details: {
+                            explanation: 'Le mot-clé mut permet de modifier la variable après sa déclaration.',
+                            syntax: 'let mut nom = valeur;',
+                            options: [],
+                            examples: [
+                                { code: 'let mut count = 0;\ncount += 1;', desc: 'Compteur mutable' },
+                                { code: 'let mut vec = Vec::new();\nvec.push(1);', desc: 'Vecteur modifiable' }
+                            ],
+                            tips: ['Utilisez mut uniquement quand nécessaire'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'const MAX: u32 = 100;',
+                        desc: 'Constante compile-time',
+                        details: {
+                            explanation: 'Les constantes sont évaluées à la compilation et doivent avoir un type explicite.',
+                            syntax: 'const NOM: Type = valeur;',
+                            options: [],
+                            examples: [
+                                { code: 'const PI: f64 = 3.14159;', desc: 'Constante flottante' },
+                                { code: 'const MAX_USERS: usize = 1000;', desc: 'Limite maximale' }
+                            ],
+                            tips: ['Convention : SCREAMING_SNAKE_CASE pour les constantes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'i32, u64, f64, bool, char',
+                        desc: 'Types primitifs',
+                        details: {
+                            explanation: 'Rust a des types primitifs avec taille explicite pour un contrôle précis de la mémoire.',
+                            syntax: 'Type',
+                            options: [
+                                { flag: 'i8, i16, i32, i64, i128', desc: 'Entiers signés' },
+                                { flag: 'u8, u16, u32, u64, u128', desc: 'Entiers non signés' },
+                                { flag: 'f32, f64', desc: 'Flottants' },
+                                { flag: 'bool', desc: 'Booléen (true/false)' },
+                                { flag: 'char', desc: 'Caractère Unicode (4 bytes)' },
+                                { flag: 'isize, usize', desc: 'Taille dépend de l\'architecture' }
+                            ],
+                            examples: [
+                                { code: 'let a: i32 = -42;', desc: 'Entier signé 32 bits' },
+                                { code: 'let b: u8 = 255;', desc: 'Entier non signé 8 bits' },
+                                { code: 'let c: f64 = 3.14;', desc: 'Flottant 64 bits' }
+                            ],
+                            tips: ['i32 est le type par défaut pour les entiers'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'ownership',
+                title: 'Ownership & Borrowing',
+                icon: 'fa-key',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'let s2 = s1;  // Move',
+                        desc: 'Transfert de propriété (move)',
+                        details: {
+                            explanation: 'En Rust, assigner une valeur transfère la propriété. L\'ancienne variable devient invalide.',
+                            syntax: 'let nouvelle = ancienne;',
+                            options: [],
+                            examples: [
+                                { code: 'let s1 = String::from("hello");\nlet s2 = s1;  // s1 n\'est plus valide\nprintln!("{}", s2);  // OK', desc: 'Move d\'un String' },
+                                { code: 'let x = 5;\nlet y = x;  // Copy, pas move (types primitifs)\nprintln!("{} {}", x, y);  // OK', desc: 'Copy pour les primitifs' }
+                            ],
+                            tips: ['Les types qui implémentent Copy (comme i32) sont copiés, pas déplacés'],
+                            warnings: ['Utiliser une variable après un move cause une erreur de compilation']
+                        }
+                    },
+                    {
+                        cmd: '&variable',
+                        desc: 'Référence immutable (borrow)',
+                        details: {
+                            explanation: 'Une référence permet d\'accéder à une valeur sans en prendre la propriété.',
+                            syntax: '&variable',
+                            options: [],
+                            examples: [
+                                { code: 'let s = String::from("hello");\nlet len = calculate_length(&s);  // Emprunte s\nprintln!("{} a {} caractères", s, len);  // s toujours valide', desc: 'Passer par référence' },
+                                { code: 'fn calculate_length(s: &String) -> usize {\n    s.len()\n}', desc: 'Fonction avec référence' }
+                            ],
+                            tips: ['Vous pouvez avoir plusieurs références immutables simultanément'],
+                            warnings: ['Une référence ne peut pas modifier la valeur']
+                        }
+                    },
+                    {
+                        cmd: '&mut variable',
+                        desc: 'Référence mutable',
+                        details: {
+                            explanation: 'Une référence mutable permet de modifier la valeur empruntée.',
+                            syntax: '&mut variable',
+                            options: [],
+                            examples: [
+                                { code: 'let mut s = String::from("hello");\nchange(&mut s);\n\nfn change(s: &mut String) {\n    s.push_str(" world");\n}', desc: 'Modifier via référence mutable' }
+                            ],
+                            tips: ['Une seule référence mutable à la fois est autorisée'],
+                            warnings: ['Pas de référence mutable si des références immutables existent']
+                        }
+                    },
+                    {
+                        cmd: 'variable.clone()',
+                        desc: 'Cloner une valeur',
+                        details: {
+                            explanation: 'Crée une copie profonde de la valeur, évitant le move.',
+                            syntax: 'variable.clone()',
+                            options: [],
+                            examples: [
+                                { code: 'let s1 = String::from("hello");\nlet s2 = s1.clone();  // Copie profonde\nprintln!("{} {}", s1, s2);  // Les deux sont valides', desc: 'Cloner un String' }
+                            ],
+                            tips: ['clone() peut être coûteux en performance'],
+                            warnings: ['Utilisez clone() avec parcimonie']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'structs',
+                title: 'Structs & Enums',
+                icon: 'fa-sitemap',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'struct NomStruct { ... }',
+                        desc: 'Définir une structure',
+                        details: {
+                            explanation: 'Les structs regroupent des données liées sous un même type.',
+                            syntax: 'struct Nom {\n    champ: Type,\n}',
+                            options: [],
+                            examples: [
+                                { code: 'struct User {\n    username: String,\n    email: String,\n    active: bool,\n}', desc: 'Définition de struct' },
+                                { code: 'let user = User {\n    username: String::from("alice"),\n    email: String::from("alice@example.com"),\n    active: true,\n};', desc: 'Instanciation' }
+                            ],
+                            tips: ['Utilisez #[derive(Debug)] pour pouvoir afficher avec {:?}'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'impl Struct { ... }',
+                        desc: 'Implémenter des méthodes',
+                        details: {
+                            explanation: 'Le bloc impl définit les méthodes associées à une struct.',
+                            syntax: 'impl NomStruct {\n    fn methode(&self) { ... }\n}',
+                            options: [
+                                { flag: '&self', desc: 'Méthode avec référence immutable' },
+                                { flag: '&mut self', desc: 'Méthode qui modifie' },
+                                { flag: 'self', desc: 'Prend ownership' },
+                                { flag: 'pas de self', desc: 'Fonction associée (constructeur)' }
+                            ],
+                            examples: [
+                                { code: 'impl User {\n    fn new(username: String) -> Self {\n        Self {\n            username,\n            email: String::new(),\n            active: true,\n        }\n    }\n\n    fn is_active(&self) -> bool {\n        self.active\n    }\n}', desc: 'Constructeur et méthode' }
+                            ],
+                            tips: ['Self est un alias pour le type de la struct'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'enum NomEnum { ... }',
+                        desc: 'Définir une énumération',
+                        details: {
+                            explanation: 'Les enums peuvent avoir des variantes avec ou sans données associées.',
+                            syntax: 'enum Nom {\n    Variante1,\n    Variante2(Type),\n}',
+                            options: [],
+                            examples: [
+                                { code: 'enum Message {\n    Quit,\n    Move { x: i32, y: i32 },\n    Write(String),\n    ChangeColor(i32, i32, i32),\n}', desc: 'Enum avec variantes diverses' },
+                                { code: 'let msg = Message::Write(String::from("hello"));', desc: 'Création d\'une variante' }
+                            ],
+                            tips: ['Option<T> et Result<T, E> sont des enums standards très utilisés'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Option<T> / Result<T, E>',
+                        desc: 'Types pour gérer absence/erreurs',
+                        details: {
+                            explanation: 'Option représente une valeur optionnelle, Result représente succès ou erreur.',
+                            syntax: 'Option<T>: Some(T) | None\nResult<T, E>: Ok(T) | Err(E)',
+                            options: [],
+                            examples: [
+                                { code: 'fn divide(a: f64, b: f64) -> Option<f64> {\n    if b == 0.0 {\n        None\n    } else {\n        Some(a / b)\n    }\n}', desc: 'Fonction retournant Option' },
+                                { code: 'fn read_file(path: &str) -> Result<String, std::io::Error> {\n    std::fs::read_to_string(path)\n}', desc: 'Fonction retournant Result' }
+                            ],
+                            tips: ['Utilisez ? pour propager les erreurs automatiquement'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'control',
+                title: 'Contrôle de flux',
+                icon: 'fa-code-branch',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'match expression { ... }',
+                        desc: 'Pattern matching',
+                        details: {
+                            explanation: 'Match permet de comparer une valeur contre plusieurs patterns et exécuter du code.',
+                            syntax: 'match value {\n    pattern => result,\n    _ => default,\n}',
+                            options: [],
+                            examples: [
+                                { code: 'match x {\n    1 => println!("un"),\n    2 | 3 => println!("deux ou trois"),\n    4..=10 => println!("entre 4 et 10"),\n    _ => println!("autre"),\n}', desc: 'Match sur entier' },
+                                { code: 'match option {\n    Some(value) => println!("{}", value),\n    None => println!("pas de valeur"),\n}', desc: 'Match sur Option' }
+                            ],
+                            tips: ['Match doit être exhaustif (couvrir tous les cas)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'if let Some(x) = option { ... }',
+                        desc: 'Pattern matching simplifié',
+                        details: {
+                            explanation: 'if let est un raccourci pour un match avec un seul pattern qui nous intéresse.',
+                            syntax: 'if let pattern = expression { ... }',
+                            options: [],
+                            examples: [
+                                { code: 'if let Some(value) = my_option {\n    println!("Valeur: {}", value);\n}', desc: 'Extraire de Option' },
+                                { code: 'if let Ok(file) = File::open("test.txt") {\n    // utiliser file\n}', desc: 'Extraire de Result' }
+                            ],
+                            tips: ['Plus concis que match quand on ne gère qu\'un cas'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'for item in collection { ... }',
+                        desc: 'Boucle for',
+                        details: {
+                            explanation: 'Itère sur les éléments d\'une collection ou d\'un itérateur.',
+                            syntax: 'for element in iterable { ... }',
+                            options: [],
+                            examples: [
+                                { code: 'for i in 0..5 {\n    println!("{}", i);  // 0, 1, 2, 3, 4\n}', desc: 'Range exclusif' },
+                                { code: 'for i in 0..=5 {\n    println!("{}", i);  // 0, 1, 2, 3, 4, 5\n}', desc: 'Range inclusif' },
+                                { code: 'let vec = vec![1, 2, 3];\nfor (i, val) in vec.iter().enumerate() {\n    println!("{}: {}", i, val);\n}', desc: 'Avec index' }
+                            ],
+                            tips: ['Utilisez .iter() pour emprunter, .into_iter() pour consommer'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'loop { ... break; }',
+                        desc: 'Boucle infinie',
+                        details: {
+                            explanation: 'loop crée une boucle infinie qui peut être interrompue avec break.',
+                            syntax: 'loop { ... break value; }',
+                            options: [],
+                            examples: [
+                                { code: 'let result = loop {\n    counter += 1;\n    if counter == 10 {\n        break counter * 2;  // Retourne 20\n    }\n};', desc: 'Loop avec valeur de retour' }
+                            ],
+                            tips: ['loop peut retourner une valeur via break'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'errors',
+                title: 'Gestion des erreurs',
+                icon: 'fa-exclamation-triangle',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'result?',
+                        desc: 'Opérateur ? (propagation)',
+                        details: {
+                            explanation: 'L\'opérateur ? propage automatiquement les erreurs vers la fonction appelante.',
+                            syntax: 'expression?',
+                            options: [],
+                            examples: [
+                                { code: 'fn read_username() -> Result<String, io::Error> {\n    let mut file = File::open("username.txt")?;\n    let mut username = String::new();\n    file.read_to_string(&mut username)?;\n    Ok(username)\n}', desc: 'Propagation d\'erreurs' }
+                            ],
+                            tips: ['? ne fonctionne que dans les fonctions retournant Result ou Option'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '.unwrap()',
+                        desc: 'Extraire la valeur ou paniquer',
+                        details: {
+                            explanation: 'Extrait la valeur d\'un Result/Option ou provoque un panic si erreur/None.',
+                            syntax: 'result.unwrap()',
+                            options: [
+                                { flag: '.unwrap()', desc: 'Panique avec message par défaut' },
+                                { flag: '.expect("msg")', desc: 'Panique avec message personnalisé' },
+                                { flag: '.unwrap_or(default)', desc: 'Valeur par défaut si erreur' },
+                                { flag: '.unwrap_or_else(|| ...)', desc: 'Closure pour calculer le défaut' }
+                            ],
+                            examples: [
+                                { code: 'let file = File::open("test.txt").unwrap();', desc: 'Panique si erreur' },
+                                { code: 'let file = File::open("test.txt")\n    .expect("Impossible d\'ouvrir le fichier");', desc: 'Avec message' },
+                                { code: 'let port = env::var("PORT").unwrap_or("8080".to_string());', desc: 'Avec défaut' }
+                            ],
+                            tips: ['Préférez expect() à unwrap() pour des messages d\'erreur clairs'],
+                            warnings: ['unwrap() en production peut causer des crashes inattendus']
+                        }
+                    },
+                    {
+                        cmd: 'panic!("message")',
+                        desc: 'Arrêt immédiat du programme',
+                        details: {
+                            explanation: 'Provoque un panic qui arrête le programme avec un message d\'erreur.',
+                            syntax: 'panic!("message")',
+                            options: [],
+                            examples: [
+                                { code: 'panic!("Erreur fatale !");', desc: 'Panic simple' },
+                                { code: 'panic!("Index {} hors limites", index);', desc: 'Avec formatage' }
+                            ],
+                            tips: ['Utilisez panic! uniquement pour les erreurs irrécupérables'],
+                            warnings: ['Préférez Result pour les erreurs gérables']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'traits',
+                title: 'Traits & Generics',
+                icon: 'fa-puzzle-piece',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'trait NomTrait { ... }',
+                        desc: 'Définir un trait',
+                        details: {
+                            explanation: 'Un trait définit un comportement partagé entre types. Similaire aux interfaces dans d\'autres langages.',
+                            syntax: 'trait NomTrait {\n    fn methode(&self) -> Type;\n    fn avec_defaut(&self) { /* impl */ }\n}',
+                            options: [],
+                            examples: [
+                                { code: 'trait Summary {\n    fn summarize(&self) -> String;\n    \n    // Méthode avec implémentation par défaut\n    fn preview(&self) -> String {\n        format!("En savoir plus: {}", self.summarize())\n    }\n}', desc: 'Trait avec méthode par défaut' },
+                                { code: 'trait Drawable {\n    fn draw(&self);\n    fn area(&self) -> f64;\n}', desc: 'Trait avec plusieurs méthodes' }
+                            ],
+                            tips: ['Les traits peuvent avoir des méthodes avec implémentation par défaut'],
+                            warnings: ['Un trait ne peut être implémenté que si le trait OU le type est défini localement']
+                        }
+                    },
+                    {
+                        cmd: 'impl Trait for Type { ... }',
+                        desc: 'Implémenter un trait',
+                        details: {
+                            explanation: 'Implémente les méthodes d\'un trait pour un type spécifique.',
+                            syntax: 'impl NomTrait for NomType {\n    fn methode(&self) -> Type { ... }\n}',
+                            options: [],
+                            examples: [
+                                { code: 'struct Article {\n    title: String,\n    content: String,\n}\n\nimpl Summary for Article {\n    fn summarize(&self) -> String {\n        format!("{}: {}", self.title, &self.content[..50])\n    }\n}', desc: 'Implémenter Summary pour Article' },
+                                { code: '#[derive(Debug, Clone, PartialEq)]\nstruct Point {\n    x: f64,\n    y: f64,\n}', desc: 'Dériver des traits automatiquement' }
+                            ],
+                            tips: ['#[derive(...)] génère automatiquement l\'implémentation de traits courants'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'fn fonction<T>(param: T)',
+                        desc: 'Fonction générique',
+                        details: {
+                            explanation: 'Les generics permettent d\'écrire du code qui fonctionne avec plusieurs types.',
+                            syntax: 'fn nom<T>(param: T) -> T { ... }',
+                            options: [],
+                            examples: [
+                                { code: 'fn largest<T: PartialOrd>(list: &[T]) -> &T {\n    let mut largest = &list[0];\n    for item in list {\n        if item > largest {\n            largest = item;\n        }\n    }\n    largest\n}', desc: 'Fonction générique avec contrainte' },
+                                { code: 'fn print_debug<T: std::fmt::Debug>(item: T) {\n    println!("{:?}", item);\n}', desc: 'Generic avec trait bound Debug' }
+                            ],
+                            tips: ['T est conventionnel, mais tout nom est valide'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'T: Trait + Trait2',
+                        desc: 'Contraintes de traits (bounds)',
+                        details: {
+                            explanation: 'Les trait bounds spécifient les capacités requises pour un type générique.',
+                            syntax: 'fn nom<T: Trait1 + Trait2>(param: T)\nfn nom<T>(param: T) where T: Trait1 + Trait2',
+                            options: [
+                                { flag: 'T: Clone', desc: 'T doit implémenter Clone' },
+                                { flag: 'T: Clone + Debug', desc: 'Multiple traits' },
+                                { flag: 'where T: ...', desc: 'Syntaxe alternative plus lisible' }
+                            ],
+                            examples: [
+                                { code: 'fn clone_and_print<T: Clone + Debug>(item: T) {\n    let cloned = item.clone();\n    println!("{:?}", cloned);\n}', desc: 'Multiple trait bounds' },
+                                { code: 'fn process<T, U>(t: T, u: U) -> i32\nwhere\n    T: Display + Clone,\n    U: Clone + Debug,\n{\n    // ...\n}', desc: 'Clause where pour lisibilité' }
+                            ],
+                            tips: ['Utilisez where pour des bounds complexes'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'lifetimes',
+                title: 'Lifetimes',
+                icon: 'fa-hourglass-half',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: '\'a (annotation de lifetime)',
+                        desc: 'Déclarer une durée de vie',
+                        details: {
+                            explanation: 'Les lifetimes garantissent que les références sont valides aussi longtemps que nécessaire.',
+                            syntax: '&\'a Type',
+                            options: [
+                                { flag: '\'a', desc: 'Lifetime nommé (convention)' },
+                                { flag: '\'_', desc: 'Lifetime anonyme/inféré' },
+                                { flag: '\'static', desc: 'Durée de vie du programme entier' }
+                            ],
+                            examples: [
+                                { code: 'fn longest<\'a>(x: &\'a str, y: &\'a str) -> &\'a str {\n    if x.len() > y.len() { x } else { y }\n}', desc: 'Fonction avec lifetime explicite' },
+                                { code: 'let result;\n{\n    let s1 = String::from("long");\n    let s2 = "short";\n    result = longest(&s1, s2);\n}  // ERREUR: s1 ne vit pas assez longtemps', desc: 'Erreur de lifetime' }
+                            ],
+                            tips: ['Le compilateur infère souvent les lifetimes automatiquement'],
+                            warnings: ['Les erreurs de lifetime peuvent être déroutantes au début']
+                        }
+                    },
+                    {
+                        cmd: 'struct Nom<\'a> { ref: &\'a str }',
+                        desc: 'Struct avec lifetime',
+                        details: {
+                            explanation: 'Une struct contenant des références doit déclarer leurs lifetimes.',
+                            syntax: 'struct Nom<\'a> {\n    champ: &\'a Type,\n}',
+                            options: [],
+                            examples: [
+                                { code: 'struct ImportantExcerpt<\'a> {\n    part: &\'a str,\n}\n\nimpl<\'a> ImportantExcerpt<\'a> {\n    fn level(&self) -> i32 {\n        3\n    }\n    \n    fn announce(&self, msg: &str) -> &str {\n        println!("Attention: {}", msg);\n        self.part\n    }\n}', desc: 'Struct et impl avec lifetime' },
+                                { code: 'let novel = String::from("Call me Ishmael. Some years ago...");\nlet first_sentence = novel.split(\'.\').next().unwrap();\nlet excerpt = ImportantExcerpt {\n    part: first_sentence,\n};', desc: 'Utilisation de la struct' }
+                            ],
+                            tips: ['Les méthodes qui retournent &self n\'ont pas besoin d\'annoter le lifetime'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '\'static',
+                        desc: 'Lifetime statique',
+                        details: {
+                            explanation: '\'static signifie que la référence peut vivre pour toute la durée du programme.',
+                            syntax: '&\'static Type',
+                            options: [],
+                            examples: [
+                                { code: 'let s: &\'static str = "Hello, world!";  // String literals sont \'static', desc: 'String literal' },
+                                { code: 'static HELLO_WORLD: &str = "Hello, world!";  // Constante globale', desc: 'Variable statique' },
+                                { code: '// Erreur courante à éviter:\n// fn return_static() -> &\'static str {\n//     let s = String::from("hello");\n//     &s  // ERREUR: s ne vit pas assez longtemps\n// }', desc: 'Mauvaise utilisation' }
+                            ],
+                            tips: ['Les string literals (&str) ont toujours un lifetime \'static'],
+                            warnings: ['N\'utilisez pas \'static pour contourner les erreurs de lifetime']
+                        }
+                    },
+                    {
+                        cmd: 'Élision de lifetime',
+                        desc: 'Règles d\'inférence automatique',
+                        details: {
+                            explanation: 'Le compilateur applique des règles pour inférer les lifetimes automatiquement.',
+                            syntax: 'fn func(s: &str) -> &str  // équivaut à fn func<\'a>(s: &\'a str) -> &\'a str',
+                            options: [
+                                { flag: 'Règle 1', desc: 'Chaque référence en entrée obtient son propre lifetime' },
+                                { flag: 'Règle 2', desc: 'Si une seule entrée, son lifetime est assigné aux sorties' },
+                                { flag: 'Règle 3', desc: 'Si &self existe, son lifetime est assigné aux sorties' }
+                            ],
+                            examples: [
+                                { code: '// Ces deux signatures sont équivalentes:\nfn first_word(s: &str) -> &str { ... }\nfn first_word<\'a>(s: &\'a str) -> &\'a str { ... }', desc: 'Élision simple' },
+                                { code: '// Annotation requise (2 entrées, ambigu):\nfn longest<\'a>(x: &\'a str, y: &\'a str) -> &\'a str', desc: 'Annotation nécessaire' }
+                            ],
+                            tips: ['Commencez sans annotations, le compilateur vous dira si elles sont nécessaires'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'collections',
+                title: 'Collections avancées',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Vec<T>',
+                        desc: 'Vecteur dynamique',
+                        details: {
+                            explanation: 'Vec est un tableau dynamique qui peut grandir ou rétrécir.',
+                            syntax: 'let v: Vec<Type> = Vec::new();\nlet v = vec![1, 2, 3];',
+                            options: [
+                                { flag: 'vec![]', desc: 'Macro pour créer avec valeurs' },
+                                { flag: 'Vec::new()', desc: 'Vecteur vide' },
+                                { flag: 'Vec::with_capacity(n)', desc: 'Pré-allouer n éléments' }
+                            ],
+                            examples: [
+                                { code: 'let mut v = vec![1, 2, 3];\nv.push(4);\nv.pop();  // Retourne Some(4)\nlet third = &v[2];  // Accès par index (panique si hors limites)\nlet third = v.get(2);  // Retourne Option<&T>', desc: 'Opérations de base' },
+                                { code: 'for i in &v {\n    println!("{}", i);\n}\n\nfor i in &mut v {\n    *i += 10;\n}', desc: 'Itération' },
+                                { code: 'v.extend([5, 6, 7]);\nv.retain(|x| *x > 2);\nv.sort();\nv.dedup();', desc: 'Méthodes avancées' }
+                            ],
+                            tips: ['Utilisez get() pour un accès sécurisé sans panic'],
+                            warnings: ['Ne pas modifier un Vec pendant qu\'on itère dessus avec une référence']
+                        }
+                    },
+                    {
+                        cmd: 'HashMap<K, V>',
+                        desc: 'Table de hachage',
+                        details: {
+                            explanation: 'HashMap stocke des paires clé-valeur avec accès O(1).',
+                            syntax: 'use std::collections::HashMap;\nlet mut map: HashMap<K, V> = HashMap::new();',
+                            options: [
+                                { flag: '.insert(k, v)', desc: 'Insérer ou remplacer' },
+                                { flag: '.get(&k)', desc: 'Obtenir Option<&V>' },
+                                { flag: '.entry(k).or_insert(v)', desc: 'Insérer si absent' },
+                                { flag: '.remove(&k)', desc: 'Supprimer une entrée' }
+                            ],
+                            examples: [
+                                { code: 'use std::collections::HashMap;\n\nlet mut scores = HashMap::new();\nscores.insert(String::from("Blue"), 10);\nscores.insert(String::from("Red"), 50);\n\nlet team = String::from("Blue");\nlet score = scores.get(&team).copied().unwrap_or(0);', desc: 'Utilisation basique' },
+                                { code: '// Compter les occurrences\nlet text = "hello world hello";\nlet mut count = HashMap::new();\n\nfor word in text.split_whitespace() {\n    let counter = count.entry(word).or_insert(0);\n    *counter += 1;\n}', desc: 'Pattern entry()' },
+                                { code: '// Créer depuis des tuples\nlet teams = vec!["Blue", "Red"];\nlet scores = vec![10, 50];\nlet map: HashMap<_, _> = teams.into_iter().zip(scores).collect();', desc: 'Créer depuis iterators' }
+                            ],
+                            tips: ['entry() est idéal pour le pattern get-or-insert'],
+                            warnings: ['Les clés doivent implémenter Hash et Eq']
+                        }
+                    },
+                    {
+                        cmd: 'HashSet<T>',
+                        desc: 'Ensemble sans doublons',
+                        details: {
+                            explanation: 'HashSet stocke des valeurs uniques avec lookup O(1).',
+                            syntax: 'use std::collections::HashSet;\nlet mut set: HashSet<T> = HashSet::new();',
+                            options: [
+                                { flag: '.insert(v)', desc: 'Ajouter (retourne false si existe)' },
+                                { flag: '.contains(&v)', desc: 'Vérifier présence' },
+                                { flag: '.remove(&v)', desc: 'Supprimer' },
+                                { flag: '.intersection(&other)', desc: 'Éléments communs' }
+                            ],
+                            examples: [
+                                { code: 'use std::collections::HashSet;\n\nlet mut books = HashSet::new();\nbooks.insert("A Game of Thrones");\nbooks.insert("A Clash of Kings");\nbooks.insert("A Game of Thrones");  // Ignoré (doublon)\n\nprintln!("Nombre de livres: {}", books.len());  // 2', desc: 'Éliminer les doublons' },
+                                { code: 'let a: HashSet<_> = [1, 2, 3].into_iter().collect();\nlet b: HashSet<_> = [3, 4, 5].into_iter().collect();\n\nlet intersection: HashSet<_> = a.intersection(&b).copied().collect();\nlet union: HashSet<_> = a.union(&b).copied().collect();\nlet difference: HashSet<_> = a.difference(&b).copied().collect();', desc: 'Opérations ensemblistes' }
+                            ],
+                            tips: ['Parfait pour vérifier rapidement l\'appartenance'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'String vs &str',
+                        desc: 'Chaînes de caractères',
+                        details: {
+                            explanation: 'String est une chaîne owned et mutable, &str est une vue immuable.',
+                            syntax: 'let s = String::from("hello");\nlet slice: &str = "hello";',
+                            options: [
+                                { flag: 'String::from()', desc: 'Créer depuis &str' },
+                                { flag: '.to_string()', desc: 'Convertir en String' },
+                                { flag: '&s[..]', desc: 'String vers &str' },
+                                { flag: 'format!()', desc: 'Concaténation complexe' }
+                            ],
+                            examples: [
+                                { code: 'let mut s = String::from("Hello");\ns.push_str(", world!");\ns.push(\'!\');\n\nlet s2 = String::from("foo");\nlet s3 = s + &s2;  // s est moved', desc: 'Manipulation de String' },
+                                { code: 'let s = format!("{} {} {}", "Hello", "World", 2024);\n\n// Itérer sur les caractères\nfor c in "नमस्ते".chars() {\n    println!("{}", c);\n}\n\n// Itérer sur les bytes\nfor b in "hello".bytes() {\n    println!("{}", b);\n}', desc: 'Formatage et itération' },
+                                { code: '// Slicing (attention aux caractères multi-byte)\nlet hello = "Здравствуйте";\nlet s = &hello[0..4];  // "Зд" (4 bytes = 2 caractères cyrilliques)', desc: 'Slicing UTF-8' }
+                            ],
+                            tips: ['Préférez &str pour les paramètres de fonction'],
+                            warnings: ['Le slicing par index peut paniquer si on coupe un caractère UTF-8']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'iterators',
+                title: 'Iterators & Closures',
+                icon: 'fa-repeat',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: '.iter() / .into_iter() / .iter_mut()',
+                        desc: 'Créer un itérateur',
+                        details: {
+                            explanation: 'Trois façons de créer un itérateur selon le type d\'accès souhaité.',
+                            syntax: 'collection.iter()\ncollection.into_iter()\ncollection.iter_mut()',
+                            options: [
+                                { flag: '.iter()', desc: 'Itère sur &T (emprunte)' },
+                                { flag: '.into_iter()', desc: 'Itère sur T (consomme)' },
+                                { flag: '.iter_mut()', desc: 'Itère sur &mut T (modifie)' }
+                            ],
+                            examples: [
+                                { code: 'let v = vec![1, 2, 3];\n\n// Emprunter les éléments\nfor val in v.iter() {\n    println!("{}", val);\n}\nprintln!("{:?}", v);  // v toujours utilisable', desc: 'iter() - emprunte' },
+                                { code: 'let v = vec![1, 2, 3];\n\n// Consommer le vecteur\nfor val in v.into_iter() {\n    println!("{}", val);\n}\n// v n\'est plus utilisable ici', desc: 'into_iter() - consomme' },
+                                { code: 'let mut v = vec![1, 2, 3];\n\n// Modifier les éléments\nfor val in v.iter_mut() {\n    *val *= 2;\n}\nprintln!("{:?}", v);  // [2, 4, 6]', desc: 'iter_mut() - modifie' }
+                            ],
+                            tips: ['for x in &collection équivaut à for x in collection.iter()'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '.map() / .filter() / .collect()',
+                        desc: 'Adaptateurs d\'itérateur',
+                        details: {
+                            explanation: 'Les adaptateurs transforment un itérateur en un autre. Ils sont paresseux (lazy).',
+                            syntax: 'iter.map(|x| ...).filter(|x| ...).collect()',
+                            options: [
+                                { flag: '.map(f)', desc: 'Transforme chaque élément' },
+                                { flag: '.filter(p)', desc: 'Garde si prédicat vrai' },
+                                { flag: '.collect()', desc: 'Consomme en collection' },
+                                { flag: '.take(n)', desc: 'Prend n premiers éléments' },
+                                { flag: '.skip(n)', desc: 'Ignore n premiers éléments' }
+                            ],
+                            examples: [
+                                { code: 'let v = vec![1, 2, 3, 4, 5];\n\nlet squared: Vec<i32> = v.iter()\n    .map(|x| x * x)\n    .collect();\n// [1, 4, 9, 16, 25]', desc: 'map() - transformer' },
+                                { code: 'let v = vec![1, 2, 3, 4, 5, 6];\n\nlet evens: Vec<_> = v.into_iter()\n    .filter(|x| x % 2 == 0)\n    .collect();\n// [2, 4, 6]', desc: 'filter() - filtrer' },
+                                { code: 'let v = vec![1, 2, 3, 4, 5];\n\nlet result: Vec<i32> = v.iter()\n    .filter(|&x| x > &2)\n    .map(|x| x * 10)\n    .collect();\n// [30, 40, 50]', desc: 'Chaînage' }
+                            ],
+                            tips: ['Les adaptateurs sont lazy - rien ne s\'exécute sans un consommateur comme collect()'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '|args| expression',
+                        desc: 'Closures (fonctions anonymes)',
+                        details: {
+                            explanation: 'Les closures capturent leur environnement et peuvent être passées comme arguments.',
+                            syntax: '|param1, param2| expression\n|param| { statements; expression }',
+                            options: [
+                                { flag: '|x|', desc: 'Capture par référence' },
+                                { flag: 'move |x|', desc: 'Prend ownership' }
+                            ],
+                            examples: [
+                                { code: '// Closure simple\nlet add = |a, b| a + b;\nprintln!("{}", add(2, 3));  // 5\n\n// Avec annotation de type\nlet add: fn(i32, i32) -> i32 = |a, b| a + b;', desc: 'Closures basiques' },
+                                { code: '// Capture de l\'environnement\nlet x = 4;\nlet equal_to_x = |z| z == x;  // Capture x par référence\nassert!(equal_to_x(4));', desc: 'Capture d\'environnement' },
+                                { code: '// move pour prendre ownership\nlet s = String::from("hello");\nlet closure = move || {\n    println!("{}", s);\n};\nclosure();\n// s n\'est plus utilisable ici', desc: 'Closure avec move' }
+                            ],
+                            tips: ['Les closures sont souvent utilisées avec les itérateurs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '.fold() / .reduce() / .find()',
+                        desc: 'Consommateurs d\'itérateur',
+                        details: {
+                            explanation: 'Les consommateurs terminent la chaîne d\'itération et produisent une valeur.',
+                            syntax: 'iter.fold(init, |acc, x| ...) \niter.find(|x| ...)',
+                            options: [
+                                { flag: '.fold(init, f)', desc: 'Accumule avec valeur initiale' },
+                                { flag: '.reduce(f)', desc: 'Accumule sans valeur initiale' },
+                                { flag: '.find(p)', desc: 'Premier élément satisfaisant p' },
+                                { flag: '.sum()', desc: 'Somme des éléments' },
+                                { flag: '.count()', desc: 'Nombre d\'éléments' },
+                                { flag: '.any(p) / .all(p)', desc: 'Prédicats existentiel/universel' }
+                            ],
+                            examples: [
+                                { code: 'let numbers = vec![1, 2, 3, 4, 5];\n\n// fold avec valeur initiale\nlet sum = numbers.iter().fold(0, |acc, x| acc + x);  // 15\n\n// reduce sans valeur initiale\nlet product = numbers.iter().copied().reduce(|acc, x| acc * x);  // Some(120)', desc: 'fold et reduce' },
+                                { code: 'let numbers = vec![1, 2, 3, 4, 5];\n\nlet first_even = numbers.iter().find(|&&x| x % 2 == 0);  // Some(&2)\n\nlet has_negative = numbers.iter().any(|&x| x < 0);  // false\nlet all_positive = numbers.iter().all(|&x| x > 0);  // true', desc: 'find, any, all' },
+                                { code: 'let v: Vec<i32> = vec![1, 2, 3];\n\nlet sum: i32 = v.iter().sum();  // 6\nlet count = v.iter().count();   // 3\nlet max = v.iter().max();       // Some(&3)', desc: 'Raccourcis courants' }
+                            ],
+                            tips: ['fold est plus flexible que reduce mais requiert une valeur initiale'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'async',
+                title: 'Async Rust',
+                icon: 'fa-bolt',
+                color: 'border-l-4 border-violet-500',
+                commands: [
+                    {
+                        cmd: 'async fn / .await',
+                        desc: 'Fonction asynchrone',
+                        details: {
+                            explanation: 'async/await permet d\'écrire du code asynchrone de manière séquentielle.',
+                            syntax: 'async fn nom() -> Type { ... }\nresult.await',
+                            options: [],
+                            examples: [
+                                { code: 'async fn fetch_data() -> String {\n    // Simule une opération asynchrone\n    "données".to_string()\n}\n\nasync fn process() {\n    let data = fetch_data().await;\n    println!("{}", data);\n}', desc: 'Fonction async basique' },
+                                { code: '// Une fonction async retourne un Future\nasync fn get_number() -> i32 {\n    42\n}\n\n// Équivalent à:\nfn get_number_explicit() -> impl Future<Output = i32> {\n    async { 42 }\n}', desc: 'Future implicite' }
+                            ],
+                            tips: ['async fn retourne un Future qui doit être .await ou exécuté'],
+                            warnings: ['Nécessite un runtime async comme tokio ou async-std']
+                        }
+                    },
+                    {
+                        cmd: 'tokio::main',
+                        desc: 'Runtime Tokio',
+                        details: {
+                            explanation: 'Tokio est le runtime async le plus populaire pour Rust.',
+                            syntax: '#[tokio::main]\nasync fn main() { ... }',
+                            options: [
+                                { flag: '#[tokio::main]', desc: 'Runtime multi-thread' },
+                                { flag: '#[tokio::main(flavor = "current_thread")]', desc: 'Single thread' },
+                                { flag: '#[tokio::test]', desc: 'Pour les tests async' }
+                            ],
+                            examples: [
+                                { code: '// Cargo.toml:\n// [dependencies]\n// tokio = { version = "1", features = ["full"] }\n\n#[tokio::main]\nasync fn main() {\n    println!("Hello depuis async!");\n    \n    let result = async_operation().await;\n    println!("Résultat: {}", result);\n}', desc: 'Point d\'entrée Tokio' },
+                                { code: 'use tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    println!("Début");\n    sleep(Duration::from_secs(1)).await;\n    println!("1 seconde plus tard");\n}', desc: 'Sleep async' }
+                            ],
+                            tips: ['Utilisez features = ["full"] pour toutes les fonctionnalités'],
+                            warnings: ['Ne pas mélanger code blocking et async sans spawn_blocking']
+                        }
+                    },
+                    {
+                        cmd: 'tokio::spawn',
+                        desc: 'Exécuter une tâche en parallèle',
+                        details: {
+                            explanation: 'spawn lance une tâche async qui s\'exécute en parallèle.',
+                            syntax: 'tokio::spawn(async { ... })',
+                            options: [],
+                            examples: [
+                                { code: 'use tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    let handle = tokio::spawn(async {\n        sleep(Duration::from_secs(1)).await;\n        "Tâche terminée"\n    });\n\n    println!("Tâche lancée...");\n    \n    let result = handle.await.unwrap();\n    println!("{}", result);\n}', desc: 'Spawn basique' },
+                                { code: '// Exécuter plusieurs tâches en parallèle\nlet handles: Vec<_> = (0..5).map(|i| {\n    tokio::spawn(async move {\n        sleep(Duration::from_millis(100 * i)).await;\n        i * 2\n    })\n}).collect();\n\nfor handle in handles {\n    let result = handle.await.unwrap();\n    println!("Résultat: {}", result);\n}', desc: 'Multiple spawns' }
+                            ],
+                            tips: ['Les tâches spawn doivent être \'static (utiliser move)'],
+                            warnings: ['Gérez les erreurs de JoinHandle avec .await.unwrap() ou ?']
+                        }
+                    },
+                    {
+                        cmd: 'tokio::select!',
+                        desc: 'Attendre la première tâche',
+                        details: {
+                            explanation: 'select! attend que l\'une des branches se complète en premier.',
+                            syntax: 'tokio::select! {\n    result = future1 => { ... }\n    result = future2 => { ... }\n}',
+                            options: [],
+                            examples: [
+                                { code: 'use tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    tokio::select! {\n        _ = sleep(Duration::from_secs(1)) => {\n            println!("1 seconde écoulée");\n        }\n        _ = sleep(Duration::from_secs(2)) => {\n            println!("2 secondes écoulées");\n        }\n    }\n    // Seul "1 seconde écoulée" s\'affiche\n}', desc: 'Race entre deux timers' },
+                                { code: 'use tokio::sync::mpsc;\n\nasync fn with_timeout<T>(future: impl Future<Output = T>, timeout: Duration) -> Option<T> {\n    tokio::select! {\n        result = future => Some(result),\n        _ = sleep(timeout) => None,\n    }\n}', desc: 'Pattern timeout' }
+                            ],
+                            tips: ['Les branches non sélectionnées sont annulées'],
+                            warnings: ['Attention à la cancellation des futures non complétées']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'projet-cli',
+                title: '🚀 Projet: CLI App',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-gradient-to-r from-orange-500 to-red-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Setup projet',
+                        desc: 'Créer la structure du projet',
+                        details: {
+                            explanation: 'Créer un outil CLI qui gère une liste de tâches TODO avec stockage JSON.',
+                            syntax: 'cargo new todo_cli && cd todo_cli',
+                            options: [],
+                            examples: [
+                                { code: 'cargo new todo_cli\ncd todo_cli\n\n# Ajouter les dépendances\ncargo add clap --features derive\ncargo add serde --features derive\ncargo add serde_json\ncargo add chrono --features serde\ncargo add colored', desc: 'Créer le projet et dépendances' },
+                                { code: '// Structure du projet:\n// todo_cli/\n// ├── Cargo.toml\n// └── src/\n//     ├── main.rs      (point d\'entrée CLI)\n//     ├── lib.rs       (logique métier)\n//     ├── task.rs      (struct Task)\n//     └── storage.rs   (persistence JSON)', desc: 'Architecture des fichiers' }
+                            ],
+                            tips: ['clap avec derive simplifie énormément le parsing des arguments'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: Modèle de données',
+                        desc: 'Définir la struct Task',
+                        details: {
+                            explanation: 'Créer les structures de données avec serde pour la sérialisation.',
+                            syntax: 'src/task.rs',
+                            options: [],
+                            examples: [
+                                { code: '// src/task.rs\nuse chrono::{DateTime, Utc};\nuse serde::{Deserialize, Serialize};\n\n#[derive(Debug, Clone, Serialize, Deserialize)]\npub struct Task {\n    pub id: u32,\n    pub title: String,\n    pub completed: bool,\n    pub created_at: DateTime<Utc>,\n    pub completed_at: Option<DateTime<Utc>>,\n}\n\nimpl Task {\n    pub fn new(id: u32, title: String) -> Self {\n        Self {\n            id,\n            title,\n            completed: false,\n            created_at: Utc::now(),\n            completed_at: None,\n        }\n    }\n\n    pub fn complete(&mut self) {\n        self.completed = true;\n        self.completed_at = Some(Utc::now());\n    }\n}', desc: 'Structure Task complète' },
+                                { code: '#[derive(Debug, Serialize, Deserialize, Default)]\npub struct TaskList {\n    pub tasks: Vec<Task>,\n    next_id: u32,\n}\n\nimpl TaskList {\n    pub fn add(&mut self, title: String) -> &Task {\n        let task = Task::new(self.next_id, title);\n        self.next_id += 1;\n        self.tasks.push(task);\n        self.tasks.last().unwrap()\n    }\n\n    pub fn remove(&mut self, id: u32) -> Option<Task> {\n        self.tasks.iter().position(|t| t.id == id)\n            .map(|i| self.tasks.remove(i))\n    }\n\n    pub fn complete(&mut self, id: u32) -> Option<&Task> {\n        self.tasks.iter_mut()\n            .find(|t| t.id == id)\n            .map(|t| { t.complete(); &*t })\n    }\n}', desc: 'Gestionnaire de tâches' }
+                            ],
+                            tips: ['derive(Serialize, Deserialize) permet la conversion JSON automatique'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Persistence JSON',
+                        desc: 'Sauvegarder et charger les données',
+                        details: {
+                            explanation: 'Implémenter le stockage persistant en JSON.',
+                            syntax: 'src/storage.rs',
+                            options: [],
+                            examples: [
+                                { code: '// src/storage.rs\nuse crate::task::TaskList;\nuse std::fs;\nuse std::io::{self, ErrorKind};\nuse std::path::Path;\n\nconst DATA_FILE: &str = "todos.json";\n\npub fn load() -> io::Result<TaskList> {\n    match fs::read_to_string(DATA_FILE) {\n        Ok(content) => {\n            serde_json::from_str(&content)\n                .map_err(|e| io::Error::new(ErrorKind::InvalidData, e))\n        }\n        Err(e) if e.kind() == ErrorKind::NotFound => {\n            Ok(TaskList::default())\n        }\n        Err(e) => Err(e),\n    }\n}\n\npub fn save(list: &TaskList) -> io::Result<()> {\n    let json = serde_json::to_string_pretty(list)\n        .map_err(|e| io::Error::new(ErrorKind::InvalidData, e))?;\n    fs::write(DATA_FILE, json)\n}', desc: 'Module storage complet' },
+                                { code: '// Alternative avec directories pour un path standard\nuse directories::ProjectDirs;\n\npub fn get_data_path() -> PathBuf {\n    if let Some(proj_dirs) = ProjectDirs::from("com", "myapp", "todo_cli") {\n        let data_dir = proj_dirs.data_dir();\n        fs::create_dir_all(data_dir).ok();\n        data_dir.join("todos.json")\n    } else {\n        PathBuf::from("todos.json")\n    }\n}', desc: 'Path XDG-compliant (optionnel)' }
+                            ],
+                            tips: ['Utilisez serde_json::to_string_pretty pour un JSON lisible'],
+                            warnings: ['Gérez le cas où le fichier n\'existe pas encore']
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Parser CLI avec Clap',
+                        desc: 'Définir les commandes et arguments',
+                        details: {
+                            explanation: 'Utiliser clap derive pour parser les arguments de ligne de commande.',
+                            syntax: 'src/main.rs',
+                            options: [],
+                            examples: [
+                                { code: '// src/main.rs\nuse clap::{Parser, Subcommand};\n\n#[derive(Parser)]\n#[command(name = "todo")]\n#[command(about = "Gestionnaire de tâches en ligne de commande", long_about = None)]\nstruct Cli {\n    #[command(subcommand)]\n    command: Commands,\n}\n\n#[derive(Subcommand)]\nenum Commands {\n    /// Ajouter une nouvelle tâche\n    Add {\n        /// Titre de la tâche\n        title: String,\n    },\n    /// Lister toutes les tâches\n    List {\n        /// Afficher uniquement les tâches complétées\n        #[arg(short, long)]\n        completed: bool,\n        \n        /// Afficher uniquement les tâches en attente\n        #[arg(short, long)]\n        pending: bool,\n    },\n    /// Marquer une tâche comme complétée\n    Done {\n        /// ID de la tâche\n        id: u32,\n    },\n    /// Supprimer une tâche\n    Remove {\n        /// ID de la tâche\n        id: u32,\n    },\n}', desc: 'Définition CLI avec Clap' }
+                            ],
+                            tips: ['Les doc comments (///) deviennent l\'aide --help automatiquement'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Logique principale',
+                        desc: 'Implémenter les handlers',
+                        details: {
+                            explanation: 'Connecter le CLI aux fonctions métier.',
+                            syntax: 'src/main.rs (suite)',
+                            options: [],
+                            examples: [
+                                { code: 'mod task;\nmod storage;\n\nuse colored::Colorize;\nuse task::TaskList;\n\nfn main() -> Result<(), Box<dyn std::error::Error>> {\n    let cli = Cli::parse();\n    let mut tasks = storage::load()?;\n\n    match cli.command {\n        Commands::Add { title } => {\n            let task = tasks.add(title);\n            println!("{} Tâche #{} ajoutée: {}", \n                "✓".green(), task.id, task.title);\n        }\n        Commands::List { completed, pending } => {\n            list_tasks(&tasks, completed, pending);\n        }\n        Commands::Done { id } => {\n            match tasks.complete(id) {\n                Some(task) => println!("{} Tâche #{} complétée!", "✓".green(), task.id),\n                None => println!("{} Tâche #{} non trouvée", "✗".red(), id),\n            }\n        }\n        Commands::Remove { id } => {\n            match tasks.remove(id) {\n                Some(task) => println!("{} Tâche supprimée: {}", "✓".green(), task.title),\n                None => println!("{} Tâche #{} non trouvée", "✗".red(), id),\n            }\n        }\n    }\n\n    storage::save(&tasks)?;\n    Ok(())\n}', desc: 'Main avec dispatch des commandes' },
+                                { code: 'fn list_tasks(tasks: &TaskList, show_completed: bool, show_pending: bool) {\n    let filtered: Vec<_> = tasks.tasks.iter()\n        .filter(|t| {\n            if show_completed && !show_pending { t.completed }\n            else if show_pending && !show_completed { !t.completed }\n            else { true }\n        })\n        .collect();\n\n    if filtered.is_empty() {\n        println!("{}", "Aucune tâche trouvée.".dimmed());\n        return;\n    }\n\n    println!("\\n{}", "=== Liste des tâches ===".bold());\n    for task in filtered {\n        let status = if task.completed {\n            "✓".green()\n        } else {\n            "○".yellow()\n        };\n        let title = if task.completed {\n            task.title.strikethrough().dimmed().to_string()\n        } else {\n            task.title.clone()\n        };\n        println!("  {} [#{}] {}", status, task.id, title);\n    }\n    println!();\n}', desc: 'Affichage coloré des tâches' }
+                            ],
+                            tips: ['Le crate colored rend la sortie terminal plus lisible'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Tests et build',
+                        desc: 'Tester et compiler en release',
+                        details: {
+                            explanation: 'Ajouter des tests unitaires et compiler pour distribution.',
+                            syntax: 'cargo test && cargo build --release',
+                            options: [],
+                            examples: [
+                                { code: '// Dans src/task.rs, ajouter:\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_add_task() {\n        let mut list = TaskList::default();\n        let task = list.add("Test task".to_string());\n        assert_eq!(task.id, 0);\n        assert_eq!(task.title, "Test task");\n        assert!(!task.completed);\n    }\n\n    #[test]\n    fn test_complete_task() {\n        let mut list = TaskList::default();\n        list.add("Task".to_string());\n        \n        let completed = list.complete(0);\n        assert!(completed.is_some());\n        assert!(completed.unwrap().completed);\n    }\n\n    #[test]\n    fn test_remove_nonexistent() {\n        let mut list = TaskList::default();\n        assert!(list.remove(999).is_none());\n    }\n}', desc: 'Tests unitaires' },
+                                { code: '# Lancer les tests\ncargo test\n\n# Build release optimisé\ncargo build --release\n\n# Le binaire est dans target/release/todo_cli\n\n# Utilisation:\n./target/release/todo_cli add "Apprendre Rust"\n./target/release/todo_cli list\n./target/release/todo_cli done 0\n./target/release/todo_cli remove 0', desc: 'Build et utilisation' },
+                                { code: '# Installation globale (optionnel)\ncargo install --path .\n\n# Maintenant disponible partout:\ntodo_cli add "Nouvelle tâche"\ntodo_cli list --pending\ntodo_cli done 1', desc: 'Installation système' }
+                            ],
+                            tips: ['cargo install place le binaire dans ~/.cargo/bin/'],
+                            warnings: ['Testez toujours les edge cases (liste vide, ID invalide, etc.)']
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Distribution',
+                        desc: 'Cross-compilation et packaging',
+                        details: {
+                            explanation: 'Compiler pour différentes plateformes et publier.',
+                            syntax: 'cargo build --release --target <target>',
+                            options: [
+                                { flag: 'x86_64-unknown-linux-gnu', desc: 'Linux 64-bit' },
+                                { flag: 'x86_64-pc-windows-msvc', desc: 'Windows 64-bit' },
+                                { flag: 'x86_64-apple-darwin', desc: 'macOS Intel' },
+                                { flag: 'aarch64-apple-darwin', desc: 'macOS Apple Silicon' }
+                            ],
+                            examples: [
+                                { code: '# Installer cross pour la cross-compilation simplifiée\ncargo install cross\n\n# Compiler pour Linux depuis n\'importe quelle plateforme\ncross build --release --target x86_64-unknown-linux-gnu\n\n# Compiler pour Windows\ncross build --release --target x86_64-pc-windows-gnu', desc: 'Cross-compilation avec cross' },
+                                { code: '# Créer un release GitHub avec les binaires\n# .github/workflows/release.yml\nname: Release\non:\n  push:\n    tags: [\'v*\']\n\njobs:\n  build:\n    runs-on: ${{ matrix.os }}\n    strategy:\n      matrix:\n        include:\n          - os: ubuntu-latest\n            target: x86_64-unknown-linux-gnu\n          - os: windows-latest\n            target: x86_64-pc-windows-msvc\n          - os: macos-latest\n            target: x86_64-apple-darwin\n    steps:\n      - uses: actions/checkout@v3\n      - run: cargo build --release --target ${{ matrix.target }}\n      - uses: actions/upload-artifact@v3\n        with:\n          name: todo_cli-${{ matrix.target }}\n          path: target/${{ matrix.target }}/release/todo_cli*', desc: 'CI/CD GitHub Actions' },
+                                { code: '# Publier sur crates.io (optionnel)\ncargo login\ncargo publish --dry-run  # Vérifier d\'abord\ncargo publish', desc: 'Publication crates.io' }
+                            ],
+                            tips: ['cross utilise Docker pour cross-compiler facilement'],
+                            warnings: ['Testez sur chaque plateforme cible avant distribution']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

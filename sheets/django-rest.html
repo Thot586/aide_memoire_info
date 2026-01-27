@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Django REST Framework : création d'APIs RESTful, serializers, viewsets et authentification.">
+    <title>Django REST Framework - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-red-500/20 mb-4 icon-glow">
+                    <i class="fas fa-plug text-3xl text-red-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Django REST Framework</h1>
+                <p class="text-slate-400">Création d'APIs RESTful avec Django</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'setup',
+                title: 'Installation & Configuration',
+                icon: 'fa-cog',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'pip install djangorestframework',
+                        desc: 'Installer Django REST Framework',
+                        details: {
+                            explanation: 'Installe le package DRF qui permet de créer des APIs RESTful avec Django.',
+                            syntax: 'pip install djangorestframework',
+                            options: [],
+                            examples: [
+                                { code: 'pip install djangorestframework', desc: 'Installation basique' },
+                                { code: 'pip install djangorestframework[markdown]', desc: 'Avec support Markdown pour la doc' }
+                            ],
+                            tips: ['Ajoutez "rest_framework" dans INSTALLED_APPS de settings.py'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'INSTALLED_APPS = [..., "rest_framework"]',
+                        desc: 'Ajouter DRF aux applications',
+                        details: {
+                            explanation: 'Configure Django pour utiliser REST Framework en l\'ajoutant aux applications installées.',
+                            syntax: 'INSTALLED_APPS = [..., "rest_framework"]',
+                            options: [],
+                            examples: [
+                                { code: 'INSTALLED_APPS = [\n    "django.contrib.admin",\n    ...\n    "rest_framework",\n    "myapp",\n]', desc: 'Configuration dans settings.py' }
+                            ],
+                            tips: ['Placez rest_framework avant vos applications'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'REST_FRAMEWORK = {...}',
+                        desc: 'Configuration globale DRF',
+                        details: {
+                            explanation: 'Définit les paramètres par défaut pour toutes vos APIs : pagination, authentification, permissions.',
+                            syntax: 'REST_FRAMEWORK = { "KEY": "value" }',
+                            options: [
+                                { flag: 'DEFAULT_AUTHENTICATION_CLASSES', desc: 'Classes d\'authentification' },
+                                { flag: 'DEFAULT_PERMISSION_CLASSES', desc: 'Permissions par défaut' },
+                                { flag: 'DEFAULT_PAGINATION_CLASS', desc: 'Type de pagination' },
+                                { flag: 'PAGE_SIZE', desc: 'Nombre d\'éléments par page' }
+                            ],
+                            examples: [
+                                { code: 'REST_FRAMEWORK = {\n    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",\n    "PAGE_SIZE": 10,\n    "DEFAULT_PERMISSION_CLASSES": [\n        "rest_framework.permissions.IsAuthenticated",\n    ]\n}', desc: 'Configuration typique' }
+                            ],
+                            tips: ['Commencez avec des permissions strictes puis assouplissez'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'serializers',
+                title: 'Serializers',
+                icon: 'fa-exchange-alt',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'class MySerializer(serializers.ModelSerializer)',
+                        desc: 'Créer un serializer de modèle',
+                        details: {
+                            explanation: 'Un ModelSerializer génère automatiquement les champs à partir d\'un modèle Django et gère la validation.',
+                            syntax: 'class MySerializer(serializers.ModelSerializer):\n    class Meta:\n        model = MyModel\n        fields = [...]',
+                            options: [
+                                { flag: 'fields = "__all__"', desc: 'Tous les champs du modèle' },
+                                { flag: 'fields = ["id", "name"]', desc: 'Champs spécifiques' },
+                                { flag: 'exclude = ["password"]', desc: 'Exclure des champs' },
+                                { flag: 'read_only_fields = ["id"]', desc: 'Champs en lecture seule' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework import serializers\nfrom .models import Article\n\nclass ArticleSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Article\n        fields = ["id", "title", "content", "author", "created_at"]', desc: 'Serializer d\'article' }
+                            ],
+                            tips: ['Évitez fields = "__all__" en production pour des raisons de sécurité'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'serializer.is_valid()',
+                        desc: 'Valider les données',
+                        details: {
+                            explanation: 'Vérifie que les données reçues sont valides selon les règles du serializer.',
+                            syntax: 'serializer.is_valid(raise_exception=False)',
+                            options: [
+                                { flag: 'raise_exception=True', desc: 'Lève une exception si invalide' }
+                            ],
+                            examples: [
+                                { code: 'serializer = ArticleSerializer(data=request.data)\nif serializer.is_valid():\n    serializer.save()\n    return Response(serializer.data, status=201)', desc: 'Validation manuelle' },
+                                { code: 'serializer.is_valid(raise_exception=True)\nserializer.save()', desc: 'Avec exception automatique' }
+                            ],
+                            tips: ['Utilisez raise_exception=True pour simplifier le code'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'serializer.save()',
+                        desc: 'Sauvegarder les données',
+                        details: {
+                            explanation: 'Crée ou met à jour une instance du modèle avec les données validées.',
+                            syntax: 'serializer.save(**kwargs)',
+                            options: [],
+                            examples: [
+                                { code: 'serializer.save()', desc: 'Sauvegarde simple' },
+                                { code: 'serializer.save(author=request.user)', desc: 'Ajouter l\'auteur automatiquement' }
+                            ],
+                            tips: ['Passez des arguments supplémentaires à save() pour injecter des données'],
+                            warnings: ['Appelez is_valid() avant save()']
+                        }
+                    },
+                    {
+                        cmd: 'SerializerMethodField()',
+                        desc: 'Champ calculé personnalisé',
+                        details: {
+                            explanation: 'Permet d\'ajouter un champ dont la valeur est calculée par une méthode.',
+                            syntax: 'field = serializers.SerializerMethodField()',
+                            options: [],
+                            examples: [
+                                { code: 'class ArticleSerializer(serializers.ModelSerializer):\n    word_count = serializers.SerializerMethodField()\n\n    def get_word_count(self, obj):\n        return len(obj.content.split())\n\n    class Meta:\n        model = Article\n        fields = ["id", "title", "word_count"]', desc: 'Compteur de mots' }
+                            ],
+                            tips: ['La méthode doit s\'appeler get_<nom_du_champ>'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'views',
+                title: 'Views & ViewSets',
+                icon: 'fa-eye',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'class MyViewSet(viewsets.ModelViewSet)',
+                        desc: 'Créer un ViewSet CRUD complet',
+                        details: {
+                            explanation: 'Un ModelViewSet fournit automatiquement les actions list, create, retrieve, update, destroy.',
+                            syntax: 'class MyViewSet(viewsets.ModelViewSet):\n    queryset = Model.objects.all()\n    serializer_class = MySerializer',
+                            options: [
+                                { flag: 'queryset', desc: 'QuerySet des objets' },
+                                { flag: 'serializer_class', desc: 'Serializer à utiliser' },
+                                { flag: 'permission_classes', desc: 'Permissions requises' },
+                                { flag: 'filter_backends', desc: 'Filtres disponibles' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework import viewsets\nfrom .models import Article\nfrom .serializers import ArticleSerializer\n\nclass ArticleViewSet(viewsets.ModelViewSet):\n    queryset = Article.objects.all()\n    serializer_class = ArticleSerializer', desc: 'ViewSet basique' }
+                            ],
+                            tips: ['ModelViewSet = ReadOnlyModelViewSet + CreateModelMixin + UpdateModelMixin + DestroyModelMixin'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '@api_view(["GET", "POST"])',
+                        desc: 'Vue fonction avec décorateur',
+                        details: {
+                            explanation: 'Décorateur pour créer une vue API basée sur une fonction simple.',
+                            syntax: '@api_view(["METHOD1", "METHOD2"])\ndef my_view(request):',
+                            options: [],
+                            examples: [
+                                { code: 'from rest_framework.decorators import api_view\nfrom rest_framework.response import Response\n\n@api_view(["GET"])\ndef hello_world(request):\n    return Response({"message": "Hello, World!"})', desc: 'Vue GET simple' },
+                                { code: '@api_view(["GET", "POST"])\ndef article_list(request):\n    if request.method == "GET":\n        articles = Article.objects.all()\n        serializer = ArticleSerializer(articles, many=True)\n        return Response(serializer.data)\n    elif request.method == "POST":\n        serializer = ArticleSerializer(data=request.data)\n        serializer.is_valid(raise_exception=True)\n        serializer.save()\n        return Response(serializer.data, status=201)', desc: 'Liste et création' }
+                            ],
+                            tips: ['Plus simple que les classes pour des endpoints simples'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'class MyAPIView(APIView)',
+                        desc: 'Vue classe personnalisée',
+                        details: {
+                            explanation: 'APIView offre un contrôle total sur chaque méthode HTTP (get, post, put, delete).',
+                            syntax: 'class MyAPIView(APIView):\n    def get(self, request):\n        ...',
+                            options: [],
+                            examples: [
+                                { code: 'from rest_framework.views import APIView\nfrom rest_framework.response import Response\n\nclass ArticleList(APIView):\n    def get(self, request):\n        articles = Article.objects.all()\n        serializer = ArticleSerializer(articles, many=True)\n        return Response(serializer.data)\n\n    def post(self, request):\n        serializer = ArticleSerializer(data=request.data)\n        serializer.is_valid(raise_exception=True)\n        serializer.save()\n        return Response(serializer.data, status=201)', desc: 'APIView complète' }
+                            ],
+                            tips: ['Utilisez APIView quand vous avez besoin de logique personnalisée'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '@action(detail=True, methods=["post"])',
+                        desc: 'Action personnalisée sur ViewSet',
+                        details: {
+                            explanation: 'Ajoute une action personnalisée à un ViewSet au-delà des opérations CRUD standard.',
+                            syntax: '@action(detail=True/False, methods=["method"])',
+                            options: [
+                                { flag: 'detail=True', desc: 'Action sur un objet spécifique (/items/1/action/)' },
+                                { flag: 'detail=False', desc: 'Action sur la collection (/items/action/)' },
+                                { flag: 'methods=["post"]', desc: 'Méthodes HTTP acceptées' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework.decorators import action\n\nclass ArticleViewSet(viewsets.ModelViewSet):\n    ...\n\n    @action(detail=True, methods=["post"])\n    def publish(self, request, pk=None):\n        article = self.get_object()\n        article.is_published = True\n        article.save()\n        return Response({"status": "published"})', desc: 'Action publier un article' }
+                            ],
+                            tips: ['L\'URL sera automatiquement /articles/{id}/publish/'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'routing',
+                title: 'Routing & URLs',
+                icon: 'fa-route',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'router = DefaultRouter()',
+                        desc: 'Créer un routeur automatique',
+                        details: {
+                            explanation: 'Le routeur génère automatiquement les URLs pour les ViewSets (list, create, retrieve, update, destroy).',
+                            syntax: 'from rest_framework.routers import DefaultRouter\nrouter = DefaultRouter()',
+                            options: [
+                                { flag: 'DefaultRouter', desc: 'Avec page racine de l\'API' },
+                                { flag: 'SimpleRouter', desc: 'Sans page racine' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework.routers import DefaultRouter\nfrom .views import ArticleViewSet\n\nrouter = DefaultRouter()\nrouter.register(r"articles", ArticleViewSet)\n\nurlpatterns = router.urls', desc: 'Configuration du routeur' }
+                            ],
+                            tips: ['DefaultRouter ajoute une page d\'index listant tous les endpoints'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'router.register(r"prefix", ViewSet)',
+                        desc: 'Enregistrer un ViewSet',
+                        details: {
+                            explanation: 'Associe un préfixe d\'URL à un ViewSet pour générer toutes les routes CRUD.',
+                            syntax: 'router.register(r"prefix", ViewSet, basename="name")',
+                            options: [
+                                { flag: 'basename', desc: 'Nom de base pour les URL names (optionnel si queryset défini)' }
+                            ],
+                            examples: [
+                                { code: 'router.register(r"articles", ArticleViewSet)', desc: 'Avec queryset' },
+                                { code: 'router.register(r"users", UserViewSet, basename="user")', desc: 'Avec basename explicite' }
+                            ],
+                            tips: ['Le basename est déduit automatiquement si queryset est défini'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'path("api/", include(router.urls))',
+                        desc: 'Inclure les routes du routeur',
+                        details: {
+                            explanation: 'Intègre les URLs générées par le routeur dans les URLs du projet.',
+                            syntax: 'path("prefix/", include(router.urls))',
+                            options: [],
+                            examples: [
+                                { code: 'from django.urls import path, include\n\nurlpatterns = [\n    path("api/", include(router.urls)),\n]', desc: 'URLs sous /api/' },
+                                { code: '# Résultat:\n# GET /api/articles/ - liste\n# POST /api/articles/ - créer\n# GET /api/articles/1/ - détail\n# PUT /api/articles/1/ - modifier\n# DELETE /api/articles/1/ - supprimer', desc: 'Routes générées' }
+                            ],
+                            tips: ['Ajoutez api-auth pour l\'interface de login dans le navigable API'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'auth',
+                title: 'Authentification & Permissions',
+                icon: 'fa-lock',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'permission_classes = [IsAuthenticated]',
+                        desc: 'Requérir l\'authentification',
+                        details: {
+                            explanation: 'Définit les permissions requises pour accéder à une vue ou un ViewSet.',
+                            syntax: 'permission_classes = [Permission1, Permission2]',
+                            options: [
+                                { flag: 'AllowAny', desc: 'Accès public' },
+                                { flag: 'IsAuthenticated', desc: 'Utilisateur connecté requis' },
+                                { flag: 'IsAdminUser', desc: 'Admin uniquement' },
+                                { flag: 'IsAuthenticatedOrReadOnly', desc: 'Lecture publique, écriture authentifiée' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework.permissions import IsAuthenticated\n\nclass ArticleViewSet(viewsets.ModelViewSet):\n    permission_classes = [IsAuthenticated]\n    ...', desc: 'ViewSet protégé' }
+                            ],
+                            tips: ['Combinez plusieurs permissions avec des listes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'class IsOwnerOrReadOnly(BasePermission)',
+                        desc: 'Permission personnalisée',
+                        details: {
+                            explanation: 'Crée une règle de permission personnalisée en surchargeant has_permission ou has_object_permission.',
+                            syntax: 'class MyPermission(permissions.BasePermission):\n    def has_object_permission(self, request, view, obj):',
+                            options: [
+                                { flag: 'has_permission()', desc: 'Permission au niveau de la vue' },
+                                { flag: 'has_object_permission()', desc: 'Permission au niveau de l\'objet' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework import permissions\n\nclass IsOwnerOrReadOnly(permissions.BasePermission):\n    def has_object_permission(self, request, view, obj):\n        # Lecture autorisée pour tous\n        if request.method in permissions.SAFE_METHODS:\n            return True\n        # Écriture uniquement pour le propriétaire\n        return obj.author == request.user', desc: 'Propriétaire ou lecture seule' }
+                            ],
+                            tips: ['SAFE_METHODS = ("GET", "HEAD", "OPTIONS")'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'TokenAuthentication',
+                        desc: 'Authentification par token',
+                        details: {
+                            explanation: 'Authentifie les requêtes via un token dans le header Authorization.',
+                            syntax: 'Authorization: Token <token_key>',
+                            options: [],
+                            examples: [
+                                { code: '# settings.py\nINSTALLED_APPS = [..., "rest_framework.authtoken"]\n\nREST_FRAMEWORK = {\n    "DEFAULT_AUTHENTICATION_CLASSES": [\n        "rest_framework.authentication.TokenAuthentication",\n    ]\n}', desc: 'Configuration' },
+                                { code: 'python manage.py migrate  # Crée la table des tokens', desc: 'Migration' },
+                                { code: 'from rest_framework.authtoken.models import Token\ntoken = Token.objects.create(user=user)', desc: 'Créer un token' }
+                            ],
+                            tips: ['Utilisez dj-rest-auth ou djoser pour des endpoints d\'auth complets'],
+                            warnings: ['Utilisez HTTPS en production avec les tokens']
+                        }
+                    },
+                    {
+                        cmd: 'JWTAuthentication',
+                        desc: 'Authentification JWT',
+                        details: {
+                            explanation: 'JSON Web Tokens pour une authentification stateless. Nécessite djangorestframework-simplejwt.',
+                            syntax: 'pip install djangorestframework-simplejwt',
+                            options: [],
+                            examples: [
+                                { code: 'pip install djangorestframework-simplejwt', desc: 'Installation' },
+                                { code: '# settings.py\nREST_FRAMEWORK = {\n    "DEFAULT_AUTHENTICATION_CLASSES": [\n        "rest_framework_simplejwt.authentication.JWTAuthentication",\n    ]\n}', desc: 'Configuration' },
+                                { code: '# urls.py\nfrom rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView\n\nurlpatterns = [\n    path("api/token/", TokenObtainPairView.as_view()),\n    path("api/token/refresh/", TokenRefreshView.as_view()),\n]', desc: 'URLs pour obtenir/rafraîchir les tokens' }
+                            ],
+                            tips: ['JWT est idéal pour les SPAs et applications mobiles'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'filtering',
+                title: 'Filtrage & Pagination',
+                icon: 'fa-filter',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'filter_backends = [SearchFilter]',
+                        desc: 'Ajouter la recherche',
+                        details: {
+                            explanation: 'Permet de rechercher dans les champs texte via le paramètre ?search=.',
+                            syntax: 'filter_backends = [SearchFilter]\nsearch_fields = ["field1", "field2"]',
+                            options: [
+                                { flag: '^field', desc: 'Commence par' },
+                                { flag: '=field', desc: 'Correspondance exacte' },
+                                { flag: '@field', desc: 'Recherche full-text (PostgreSQL)' },
+                                { flag: '$field', desc: 'Regex' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework.filters import SearchFilter\n\nclass ArticleViewSet(viewsets.ModelViewSet):\n    filter_backends = [SearchFilter]\n    search_fields = ["title", "content", "author__username"]', desc: 'Recherche dans titre, contenu et auteur' },
+                                { code: '# GET /api/articles/?search=django', desc: 'Utilisation' }
+                            ],
+                            tips: ['Utilisez __ pour traverser les relations'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'filter_backends = [DjangoFilterBackend]',
+                        desc: 'Filtrage avancé avec django-filter',
+                        details: {
+                            explanation: 'Permet de filtrer par valeur exacte des champs via les paramètres d\'URL.',
+                            syntax: 'pip install django-filter',
+                            options: [],
+                            examples: [
+                                { code: 'pip install django-filter', desc: 'Installation' },
+                                { code: '# settings.py\nINSTALLED_APPS = [..., "django_filters"]\n\nREST_FRAMEWORK = {\n    "DEFAULT_FILTER_BACKENDS": [\n        "django_filters.rest_framework.DjangoFilterBackend"\n    ]\n}', desc: 'Configuration globale' },
+                                { code: 'class ArticleViewSet(viewsets.ModelViewSet):\n    filterset_fields = ["category", "author", "is_published"]', desc: 'Filtres sur un ViewSet' },
+                                { code: '# GET /api/articles/?category=tech&is_published=true', desc: 'Utilisation' }
+                            ],
+                            tips: ['Créez des FilterSet personnalisés pour des filtres complexes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'pagination_class = PageNumberPagination',
+                        desc: 'Pagination des résultats',
+                        details: {
+                            explanation: 'Divise les résultats en pages pour éviter de charger trop de données.',
+                            syntax: 'pagination_class = PaginationClass',
+                            options: [
+                                { flag: 'PageNumberPagination', desc: '?page=2' },
+                                { flag: 'LimitOffsetPagination', desc: '?limit=10&offset=20' },
+                                { flag: 'CursorPagination', desc: 'Curseur opaque (performant)' }
+                            ],
+                            examples: [
+                                { code: '# settings.py\nREST_FRAMEWORK = {\n    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",\n    "PAGE_SIZE": 20\n}', desc: 'Configuration globale' },
+                                { code: 'class LargeResultsSetPagination(PageNumberPagination):\n    page_size = 100\n    page_size_query_param = "page_size"\n    max_page_size = 1000', desc: 'Pagination personnalisée' }
+                            ],
+                            tips: ['CursorPagination est le plus performant pour de grandes tables'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'nested-serializers',
+                title: 'Serializers avancés',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Nested Serializers (lecture)',
+                        desc: 'Imbriquer des serializers pour les relations',
+                        details: {
+                            explanation: 'Un serializer peut inclure d\'autres serializers pour afficher les données des relations (ForeignKey, ManyToMany).',
+                            syntax: 'related_field = RelatedSerializer(many=True/False, read_only=True)',
+                            options: [
+                                { flag: 'many=True', desc: 'Pour les relations ManyToMany ou reverse FK' },
+                                { flag: 'read_only=True', desc: 'Lecture seule (pas de création via ce champ)' },
+                                { flag: 'source', desc: 'Spécifier le champ source si différent du nom' }
+                            ],
+                            examples: [
+                                { code: 'class AuthorSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = User\n        fields = ["id", "username", "email"]\n\nclass ArticleSerializer(serializers.ModelSerializer):\n    author = AuthorSerializer(read_only=True)\n    \n    class Meta:\n        model = Article\n        fields = ["id", "title", "author", "content"]', desc: 'Inclure les détails de l\'auteur' },
+                                { code: '# Résultat JSON:\n{\n    "id": 1,\n    "title": "Mon article",\n    "author": {\n        "id": 5,\n        "username": "john",\n        "email": "john@example.com"\n    },\n    "content": "..."\n}', desc: 'JSON avec nested object' }
+                            ],
+                            tips: ['Utilisez read_only=True pour éviter les problèmes de création/mise à jour'],
+                            warnings: ['Les nested serializers peuvent causer des requêtes N+1 - utilisez select_related/prefetch_related']
+                        }
+                    },
+                    {
+                        cmd: 'Writable Nested Serializers',
+                        desc: 'Serializers imbriqués modifiables',
+                        details: {
+                            explanation: 'Pour créer/modifier des objets liés en une seule requête, surchargez create() et update().',
+                            syntax: 'def create(self, validated_data): / def update(self, instance, validated_data):',
+                            options: [],
+                            examples: [
+                                { code: 'class ArticleSerializer(serializers.ModelSerializer):\n    tags = TagSerializer(many=True)\n\n    class Meta:\n        model = Article\n        fields = ["id", "title", "content", "tags"]\n\n    def create(self, validated_data):\n        tags_data = validated_data.pop("tags", [])\n        article = Article.objects.create(**validated_data)\n        for tag_data in tags_data:\n            tag, _ = Tag.objects.get_or_create(**tag_data)\n            article.tags.add(tag)\n        return article\n\n    def update(self, instance, validated_data):\n        tags_data = validated_data.pop("tags", None)\n        for attr, value in validated_data.items():\n            setattr(instance, attr, value)\n        instance.save()\n        if tags_data is not None:\n            instance.tags.clear()\n            for tag_data in tags_data:\n                tag, _ = Tag.objects.get_or_create(**tag_data)\n                instance.tags.add(tag)\n        return instance', desc: 'Create/Update avec tags' }
+                            ],
+                            tips: ['drf-writable-nested simplifie grandement cette logique'],
+                            warnings: ['Gérez les transactions pour éviter les états incohérents']
+                        }
+                    },
+                    {
+                        cmd: 'def validate_<field>() / def validate()',
+                        desc: 'Validation personnalisée',
+                        details: {
+                            explanation: 'validate_<field> valide un champ spécifique, validate() permet la validation croisée de plusieurs champs.',
+                            syntax: 'def validate_field(self, value): / def validate(self, data):',
+                            options: [],
+                            examples: [
+                                { code: 'class ArticleSerializer(serializers.ModelSerializer):\n    def validate_title(self, value):\n        if len(value) < 5:\n            raise serializers.ValidationError("Le titre doit faire au moins 5 caractères")\n        return value\n\n    def validate(self, data):\n        if data.get("start_date") and data.get("end_date"):\n            if data["start_date"] > data["end_date"]:\n                raise serializers.ValidationError({\n                    "end_date": "La date de fin doit être après la date de début"\n                })\n        return data', desc: 'Validation de champ et globale' },
+                                { code: '# Validation avec contexte\ndef validate_author(self, value):\n    request = self.context.get("request")\n    if value != request.user and not request.user.is_staff:\n        raise serializers.ValidationError("Vous ne pouvez pas publier pour un autre utilisateur")\n    return value', desc: 'Validation avec le contexte de la requête' }
+                            ],
+                            tips: ['Le contexte (request, view, format) est accessible via self.context'],
+                            warnings: ['Retournez toujours la valeur dans validate_<field>']
+                        }
+                    },
+                    {
+                        cmd: 'to_representation() / to_internal_value()',
+                        desc: 'Personnaliser la sérialisation',
+                        details: {
+                            explanation: 'to_representation() contrôle le format de sortie (lecture), to_internal_value() le format d\'entrée (écriture).',
+                            syntax: 'def to_representation(self, instance): / def to_internal_value(self, data):',
+                            options: [],
+                            examples: [
+                                { code: 'class ArticleSerializer(serializers.ModelSerializer):\n    def to_representation(self, instance):\n        data = super().to_representation(instance)\n        # Ajouter des champs conditionnels\n        if self.context["request"].user == instance.author:\n            data["edit_url"] = f"/api/articles/{instance.pk}/edit/"\n        # Formater une date\n        data["created_at"] = instance.created_at.strftime("%d/%m/%Y")\n        return data', desc: 'Personnaliser la sortie' },
+                                { code: 'def to_internal_value(self, data):\n    # Normaliser les données en entrée\n    if "tags" in data and isinstance(data["tags"], str):\n        data["tags"] = [t.strip() for t in data["tags"].split(",")]\n    return super().to_internal_value(data)', desc: 'Normaliser l\'entrée' }
+                            ],
+                            tips: ['Idéal pour ajouter des URLs, formater des dates, ou inclure des permissions'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'throttling',
+                title: 'Throttling & Rate Limiting',
+                icon: 'fa-tachometer-alt',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'DEFAULT_THROTTLE_CLASSES / DEFAULT_THROTTLE_RATES',
+                        desc: 'Configuration globale du throttling',
+                        details: {
+                            explanation: 'Le throttling limite le nombre de requêtes par utilisateur/IP pour protéger l\'API contre les abus.',
+                            syntax: 'REST_FRAMEWORK = { "DEFAULT_THROTTLE_CLASSES": [...], "DEFAULT_THROTTLE_RATES": {...} }',
+                            options: [
+                                { flag: 'AnonRateThrottle', desc: 'Limite par IP (utilisateurs anonymes)' },
+                                { flag: 'UserRateThrottle', desc: 'Limite par utilisateur authentifié' },
+                                { flag: 'ScopedRateThrottle', desc: 'Limite par scope personnalisé' }
+                            ],
+                            examples: [
+                                { code: '# settings.py\nREST_FRAMEWORK = {\n    "DEFAULT_THROTTLE_CLASSES": [\n        "rest_framework.throttling.AnonRateThrottle",\n        "rest_framework.throttling.UserRateThrottle"\n    ],\n    "DEFAULT_THROTTLE_RATES": {\n        "anon": "100/day",\n        "user": "1000/day"\n    }\n}', desc: 'Configuration basique' },
+                                { code: '# Formats de rate:\n# "5/minute" ou "5/min"\n# "100/hour" ou "100/h"\n# "1000/day" ou "1000/d"', desc: 'Formats des rates' }
+                            ],
+                            tips: ['Le throttling utilise le cache Django - configurez un backend adapté en production'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'throttle_classes = [ScopedRateThrottle]',
+                        desc: 'Throttling par scope (endpoint)',
+                        details: {
+                            explanation: 'ScopedRateThrottle permet d\'appliquer des limites différentes selon les endpoints.',
+                            syntax: 'throttle_classes = [ScopedRateThrottle]\nthrottle_scope = "scope_name"',
+                            options: [],
+                            examples: [
+                                { code: '# settings.py\nREST_FRAMEWORK = {\n    "DEFAULT_THROTTLE_RATES": {\n        "uploads": "10/hour",\n        "contacts": "5/minute",\n        "burst": "60/minute"\n    }\n}', desc: 'Définir les scopes' },
+                                { code: 'from rest_framework.throttling import ScopedRateThrottle\n\nclass FileUploadView(APIView):\n    throttle_classes = [ScopedRateThrottle]\n    throttle_scope = "uploads"\n\n    def post(self, request):\n        # Upload limité à 10/heure\n        ...', desc: 'Vue avec throttle scope' }
+                            ],
+                            tips: ['Utilisez des scopes différents pour les endpoints sensibles (upload, envoi d\'email...)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'class CustomThrottle(BaseThrottle)',
+                        desc: 'Throttle personnalisé',
+                        details: {
+                            explanation: 'Créez une classe de throttle personnalisée pour une logique de limitation sur mesure.',
+                            syntax: 'class CustomThrottle(BaseThrottle):\n    def allow_request(self, request, view):\n    def wait(self):',
+                            options: [],
+                            examples: [
+                                { code: 'from rest_framework.throttling import BaseThrottle\nimport time\n\nclass BurstThrottle(BaseThrottle):\n    \"\"\"Limite les rafales de requêtes\"\"\"\n    rate = 10  # requêtes\n    duration = 60  # secondes\n    cache = {}\n\n    def allow_request(self, request, view):\n        ident = self.get_ident(request)\n        now = time.time()\n        history = self.cache.get(ident, [])\n        # Nettoyer l\'historique\n        history = [t for t in history if t > now - self.duration]\n        if len(history) >= self.rate:\n            self.wait_time = self.duration - (now - history[0])\n            return False\n        history.append(now)\n        self.cache[ident] = history\n        return True\n\n    def wait(self):\n        return self.wait_time', desc: 'Throttle anti-burst' },
+                                { code: '# Throttle basé sur un plan utilisateur\nclass PlanBasedThrottle(UserRateThrottle):\n    def get_rate(self):\n        user = self.request.user\n        if user.is_premium:\n            return "10000/day"\n        return "100/day"', desc: 'Rate selon le plan utilisateur' }
+                            ],
+                            tips: ['Utilisez Redis pour partager le cache entre plusieurs instances'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'versioning',
+                title: 'Versioning API',
+                icon: 'fa-code-branch',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'DEFAULT_VERSIONING_CLASS',
+                        desc: 'Configuration du versioning',
+                        details: {
+                            explanation: 'Le versioning permet de maintenir plusieurs versions de votre API simultanément.',
+                            syntax: 'REST_FRAMEWORK = { "DEFAULT_VERSIONING_CLASS": "...", "DEFAULT_VERSION": "...", "ALLOWED_VERSIONS": [...] }',
+                            options: [
+                                { flag: 'URLPathVersioning', desc: '/api/v1/... (recommandé)' },
+                                { flag: 'NamespaceVersioning', desc: 'Via namespace d\'URL' },
+                                { flag: 'HostNameVersioning', desc: 'v1.api.example.com' },
+                                { flag: 'QueryParameterVersioning', desc: '?version=1' },
+                                { flag: 'AcceptHeaderVersioning', desc: 'Accept: application/json; version=1' }
+                            ],
+                            examples: [
+                                { code: '# settings.py\nREST_FRAMEWORK = {\n    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",\n    "DEFAULT_VERSION": "v1",\n    "ALLOWED_VERSIONS": ["v1", "v2"],\n    "VERSION_PARAM": "version"\n}', desc: 'Versioning par URL' },
+                                { code: '# urls.py\nurlpatterns = [\n    path("api/<str:version>/", include("myapp.urls")),\n]\n# Résultat: /api/v1/articles/, /api/v2/articles/', desc: 'Configuration des URLs' }
+                            ],
+                            tips: ['URLPathVersioning est le plus explicite et le plus utilisé'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'request.version',
+                        desc: 'Utiliser la version dans les vues',
+                        details: {
+                            explanation: 'La version de l\'API est accessible via request.version pour adapter le comportement.',
+                            syntax: 'version = request.version',
+                            options: [],
+                            examples: [
+                                { code: 'class ArticleViewSet(viewsets.ModelViewSet):\n    def get_serializer_class(self):\n        if self.request.version == "v1":\n            return ArticleSerializerV1\n        return ArticleSerializerV2', desc: 'Serializer selon la version' },
+                                { code: 'class ArticleList(APIView):\n    def get(self, request):\n        articles = Article.objects.all()\n        if request.version == "v1":\n            # V1: format simplifié\n            data = [{"id": a.id, "title": a.title} for a in articles]\n        else:\n            # V2: format complet\n            serializer = ArticleSerializer(articles, many=True)\n            data = serializer.data\n        return Response(data)', desc: 'Logique conditionnelle' }
+                            ],
+                            tips: ['Gardez la rétrocompatibilité : ne supprimez pas de champs, ajoutez-en'],
+                            warnings: ['Documentez clairement les différences entre versions']
+                        }
+                    },
+                    {
+                        cmd: 'Stratégie de versioning',
+                        desc: 'Bonnes pratiques de versioning',
+                        details: {
+                            explanation: 'Gérez l\'évolution de votre API de manière structurée pour ne pas casser les clients existants.',
+                            syntax: 'Organisation des modules par version',
+                            options: [],
+                            examples: [
+                                { code: '# Structure recommandée:\nmyapp/\n├── api/\n│   ├── v1/\n│   │   ├── serializers.py\n│   │   ├── views.py\n│   │   └── urls.py\n│   └── v2/\n│       ├── serializers.py\n│       ├── views.py\n│       └── urls.py\n└── models.py', desc: 'Structure de fichiers' },
+                                { code: '# myapp/api/v2/serializers.py\nfrom myapp.api.v1.serializers import ArticleSerializerV1\n\nclass ArticleSerializerV2(ArticleSerializerV1):\n    \"\"\"V2 ajoute le champ author_details\"\"\"\n    author_details = AuthorSerializer(source="author", read_only=True)\n\n    class Meta(ArticleSerializerV1.Meta):\n        fields = ArticleSerializerV1.Meta.fields + ["author_details"]', desc: 'Héritage entre versions' }
+                            ],
+                            tips: ['Héritez des serializers V1 dans V2 pour minimiser la duplication'],
+                            warnings: ['Prévoyez une date de dépréciation pour les anciennes versions']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'testing',
+                title: 'Tests API',
+                icon: 'fa-vial',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'APITestCase / APIClient',
+                        desc: 'Classes de test DRF',
+                        details: {
+                            explanation: 'DRF fournit APITestCase et APIClient pour tester facilement vos endpoints.',
+                            syntax: 'from rest_framework.test import APITestCase, APIClient',
+                            options: [
+                                { flag: 'client.get()', desc: 'Requête GET' },
+                                { flag: 'client.post()', desc: 'Requête POST avec data' },
+                                { flag: 'client.put()', desc: 'Requête PUT' },
+                                { flag: 'client.delete()', desc: 'Requête DELETE' },
+                                { flag: 'format="json"', desc: 'Format des données (json, multipart)' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework.test import APITestCase\nfrom rest_framework import status\nfrom django.contrib.auth.models import User\nfrom .models import Article\n\nclass ArticleAPITests(APITestCase):\n    def setUp(self):\n        self.user = User.objects.create_user("testuser", "test@test.com", "password")\n        self.article = Article.objects.create(\n            title="Test Article",\n            content="Content",\n            author=self.user\n        )\n\n    def test_list_articles(self):\n        response = self.client.get("/api/articles/")\n        self.assertEqual(response.status_code, status.HTTP_200_OK)\n        self.assertEqual(len(response.data["results"]), 1)', desc: 'Test de liste' }
+                            ],
+                            tips: ['Utilisez setUp() pour créer les données de test'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'client.force_authenticate(user)',
+                        desc: 'Authentifier les requêtes de test',
+                        details: {
+                            explanation: 'force_authenticate() simule l\'authentification sans passer par le processus complet.',
+                            syntax: 'self.client.force_authenticate(user=user)',
+                            options: [],
+                            examples: [
+                                { code: 'def test_create_article_authenticated(self):\n    self.client.force_authenticate(user=self.user)\n    data = {"title": "New Article", "content": "Content"}\n    response = self.client.post("/api/articles/", data, format="json")\n    self.assertEqual(response.status_code, status.HTTP_201_CREATED)\n    self.assertEqual(Article.objects.count(), 2)', desc: 'Test création authentifiée' },
+                                { code: 'def test_create_article_unauthenticated(self):\n    # Sans force_authenticate\n    data = {"title": "New Article", "content": "Content"}\n    response = self.client.post("/api/articles/", data, format="json")\n    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)', desc: 'Test rejet non authentifié' },
+                                { code: 'def test_with_token(self):\n    token = Token.objects.create(user=self.user)\n    self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")\n    response = self.client.get("/api/articles/")\n    self.assertEqual(response.status_code, status.HTTP_200_OK)', desc: 'Test avec token réel' }
+                            ],
+                            tips: ['credentials() est utile pour tester l\'authentification par token'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'response.data / response.status_code',
+                        desc: 'Assertions sur les réponses',
+                        details: {
+                            explanation: 'Vérifiez le contenu et le code de statut des réponses API.',
+                            syntax: 'response.data / response.status_code / response.json()',
+                            options: [],
+                            examples: [
+                                { code: 'def test_article_detail(self):\n    response = self.client.get(f"/api/articles/{self.article.pk}/")\n    self.assertEqual(response.status_code, status.HTTP_200_OK)\n    self.assertEqual(response.data["title"], "Test Article")\n    self.assertIn("author", response.data)', desc: 'Assertions sur le contenu' },
+                                { code: 'def test_article_not_found(self):\n    response = self.client.get("/api/articles/999/")\n    self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)', desc: 'Test 404' },
+                                { code: 'def test_validation_error(self):\n    self.client.force_authenticate(user=self.user)\n    data = {"title": ""}  # titre vide invalide\n    response = self.client.post("/api/articles/", data, format="json")\n    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)\n    self.assertIn("title", response.data)', desc: 'Test erreur de validation' }
+                            ],
+                            tips: ['Testez les cas d\'erreur (400, 401, 403, 404) pas seulement les succès'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'APIRequestFactory',
+                        desc: 'Tester les vues isolément',
+                        details: {
+                            explanation: 'APIRequestFactory permet de tester les vues sans passer par le routeur URL.',
+                            syntax: 'from rest_framework.test import APIRequestFactory',
+                            options: [],
+                            examples: [
+                                { code: 'from rest_framework.test import APIRequestFactory\nfrom .views import ArticleViewSet\n\nclass ArticleViewSetTests(APITestCase):\n    def setUp(self):\n        self.factory = APIRequestFactory()\n        self.user = User.objects.create_user("test", "test@test.com", "pass")\n\n    def test_list_action(self):\n        view = ArticleViewSet.as_view({"get": "list"})\n        request = self.factory.get("/articles/")\n        request.user = self.user\n        response = view(request)\n        self.assertEqual(response.status_code, 200)', desc: 'Test isolé du ViewSet' },
+                                { code: '# Utile pour tester les actions personnalisées\ndef test_publish_action(self):\n    view = ArticleViewSet.as_view({"post": "publish"})\n    request = self.factory.post("/articles/1/publish/")\n    force_authenticate(request, user=self.user)\n    response = view(request, pk=1)\n    self.assertEqual(response.status_code, 200)', desc: 'Test action personnalisée' }
+                            ],
+                            tips: ['Préférez APIClient pour les tests d\'intégration, APIRequestFactory pour les tests unitaires'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'exceptions',
+                title: 'Gestion des erreurs',
+                icon: 'fa-exclamation-triangle',
+                color: 'border-l-4 border-red-400',
+                commands: [
+                    {
+                        cmd: 'raise APIException / ValidationError',
+                        desc: 'Lever des exceptions API',
+                        details: {
+                            explanation: 'DRF fournit des exceptions prédéfinies qui génèrent des réponses HTTP appropriées.',
+                            syntax: 'from rest_framework.exceptions import APIException',
+                            options: [
+                                { flag: 'APIException', desc: '500 - Erreur serveur' },
+                                { flag: 'ValidationError', desc: '400 - Données invalides' },
+                                { flag: 'NotFound', desc: '404 - Ressource introuvable' },
+                                { flag: 'PermissionDenied', desc: '403 - Accès refusé' },
+                                { flag: 'NotAuthenticated', desc: '401 - Non authentifié' },
+                                { flag: 'Throttled', desc: '429 - Trop de requêtes' }
+                            ],
+                            examples: [
+                                { code: 'from rest_framework.exceptions import ValidationError, NotFound\n\nclass ArticleViewSet(viewsets.ModelViewSet):\n    def perform_create(self, serializer):\n        if Article.objects.filter(author=self.request.user).count() >= 10:\n            raise ValidationError({"detail": "Limite de 10 articles atteinte"})\n        serializer.save(author=self.request.user)', desc: 'Erreur de validation' },
+                                { code: 'def get_object(self):\n    try:\n        return Article.objects.get(pk=self.kwargs["pk"])\n    except Article.DoesNotExist:\n        raise NotFound("Article non trouvé")', desc: 'Erreur 404 personnalisée' }
+                            ],
+                            tips: ['Utilisez ValidationError avec un dict pour des erreurs par champ'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'EXCEPTION_HANDLER personnalisé',
+                        desc: 'Handler d\'exceptions global',
+                        details: {
+                            explanation: 'Personnalisez le format des réponses d\'erreur pour toute l\'API.',
+                            syntax: 'REST_FRAMEWORK = { "EXCEPTION_HANDLER": "myapp.utils.custom_exception_handler" }',
+                            options: [],
+                            examples: [
+                                { code: '# myapp/utils.py\nfrom rest_framework.views import exception_handler\nfrom rest_framework.exceptions import APIException\nimport logging\n\nlogger = logging.getLogger(__name__)\n\ndef custom_exception_handler(exc, context):\n    # Appeler le handler par défaut d\'abord\n    response = exception_handler(exc, context)\n\n    if response is not None:\n        # Personnaliser le format de réponse\n        response.data = {\n            "success": False,\n            "error": {\n                "code": response.status_code,\n                "message": str(exc.detail) if hasattr(exc, "detail") else str(exc),\n                "type": exc.__class__.__name__\n            }\n        }\n        # Logger l\'erreur\n        logger.error(f"API Error: {exc}", exc_info=True, extra={"context": context})\n\n    return response', desc: 'Handler personnalisé' },
+                                { code: '# settings.py\nREST_FRAMEWORK = {\n    "EXCEPTION_HANDLER": "myapp.utils.custom_exception_handler"\n}', desc: 'Configuration' }
+                            ],
+                            tips: ['Loggez les erreurs 500 pour le debugging en production'],
+                            warnings: ['Ne divulguez pas de détails techniques sensibles dans les erreurs']
+                        }
+                    },
+                    {
+                        cmd: 'class CustomAPIException(APIException)',
+                        desc: 'Exception personnalisée',
+                        details: {
+                            explanation: 'Créez des exceptions métier spécifiques pour des erreurs particulières de votre application.',
+                            syntax: 'class CustomException(APIException): status_code = XXX',
+                            options: [],
+                            examples: [
+                                { code: 'from rest_framework.exceptions import APIException\n\nclass PaymentRequired(APIException):\n    status_code = 402\n    default_detail = "Paiement requis pour accéder à cette ressource"\n    default_code = "payment_required"\n\nclass QuotaExceeded(APIException):\n    status_code = 429\n    default_detail = "Quota d\\'API dépassé"\n    default_code = "quota_exceeded"\n\nclass ServiceUnavailable(APIException):\n    status_code = 503\n    default_detail = "Service temporairement indisponible"\n    default_code = "service_unavailable"', desc: 'Exceptions métier' },
+                                { code: '# Utilisation\nclass PremiumArticleView(APIView):\n    def get(self, request, pk):\n        article = get_object_or_404(Article, pk=pk)\n        if article.is_premium and not request.user.has_premium:\n            raise PaymentRequired("Cet article est réservé aux membres premium")\n        return Response(ArticleSerializer(article).data)', desc: 'Utilisation' }
+                            ],
+                            tips: ['Utilisez des codes d\'erreur explicites pour faciliter le traitement côté client'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-api',
+                title: '🚀 Projet: API Blog',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-gradient-to-r from-lime-500 to-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Structure du projet',
+                        desc: 'Initialisation et configuration',
+                        details: {
+                            explanation: 'Créer un projet Django avec DRF configuré pour une API de blog.',
+                            syntax: 'django-admin startproject config . && python manage.py startapp blog',
+                            options: [],
+                            examples: [
+                                { code: '# Installation\npip install django djangorestframework django-filter djangorestframework-simplejwt\n\n# Créer le projet\ndjango-admin startproject config .\npython manage.py startapp blog\npython manage.py startapp accounts', desc: 'Installation' },
+                                { code: '# config/settings.py\nINSTALLED_APPS = [\n    ...\n    "rest_framework",\n    "rest_framework_simplejwt",\n    "django_filters",\n    "blog",\n    "accounts",\n]\n\nREST_FRAMEWORK = {\n    "DEFAULT_AUTHENTICATION_CLASSES": [\n        "rest_framework_simplejwt.authentication.JWTAuthentication",\n    ],\n    "DEFAULT_PERMISSION_CLASSES": [\n        "rest_framework.permissions.IsAuthenticatedOrReadOnly",\n    ],\n    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",\n    "PAGE_SIZE": 10,\n    "DEFAULT_FILTER_BACKENDS": [\n        "django_filters.rest_framework.DjangoFilterBackend",\n        "rest_framework.filters.SearchFilter",\n        "rest_framework.filters.OrderingFilter",\n    ],\n}', desc: 'Configuration DRF' }
+                            ],
+                            tips: ['Séparez les apps par domaine métier : blog, accounts, comments...'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: Modèles',
+                        desc: 'Article, Category, Tag, Comment',
+                        details: {
+                            explanation: 'Définir les modèles de données pour le blog.',
+                            syntax: 'class Article(models.Model):',
+                            options: [],
+                            examples: [
+                                { code: '# blog/models.py\nfrom django.db import models\nfrom django.contrib.auth.models import User\n\nclass Category(models.Model):\n    name = models.CharField(max_length=100, unique=True)\n    slug = models.SlugField(unique=True)\n    description = models.TextField(blank=True)\n\n    def __str__(self):\n        return self.name\n\n    class Meta:\n        verbose_name_plural = "categories"\n\nclass Tag(models.Model):\n    name = models.CharField(max_length=50, unique=True)\n    slug = models.SlugField(unique=True)\n\n    def __str__(self):\n        return self.name\n\nclass Article(models.Model):\n    STATUS_CHOICES = [("draft", "Brouillon"), ("published", "Publié")]\n\n    title = models.CharField(max_length=200)\n    slug = models.SlugField(unique=True)\n    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")\n    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="articles")\n    tags = models.ManyToManyField(Tag, blank=True, related_name="articles")\n    content = models.TextField()\n    excerpt = models.TextField(max_length=500, blank=True)\n    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft")\n    created_at = models.DateTimeField(auto_now_add=True)\n    updated_at = models.DateTimeField(auto_now=True)\n    views_count = models.PositiveIntegerField(default=0)\n\n    class Meta:\n        ordering = ["-created_at"]\n\n    def __str__(self):\n        return self.title\n\nclass Comment(models.Model):\n    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="comments")\n    author = models.ForeignKey(User, on_delete=models.CASCADE)\n    content = models.TextField()\n    created_at = models.DateTimeField(auto_now_add=True)\n    is_approved = models.BooleanField(default=True)\n\n    class Meta:\n        ordering = ["created_at"]', desc: 'Modèles complets' }
+                            ],
+                            tips: ['Utilisez related_name pour un accès facile aux relations inverses'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Serializers',
+                        desc: 'Serializers avec nested relations',
+                        details: {
+                            explanation: 'Créer des serializers pour toutes les ressources avec gestion des relations.',
+                            syntax: 'class ArticleSerializer(serializers.ModelSerializer):',
+                            options: [],
+                            examples: [
+                                { code: '# blog/serializers.py\nfrom rest_framework import serializers\nfrom django.contrib.auth.models import User\nfrom .models import Article, Category, Tag, Comment\n\nclass UserSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = User\n        fields = ["id", "username", "email"]\n\nclass CategorySerializer(serializers.ModelSerializer):\n    articles_count = serializers.SerializerMethodField()\n\n    class Meta:\n        model = Category\n        fields = ["id", "name", "slug", "description", "articles_count"]\n\n    def get_articles_count(self, obj):\n        return obj.articles.filter(status="published").count()\n\nclass TagSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Tag\n        fields = ["id", "name", "slug"]\n\nclass CommentSerializer(serializers.ModelSerializer):\n    author = UserSerializer(read_only=True)\n\n    class Meta:\n        model = Comment\n        fields = ["id", "author", "content", "created_at"]\n        read_only_fields = ["created_at"]', desc: 'Serializers de base' },
+                                { code: '# Article serializers (liste vs détail)\nclass ArticleListSerializer(serializers.ModelSerializer):\n    author = UserSerializer(read_only=True)\n    category = CategorySerializer(read_only=True)\n    tags = TagSerializer(many=True, read_only=True)\n    comments_count = serializers.SerializerMethodField()\n\n    class Meta:\n        model = Article\n        fields = ["id", "title", "slug", "author", "category", "tags",\n                  "excerpt", "created_at", "views_count", "comments_count"]\n\n    def get_comments_count(self, obj):\n        return obj.comments.filter(is_approved=True).count()\n\nclass ArticleDetailSerializer(ArticleListSerializer):\n    comments = CommentSerializer(many=True, read_only=True)\n\n    class Meta(ArticleListSerializer.Meta):\n        fields = ArticleListSerializer.Meta.fields + ["content", "updated_at", "comments"]\n\nclass ArticleCreateSerializer(serializers.ModelSerializer):\n    tags = serializers.PrimaryKeyRelatedField(\n        many=True, queryset=Tag.objects.all(), required=False\n    )\n\n    class Meta:\n        model = Article\n        fields = ["title", "slug", "category", "tags", "content", "excerpt", "status"]\n\n    def create(self, validated_data):\n        tags = validated_data.pop("tags", [])\n        article = Article.objects.create(**validated_data)\n        article.tags.set(tags)\n        return article', desc: 'Serializers Article' }
+                            ],
+                            tips: ['Séparez les serializers de liste et de détail pour optimiser les données transférées'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: ViewSets et Permissions',
+                        desc: 'CRUD avec permissions personnalisées',
+                        details: {
+                            explanation: 'Créer les ViewSets avec filtrage, recherche et permissions.',
+                            syntax: 'class ArticleViewSet(viewsets.ModelViewSet):',
+                            options: [],
+                            examples: [
+                                { code: '# blog/permissions.py\nfrom rest_framework import permissions\n\nclass IsAuthorOrReadOnly(permissions.BasePermission):\n    \"\"\"Seul l\\'auteur peut modifier\"\"\"\n    def has_object_permission(self, request, view, obj):\n        if request.method in permissions.SAFE_METHODS:\n            return True\n        return obj.author == request.user\n\nclass IsAdminOrReadOnly(permissions.BasePermission):\n    \"\"\"Admin peut modifier, autres lecture seule\"\"\"\n    def has_permission(self, request, view):\n        if request.method in permissions.SAFE_METHODS:\n            return True\n        return request.user and request.user.is_staff', desc: 'Permissions' },
+                                { code: '# blog/views.py\nfrom rest_framework import viewsets, status\nfrom rest_framework.decorators import action\nfrom rest_framework.response import Response\nfrom rest_framework.permissions import IsAuthenticatedOrReadOnly\nfrom django_filters.rest_framework import DjangoFilterBackend\nfrom .models import Article, Category, Tag, Comment\nfrom .serializers import *\nfrom .permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly\n\nclass CategoryViewSet(viewsets.ModelViewSet):\n    queryset = Category.objects.all()\n    serializer_class = CategorySerializer\n    permission_classes = [IsAdminOrReadOnly]\n    lookup_field = "slug"\n\nclass TagViewSet(viewsets.ModelViewSet):\n    queryset = Tag.objects.all()\n    serializer_class = TagSerializer\n    permission_classes = [IsAdminOrReadOnly]\n    lookup_field = "slug"\n\nclass ArticleViewSet(viewsets.ModelViewSet):\n    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]\n    filterset_fields = ["category__slug", "author__username", "status", "tags__slug"]\n    search_fields = ["title", "content", "excerpt"]\n    ordering_fields = ["created_at", "views_count", "title"]\n    lookup_field = "slug"\n\n    def get_queryset(self):\n        qs = Article.objects.select_related("author", "category").prefetch_related("tags")\n        # Les non-authentifiés ne voient que les articles publiés\n        if not self.request.user.is_authenticated:\n            return qs.filter(status="published")\n        # Les auteurs voient aussi leurs brouillons\n        if self.request.user.is_staff:\n            return qs\n        return qs.filter(models.Q(status="published") | models.Q(author=self.request.user))\n\n    def get_serializer_class(self):\n        if self.action == "list":\n            return ArticleListSerializer\n        if self.action in ["create", "update", "partial_update"]:\n            return ArticleCreateSerializer\n        return ArticleDetailSerializer\n\n    def perform_create(self, serializer):\n        serializer.save(author=self.request.user)\n\n    def retrieve(self, request, *args, **kwargs):\n        instance = self.get_object()\n        # Incrémenter les vues\n        instance.views_count += 1\n        instance.save(update_fields=["views_count"])\n        serializer = self.get_serializer(instance)\n        return Response(serializer.data)\n\n    @action(detail=True, methods=["post"])\n    def publish(self, request, slug=None):\n        article = self.get_object()\n        article.status = "published"\n        article.save()\n        return Response({"status": "Article publié"})', desc: 'ArticleViewSet complet' }
+                            ],
+                            tips: ['select_related et prefetch_related évitent les requêtes N+1'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Authentification JWT',
+                        desc: 'Endpoints d\'authentification',
+                        details: {
+                            explanation: 'Configurer les endpoints JWT pour login, refresh et inscription.',
+                            syntax: 'TokenObtainPairView / TokenRefreshView',
+                            options: [],
+                            examples: [
+                                { code: '# accounts/serializers.py\nfrom rest_framework import serializers\nfrom django.contrib.auth.models import User\nfrom django.contrib.auth.password_validation import validate_password\n\nclass RegisterSerializer(serializers.ModelSerializer):\n    password = serializers.CharField(write_only=True, validators=[validate_password])\n    password2 = serializers.CharField(write_only=True)\n\n    class Meta:\n        model = User\n        fields = ["username", "email", "password", "password2"]\n\n    def validate(self, data):\n        if data["password"] != data["password2"]:\n            raise serializers.ValidationError({"password2": "Les mots de passe ne correspondent pas"})\n        return data\n\n    def create(self, validated_data):\n        validated_data.pop("password2")\n        user = User.objects.create_user(**validated_data)\n        return user\n\nclass UserProfileSerializer(serializers.ModelSerializer):\n    articles_count = serializers.SerializerMethodField()\n\n    class Meta:\n        model = User\n        fields = ["id", "username", "email", "date_joined", "articles_count"]\n\n    def get_articles_count(self, obj):\n        return obj.articles.count()', desc: 'Serializers auth' },
+                                { code: '# accounts/views.py\nfrom rest_framework import generics, permissions\nfrom rest_framework.response import Response\nfrom django.contrib.auth.models import User\nfrom .serializers import RegisterSerializer, UserProfileSerializer\n\nclass RegisterView(generics.CreateAPIView):\n    queryset = User.objects.all()\n    serializer_class = RegisterSerializer\n    permission_classes = [permissions.AllowAny]\n\nclass ProfileView(generics.RetrieveUpdateAPIView):\n    serializer_class = UserProfileSerializer\n    permission_classes = [permissions.IsAuthenticated]\n\n    def get_object(self):\n        return self.request.user', desc: 'Vues auth' },
+                                { code: '# config/urls.py\nfrom django.urls import path, include\nfrom rest_framework.routers import DefaultRouter\nfrom rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView\nfrom accounts.views import RegisterView, ProfileView\nfrom blog.views import ArticleViewSet, CategoryViewSet, TagViewSet\n\nrouter = DefaultRouter()\nrouter.register(r"articles", ArticleViewSet, basename="article")\nrouter.register(r"categories", CategoryViewSet)\nrouter.register(r"tags", TagViewSet)\n\nurlpatterns = [\n    path("api/", include(router.urls)),\n    # Auth\n    path("api/auth/register/", RegisterView.as_view(), name="register"),\n    path("api/auth/login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),\n    path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),\n    path("api/auth/profile/", ProfileView.as_view(), name="profile"),\n]', desc: 'URLs complètes' }
+                            ],
+                            tips: ['Stockez le refresh token de façon sécurisée côté client'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Tests automatisés',
+                        desc: 'Suite de tests complète',
+                        details: {
+                            explanation: 'Écrire des tests pour valider le comportement de l\'API.',
+                            syntax: 'class ArticleAPITests(APITestCase):',
+                            options: [],
+                            examples: [
+                                { code: '# blog/tests.py\nfrom rest_framework.test import APITestCase\nfrom rest_framework import status\nfrom django.contrib.auth.models import User\nfrom .models import Article, Category\n\nclass ArticleAPITests(APITestCase):\n    def setUp(self):\n        self.user = User.objects.create_user("testuser", "test@test.com", "testpass123")\n        self.admin = User.objects.create_superuser("admin", "admin@test.com", "adminpass")\n        self.category = Category.objects.create(name="Tech", slug="tech")\n        self.article = Article.objects.create(\n            title="Test Article",\n            slug="test-article",\n            author=self.user,\n            category=self.category,\n            content="Test content",\n            status="published"\n        )\n\n    def test_list_articles_unauthenticated(self):\n        \"\"\"Les anonymes peuvent lister les articles publiés\"\"\"\n        response = self.client.get("/api/articles/")\n        self.assertEqual(response.status_code, status.HTTP_200_OK)\n        self.assertEqual(len(response.data["results"]), 1)\n\n    def test_create_article_unauthenticated(self):\n        \"\"\"Les anonymes ne peuvent pas créer d\\'articles\"\"\"\n        data = {"title": "New", "slug": "new", "content": "..."}\n        response = self.client.post("/api/articles/", data)\n        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)\n\n    def test_create_article_authenticated(self):\n        \"\"\"Les utilisateurs connectés peuvent créer\"\"\"\n        self.client.force_authenticate(user=self.user)\n        data = {\n            "title": "New Article",\n            "slug": "new-article",\n            "content": "New content",\n            "category": self.category.id,\n            "status": "draft"\n        }\n        response = self.client.post("/api/articles/", data, format="json")\n        self.assertEqual(response.status_code, status.HTTP_201_CREATED)\n        self.assertEqual(Article.objects.count(), 2)\n        # Vérifie que l\\'auteur est automatiquement assigné\n        self.assertEqual(Article.objects.last().author, self.user)\n\n    def test_update_own_article(self):\n        \"\"\"Un auteur peut modifier son article\"\"\"\n        self.client.force_authenticate(user=self.user)\n        response = self.client.patch(\n            f"/api/articles/{self.article.slug}/",\n            {"title": "Updated Title"},\n            format="json"\n        )\n        self.assertEqual(response.status_code, status.HTTP_200_OK)\n        self.article.refresh_from_db()\n        self.assertEqual(self.article.title, "Updated Title")\n\n    def test_update_other_article(self):\n        \"\"\"Un utilisateur ne peut pas modifier l\\'article d\\'un autre\"\"\"\n        other_user = User.objects.create_user("other", "other@test.com", "pass")\n        self.client.force_authenticate(user=other_user)\n        response = self.client.patch(\n            f"/api/articles/{self.article.slug}/",\n            {"title": "Hacked"},\n            format="json"\n        )\n        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)\n\n    def test_filter_by_category(self):\n        \"\"\"Test du filtrage par catégorie\"\"\"\n        response = self.client.get("/api/articles/?category__slug=tech")\n        self.assertEqual(response.status_code, status.HTTP_200_OK)\n        self.assertEqual(len(response.data["results"]), 1)\n\n    def test_search_articles(self):\n        \"\"\"Test de la recherche\"\"\"\n        response = self.client.get("/api/articles/?search=Test")\n        self.assertEqual(len(response.data["results"]), 1)', desc: 'Suite de tests' }
+                            ],
+                            tips: ['Lancez les tests avec: python manage.py test blog.tests'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Documentation OpenAPI',
+                        desc: 'Documentation automatique avec drf-spectacular',
+                        details: {
+                            explanation: 'Générer une documentation OpenAPI interactive (Swagger/ReDoc).',
+                            syntax: 'pip install drf-spectacular',
+                            options: [],
+                            examples: [
+                                { code: '# Installation\npip install drf-spectacular\n\n# settings.py\nINSTALLED_APPS = [..., "drf_spectacular"]\n\nREST_FRAMEWORK = {\n    ...\n    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",\n}\n\nSPECTACULAR_SETTINGS = {\n    "TITLE": "Blog API",\n    "DESCRIPTION": "API REST pour un blog avec articles, catégories et commentaires",\n    "VERSION": "1.0.0",\n    "SERVE_INCLUDE_SCHEMA": False,\n}', desc: 'Configuration' },
+                                { code: '# config/urls.py\nfrom drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView\n\nurlpatterns = [\n    ...\n    # Documentation API\n    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),\n    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),\n    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),\n]', desc: 'URLs documentation' },
+                                { code: '# Personnaliser la doc avec des décorateurs\nfrom drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample\n\nclass ArticleViewSet(viewsets.ModelViewSet):\n    @extend_schema(\n        summary="Liste des articles",\n        description="Retourne la liste paginée des articles publiés",\n        parameters=[\n            OpenApiParameter(name="category__slug", description="Filtrer par catégorie"),\n            OpenApiParameter(name="search", description="Recherche dans le titre et contenu"),\n        ],\n        responses={200: ArticleListSerializer(many=True)}\n    )\n    def list(self, request, *args, **kwargs):\n        return super().list(request, *args, **kwargs)\n\n    @extend_schema(\n        summary="Publier un article",\n        description="Change le statut de l\\'article en \\'published\\'",\n        responses={200: {"type": "object", "properties": {"status": {"type": "string"}}}}\n    )\n    @action(detail=True, methods=["post"])\n    def publish(self, request, slug=None):\n        ...', desc: 'Personnalisation de la doc' }
+                            ],
+                            tips: ['Accédez à /api/docs/ pour l\'interface Swagger interactive'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

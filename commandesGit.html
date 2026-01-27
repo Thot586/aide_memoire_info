@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aide-mémoire Git Interactif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .command-card:hover { transform: translateY(-2px); transition: all 0.2s ease; }
+        .command-row { cursor: pointer; }
+        .modal-overlay { backdrop-filter: blur(4px); }
+        .modal-content { animation: modalSlideIn 0.2s ease-out; }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white py-8 px-4 shadow-lg">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-3xl font-bold mb-2"><i class="fab fa-git-alt text-orange-500 mr-2"></i>Guide Git & GitHub</h1>
+            <p class="text-slate-400">Les commandes essentielles classées par catégorie</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4">
+
+        <!-- Search -->
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande (ex: commit, push)..."
+                   class="w-full p-4 pl-12 rounded-lg border border-slate-200 shadow-sm focus:ring-2 focus:ring-orange-500 focus:outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+        </div>
+
+        <!-- Categories Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid">
+            <!-- Categories will be injected here by JS -->
+        </div>
+
+    </main>
+
+    <!-- Modal Détails -->
+    <div id="detailModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent">
+                <!-- Contenu injecté dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-slate-500 py-8 text-sm">
+        <p>Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const gitData = [
+            {
+                id: 'config',
+                title: 'Configuration & Initialisation',
+                icon: 'fa-cogs',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'git config --global user.name "Nom"',
+                        desc: 'Définir le nom de l\'utilisateur',
+                        details: {
+                            explanation: 'Cette commande configure votre identité dans Git. Le nom que vous définissez apparaîtra dans chaque commit que vous créez. C\'est une configuration obligatoire avant de pouvoir faire des commits.',
+                            syntax: 'git config [--global|--local|--system] user.name "<votre nom>"',
+                            options: [
+                                { flag: '--global', desc: 'Applique la configuration à tous vos projets Git (stocké dans ~/.gitconfig)' },
+                                { flag: '--local', desc: 'Applique uniquement au projet courant (stocké dans .git/config)' },
+                                { flag: '--system', desc: 'Applique à tous les utilisateurs de la machine' }
+                            ],
+                            examples: [
+                                { code: 'git config --global user.name "Jean Dupont"', desc: 'Configuration globale avec prénom et nom' },
+                                { code: 'git config --local user.name "JDupont-Pro"', desc: 'Configuration spécifique pour un projet professionnel' },
+                                { code: 'git config user.name', desc: 'Afficher le nom actuellement configuré' }
+                            ],
+                            tips: ['Utilisez votre vrai nom pour que vos collaborateurs vous identifient facilement', 'La configuration globale est suffisante pour la plupart des cas'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git config --global user.email "mail"',
+                        desc: 'Définir l\'email de l\'utilisateur',
+                        details: {
+                            explanation: 'Configure l\'adresse email associée à vos commits. Sur GitHub, cet email est utilisé pour lier vos commits à votre compte. Utilisez la même adresse que celle de votre compte GitHub pour que vos contributions soient correctement attribuées.',
+                            syntax: 'git config [--global|--local] user.email "<votre email>"',
+                            options: [
+                                { flag: '--global', desc: 'Configuration pour tous vos projets' },
+                                { flag: '--local', desc: 'Configuration pour le projet courant uniquement' }
+                            ],
+                            examples: [
+                                { code: 'git config --global user.email "jean.dupont@email.com"', desc: 'Email personnel pour tous les projets' },
+                                { code: 'git config --local user.email "j.dupont@entreprise.com"', desc: 'Email professionnel pour un projet spécifique' },
+                                { code: 'git config --global --list', desc: 'Voir toutes vos configurations globales' }
+                            ],
+                            tips: ['Utilisez l\'email de votre compte GitHub pour que vos commits apparaissent sur votre profil', 'GitHub propose des emails privés (noreply) si vous ne voulez pas exposer votre email'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git init',
+                        desc: 'Initialiser un nouveau dépôt local',
+                        details: {
+                            explanation: 'Transforme un dossier ordinaire en dépôt Git. Cette commande crée un sous-dossier caché .git qui contient toute la structure nécessaire au versionnement. C\'est la première commande à exécuter pour commencer à suivre les modifications d\'un projet.',
+                            syntax: 'git init [nom-du-dossier]',
+                            options: [
+                                { flag: '-b <nom>', desc: 'Définit le nom de la branche initiale (par défaut: master ou main selon votre config)' },
+                                { flag: '--bare', desc: 'Crée un dépôt "nu" sans répertoire de travail (pour les serveurs)' }
+                            ],
+                            examples: [
+                                { code: 'git init', desc: 'Initialise Git dans le dossier courant' },
+                                { code: 'git init mon-projet', desc: 'Crée un nouveau dossier "mon-projet" et l\'initialise' },
+                                { code: 'git init -b main', desc: 'Initialise avec "main" comme branche principale (convention GitHub)' }
+                            ],
+                            tips: ['Après git init, pensez à créer un fichier .gitignore pour exclure les fichiers inutiles', 'Vérifiez que le dépôt est créé avec ls -la (vous devriez voir .git)'],
+                            warnings: [],
+                            notes: ['Par défaut, Git crée une branche appelée "master". GitHub utilise "main" depuis 2020. Vous pouvez configurer votre préférence avec: git config --global init.defaultBranch main']
+                        }
+                    },
+                    {
+                        cmd: 'git clone <url>',
+                        desc: 'Cloner un dépôt distant existant',
+                        details: {
+                            explanation: 'Télécharge une copie complète d\'un dépôt distant (depuis GitHub, GitLab, etc.) sur votre machine. Cela inclut tout l\'historique, toutes les branches et configure automatiquement le lien avec le dépôt distant (appelé "origin").',
+                            syntax: 'git clone <url> [nom-dossier-local]',
+                            options: [
+                                { flag: '--depth <n>', desc: 'Clone uniquement les n derniers commits (clone superficiel, plus rapide)' },
+                                { flag: '-b <branche>', desc: 'Clone une branche spécifique au lieu de la branche par défaut' },
+                                { flag: '--single-branch', desc: 'Clone uniquement la branche spécifiée (économise de l\'espace)' }
+                            ],
+                            examples: [
+                                { code: 'git clone https://github.com/user/repo.git', desc: 'Clone via HTTPS (demande identifiants)' },
+                                { code: 'git clone git@github.com:user/repo.git', desc: 'Clone via SSH (nécessite clé SSH configurée)' },
+                                { code: 'git clone https://github.com/user/repo.git mon-projet', desc: 'Clone dans un dossier nommé "mon-projet"' },
+                                { code: 'git clone --depth 1 <url>', desc: 'Clone rapide avec uniquement le dernier commit' }
+                            ],
+                            tips: ['Préférez SSH pour éviter de saisir vos identifiants à chaque opération', 'L\'URL se trouve sur GitHub en cliquant sur le bouton vert "Code"'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'changes',
+                title: 'Gestion des Fichiers (Staging)',
+                icon: 'fa-file-code',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'git status',
+                        desc: 'Voir l\'état des fichiers modifiés',
+                        details: {
+                            explanation: 'Affiche l\'état actuel de votre répertoire de travail : quels fichiers ont été modifiés, lesquels sont prêts à être commités (staged), et lesquels ne sont pas suivis par Git. C\'est LA commande à utiliser régulièrement pour savoir où vous en êtes.',
+                            syntax: 'git status [options]',
+                            options: [
+                                { flag: '-s', desc: 'Affichage court/compact (short)' },
+                                { flag: '-b', desc: 'Affiche aussi la branche courante' },
+                                { flag: '--ignored', desc: 'Affiche aussi les fichiers ignorés' }
+                            ],
+                            examples: [
+                                { code: 'git status', desc: 'Affichage complet avec explications' },
+                                { code: 'git status -s', desc: 'Affichage compact : M=modifié, A=ajouté, ?=non suivi' },
+                                { code: 'git status -sb', desc: 'Compact avec nom de la branche' }
+                            ],
+                            tips: ['Utilisez git status avant chaque commit pour vérifier ce que vous allez enregistrer', 'Les fichiers en vert sont "staged" (prêts), en rouge ils ne le sont pas encore'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git add <fichier>',
+                        desc: 'Ajouter un fichier à l\'index (stage)',
+                        details: {
+                            explanation: 'Ajoute un fichier à la "zone de staging" (index). C\'est une étape intermédiaire obligatoire avant le commit. Seuls les fichiers "stagés" seront inclus dans le prochain commit. Cela vous permet de sélectionner précisément ce que vous voulez enregistrer.',
+                            syntax: 'git add <fichier(s)>',
+                            options: [
+                                { flag: '-p', desc: 'Mode interactif : choisir quelles parties du fichier ajouter' },
+                                { flag: '-n', desc: 'Simulation : montre ce qui serait ajouté sans le faire' }
+                            ],
+                            examples: [
+                                { code: 'git add index.html', desc: 'Ajoute un fichier spécifique' },
+                                { code: 'git add src/', desc: 'Ajoute tout le contenu d\'un dossier' },
+                                { code: 'git add *.js', desc: 'Ajoute tous les fichiers JavaScript' },
+                                { code: 'git add -p fichier.js', desc: 'Choisir interactivement les modifications à ajouter' }
+                            ],
+                            tips: ['Préférez ajouter les fichiers un par un ou par groupe logique pour des commits clairs', 'Utilisez git diff pour voir les modifications avant de les ajouter'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git add .',
+                        desc: 'Ajouter tous les fichiers modifiés',
+                        details: {
+                            explanation: 'Ajoute TOUS les fichiers modifiés et nouveaux du répertoire courant et ses sous-dossiers à la zone de staging. Pratique mais à utiliser avec précaution pour ne pas inclure des fichiers indésirables.',
+                            syntax: 'git add <pattern>',
+                            options: [
+                                { flag: '.', desc: 'Tous les fichiers du dossier courant et sous-dossiers' },
+                                { flag: '-A', desc: 'Tous les fichiers (ajouts + modifications + suppressions) de tout le dépôt' },
+                                { flag: '-u', desc: 'Uniquement les fichiers déjà suivis (pas les nouveaux)' }
+                            ],
+                            examples: [
+                                { code: 'git add .', desc: 'Ajoute tout depuis le dossier courant' },
+                                { code: 'git add -A', desc: 'Ajoute absolument tout, y compris les suppressions' },
+                                { code: 'git add -u', desc: 'Met à jour les fichiers suivis (ignore les nouveaux fichiers)' }
+                            ],
+                            tips: ['Créez un .gitignore AVANT d\'utiliser git add . pour exclure les fichiers sensibles', 'Utilisez git status après pour vérifier ce qui a été ajouté'],
+                            warnings: ['Attention à ne pas ajouter accidentellement des fichiers sensibles (.env, mots de passe, clés API)']
+                        }
+                    },
+                    {
+                        cmd: 'git rm <fichier>',
+                        desc: 'Supprimer un fichier du suivi',
+                        details: {
+                            explanation: 'Supprime un fichier du suivi Git ET du disque. Le fichier sera marqué comme supprimé dans le prochain commit. Utilisez --cached pour retirer du suivi Git tout en gardant le fichier sur le disque.',
+                            syntax: 'git rm [options] <fichier>',
+                            options: [
+                                { flag: '--cached', desc: 'Retire du suivi Git mais GARDE le fichier sur le disque' },
+                                { flag: '-f', desc: 'Force la suppression même si le fichier a des modifications non commitées' },
+                                { flag: '-r', desc: 'Suppression récursive (pour les dossiers)' }
+                            ],
+                            examples: [
+                                { code: 'git rm secret.txt', desc: 'Supprime le fichier du disque ET de Git' },
+                                { code: 'git rm --cached .env', desc: 'Retire .env du suivi Git mais le garde sur le disque' },
+                                { code: 'git rm -r --cached node_modules/', desc: 'Retire un dossier entier du suivi' }
+                            ],
+                            tips: ['Utilisez --cached quand vous avez oublié d\'ajouter un fichier au .gitignore', 'N\'oubliez pas de commiter après git rm'],
+                            warnings: ['Sans --cached, le fichier sera définitivement supprimé du disque!']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'commit',
+                title: 'Sauvegarde (Commit)',
+                icon: 'fa-check-circle',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'git commit -m "Message"',
+                        desc: 'Enregistrer les modifications indexées',
+                        details: {
+                            explanation: 'Crée un "instantané" permanent de tous les fichiers stagés (ajoutés avec git add). Chaque commit est identifié par un hash unique et contient : les modifications, l\'auteur, la date et votre message descriptif.',
+                            syntax: 'git commit [options] -m "<message>"',
+                            options: [
+                                { flag: '-m "<msg>"', desc: 'Message de commit (obligatoire, décrit les changements)' },
+                                { flag: '-a', desc: 'Stage automatiquement tous les fichiers MODIFIÉS (pas les nouveaux)' },
+                                { flag: '-am "<msg>"', desc: 'Combine -a et -m : stage les modifs + commit en une commande' },
+                                { flag: '--allow-empty', desc: 'Permet un commit sans modification (utile pour déclencher des CI/CD)' }
+                            ],
+                            examples: [
+                                { code: 'git commit -m "Ajout de la page de connexion"', desc: 'Commit simple avec message descriptif' },
+                                { code: 'git commit -am "Correction du bug #42"', desc: 'Stage les fichiers modifiés + commit' },
+                                { code: 'git commit -m "fix: corrige le calcul du total"', desc: 'Message avec préfixe conventionnel' }
+                            ],
+                            tips: ['Écrivez des messages clairs : préférez "Ajoute validation email" à "fix"', 'Faites des commits fréquents et petits plutôt que rares et massifs', 'Convention populaire : commencez par feat:, fix:, docs:, refactor:'],
+                            warnings: ['Le flag -a n\'ajoute PAS les nouveaux fichiers, seulement les fichiers déjà suivis']
+                        }
+                    },
+                    {
+                        cmd: 'git commit --amend',
+                        desc: 'Modifier le dernier commit',
+                        details: {
+                            explanation: 'Modifie le dernier commit au lieu d\'en créer un nouveau. Permet de corriger le message ou d\'ajouter des fichiers oubliés. Le commit modifié remplace l\'ancien (nouvel identifiant hash).',
+                            syntax: 'git commit --amend [options]',
+                            options: [
+                                { flag: '--amend', desc: 'Modifie le dernier commit' },
+                                { flag: '-m "<msg>"', desc: 'Nouveau message (sinon ouvre l\'éditeur)' },
+                                { flag: '--no-edit', desc: 'Garde le message existant (utile pour ajouter des fichiers oubliés)' }
+                            ],
+                            examples: [
+                                { code: 'git commit --amend -m "Nouveau message corrigé"', desc: 'Corrige juste le message du dernier commit' },
+                                { code: 'git add fichier_oublie.js && git commit --amend --no-edit', desc: 'Ajoute un fichier oublié au dernier commit' },
+                                { code: 'git commit --amend', desc: 'Ouvre l\'éditeur pour modifier le message' }
+                            ],
+                            tips: ['Parfait pour corriger une faute de frappe dans le message', 'Utilisez --no-edit quand vous ajoutez juste un fichier oublié'],
+                            warnings: ['Ne JAMAIS amend un commit déjà poussé (push) sur un dépôt partagé!', 'Cela réécrit l\'historique et peut causer des conflits pour les autres']
+                        }
+                    },
+                    {
+                        cmd: 'git log',
+                        desc: 'Voir l\'historique des commits',
+                        details: {
+                            explanation: 'Affiche l\'historique complet des commits de la branche courante, du plus récent au plus ancien. Montre le hash, l\'auteur, la date et le message de chaque commit.',
+                            syntax: 'git log [options]',
+                            options: [
+                                { flag: '--oneline', desc: 'Format compact : une ligne par commit' },
+                                { flag: '-n <nombre>', desc: 'Limite aux n derniers commits' },
+                                { flag: '--graph', desc: 'Affiche un graphique ASCII des branches' },
+                                { flag: '--author="<nom>"', desc: 'Filtre par auteur' },
+                                { flag: '-p', desc: 'Affiche les différences (patch) de chaque commit' }
+                            ],
+                            examples: [
+                                { code: 'git log', desc: 'Historique complet (appuyez q pour quitter)' },
+                                { code: 'git log --oneline -10', desc: 'Les 10 derniers commits en format compact' },
+                                { code: 'git log --oneline --graph --all', desc: 'Graphique de toutes les branches' },
+                                { code: 'git log --author="Jean"', desc: 'Commits de Jean uniquement' }
+                            ],
+                            tips: ['Appuyez sur q pour quitter l\'affichage', 'Combinez les options : --oneline --graph est très visuel'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git log --oneline',
+                        desc: 'Historique compact sur une ligne',
+                        details: {
+                            explanation: 'Version condensée de git log : affiche chaque commit sur une seule ligne avec le hash court (7 caractères) et le message. Idéal pour avoir une vue d\'ensemble rapide.',
+                            syntax: 'git log --oneline [options]',
+                            options: [
+                                { flag: '--oneline', desc: 'Une ligne par commit (hash court + message)' },
+                                { flag: '-n <nombre>', desc: 'Limite le nombre de commits affichés' },
+                                { flag: '--all', desc: 'Affiche toutes les branches, pas seulement la courante' },
+                                { flag: '--graph', desc: 'Ajoute un graphique ASCII des branches' }
+                            ],
+                            examples: [
+                                { code: 'git log --oneline', desc: 'Historique compact' },
+                                { code: 'git log --oneline -5', desc: 'Les 5 derniers commits' },
+                                { code: 'git log --oneline --graph --all', desc: 'Vue graphique de toutes les branches' }
+                            ],
+                            tips: ['Le hash court (ex: a1b2c3d) suffit pour la plupart des opérations Git', 'Très utile avant un rebase ou merge pour visualiser l\'historique'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'branches',
+                title: 'Branches & Fusion',
+                icon: 'fa-code-branch',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'git branch',
+                        desc: 'Lister les branches locales',
+                        details: {
+                            explanation: 'Affiche la liste de toutes les branches locales. La branche courante est marquée d\'un astérisque (*) et apparaît en vert. Les branches permettent de travailler sur différentes fonctionnalités en parallèle.',
+                            syntax: 'git branch [options] [nom-branche]',
+                            options: [
+                                { flag: '-a', desc: 'Liste toutes les branches (locales + distantes)' },
+                                { flag: '-r', desc: 'Liste uniquement les branches distantes' },
+                                { flag: '-v', desc: 'Affiche le dernier commit de chaque branche' },
+                                { flag: '-d <nom>', desc: 'Supprime une branche (si fusionnée)' },
+                                { flag: '-D <nom>', desc: 'Force la suppression d\'une branche' }
+                            ],
+                            examples: [
+                                { code: 'git branch', desc: 'Liste les branches locales' },
+                                { code: 'git branch -a', desc: 'Liste toutes les branches (locales et distantes)' },
+                                { code: 'git branch nouvelle-feature', desc: 'Crée une nouvelle branche' },
+                                { code: 'git branch -d feature-terminee', desc: 'Supprime une branche fusionnée' }
+                            ],
+                            tips: ['Nommez vos branches clairement : feature/login, bugfix/header, etc.', 'Supprimez les branches fusionnées pour garder un dépôt propre'],
+                            warnings: [],
+                            notes: ['Git utilise "master" par défaut, GitHub utilise "main". Vérifiez le nom avec git branch pour éviter les erreurs.']
+                        }
+                    },
+                    {
+                        cmd: 'git branch <nom>',
+                        desc: 'Créer une nouvelle branche',
+                        details: {
+                            explanation: 'Crée une nouvelle branche à partir de l\'état actuel (HEAD). La nouvelle branche pointe vers le même commit que la branche courante. Attention : cette commande crée la branche mais n\'y bascule pas automatiquement.',
+                            syntax: 'git branch <nom-de-la-branche>',
+                            options: [
+                                { flag: '-m <ancien> <nouveau>', desc: 'Renomme une branche' },
+                                { flag: '-c <nom>', desc: 'Copie une branche' },
+                                { flag: '--track <remote/branch>', desc: 'Crée une branche qui suit une branche distante' }
+                            ],
+                            examples: [
+                                { code: 'git branch feature/authentification', desc: 'Crée une branche pour développer l\'auth' },
+                                { code: 'git branch -m master main', desc: 'Renomme "master" en "main"' },
+                                { code: 'git branch hotfix/bug-urgent', desc: 'Crée une branche pour un correctif urgent' }
+                            ],
+                            tips: ['Convention de nommage : feature/, bugfix/, hotfix/, release/', 'Utilisez git checkout -b pour créer ET basculer en une commande'],
+                            warnings: ['Cette commande crée la branche mais n\'y bascule PAS. Utilisez ensuite git checkout <nom>']
+                        }
+                    },
+                    {
+                        cmd: 'git checkout <nom>',
+                        desc: 'Basculer vers une autre branche',
+                        details: {
+                            explanation: 'Change de branche de travail. Votre répertoire de travail sera mis à jour pour refléter l\'état de la branche cible. Les modifications non commitées peuvent être conservées ou bloquer le changement.',
+                            syntax: 'git checkout [options] <branche|commit|fichier>',
+                            options: [
+                                { flag: '-b <nom>', desc: 'Crée une nouvelle branche ET y bascule' },
+                                { flag: '-B <nom>', desc: 'Crée/réinitialise une branche ET y bascule' },
+                                { flag: '--', desc: 'Sépare les noms de branches des noms de fichiers' }
+                            ],
+                            examples: [
+                                { code: 'git checkout main', desc: 'Bascule vers la branche main' },
+                                { code: 'git checkout -b feature/panier', desc: 'Crée et bascule vers feature/panier' },
+                                { code: 'git checkout -', desc: 'Retourne à la branche précédente' },
+                                { code: 'git checkout a1b2c3d', desc: 'Se positionne sur un commit spécifique (detached HEAD)' }
+                            ],
+                            tips: ['git checkout - est un raccourci pratique pour alterner entre deux branches', 'Préférez git switch (Git 2.23+) pour changer de branche, c\'est plus clair'],
+                            warnings: ['Commitez ou stashez vos modifications avant de changer de branche'],
+                            notes: ['La branche par défaut s\'appelle "master" dans Git et "main" sur GitHub. Vérifiez le nom avec git branch.']
+                        }
+                    },
+                    {
+                        cmd: 'git merge <branche>',
+                        desc: 'Fusionner une branche dans la courante',
+                        details: {
+                            explanation: 'Intègre les modifications d\'une autre branche dans la branche courante. Git tente de fusionner automatiquement. En cas de modifications conflictuelles sur les mêmes lignes, vous devrez résoudre les conflits manuellement.',
+                            syntax: 'git merge [options] <branche-source>',
+                            options: [
+                                { flag: '--no-ff', desc: 'Force un commit de merge même si fast-forward possible' },
+                                { flag: '--squash', desc: 'Regroupe tous les commits de la branche en un seul' },
+                                { flag: '--abort', desc: 'Annule un merge en cours (en cas de conflit)' }
+                            ],
+                            examples: [
+                                { code: 'git checkout main && git merge feature/login', desc: 'Fusionne feature/login dans main' },
+                                { code: 'git merge --no-ff develop', desc: 'Merge avec commit explicite (conserve l\'historique)' },
+                                { code: 'git merge --abort', desc: 'Annule un merge problématique en cours' }
+                            ],
+                            tips: ['Assurez-vous d\'être sur la branche cible (main) avant de merger', 'Testez votre code après le merge avant de push'],
+                            warnings: ['En cas de conflit, Git marque les fichiers concernés. Éditez-les, puis git add + git commit']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'remote',
+                title: 'Synchronisation (Remote)',
+                icon: 'fa-cloud-upload-alt',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'git remote -v',
+                        desc: 'Voir les dépôts distants connectés',
+                        details: {
+                            explanation: 'Liste tous les dépôts distants (remotes) configurés et leurs URLs. Par convention, le dépôt principal s\'appelle "origin". Vous pouvez avoir plusieurs remotes (ex: origin pour GitHub, upstream pour le projet original d\'un fork).',
+                            syntax: 'git remote [options]',
+                            options: [
+                                { flag: '-v', desc: 'Affiche les URLs (fetch et push) de chaque remote' },
+                                { flag: 'add <nom> <url>', desc: 'Ajoute un nouveau remote' },
+                                { flag: 'remove <nom>', desc: 'Supprime un remote' },
+                                { flag: 'rename <ancien> <nouveau>', desc: 'Renomme un remote' }
+                            ],
+                            examples: [
+                                { code: 'git remote -v', desc: 'Liste les remotes avec leurs URLs' },
+                                { code: 'git remote add origin https://github.com/user/repo.git', desc: 'Connecte le dépôt local à GitHub' },
+                                { code: 'git remote add upstream https://github.com/original/repo.git', desc: 'Ajoute le dépôt original d\'un fork' },
+                                { code: 'git remote remove origin', desc: 'Supprime la connexion à origin' }
+                            ],
+                            tips: ['"origin" est le nom par défaut du remote créé par git clone', 'Utilisez des noms explicites : origin (votre fork), upstream (projet original)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git fetch origin',
+                        desc: 'Récupérer les changements distants sans fusionner',
+                        details: {
+                            explanation: 'Télécharge les nouveaux commits et branches du dépôt distant SANS modifier votre branche locale. Cela met à jour vos références distantes (origin/main, etc.). Utilisez cette commande pour voir ce qui a changé avant d\'intégrer.',
+                            syntax: 'git fetch [remote] [branche]',
+                            options: [
+                                { flag: '--all', desc: 'Récupère depuis tous les remotes configurés' },
+                                { flag: '--prune', desc: 'Supprime les références aux branches distantes supprimées' },
+                                { flag: '-p', desc: 'Raccourci pour --prune' }
+                            ],
+                            examples: [
+                                { code: 'git fetch origin', desc: 'Récupère toutes les mises à jour de origin' },
+                                { code: 'git fetch --all', desc: 'Récupère depuis tous les remotes' },
+                                { code: 'git fetch origin main', desc: 'Récupère uniquement la branche main' },
+                                { code: 'git fetch -p', desc: 'Nettoie les branches supprimées sur le distant' }
+                            ],
+                            tips: ['Après fetch, utilisez git log origin/main pour voir les nouveaux commits', 'fetch est "sûr" car il ne modifie pas votre travail en cours'],
+                            warnings: [],
+                            notes: ['La branche par défaut peut être "master" (Git) ou "main" (GitHub). Utilisez git branch -r pour voir les branches distantes.']
+                        }
+                    },
+                    {
+                        cmd: 'git pull origin <branche>',
+                        desc: 'Récupérer et fusionner les changements',
+                        details: {
+                            explanation: 'Combine git fetch + git merge en une seule commande. Télécharge les modifications du dépôt distant ET les fusionne dans votre branche courante. C\'est la commande la plus courante pour se synchroniser.',
+                            syntax: 'git pull [remote] [branche]',
+                            options: [
+                                { flag: '--rebase', desc: 'Utilise rebase au lieu de merge (historique plus linéaire)' },
+                                { flag: '--ff-only', desc: 'N\'accepte que les fast-forward (échoue s\'il y a divergence)' },
+                                { flag: '--no-commit', desc: 'Fusionne sans créer de commit automatiquement' }
+                            ],
+                            examples: [
+                                { code: 'git pull origin main', desc: 'Récupère et fusionne main depuis origin' },
+                                { code: 'git pull', desc: 'Pull depuis le remote/branche par défaut' },
+                                { code: 'git pull --rebase origin main', desc: 'Pull avec rebase pour un historique propre' },
+                                { code: 'git pull origin master', desc: 'Pour les dépôts utilisant "master" comme branche principale' }
+                            ],
+                            tips: ['Faites un pull avant de commencer à travailler pour avoir la dernière version', 'Préférez --rebase pour éviter les commits de merge inutiles'],
+                            warnings: ['Pull peut créer des conflits si vous avez des modifications locales sur les mêmes fichiers'],
+                            notes: ['GitHub utilise "main", Git utilise "master" par défaut. Vérifiez avec git branch -r quelle branche utilise votre dépôt.']
+                        }
+                    },
+                    {
+                        cmd: 'git push origin <branche>',
+                        desc: 'Envoyer les commits locaux vers le distant',
+                        details: {
+                            explanation: 'Envoie vos commits locaux vers le dépôt distant. La branche distante sera mise à jour avec vos modifications. Nécessite les droits d\'écriture sur le dépôt.',
+                            syntax: 'git push [options] [remote] [branche]',
+                            options: [
+                                { flag: '-u', desc: 'Définit la branche distante comme upstream (suivi). À faire une fois, ensuite git push suffit' },
+                                { flag: '--force', desc: 'Force le push même si l\'historique diverge (DANGER!)' },
+                                { flag: '--force-with-lease', desc: 'Force sécurisé : échoue si quelqu\'un a push entre-temps' },
+                                { flag: '--tags', desc: 'Pousse aussi les tags' },
+                                { flag: '-d <branche>', desc: 'Supprime une branche distante' }
+                            ],
+                            examples: [
+                                { code: 'git push origin main', desc: 'Pousse vers la branche main sur origin' },
+                                { code: 'git push -u origin feature/login', desc: 'Premier push d\'une nouvelle branche avec suivi' },
+                                { code: 'git push', desc: 'Pousse vers la branche upstream configurée' },
+                                { code: 'git push origin --delete old-branch', desc: 'Supprime une branche distante' }
+                            ],
+                            tips: ['Utilisez -u lors du premier push d\'une branche, ensuite git push suffit', 'Préférez --force-with-lease à --force pour éviter d\'écraser le travail des autres'],
+                            warnings: ['--force réécrit l\'historique distant. Ne JAMAIS l\'utiliser sur main/master partagé!', 'Toujours pull avant push pour éviter les conflits'],
+                            notes: ['La branche par défaut peut être "master" (Git) ou "main" (GitHub). Vérifiez avec votre équipe quelle convention utiliser.']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'undo',
+                title: 'Annulation & Nettoyage',
+                icon: 'fa-undo',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'git checkout -- <fichier>',
+                        desc: 'Annuler les modifs d\'un fichier (avant add)',
+                        details: {
+                            explanation: 'Restaure un fichier à son état du dernier commit, annulant toutes les modifications non stagées. Le fichier doit ne pas encore avoir été ajouté avec git add. Les modifications seront perdues définitivement.',
+                            syntax: 'git checkout -- <fichier>',
+                            options: [
+                                { flag: '--', desc: 'Sépare la commande du nom de fichier (évite l\'ambiguïté avec les branches)' }
+                            ],
+                            examples: [
+                                { code: 'git checkout -- index.html', desc: 'Restaure index.html à son dernier état commité' },
+                                { code: 'git checkout -- .', desc: 'Restaure TOUS les fichiers modifiés (DANGER!)' },
+                                { code: 'git checkout -- src/', desc: 'Restaure tout le dossier src/' }
+                            ],
+                            tips: ['Préférez git restore (Git 2.23+) qui est plus clair : git restore fichier.txt', 'Faites un git diff avant pour voir ce que vous allez perdre'],
+                            warnings: ['Les modifications annulées sont perdues DÉFINITIVEMENT!', 'Aucun moyen de récupérer les changements après cette commande']
+                        }
+                    },
+                    {
+                        cmd: 'git reset HEAD <fichier>',
+                        desc: 'Retirer un fichier de l\'index (unstage)',
+                        details: {
+                            explanation: 'Retire un fichier de la zone de staging (annule git add) SANS supprimer les modifications. Le fichier revient à l\'état "modifié non stagé". Utile si vous avez ajouté un fichier par erreur.',
+                            syntax: 'git reset [options] [fichier]',
+                            options: [
+                                { flag: 'HEAD', desc: 'Référence au dernier commit (optionnel avec les versions récentes)' },
+                                { flag: '--soft', desc: 'Garde les fichiers stagés (pour reset de commits)' },
+                                { flag: '--mixed', desc: 'Unstage les fichiers mais garde les modifications (par défaut)' },
+                                { flag: '--hard', desc: 'Supprime TOUT : staging ET modifications' }
+                            ],
+                            examples: [
+                                { code: 'git reset HEAD fichier.js', desc: 'Unstage un fichier spécifique' },
+                                { code: 'git reset HEAD', desc: 'Unstage tous les fichiers' },
+                                { code: 'git restore --staged fichier.js', desc: 'Alternative moderne (Git 2.23+)' }
+                            ],
+                            tips: ['Les modifications du fichier sont conservées, seul le staging est annulé', 'Préférez git restore --staged (plus intuitif)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git reset --hard',
+                        desc: 'Annuler tous les changements (Attention !)',
+                        details: {
+                            explanation: 'Réinitialise complètement votre répertoire de travail à l\'état d\'un commit. Supprime TOUTES les modifications (stagées et non stagées) ET peut supprimer des commits. Commande puissante mais DANGEREUSE.',
+                            syntax: 'git reset --hard [commit]',
+                            options: [
+                                { flag: '--hard', desc: 'Supprime les modifications ET les fichiers stagés' },
+                                { flag: 'HEAD', desc: 'Revient au dernier commit' },
+                                { flag: 'HEAD~1', desc: 'Revient à l\'avant-dernier commit' },
+                                { flag: '<hash>', desc: 'Revient à un commit spécifique' }
+                            ],
+                            examples: [
+                                { code: 'git reset --hard', desc: 'Annule toutes les modifications locales' },
+                                { code: 'git reset --hard HEAD~1', desc: 'Supprime le dernier commit ET ses modifications' },
+                                { code: 'git reset --hard origin/main', desc: 'Synchronise exactement avec le distant' },
+                                { code: 'git reset --hard a1b2c3d', desc: 'Revient au commit spécifié' }
+                            ],
+                            tips: ['Faites un git stash avant si vous n\'êtes pas sûr de vouloir tout perdre', 'git reflog peut parfois récupérer des commits perdus (dans les 30 jours)'],
+                            warnings: ['TOUTES les modifications non commitées seront PERDUES!', 'Les commits supprimés après un push peuvent causer des problèmes de synchronisation', 'Ne JAMAIS utiliser sur des commits déjà partagés (push)']
+                        }
+                    },
+                    {
+                        cmd: 'git stash',
+                        desc: 'Mettre de côté les changements en cours',
+                        details: {
+                            explanation: 'Sauvegarde temporairement vos modifications non commitées dans une pile (stash). Votre répertoire devient propre, vous permettant de changer de branche ou pull sans conflit. Vous pourrez récupérer ces modifications plus tard.',
+                            syntax: 'git stash [commande] [options]',
+                            options: [
+                                { flag: 'push -m "<msg>"', desc: 'Stash avec un message descriptif' },
+                                { flag: 'list', desc: 'Liste tous les stashs sauvegardés' },
+                                { flag: 'pop', desc: 'Applique ET supprime le dernier stash' },
+                                { flag: 'apply', desc: 'Applique le dernier stash SANS le supprimer' },
+                                { flag: 'drop', desc: 'Supprime le dernier stash' },
+                                { flag: '-u', desc: 'Inclut aussi les fichiers non suivis (untracked)' }
+                            ],
+                            examples: [
+                                { code: 'git stash', desc: 'Met de côté les modifications courantes' },
+                                { code: 'git stash push -m "WIP: formulaire login"', desc: 'Stash avec description' },
+                                { code: 'git stash list', desc: 'Voir tous les stashs : stash@{0}, stash@{1}...' },
+                                { code: 'git stash pop', desc: 'Récupère les modifications et supprime le stash' },
+                                { code: 'git stash apply stash@{1}', desc: 'Applique un stash spécifique' }
+                            ],
+                            tips: ['Utilisez des messages descriptifs : git stash push -m "description"', 'git stash pop = apply + drop en une commande'],
+                            warnings: ['Les stashs sont locaux, ils ne sont pas partagés via push/pull']
+                        }
+                    }
+                ]
+            }
+        ];
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showDetails(categoryId, cmdIndex) {
+            const category = gitData.find(c => c.id === categoryId);
+            const command = category.commands[cmdIndex];
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+
+            // Génération du contenu de la modale
+            let optionsHtml = '';
+            if (command.details.options && command.details.options.length > 0) {
+                optionsHtml = `
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-slate-700 mb-2 flex items-center">
+                            <i class="fas fa-sliders-h mr-2 text-slate-400"></i>Options / Flags
+                        </h4>
+                        <div class="bg-slate-50 rounded-lg overflow-hidden">
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    ${command.details.options.map(opt => `
+                                        <tr class="border-b border-slate-200 last:border-0">
+                                            <td class="p-2 font-mono text-orange-600 whitespace-nowrap font-semibold">${escapeHtml(opt.flag)}</td>
+                                            <td class="p-2 text-slate-600">${opt.desc}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let examplesHtml = '';
+            if (command.details.examples && command.details.examples.length > 0) {
+                examplesHtml = `
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-slate-700 mb-2 flex items-center">
+                            <i class="fas fa-code mr-2 text-slate-400"></i>Exemples pratiques
+                        </h4>
+                        <div class="space-y-2">
+                            ${command.details.examples.map(ex => `
+                                <div class="bg-slate-800 rounded-lg p-3">
+                                    <code class="text-green-400 text-sm block mb-1">${escapeHtml(ex.code)}</code>
+                                    <span class="text-slate-400 text-xs">${ex.desc}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let tipsHtml = '';
+            if (command.details.tips && command.details.tips.length > 0) {
+                tipsHtml = `
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-slate-700 mb-2 flex items-center">
+                            <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>Conseils
+                        </h4>
+                        <ul class="space-y-1">
+                            ${command.details.tips.map(tip => `
+                                <li class="flex items-start text-sm text-slate-600">
+                                    <span class="text-yellow-500 mr-2">💡</span>
+                                    ${tip}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            let warningsHtml = '';
+            if (command.details.warnings && command.details.warnings.length > 0) {
+                warningsHtml = `
+                    <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                        <h4 class="font-semibold text-red-700 mb-2 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Attention
+                        </h4>
+                        <ul class="space-y-1">
+                            ${command.details.warnings.map(warn => `
+                                <li class="flex items-start text-sm text-red-600">
+                                    <span class="mr-2">⚠️</span>
+                                    ${warn}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            let notesHtml = '';
+            if (command.details.notes && command.details.notes.length > 0) {
+                notesHtml = `
+                    <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <h4 class="font-semibold text-blue-700 mb-2 flex items-center">
+                            <i class="fas fa-info-circle mr-2"></i>Note importante
+                        </h4>
+                        <ul class="space-y-1">
+                            ${command.details.notes.map(note => `
+                                <li class="flex items-start text-sm text-blue-700">
+                                    <span class="mr-2">📝</span>
+                                    ${note}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = `
+                <div class="sticky top-0 bg-slate-100 border-b border-slate-200 p-4 flex items-center justify-between">
+                    <h3 class="font-bold text-lg text-slate-800 flex items-center">
+                        <i class="fas ${category.icon} mr-2 text-slate-500"></i>
+                        Détails de la commande
+                    </h3>
+                    <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-200 rounded-full transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <!-- Commande principale -->
+                    <div class="bg-slate-900 rounded-lg p-4 mb-6">
+                        <code class="text-orange-400 text-lg font-mono">${escapeHtml(command.cmd)}</code>
+                        <p class="text-slate-400 text-sm mt-2">${command.desc}</p>
+                    </div>
+
+                    <!-- Explication -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-slate-700 mb-2 flex items-center">
+                            <i class="fas fa-book-open mr-2 text-slate-400"></i>Explication
+                        </h4>
+                        <p class="text-slate-600 leading-relaxed">${command.details.explanation}</p>
+                    </div>
+
+                    <!-- Syntaxe -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-slate-700 mb-2 flex items-center">
+                            <i class="fas fa-terminal mr-2 text-slate-400"></i>Syntaxe
+                        </h4>
+                        <div class="bg-slate-100 rounded-lg p-3">
+                            <code class="text-slate-700 font-mono text-sm">${escapeHtml(command.details.syntax)}</code>
+                        </div>
+                    </div>
+
+                    ${optionsHtml}
+                    ${examplesHtml}
+                    ${notesHtml}
+                    ${tipsHtml}
+                    ${warningsHtml}
+
+                    <!-- Bouton copier -->
+                    <div class="mt-6 pt-4 border-t border-slate-200">
+                        <button type="button" onclick="copyModalCommand(this, '${escapeHtml(command.cmd).replace(/'/g, "\\'")}')"
+                                class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium transition flex items-center justify-center">
+                            <i class="far fa-copy mr-2"></i>Copier la commande
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        // Fermer avec Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        function renderCategories(filter = '') {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = '';
+
+            gitData.forEach(category => {
+                // Filter commands based on search
+                const filteredCommands = category.commands.map((c, idx) => ({...c, originalIndex: idx})).filter(c =>
+                    c.cmd.toLowerCase().includes(filter.toLowerCase()) ||
+                    c.desc.toLowerCase().includes(filter.toLowerCase())
+                );
+
+                if (filteredCommands.length > 0) {
+                    const card = document.createElement('div');
+                    card.className = `bg-white rounded-xl shadow-md overflow-hidden ${category.color} command-card`;
+
+                    let commandsHtml = filteredCommands.map(c => {
+                        const safeCmd = escapeHtml(c.cmd);
+                        return `
+                        <div class="command-row group flex items-center justify-between p-2 hover:bg-slate-50 rounded border-b border-slate-100 last:border-0"
+                             onclick="showDetails('${category.id}', ${c.originalIndex})">
+                            <div class="flex-1 min-w-0 mr-4">
+                                <code class="block text-sm font-mono text-slate-700 bg-slate-100 p-1 rounded px-2 break-all group-hover:text-orange-600 transition-colors">${safeCmd}</code>
+                                <span class="text-xs text-slate-500 mt-1 block truncate">${c.desc}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="text-slate-300 group-hover:text-orange-400 transition">
+                                    <i class="fas fa-chevron-right text-xs"></i>
+                                </span>
+                                <button type="button" onclick="event.stopPropagation(); copyToClipboard(this.getAttribute('data-cmd'), this)" data-cmd="${safeCmd}" class="text-slate-300 hover:text-slate-600 transition p-2" title="Copier">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `}).join('');
+
+                    card.innerHTML = `
+                        <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                            <h2 class="font-semibold text-slate-700 flex items-center">
+                                <i class="fas ${category.icon} w-6 text-center mr-2 text-slate-400"></i>
+                                ${category.title}
+                            </h2>
+                        </div>
+                        <div class="p-3">
+                            ${commandsHtml}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+            });
+        }
+
+        function copyToClipboard(text, buttonElement) {
+            // Décoder les entités HTML pour copier le texte original
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = text;
+            const decodedText = textarea.value;
+
+            // Utiliser l'API moderne du presse-papier
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    showCopyFeedback(buttonElement);
+                }).catch(() => {
+                    // Fallback si l'API échoue
+                    fallbackCopy(decodedText, buttonElement);
+                });
+            } else {
+                fallbackCopy(decodedText, buttonElement);
+            }
+        }
+
+        function fallbackCopy(text, buttonElement) {
+            const tempInput = document.createElement("input");
+            tempInput.style.position = 'absolute';
+            tempInput.style.left = '-9999px';
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            showCopyFeedback(buttonElement);
+        }
+
+        function showCopyFeedback(buttonElement) {
+            if (!buttonElement) return;
+            const originalIcon = buttonElement.innerHTML;
+            buttonElement.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+            setTimeout(() => {
+                buttonElement.innerHTML = '<i class="far fa-copy"></i>';
+            }, 1000);
+        }
+
+        function copyModalCommand(buttonElement, text) {
+            // Décoder les entités HTML
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = text;
+            const decodedText = textarea.value;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    buttonElement.innerHTML = '<i class="fas fa-check mr-2"></i>Copié !';
+                    setTimeout(() => {
+                        buttonElement.innerHTML = '<i class="far fa-copy mr-2"></i>Copier la commande';
+                    }, 1500);
+                }).catch(() => {
+                    fallbackCopy(decodedText, null);
+                    buttonElement.innerHTML = '<i class="fas fa-check mr-2"></i>Copié !';
+                    setTimeout(() => {
+                        buttonElement.innerHTML = '<i class="far fa-copy mr-2"></i>Copier la commande';
+                    }, 1500);
+                });
+            } else {
+                fallbackCopy(decodedText, null);
+                buttonElement.innerHTML = '<i class="fas fa-check mr-2"></i>Copié !';
+                setTimeout(() => {
+                    buttonElement.innerHTML = '<i class="far fa-copy mr-2"></i>Copier la commande';
+                }, 1500);
+            }
+        }
+
+        // Initial render
+        renderCategories();
+
+        // Search listener
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderCategories(e.target.value);
+        });
+
+    </script>
+</body>
+</html>

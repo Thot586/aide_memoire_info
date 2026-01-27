@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Shell Linux/Bash : commandes essentielles pour naviguer et gérer les fichiers.">
+    <title>Shell Linux - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gray-500/20 mb-4 icon-glow">
+                    <i class="fas fa-terminal text-3xl text-gray-300"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Shell Linux</h1>
+                <p class="text-slate-400">Commandes Bash indispensables pour naviguer et gérer les fichiers</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'navigation',
+                title: 'Navigation',
+                icon: 'fa-compass',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'cd chemin',
+                        desc: 'Changer de répertoire',
+                        details: {
+                            explanation: 'Change le répertoire de travail courant. C\'est la commande la plus utilisée pour naviguer.',
+                            syntax: 'cd [chemin]',
+                            options: [
+                                { flag: 'cd', desc: 'Retour au répertoire personnel (~)' },
+                                { flag: 'cd ..', desc: 'Remonter d\'un niveau' },
+                                { flag: 'cd -', desc: 'Retour au répertoire précédent' },
+                                { flag: 'cd /', desc: 'Aller à la racine' }
+                            ],
+                            examples: [
+                                { code: 'cd /var/www', desc: 'Chemin absolu' },
+                                { code: 'cd ../projet', desc: 'Chemin relatif' },
+                                { code: 'cd ~', desc: 'Répertoire personnel' }
+                            ],
+                            tips: ['Utilisez Tab pour l\'autocomplétion des chemins'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ls',
+                        desc: 'Lister le contenu d\'un répertoire',
+                        details: {
+                            explanation: 'Affiche la liste des fichiers et dossiers dans le répertoire courant ou spécifié.',
+                            syntax: 'ls [options] [chemin]',
+                            options: [
+                                { flag: '-l', desc: 'Format long (détails)' },
+                                { flag: '-a', desc: 'Afficher les fichiers cachés' },
+                                { flag: '-h', desc: 'Tailles lisibles (Ko, Mo)' },
+                                { flag: '-R', desc: 'Récursif' },
+                                { flag: '-t', desc: 'Trier par date' }
+                            ],
+                            examples: [
+                                { code: 'ls -la', desc: 'Liste détaillée avec fichiers cachés' },
+                                { code: 'ls -lh *.txt', desc: 'Fichiers .txt avec tailles lisibles' }
+                            ],
+                            tips: ['Alias courant: ll = ls -la'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'pwd',
+                        desc: 'Afficher le répertoire courant',
+                        details: {
+                            explanation: 'Print Working Directory - affiche le chemin absolu du répertoire actuel.',
+                            syntax: 'pwd',
+                            options: [],
+                            examples: [
+                                { code: 'pwd', desc: 'Affiche ex: /home/user/projet' }
+                            ],
+                            tips: ['Utile dans les scripts pour vérifier l\'emplacement'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'files',
+                title: 'Gestion des fichiers',
+                icon: 'fa-file',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'cp source destination',
+                        desc: 'Copier fichiers/dossiers',
+                        details: {
+                            explanation: 'Copie un fichier ou un dossier vers une nouvelle destination.',
+                            syntax: 'cp [options] source destination',
+                            options: [
+                                { flag: '-r', desc: 'Récursif (pour les dossiers)' },
+                                { flag: '-i', desc: 'Demander confirmation avant écrasement' },
+                                { flag: '-v', desc: 'Mode verbeux' },
+                                { flag: '-p', desc: 'Préserver les attributs' }
+                            ],
+                            examples: [
+                                { code: 'cp fichier.txt copie.txt', desc: 'Copier un fichier' },
+                                { code: 'cp -r dossier/ backup/', desc: 'Copier un dossier récursivement' }
+                            ],
+                            tips: ['Utilisez -i pour éviter d\'écraser par erreur'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'mv source destination',
+                        desc: 'Déplacer/renommer',
+                        details: {
+                            explanation: 'Déplace un fichier/dossier ou le renomme si la destination est dans le même répertoire.',
+                            syntax: 'mv [options] source destination',
+                            options: [
+                                { flag: '-i', desc: 'Demander confirmation' },
+                                { flag: '-v', desc: 'Mode verbeux' }
+                            ],
+                            examples: [
+                                { code: 'mv ancien.txt nouveau.txt', desc: 'Renommer' },
+                                { code: 'mv fichier.txt /tmp/', desc: 'Déplacer vers /tmp' },
+                                { code: 'mv *.jpg images/', desc: 'Déplacer tous les jpg' }
+                            ],
+                            tips: ['mv fonctionne pour renommer ET déplacer'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'rm fichier',
+                        desc: 'Supprimer fichiers/dossiers',
+                        details: {
+                            explanation: 'Supprime définitivement des fichiers ou dossiers. Pas de corbeille !',
+                            syntax: 'rm [options] fichier(s)',
+                            options: [
+                                { flag: '-r', desc: 'Récursif (dossiers)' },
+                                { flag: '-f', desc: 'Forcer sans confirmation' },
+                                { flag: '-i', desc: 'Demander confirmation' },
+                                { flag: '-v', desc: 'Mode verbeux' }
+                            ],
+                            examples: [
+                                { code: 'rm fichier.txt', desc: 'Supprimer un fichier' },
+                                { code: 'rm -r dossier/', desc: 'Supprimer un dossier et son contenu' },
+                                { code: 'rm -i *.log', desc: 'Supprimer avec confirmation' }
+                            ],
+                            tips: ['Utilisez rm -i pour éviter les erreurs'],
+                            warnings: ['rm -rf est irréversible ! Vérifiez deux fois avant d\'exécuter.']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'permissions',
+                title: 'Permissions',
+                icon: 'fa-lock',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'chmod mode fichier',
+                        desc: 'Modifier les permissions',
+                        details: {
+                            explanation: 'Change les permissions de lecture (r), écriture (w) et exécution (x) d\'un fichier.',
+                            syntax: 'chmod [options] mode fichier',
+                            options: [
+                                { flag: '-R', desc: 'Récursif' },
+                                { flag: '755', desc: 'rwxr-xr-x (script exécutable)' },
+                                { flag: '644', desc: 'rw-r--r-- (fichier normal)' },
+                                { flag: '+x', desc: 'Ajouter le droit d\'exécution' }
+                            ],
+                            examples: [
+                                { code: 'chmod +x script.sh', desc: 'Rendre exécutable' },
+                                { code: 'chmod 755 script.sh', desc: 'Permissions classiques pour script' },
+                                { code: 'chmod -R 644 dossier/', desc: 'Appliquer récursivement' }
+                            ],
+                            tips: ['7=rwx, 5=r-x, 4=r--, 0=---'],
+                            warnings: ['chmod 777 donne tous les droits à tous - risque de sécurité']
+                        }
+                    },
+                    {
+                        cmd: 'chown user:group fichier',
+                        desc: 'Changer le propriétaire',
+                        details: {
+                            explanation: 'Change le propriétaire et/ou le groupe d\'un fichier ou dossier.',
+                            syntax: 'chown [options] user[:group] fichier',
+                            options: [
+                                { flag: '-R', desc: 'Récursif' },
+                                { flag: 'user:', desc: 'Changer aussi le groupe en celui de l\'utilisateur' }
+                            ],
+                            examples: [
+                                { code: 'chown www-data fichier.txt', desc: 'Changer le propriétaire' },
+                                { code: 'chown www-data:www-data /var/www', desc: 'Propriétaire et groupe' },
+                                { code: 'sudo chown -R $USER:$USER projet/', desc: 'Récupérer la propriété d\'un dossier' }
+                            ],
+                            tips: ['Nécessite souvent sudo'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'search',
+                title: 'Recherche & Texte',
+                icon: 'fa-search',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'grep motif fichier',
+                        desc: 'Rechercher dans un fichier',
+                        details: {
+                            explanation: 'Recherche des lignes contenant un motif dans un fichier ou une entrée.',
+                            syntax: 'grep [options] motif fichier(s)',
+                            options: [
+                                { flag: '-i', desc: 'Ignorer la casse' },
+                                { flag: '-r', desc: 'Récursif dans les dossiers' },
+                                { flag: '-n', desc: 'Afficher les numéros de ligne' },
+                                { flag: '-v', desc: 'Inverser (lignes ne contenant PAS)' },
+                                { flag: '-c', desc: 'Compter les occurrences' }
+                            ],
+                            examples: [
+                                { code: 'grep "erreur" log.txt', desc: 'Chercher "erreur" dans log.txt' },
+                                { code: 'grep -ri "TODO" src/', desc: 'Chercher TODO dans src/ (récursif, insensible casse)' },
+                                { code: 'cat fichier | grep motif', desc: 'Avec pipe' }
+                            ],
+                            tips: ['Combinez avec | (pipe) pour filtrer la sortie d\'autres commandes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'find chemin -name motif',
+                        desc: 'Trouver des fichiers',
+                        details: {
+                            explanation: 'Recherche des fichiers selon différents critères (nom, taille, date, etc.).',
+                            syntax: 'find chemin [expressions]',
+                            options: [
+                                { flag: '-name', desc: 'Recherche par nom (sensible casse)' },
+                                { flag: '-iname', desc: 'Recherche par nom (insensible casse)' },
+                                { flag: '-type f/d', desc: 'Fichiers (f) ou dossiers (d)' },
+                                { flag: '-mtime -7', desc: 'Modifiés il y a moins de 7 jours' },
+                                { flag: '-size +10M', desc: 'Plus de 10 Mo' }
+                            ],
+                            examples: [
+                                { code: 'find . -name "*.py"', desc: 'Fichiers Python dans le dossier courant' },
+                                { code: 'find /var -type f -size +100M', desc: 'Fichiers > 100 Mo dans /var' },
+                                { code: 'find . -name "*.tmp" -delete', desc: 'Trouver et supprimer les .tmp' }
+                            ],
+                            tips: ['Utilisez -exec pour exécuter une commande sur chaque résultat'],
+                            warnings: ['Attention avec -delete, pas de confirmation !']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'processes',
+                title: 'Gestion des Processus',
+                icon: 'fa-microchip',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'ps aux',
+                        desc: 'Lister les processus',
+                        details: {
+                            explanation: 'Affiche la liste des processus en cours d\'exécution avec leurs détails.',
+                            syntax: 'ps [options]',
+                            options: [
+                                { flag: 'aux', desc: 'Tous les processus (format BSD)' },
+                                { flag: '-ef', desc: 'Tous les processus (format System V)' },
+                                { flag: '-u user', desc: 'Processus d\'un utilisateur' },
+                                { flag: '--forest', desc: 'Vue arborescente' },
+                                { flag: '-p PID', desc: 'Processus spécifique' }
+                            ],
+                            examples: [
+                                { code: 'ps aux', desc: 'Tous les processus' },
+                                { code: 'ps aux | grep nginx', desc: 'Filtrer par nom' },
+                                { code: 'ps aux --sort=-%mem | head', desc: 'Top consommateurs mémoire' },
+                                { code: 'ps -ef --forest', desc: 'Arbre des processus' }
+                            ],
+                            tips: ['Combinez avec grep pour filtrer les résultats'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'kill / killall',
+                        desc: 'Terminer des processus',
+                        details: {
+                            explanation: 'Envoie des signaux aux processus pour les contrôler ou les terminer.',
+                            syntax: 'kill [signal] PID\nkillall [signal] nom',
+                            options: [
+                                { flag: '-15 (SIGTERM)', desc: 'Terminer proprement (défaut)' },
+                                { flag: '-9 (SIGKILL)', desc: 'Forcer l\'arrêt immédiat' },
+                                { flag: '-1 (SIGHUP)', desc: 'Recharger la configuration' },
+                                { flag: '-l', desc: 'Lister tous les signaux' }
+                            ],
+                            examples: [
+                                { code: 'kill 1234', desc: 'Terminer le processus 1234' },
+                                { code: 'kill -9 1234', desc: 'Forcer l\'arrêt' },
+                                { code: 'killall firefox', desc: 'Tuer tous les processus firefox' },
+                                { code: 'pkill -f "python script.py"', desc: 'Tuer par ligne de commande' }
+                            ],
+                            tips: ['Essayez d\'abord SIGTERM, puis SIGKILL si nécessaire'],
+                            warnings: ['kill -9 ne permet pas au processus de se terminer proprement']
+                        }
+                    },
+                    {
+                        cmd: 'bg / fg / jobs',
+                        desc: 'Processus en arrière-plan',
+                        details: {
+                            explanation: 'Gère les processus en arrière-plan et premier plan dans le shell.',
+                            syntax: 'bg [job_id]\nfg [job_id]\njobs',
+                            options: [
+                                { flag: 'Ctrl+Z', desc: 'Suspendre le processus courant' },
+                                { flag: 'bg', desc: 'Reprendre en arrière-plan' },
+                                { flag: 'fg', desc: 'Reprendre en premier plan' },
+                                { flag: 'jobs', desc: 'Lister les jobs' },
+                                { flag: '&', desc: 'Lancer en arrière-plan' }
+                            ],
+                            examples: [
+                                { code: 'sleep 100 &', desc: 'Lancer en arrière-plan' },
+                                { code: 'Ctrl+Z puis bg', desc: 'Mettre en arrière-plan' },
+                                { code: 'jobs', desc: 'Voir les jobs actifs' },
+                                { code: 'fg %1', desc: 'Ramener le job 1 au premier plan' }
+                            ],
+                            tips: ['& à la fin d\'une commande la lance en arrière-plan'],
+                            warnings: ['Les jobs meurent si vous fermez le terminal (utilisez nohup ou tmux)']
+                        }
+                    },
+                    {
+                        cmd: 'nohup / disown',
+                        desc: 'Processus persistants',
+                        details: {
+                            explanation: 'Permet à un processus de continuer après la fermeture du terminal.',
+                            syntax: 'nohup commande &\ndisown job_id',
+                            options: [
+                                { flag: 'nohup', desc: 'Immunise contre SIGHUP' },
+                                { flag: 'disown', desc: 'Détache un job existant' },
+                                { flag: '&', desc: 'Lancer en arrière-plan' }
+                            ],
+                            examples: [
+                                { code: 'nohup ./long_script.sh &', desc: 'Script qui survit au logout' },
+                                { code: 'nohup python train.py > output.log 2>&1 &', desc: 'Avec redirection' },
+                                { code: 'disown %1', desc: 'Détacher le job 1' },
+                                { code: 'nohup ./server.sh </dev/null &>/dev/null &', desc: 'Complètement détaché' }
+                            ],
+                            tips: ['La sortie va par défaut dans nohup.out'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'text-processing',
+                title: 'Traitement de Texte',
+                icon: 'fa-align-left',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'awk',
+                        desc: 'Traitement de texte structuré',
+                        details: {
+                            explanation: 'Langage puissant pour traiter des données en colonnes et générer des rapports.',
+                            syntax: 'awk \'pattern {action}\' fichier',
+                            options: [
+                                { flag: '-F":"', desc: 'Définir le séparateur de champ' },
+                                { flag: '$1, $2...', desc: 'Colonnes (champs)' },
+                                { flag: '$0', desc: 'Ligne complète' },
+                                { flag: 'NR', desc: 'Numéro de ligne' },
+                                { flag: 'NF', desc: 'Nombre de champs' }
+                            ],
+                            examples: [
+                                { code: 'awk \'{print $1}\' fichier', desc: 'Première colonne' },
+                                { code: 'awk -F: \'{print $1, $3}\' /etc/passwd', desc: 'Users et UIDs' },
+                                { code: 'awk \'$3 > 100 {print $1}\' data.txt', desc: 'Si colonne 3 > 100' },
+                                { code: 'awk \'{sum+=$1} END {print sum}\' nums.txt', desc: 'Somme d\'une colonne' }
+                            ],
+                            tips: ['BEGIN et END pour des actions avant/après le traitement'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sed',
+                        desc: 'Éditeur de flux',
+                        details: {
+                            explanation: 'Stream editor pour transformer du texte à la volée.',
+                            syntax: 'sed [options] \'commande\' fichier',
+                            options: [
+                                { flag: 's/old/new/', desc: 'Substitution (première occurrence)' },
+                                { flag: 's/old/new/g', desc: 'Substitution globale' },
+                                { flag: '-i', desc: 'Modifier le fichier en place' },
+                                { flag: '-n', desc: 'Mode silencieux (avec p pour print)' },
+                                { flag: 'd', desc: 'Supprimer des lignes' }
+                            ],
+                            examples: [
+                                { code: 'sed \'s/foo/bar/g\' file.txt', desc: 'Remplacer foo par bar' },
+                                { code: 'sed -i \'s/old/new/g\' file.txt', desc: 'Modifier en place' },
+                                { code: 'sed -n \'5,10p\' file.txt', desc: 'Lignes 5 à 10' },
+                                { code: 'sed \'/^#/d\' config.txt', desc: 'Supprimer les commentaires' }
+                            ],
+                            tips: ['Utilisez -i.bak pour créer une sauvegarde avant modification'],
+                            warnings: ['-i modifie directement le fichier !']
+                        }
+                    },
+                    {
+                        cmd: 'cut / sort / uniq',
+                        desc: 'Manipulation de colonnes',
+                        details: {
+                            explanation: 'Outils pour extraire, trier et dédupliquer des données.',
+                            syntax: 'cut -d":" -f1 fichier\nsort [options] fichier\nuniq [options]',
+                            options: [
+                                { flag: 'cut -d', desc: 'Délimiteur' },
+                                { flag: 'cut -f1,3', desc: 'Champs 1 et 3' },
+                                { flag: 'sort -n', desc: 'Tri numérique' },
+                                { flag: 'sort -r', desc: 'Tri inversé' },
+                                { flag: 'uniq -c', desc: 'Compter les occurrences' }
+                            ],
+                            examples: [
+                                { code: 'cut -d: -f1 /etc/passwd', desc: 'Extraire les usernames' },
+                                { code: 'sort -t: -k3 -n /etc/passwd', desc: 'Trier par UID' },
+                                { code: 'sort file.txt | uniq -c | sort -rn', desc: 'Top occurrences' },
+                                { code: 'cut -d, -f2 data.csv | sort | uniq', desc: 'Valeurs uniques colonne 2' }
+                            ],
+                            tips: ['uniq nécessite que les données soient triées !'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'wc / head / tail',
+                        desc: 'Statistiques et aperçus',
+                        details: {
+                            explanation: 'Compter les lignes/mots et afficher le début ou la fin des fichiers.',
+                            syntax: 'wc [options] fichier\nhead/tail [-n N] fichier',
+                            options: [
+                                { flag: 'wc -l', desc: 'Compter les lignes' },
+                                { flag: 'wc -w', desc: 'Compter les mots' },
+                                { flag: 'wc -c', desc: 'Compter les octets' },
+                                { flag: 'head -n 10', desc: 'Premières 10 lignes' },
+                                { flag: 'tail -f', desc: 'Suivre en temps réel' }
+                            ],
+                            examples: [
+                                { code: 'wc -l *.py', desc: 'Lignes par fichier Python' },
+                                { code: 'head -n 20 file.txt', desc: '20 premières lignes' },
+                                { code: 'tail -f /var/log/syslog', desc: 'Suivre les logs' },
+                                { code: 'tail -n +2 data.csv', desc: 'Tout sauf l\'en-tête' }
+                            ],
+                            tips: ['tail -f est indispensable pour suivre les logs en temps réel'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'archives',
+                title: 'Archives & Compression',
+                icon: 'fa-file-archive',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'tar',
+                        desc: 'Archiver des fichiers',
+                        details: {
+                            explanation: 'Crée et extrait des archives tar, avec ou sans compression.',
+                            syntax: 'tar [options] archive.tar fichiers',
+                            options: [
+                                { flag: '-c', desc: 'Créer une archive' },
+                                { flag: '-x', desc: 'Extraire une archive' },
+                                { flag: '-v', desc: 'Mode verbeux' },
+                                { flag: '-f', desc: 'Spécifier le fichier archive' },
+                                { flag: '-z', desc: 'Compression gzip (.tar.gz)' },
+                                { flag: '-j', desc: 'Compression bzip2 (.tar.bz2)' },
+                                { flag: '-J', desc: 'Compression xz (.tar.xz)' }
+                            ],
+                            examples: [
+                                { code: 'tar -cvf archive.tar dossier/', desc: 'Créer une archive' },
+                                { code: 'tar -czvf archive.tar.gz dossier/', desc: 'Archive compressée gzip' },
+                                { code: 'tar -xzvf archive.tar.gz', desc: 'Extraire un .tar.gz' },
+                                { code: 'tar -xzvf archive.tar.gz -C /destination/', desc: 'Extraire vers un dossier' }
+                            ],
+                            tips: ['Mnémotechnique: c=create, x=extract, v=verbose, f=file, z=gzip'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'gzip / gunzip',
+                        desc: 'Compression gzip',
+                        details: {
+                            explanation: 'Compresse ou décompresse des fichiers individuels avec gzip.',
+                            syntax: 'gzip [options] fichier\ngunzip fichier.gz',
+                            options: [
+                                { flag: '-k', desc: 'Garder le fichier original' },
+                                { flag: '-d', desc: 'Décompresser' },
+                                { flag: '-9', desc: 'Compression maximale' },
+                                { flag: '-l', desc: 'Lister le contenu' }
+                            ],
+                            examples: [
+                                { code: 'gzip fichier.txt', desc: 'Compresser (remplace l\'original)' },
+                                { code: 'gzip -k fichier.txt', desc: 'Compresser en gardant l\'original' },
+                                { code: 'gunzip fichier.txt.gz', desc: 'Décompresser' },
+                                { code: 'zcat fichier.gz', desc: 'Lire sans décompresser' }
+                            ],
+                            tips: ['zcat, zgrep, zless permettent de lire les .gz sans les extraire'],
+                            warnings: ['Sans -k, gzip supprime le fichier original']
+                        }
+                    },
+                    {
+                        cmd: 'zip / unzip',
+                        desc: 'Archives ZIP',
+                        details: {
+                            explanation: 'Crée et extrait des archives au format ZIP (compatible Windows).',
+                            syntax: 'zip [options] archive.zip fichiers\nunzip archive.zip',
+                            options: [
+                                { flag: '-r', desc: 'Récursif (dossiers)' },
+                                { flag: '-e', desc: 'Chiffrer avec mot de passe' },
+                                { flag: '-d', desc: 'Destination pour unzip' },
+                                { flag: '-l', desc: 'Lister le contenu' }
+                            ],
+                            examples: [
+                                { code: 'zip -r archive.zip dossier/', desc: 'Créer un ZIP' },
+                                { code: 'zip -re secure.zip dossier/', desc: 'ZIP avec mot de passe' },
+                                { code: 'unzip archive.zip', desc: 'Extraire' },
+                                { code: 'unzip archive.zip -d /destination/', desc: 'Extraire vers un dossier' }
+                            ],
+                            tips: ['Format ZIP idéal pour partager avec des utilisateurs Windows'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'scripting',
+                title: 'Scripting Bash',
+                icon: 'fa-code',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Variables & Paramètres',
+                        desc: 'Définir et utiliser des variables',
+                        details: {
+                            explanation: 'Les variables stockent des données réutilisables dans les scripts.',
+                            syntax: 'VAR="valeur"\necho $VAR',
+                            options: [
+                                { flag: '$1, $2...', desc: 'Arguments du script' },
+                                { flag: '$#', desc: 'Nombre d\'arguments' },
+                                { flag: '$@', desc: 'Tous les arguments' },
+                                { flag: '$?', desc: 'Code retour dernière commande' },
+                                { flag: '$$', desc: 'PID du script' }
+                            ],
+                            examples: [
+                                { code: '#!/bin/bash\nNAME="World"\necho "Hello, $NAME!"', desc: 'Variable simple' },
+                                { code: 'FILE=${1:-"default.txt"}', desc: 'Valeur par défaut' },
+                                { code: 'DIR=$(pwd)', desc: 'Capture de sortie commande' },
+                                { code: 'readonly PI=3.14159', desc: 'Variable constante' }
+                            ],
+                            tips: ['Utilisez ${VAR} pour éviter les ambiguïtés'],
+                            warnings: ['Pas d\'espaces autour du = lors de l\'assignation']
+                        }
+                    },
+                    {
+                        cmd: 'Conditions if/else',
+                        desc: 'Exécution conditionnelle',
+                        details: {
+                            explanation: 'Exécute du code selon des conditions.',
+                            syntax: 'if [ condition ]; then\n  commandes\nfi',
+                            options: [
+                                { flag: '-f fichier', desc: 'Fichier existe' },
+                                { flag: '-d dossier', desc: 'Dossier existe' },
+                                { flag: '-z "$VAR"', desc: 'Variable vide' },
+                                { flag: '-n "$VAR"', desc: 'Variable non vide' },
+                                { flag: '-eq, -ne, -lt, -gt', desc: 'Comparaisons numériques' }
+                            ],
+                            examples: [
+                                { code: 'if [ -f "config.txt" ]; then\n  echo "Config trouvée"\nelse\n  echo "Config manquante"\nfi', desc: 'Test fichier' },
+                                { code: 'if [ "$USER" = "root" ]; then\n  echo "Vous êtes root"\nfi', desc: 'Test string' },
+                                { code: '[ -d "$DIR" ] || mkdir -p "$DIR"', desc: 'Créer si n\'existe pas' },
+                                { code: '[[ "$FILE" == *.txt ]] && echo "Fichier texte"', desc: 'Pattern matching' }
+                            ],
+                            tips: ['[[ ]] est plus puissant que [ ] (bash uniquement)'],
+                            warnings: ['Toujours mettre les variables entre guillemets']
+                        }
+                    },
+                    {
+                        cmd: 'Boucles for/while',
+                        desc: 'Itérations',
+                        details: {
+                            explanation: 'Répète des commandes sur une liste ou selon une condition.',
+                            syntax: 'for item in liste; do\n  commandes\ndone',
+                            options: [
+                                { flag: 'for i in {1..10}', desc: 'Séquence de nombres' },
+                                { flag: 'for f in *.txt', desc: 'Glob pattern' },
+                                { flag: 'while read line', desc: 'Lire ligne par ligne' },
+                                { flag: 'break/continue', desc: 'Contrôle de boucle' }
+                            ],
+                            examples: [
+                                { code: 'for f in *.log; do\n  gzip "$f"\ndone', desc: 'Compresser tous les logs' },
+                                { code: 'for i in {1..5}; do\n  echo "Itération $i"\ndone', desc: 'Boucle numérique' },
+                                { code: 'while read -r line; do\n  echo "Ligne: $line"\ndone < fichier.txt', desc: 'Lire un fichier' },
+                                { code: 'while true; do\n  sleep 60\n  ./check.sh\ndone', desc: 'Boucle infinie' }
+                            ],
+                            tips: ['Utilisez read -r pour éviter l\'interprétation des backslashes'],
+                            warnings: ['Attention aux espaces dans les noms de fichiers avec for']
+                        }
+                    },
+                    {
+                        cmd: 'Fonctions & Exit codes',
+                        desc: 'Modulariser et gérer les erreurs',
+                        details: {
+                            explanation: 'Les fonctions organisent le code, les exit codes indiquent le succès/échec.',
+                            syntax: 'function_name() {\n  commandes\n  return code\n}',
+                            options: [
+                                { flag: 'set -e', desc: 'Arrêter sur erreur' },
+                                { flag: 'set -x', desc: 'Mode debug (trace)' },
+                                { flag: 'trap', desc: 'Capturer les signaux' },
+                                { flag: 'exit N', desc: 'Quitter avec code N' }
+                            ],
+                            examples: [
+                                { code: 'log() {\n  echo "[$(date)] $1"\n}\nlog "Script démarré"', desc: 'Fonction de log' },
+                                { code: 'set -euo pipefail\n# Script robuste', desc: 'Mode strict' },
+                                { code: 'trap "rm -f $TMPFILE" EXIT', desc: 'Nettoyage à la sortie' },
+                                { code: 'die() { echo "$1" >&2; exit 1; }\n[ -f "$FILE" ] || die "Fichier manquant"', desc: 'Fonction d\'erreur' }
+                            ],
+                            tips: ['set -euo pipefail est recommandé pour les scripts robustes'],
+                            warnings: ['Exit code 0 = succès, autre = échec']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-automation',
+                title: '🚀 Projet: Script d\'Automatisation',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Structure du script',
+                        desc: 'Base robuste avec gestion d\'erreurs',
+                        details: {
+                            explanation: 'Créer un script bash professionnel avec header, options et gestion d\'erreurs.',
+                            syntax: '#!/bin/bash\nset -euo pipefail',
+                            options: [],
+                            examples: [
+                                { code: '#!/bin/bash\n#\n# Script: deploy.sh\n# Description: Déploiement automatisé\n# Usage: ./deploy.sh [env] [options]\n#\nset -euo pipefail\nIFS=$\'\\n\\t\'\n\n# Variables globales\nSCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"\nLOG_FILE="/var/log/deploy.log"\nENV="${1:-production}"\n\n# Couleurs pour le terminal\nRED=\'\\033[0;31m\'\nGREEN=\'\\033[0;32m\'\nNC=\'\\033[0m\' # No Color', desc: 'En-tête complet' }
+                            ],
+                            tips: ['set -euo pipefail rend le script plus robuste'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: Fonctions utilitaires',
+                        desc: 'Logging, erreurs, confirmations',
+                        details: {
+                            explanation: 'Fonctions réutilisables pour logger, afficher des erreurs et demander des confirmations.',
+                            syntax: 'log() { ... }\nerror() { ... }',
+                            options: [],
+                            examples: [
+                                { code: '# Logging\nlog() {\n  local level="$1"; shift\n  echo -e "[$(date \'+%Y-%m-%d %H:%M:%S\')] [$level] $*" | tee -a "$LOG_FILE"\n}\n\ninfo() { log "INFO" "$@"; }\nwarn() { log "WARN" "${YELLOW}$*${NC}"; }\nerror() { log "ERROR" "${RED}$*${NC}" >&2; }\n\n# Gestion d\'erreurs\ndie() {\n  error "$1"\n  exit "${2:-1}"\n}\n\n# Confirmation\nconfirm() {\n  read -r -p "$1 [y/N] " response\n  [[ "$response" =~ ^[Yy]$ ]]\n}', desc: 'Fonctions utilitaires' }
+                            ],
+                            tips: ['Utilisez tee pour logger à la fois dans le fichier et le terminal'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Parsing des arguments',
+                        desc: 'Options et flags avec getopts',
+                        details: {
+                            explanation: 'Traiter les arguments de ligne de commande de manière professionnelle.',
+                            syntax: 'while getopts "vh" opt; do ...',
+                            options: [],
+                            examples: [
+                                { code: '# Valeurs par défaut\nVERBOSE=false\nDRY_RUN=false\nTARGET_ENV="production"\n\n# Aide\nusage() {\n  cat << EOF\nUsage: $0 [options] [environment]\n\nOptions:\n  -v, --verbose    Mode verbeux\n  -n, --dry-run    Simulation sans exécution\n  -h, --help       Afficher cette aide\n\nEnvironments: staging, production (défaut)\nEOF\n  exit 0\n}\n\n# Parsing\nwhile [[ $# -gt 0 ]]; do\n  case "$1" in\n    -v|--verbose) VERBOSE=true; shift ;;\n    -n|--dry-run) DRY_RUN=true; shift ;;\n    -h|--help) usage ;;\n    -*) die "Option inconnue: $1" ;;\n    *) TARGET_ENV="$1"; shift ;;\n  esac\ndone', desc: 'Parsing complet' }
+                            ],
+                            tips: ['Supportez les options courtes (-v) et longues (--verbose)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Vérifications préalables',
+                        desc: 'Prérequis et validations',
+                        details: {
+                            explanation: 'Vérifier que l\'environnement est correct avant d\'exécuter le script.',
+                            syntax: 'check_requirements() { ... }',
+                            options: [],
+                            examples: [
+                                { code: 'check_requirements() {\n  info "Vérification des prérequis..."\n  \n  # Vérifier les commandes nécessaires\n  local required_cmds=(git docker rsync ssh)\n  for cmd in "${required_cmds[@]}"; do\n    command -v "$cmd" >/dev/null 2>&1 || die "$cmd n\'est pas installé"\n  done\n  \n  # Vérifier les fichiers de config\n  [ -f ".env" ] || die "Fichier .env manquant"\n  [ -f "docker-compose.yml" ] || die "docker-compose.yml manquant"\n  \n  # Vérifier les droits\n  [ -w "$LOG_FILE" ] || touch "$LOG_FILE" 2>/dev/null || die "Impossible d\'écrire dans $LOG_FILE"\n  \n  # Vérifier la connexion réseau\n  ping -c1 -W2 "$DEPLOY_HOST" >/dev/null 2>&1 || die "Serveur $DEPLOY_HOST inaccessible"\n  \n  info "Tous les prérequis sont satisfaits"\n}', desc: 'Vérifications complètes' }
+                            ],
+                            tips: ['Échouez tôt et clairement plutôt que tard avec des erreurs cryptiques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Logique métier',
+                        desc: 'Actions principales du script',
+                        details: {
+                            explanation: 'Implémenter les actions principales avec gestion des erreurs.',
+                            syntax: 'deploy() { ... }\nrun_tests() { ... }',
+                            options: [],
+                            examples: [
+                                { code: 'backup_current() {\n  info "Sauvegarde de la version actuelle..."\n  local backup_dir="/backup/$(date +%Y%m%d_%H%M%S)"\n  \n  if $DRY_RUN; then\n    info "[DRY-RUN] mkdir -p $backup_dir"\n    return 0\n  fi\n  \n  ssh "$DEPLOY_HOST" "mkdir -p $backup_dir && cp -r $APP_DIR/* $backup_dir/" \\\n    || die "Échec de la sauvegarde"\n  \n  info "Sauvegarde créée: $backup_dir"\n}\n\ndeploy() {\n  info "Déploiement vers $TARGET_ENV..."\n  \n  # Build\n  docker compose build --no-cache || die "Échec du build"\n  \n  # Tests\n  docker compose run --rm app pytest || die "Tests échoués"\n  \n  # Deploy\n  rsync -avz --delete ./dist/ "$DEPLOY_HOST:$APP_DIR/" || die "Échec rsync"\n  \n  # Restart\n  ssh "$DEPLOY_HOST" "cd $APP_DIR && docker compose up -d" || die "Échec restart"\n  \n  info "Déploiement terminé avec succès!"\n}', desc: 'Actions principales' }
+                            ],
+                            tips: ['Implémentez le mode dry-run pour tester sans risque'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Nettoyage et rollback',
+                        desc: 'Trap et gestion des erreurs',
+                        details: {
+                            explanation: 'Utiliser trap pour nettoyer et permettre le rollback en cas d\'échec.',
+                            syntax: 'trap cleanup EXIT\ntrap rollback ERR',
+                            options: [],
+                            examples: [
+                                { code: '# Variables pour le rollback\nDEPLOYED=false\nBACKUP_PATH=""\n\ncleanup() {\n  local exit_code=$?\n  info "Nettoyage..."\n  \n  # Supprimer fichiers temporaires\n  rm -rf "${TMPDIR:-/tmp}/deploy_$$"* 2>/dev/null\n  \n  if [ $exit_code -ne 0 ] && [ "$DEPLOYED" = true ]; then\n    warn "Échec détecté après déploiement, rollback..."\n    rollback\n  fi\n  \n  exit $exit_code\n}\n\nrollback() {\n  error "Rollback vers la version précédente..."\n  if [ -n "$BACKUP_PATH" ]; then\n    ssh "$DEPLOY_HOST" "rm -rf $APP_DIR/* && cp -r $BACKUP_PATH/* $APP_DIR/"\n    ssh "$DEPLOY_HOST" "cd $APP_DIR && docker compose up -d"\n    info "Rollback effectué depuis: $BACKUP_PATH"\n  else\n    error "Pas de backup disponible pour le rollback!"\n  fi\n}\n\ntrap cleanup EXIT', desc: 'Gestion de sortie' }
+                            ],
+                            tips: ['Trap EXIT est appelé dans tous les cas, même sur erreur'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Point d\'entrée',
+                        desc: 'Orchestration main()',
+                        details: {
+                            explanation: 'Fonction main qui orchestre l\'exécution du script.',
+                            syntax: 'main() { ... }\nmain "$@"',
+                            options: [],
+                            examples: [
+                                { code: 'main() {\n  info "=== Déploiement $TARGET_ENV ===" \n  info "Mode: $($DRY_RUN && echo "DRY-RUN" || echo "RÉEL")"\n  \n  # Confirmation en production\n  if [ "$TARGET_ENV" = "production" ] && ! $DRY_RUN; then\n    confirm "Déployer en PRODUCTION?" || die "Annulé par l\'utilisateur"\n  fi\n  \n  # Étapes du déploiement\n  check_requirements\n  \n  backup_current\n  BACKUP_PATH="$LAST_BACKUP"\n  \n  deploy\n  DEPLOYED=true\n  \n  # Vérification post-déploiement\n  sleep 5\n  if ! curl -sf "https://$APP_URL/health" >/dev/null; then\n    die "Health check échoué après déploiement"\n  fi\n  \n  info "=== Déploiement réussi! ==="\n  info "URL: https://$APP_URL"\n}\n\n# Point d\'entrée\nmain "$@"', desc: 'Fonction main' }
+                            ],
+                            tips: ['main "$@" passe tous les arguments à la fonction main'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

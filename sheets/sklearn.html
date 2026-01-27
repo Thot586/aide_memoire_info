@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Scikit-Learn : Machine Learning, preprocessing, modèles et métriques.">
+    <title>Machine Learning - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-orange-500/20 mb-4 icon-glow">
+                    <i class="fas fa-brain text-3xl text-orange-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Machine Learning</h1>
+                <p class="text-slate-400">Scikit-Learn : fit, predict, preprocessing et métriques</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'split',
+                title: 'Préparation des données',
+                icon: 'fa-cut',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'train_test_split(X, y)',
+                        desc: 'Diviser en train/test',
+                        details: {
+                            explanation: 'Divise les données en ensembles d\'entraînement et de test pour évaluer le modèle.',
+                            syntax: 'train_test_split(X, y, test_size=0.2, random_state=42)',
+                            options: [
+                                { flag: 'test_size', desc: 'Proportion pour le test (0.2 = 20%)' },
+                                { flag: 'random_state', desc: 'Graine aléatoire (reproductibilité)' },
+                                { flag: 'stratify', desc: 'Stratifier par classe (classification)' },
+                                { flag: 'shuffle', desc: 'Mélanger avant de diviser (True par défaut)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import train_test_split', desc: 'Import' },
+                                { code: 'X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)', desc: 'Split classique' },
+                                { code: 'train_test_split(X, y, stratify=y)', desc: 'Garder les proportions de classes' }
+                            ],
+                            tips: ['Utilisez random_state pour des résultats reproductibles'],
+                            warnings: ['Stratify est important pour les datasets déséquilibrés']
+                        }
+                    },
+                    {
+                        cmd: 'StandardScaler()',
+                        desc: 'Standardiser (moyenne=0, std=1)',
+                        details: {
+                            explanation: 'Standardise les features (moyenne=0, écart-type=1). Essentiel pour de nombreux algorithmes sensibles à l\'échelle (SVM, KNN, réseaux de neurones).',
+                            syntax: 'StandardScaler().fit_transform(X)',
+                            options: [
+                                { flag: 'with_mean', desc: 'Centrer sur la moyenne (True par défaut)' },
+                                { flag: 'with_std', desc: 'Diviser par l\'écart-type (True par défaut)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import StandardScaler', desc: 'Import' },
+                                { code: 'scaler = StandardScaler()', desc: 'Créer le scaler' },
+                                { code: 'X_train_scaled = scaler.fit_transform(X_train)', desc: 'Fit et transform sur train' },
+                                { code: 'X_test_scaled = scaler.transform(X_test)', desc: 'Transform seulement sur test' }
+                            ],
+                            tips: ['TOUJOURS fit sur train, puis transform sur train ET test', 'Formule: z = (x - μ) / σ'],
+                            warnings: ['Ne jamais fit sur le test set (data leakage) !']
+                        }
+                    },
+                    {
+                        cmd: 'MinMaxScaler()',
+                        desc: 'Normaliser entre 0 et 1',
+                        details: {
+                            explanation: 'Ramène les valeurs entre 0 et 1 (ou un intervalle personnalisé). Préserve la forme de la distribution.',
+                            syntax: 'MinMaxScaler(feature_range=(0, 1))',
+                            options: [
+                                { flag: 'feature_range', desc: 'Intervalle cible (défaut: (0, 1))' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import MinMaxScaler', desc: 'Import' },
+                                { code: 'scaler = MinMaxScaler()', desc: 'Scaler entre 0 et 1' },
+                                { code: 'scaler = MinMaxScaler(feature_range=(-1, 1))', desc: 'Scaler entre -1 et 1' },
+                                { code: 'X_scaled = scaler.fit_transform(X_train)', desc: 'Normaliser' }
+                            ],
+                            tips: ['Préférable si les données ne suivent pas une distribution normale', 'Formule: x_scaled = (x - min) / (max - min)'],
+                            warnings: ['Sensible aux outliers (contrairement à RobustScaler)']
+                        }
+                    },
+                    {
+                        cmd: 'RobustScaler()',
+                        desc: 'Scaler robuste aux outliers',
+                        details: {
+                            explanation: 'Utilise la médiane et les quartiles au lieu de la moyenne et l\'écart-type. Résistant aux valeurs aberrantes.',
+                            syntax: 'RobustScaler(quantile_range=(25.0, 75.0))',
+                            options: [
+                                { flag: 'with_centering', desc: 'Centrer sur la médiane (True)' },
+                                { flag: 'with_scaling', desc: 'Diviser par IQR (True)' },
+                                { flag: 'quantile_range', desc: 'Plage des quartiles (défaut: 25-75)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import RobustScaler', desc: 'Import' },
+                                { code: 'scaler = RobustScaler()', desc: 'Créer le scaler robuste' },
+                                { code: 'X_scaled = scaler.fit_transform(X)', desc: 'Transformer' }
+                            ],
+                            tips: ['Idéal quand les données contiennent des outliers', 'IQR = Q3 - Q1 (interquartile range)'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'encoding',
+                title: 'Encodage des variables',
+                icon: 'fa-exchange-alt',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'LabelEncoder()',
+                        desc: 'Encoder les labels (0, 1, 2...)',
+                        details: {
+                            explanation: 'Convertit les catégories textuelles en nombres entiers (0, 1, 2...). Utile pour la variable cible y.',
+                            syntax: 'LabelEncoder().fit_transform(y)',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import LabelEncoder', desc: 'Import' },
+                                { code: 'le = LabelEncoder()', desc: 'Créer l\'encoder' },
+                                { code: 'y_encoded = le.fit_transform(["chat", "chien", "chat"])', desc: 'Résultat: [0, 1, 0]' },
+                                { code: 'le.inverse_transform([0, 1])', desc: 'Décoder: ["chat", "chien"]' },
+                                { code: 'le.classes_', desc: 'Voir les classes: ["chat", "chien"]' }
+                            ],
+                            tips: ['Utilisez pour la variable cible (y)', 'inverse_transform() pour revenir aux labels'],
+                            warnings: ['NE PAS utiliser pour les features X (implique un ordre inexistant)']
+                        }
+                    },
+                    {
+                        cmd: 'OneHotEncoder()',
+                        desc: 'Encoder en colonnes binaires',
+                        details: {
+                            explanation: 'Crée une colonne binaire par catégorie (one-hot encoding). La méthode standard pour encoder les features catégorielles.',
+                            syntax: 'OneHotEncoder(sparse_output=False, handle_unknown="ignore")',
+                            options: [
+                                { flag: 'sparse_output', desc: 'False pour array dense (sinon sparse matrix)' },
+                                { flag: 'drop', desc: '"first" pour éviter la colinéarité' },
+                                { flag: 'handle_unknown', desc: '"ignore" pour gérer les catégories inconnues' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import OneHotEncoder', desc: 'Import' },
+                                { code: 'ohe = OneHotEncoder(sparse_output=False)', desc: 'Créer l\'encoder' },
+                                { code: 'X_encoded = ohe.fit_transform(df[["couleur"]])', desc: 'Encoder une colonne' },
+                                { code: 'ohe.get_feature_names_out(["couleur"])', desc: 'Noms des colonnes créées' },
+                                { code: 'OneHotEncoder(drop="first")', desc: 'Éviter dummy variable trap' }
+                            ],
+                            tips: ['Utilisez drop="first" pour la régression linéaire', 'sparse_output=False pour faciliter le debug'],
+                            warnings: ['Peut créer beaucoup de colonnes (high cardinality)']
+                        }
+                    },
+                    {
+                        cmd: 'OrdinalEncoder()',
+                        desc: 'Encoder avec ordre (1, 2, 3...)',
+                        details: {
+                            explanation: 'Encode les catégories avec un ordre défini. Utile quand les catégories ont un ordre logique (ex: taille S < M < L).',
+                            syntax: 'OrdinalEncoder(categories=[["S", "M", "L"]])',
+                            options: [
+                                { flag: 'categories', desc: 'Liste des catégories dans l\'ordre' },
+                                { flag: 'handle_unknown', desc: '"use_encoded_value" + unknown_value' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import OrdinalEncoder', desc: 'Import' },
+                                { code: 'oe = OrdinalEncoder(categories=[["S", "M", "L", "XL"]])', desc: 'Définir l\'ordre' },
+                                { code: 'X_encoded = oe.fit_transform(df[["taille"]])', desc: 'S=0, M=1, L=2, XL=3' },
+                                { code: 'oe.inverse_transform([[0], [2]])', desc: 'Décoder: [["S"], ["L"]]' }
+                            ],
+                            tips: ['Utilisez quand l\'ordre a un sens (ex: niveau d\'éducation)', 'Les arbres de décision gèrent bien les ordinaux'],
+                            warnings: ['Ne pas utiliser si pas d\'ordre naturel entre catégories']
+                        }
+                    },
+                    {
+                        cmd: 'TargetEncoder()',
+                        desc: 'Encoder par la moyenne cible',
+                        details: {
+                            explanation: 'Encode chaque catégorie par la moyenne de la variable cible pour cette catégorie. Utile pour les features avec beaucoup de modalités.',
+                            syntax: 'TargetEncoder(smooth="auto")',
+                            options: [
+                                { flag: 'smooth', desc: 'Régularisation pour éviter l\'overfitting' },
+                                { flag: 'target_type', desc: '"binary" ou "continuous"' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import TargetEncoder', desc: 'Import (sklearn >= 1.3)' },
+                                { code: 'te = TargetEncoder()', desc: 'Créer l\'encoder' },
+                                { code: 'X_encoded = te.fit_transform(X[["ville"]], y)', desc: 'Encoder avec la cible' }
+                            ],
+                            tips: ['Très efficace pour features à haute cardinalité', 'Utilise la moyenne globale pour les catégories rares'],
+                            warnings: ['Risque de data leakage si mal utilisé', 'Toujours fit sur train uniquement']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'classif',
+                title: 'Modèles de Classification',
+                icon: 'fa-sitemap',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'LogisticRegression()',
+                        desc: 'Régression logistique',
+                        details: {
+                            explanation: 'Modèle linéaire pour la classification binaire ou multiclasse. Simple, interprétable, souvent le premier choix.',
+                            syntax: 'LogisticRegression(C=1.0, max_iter=100)',
+                            options: [
+                                { flag: 'C', desc: 'Inverse de la régularisation (petit = forte régul.)' },
+                                { flag: 'penalty', desc: '"l1", "l2", "elasticnet", None' },
+                                { flag: 'solver', desc: '"lbfgs", "liblinear", "saga"...' },
+                                { flag: 'max_iter', desc: 'Nombre max d\'itérations' },
+                                { flag: 'class_weight', desc: '"balanced" pour classes déséquilibrées' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import LogisticRegression', desc: 'Import' },
+                                { code: 'model = LogisticRegression(max_iter=1000)', desc: 'Créer le modèle' },
+                                { code: 'model.fit(X_train, y_train)', desc: 'Entraîner' },
+                                { code: 'model.coef_', desc: 'Coefficients (interprétabilité)' },
+                                { code: 'model.predict_proba(X)[:, 1]', desc: 'Probabilité classe positive' }
+                            ],
+                            tips: ['Commencez toujours par LogisticRegression comme baseline', 'Utilisez class_weight="balanced" si déséquilibre'],
+                            warnings: ['Augmentez max_iter si "convergence warning"']
+                        }
+                    },
+                    {
+                        cmd: 'RandomForestClassifier()',
+                        desc: 'Forêt aléatoire',
+                        details: {
+                            explanation: 'Ensemble d\'arbres de décision. Robuste, peu d\'overfitting, gère bien les non-linéarités.',
+                            syntax: 'RandomForestClassifier(n_estimators=100, max_depth=None)',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre d\'arbres (100-500)' },
+                                { flag: 'max_depth', desc: 'Profondeur max (None = illimité)' },
+                                { flag: 'min_samples_split', desc: 'Min samples pour diviser un nœud' },
+                                { flag: 'min_samples_leaf', desc: 'Min samples par feuille' },
+                                { flag: 'n_jobs', desc: '-1 pour paralléliser' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import RandomForestClassifier', desc: 'Import' },
+                                { code: 'rf = RandomForestClassifier(n_estimators=200, random_state=42)', desc: 'Créer' },
+                                { code: 'rf.fit(X_train, y_train)', desc: 'Entraîner' },
+                                { code: 'rf.feature_importances_', desc: 'Importance des features' }
+                            ],
+                            tips: ['Pas besoin de normaliser les features', 'feature_importances_ pour interpréter'],
+                            warnings: ['Peut être lent avec beaucoup d\'arbres']
+                        }
+                    },
+                    {
+                        cmd: 'GradientBoostingClassifier()',
+                        desc: 'Gradient Boosting',
+                        details: {
+                            explanation: 'Construit les arbres séquentiellement, chacun corrigeant les erreurs du précédent. Très performant.',
+                            syntax: 'GradientBoostingClassifier(n_estimators=100, learning_rate=0.1)',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre d\'arbres' },
+                                { flag: 'learning_rate', desc: 'Taux d\'apprentissage (0.01-0.3)' },
+                                { flag: 'max_depth', desc: 'Profondeur (souvent 3-5)' },
+                                { flag: 'subsample', desc: 'Fraction des données par arbre' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import GradientBoostingClassifier', desc: 'Import' },
+                                { code: 'gb = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1)', desc: 'Créer' },
+                                { code: 'gb.fit(X_train, y_train)', desc: 'Entraîner' }
+                            ],
+                            tips: ['Préférez HistGradientBoosting pour grands datasets', 'Réduire learning_rate + augmenter n_estimators = meilleur'],
+                            warnings: ['Risque d\'overfitting si learning_rate trop élevé']
+                        }
+                    },
+                    {
+                        cmd: 'SVC()',
+                        desc: 'Support Vector Machine',
+                        details: {
+                            explanation: 'Trouve l\'hyperplan optimal séparant les classes. Excellent pour les petits datasets.',
+                            syntax: 'SVC(kernel="rbf", C=1.0, gamma="scale")',
+                            options: [
+                                { flag: 'kernel', desc: '"linear", "rbf", "poly", "sigmoid"' },
+                                { flag: 'C', desc: 'Pénalité des erreurs (régularisation)' },
+                                { flag: 'gamma', desc: 'Paramètre du kernel RBF' },
+                                { flag: 'probability', desc: 'True pour avoir predict_proba()' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.svm import SVC', desc: 'Import' },
+                                { code: 'svm = SVC(kernel="rbf", probability=True)', desc: 'Avec probas' },
+                                { code: 'svm = SVC(kernel="linear")', desc: 'SVM linéaire' },
+                                { code: 'svm.fit(X_train_scaled, y_train)', desc: 'Entraîner (données scalées!)' }
+                            ],
+                            tips: ['TOUJOURS normaliser les features avant SVM', 'kernel="linear" pour données linéairement séparables'],
+                            warnings: ['Lent sur grands datasets (> 10k samples)', 'Sensible à l\'échelle des features']
+                        }
+                    },
+                    {
+                        cmd: 'KNeighborsClassifier()',
+                        desc: 'K plus proches voisins',
+                        details: {
+                            explanation: 'Classifie selon la classe majoritaire des k voisins les plus proches. Simple et intuitif.',
+                            syntax: 'KNeighborsClassifier(n_neighbors=5, metric="minkowski")',
+                            options: [
+                                { flag: 'n_neighbors', desc: 'Nombre de voisins (k)' },
+                                { flag: 'weights', desc: '"uniform" ou "distance"' },
+                                { flag: 'metric', desc: 'Distance: "euclidean", "manhattan"...' },
+                                { flag: 'algorithm', desc: '"auto", "ball_tree", "kd_tree", "brute"' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.neighbors import KNeighborsClassifier', desc: 'Import' },
+                                { code: 'knn = KNeighborsClassifier(n_neighbors=5)', desc: 'Créer avec k=5' },
+                                { code: 'knn = KNeighborsClassifier(weights="distance")', desc: 'Pondérer par distance' },
+                                { code: 'knn.fit(X_train_scaled, y_train)', desc: 'Entraîner' }
+                            ],
+                            tips: ['TOUJOURS normaliser les features', 'Tester plusieurs valeurs de k (impair pour binaire)'],
+                            warnings: ['Lent en prédiction sur grands datasets', 'Sensible aux dimensions (curse of dimensionality)']
+                        }
+                    },
+                    {
+                        cmd: 'XGBClassifier()',
+                        desc: 'XGBoost (externe)',
+                        details: {
+                            explanation: 'Implémentation optimisée du gradient boosting. Souvent gagnant des compétitions Kaggle.',
+                            syntax: 'XGBClassifier(n_estimators=100, learning_rate=0.1)',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre d\'arbres' },
+                                { flag: 'learning_rate', desc: 'Taux d\'apprentissage (eta)' },
+                                { flag: 'max_depth', desc: 'Profondeur des arbres (6 par défaut)' },
+                                { flag: 'subsample', desc: 'Fraction des données par arbre' },
+                                { flag: 'colsample_bytree', desc: 'Fraction des features par arbre' }
+                            ],
+                            examples: [
+                                { code: 'from xgboost import XGBClassifier', desc: 'pip install xgboost' },
+                                { code: 'xgb = XGBClassifier(n_estimators=200, learning_rate=0.05)', desc: 'Créer' },
+                                { code: 'xgb.fit(X_train, y_train)', desc: 'Entraîner' },
+                                { code: 'xgb.feature_importances_', desc: 'Importance des features' }
+                            ],
+                            tips: ['early_stopping_rounds pour éviter l\'overfitting', 'Supporte les valeurs manquantes nativement'],
+                            warnings: ['Bibliothèque externe: pip install xgboost']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'regress',
+                title: 'Modèles de Régression',
+                icon: 'fa-chart-line',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'LinearRegression()',
+                        desc: 'Régression linéaire simple',
+                        details: {
+                            explanation: 'Modèle linéaire pour prédire une valeur continue. Minimise la somme des erreurs au carré (MSE).',
+                            syntax: 'LinearRegression(fit_intercept=True)',
+                            options: [
+                                { flag: 'fit_intercept', desc: 'Calculer l\'ordonnée à l\'origine' },
+                                { flag: 'positive', desc: 'Forcer coefficients positifs' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import LinearRegression', desc: 'Import' },
+                                { code: 'lr = LinearRegression()', desc: 'Créer' },
+                                { code: 'lr.fit(X_train, y_train)', desc: 'Entraîner' },
+                                { code: 'lr.coef_', desc: 'Coefficients' },
+                                { code: 'lr.intercept_', desc: 'Ordonnée à l\'origine' }
+                            ],
+                            tips: ['coef_ et intercept_ pour interpréter le modèle', 'Équation: y = β₀ + β₁x₁ + β₂x₂ + ...'],
+                            warnings: ['Sensible aux outliers', 'Suppose une relation linéaire']
+                        }
+                    },
+                    {
+                        cmd: 'Ridge()',
+                        desc: 'Régression Ridge (L2)',
+                        details: {
+                            explanation: 'Régression linéaire avec régularisation L2. Réduit l\'overfitting en pénalisant les grands coefficients.',
+                            syntax: 'Ridge(alpha=1.0)',
+                            options: [
+                                { flag: 'alpha', desc: 'Force de régularisation (plus grand = plus de régul.)' },
+                                { flag: 'solver', desc: '"auto", "svd", "cholesky", "lsqr"...' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import Ridge', desc: 'Import' },
+                                { code: 'ridge = Ridge(alpha=1.0)', desc: 'Créer' },
+                                { code: 'ridge.fit(X_train, y_train)', desc: 'Entraîner' },
+                                { code: 'RidgeCV(alphas=[0.1, 1.0, 10.0])', desc: 'Avec validation croisée' }
+                            ],
+                            tips: ['Utilisez RidgeCV pour trouver le meilleur alpha', 'Ridge garde toutes les features (coeffs → 0 mais jamais 0)'],
+                            warnings: ['Normalisez les features avant Ridge']
+                        }
+                    },
+                    {
+                        cmd: 'Lasso()',
+                        desc: 'Régression Lasso (L1)',
+                        details: {
+                            explanation: 'Régression linéaire avec régularisation L1. Peut mettre certains coefficients exactement à zéro (sélection de features).',
+                            syntax: 'Lasso(alpha=1.0)',
+                            options: [
+                                { flag: 'alpha', desc: 'Force de régularisation' },
+                                { flag: 'max_iter', desc: 'Nombre max d\'itérations' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import Lasso', desc: 'Import' },
+                                { code: 'lasso = Lasso(alpha=0.1)', desc: 'Créer' },
+                                { code: 'lasso.fit(X_train, y_train)', desc: 'Entraîner' },
+                                { code: 'np.sum(lasso.coef_ != 0)', desc: 'Nombre de features sélectionnées' },
+                                { code: 'LassoCV()', desc: 'Avec validation croisée' }
+                            ],
+                            tips: ['Lasso fait de la sélection de features automatique', 'ElasticNet combine L1 et L2'],
+                            warnings: ['Peut être instable si features corrélées (préférer ElasticNet)']
+                        }
+                    },
+                    {
+                        cmd: 'RandomForestRegressor()',
+                        desc: 'Forêt aléatoire régression',
+                        details: {
+                            explanation: 'Version régression de Random Forest. Robuste et performant sans beaucoup de tuning.',
+                            syntax: 'RandomForestRegressor(n_estimators=100)',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre d\'arbres' },
+                                { flag: 'max_depth', desc: 'Profondeur max' },
+                                { flag: 'min_samples_split', desc: 'Min samples pour diviser' },
+                                { flag: 'n_jobs', desc: '-1 pour paralléliser' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import RandomForestRegressor', desc: 'Import' },
+                                { code: 'rf = RandomForestRegressor(n_estimators=100, random_state=42)', desc: 'Créer' },
+                                { code: 'rf.fit(X_train, y_train)', desc: 'Entraîner' },
+                                { code: 'rf.feature_importances_', desc: 'Importance des features' }
+                            ],
+                            tips: ['Pas besoin de normaliser', 'feature_importances_ pour l\'interprétabilité'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'SVR()',
+                        desc: 'Support Vector Regression',
+                        details: {
+                            explanation: 'Version régression des SVM. Prédit une valeur continue en trouvant un tube ε autour de la fonction.',
+                            syntax: 'SVR(kernel="rbf", C=1.0, epsilon=0.1)',
+                            options: [
+                                { flag: 'kernel', desc: '"linear", "rbf", "poly"' },
+                                { flag: 'C', desc: 'Pénalité des erreurs' },
+                                { flag: 'epsilon', desc: 'Marge de tolérance (tube ε)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.svm import SVR', desc: 'Import' },
+                                { code: 'svr = SVR(kernel="rbf")', desc: 'Créer' },
+                                { code: 'svr.fit(X_train_scaled, y_train)', desc: 'Entraîner (données scalées!)' }
+                            ],
+                            tips: ['TOUJOURS normaliser les features', 'Bon pour petits datasets non-linéaires'],
+                            warnings: ['Lent sur grands datasets']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'metrics',
+                title: 'Métriques d\'évaluation',
+                icon: 'fa-chart-bar',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'accuracy_score(y_true, y_pred)',
+                        desc: 'Précision globale',
+                        details: {
+                            explanation: 'Pourcentage de prédictions correctes. Simple mais peut être trompeuse sur données déséquilibrées.',
+                            syntax: 'accuracy_score(y_true, y_pred)',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.metrics import accuracy_score', desc: 'Import' },
+                                { code: 'acc = accuracy_score(y_test, y_pred)', desc: 'Calculer' },
+                                { code: 'print(f"Accuracy: {acc:.2%}")', desc: 'Afficher: "Accuracy: 85.00%"' }
+                            ],
+                            tips: ['Formule: (TP + TN) / Total'],
+                            warnings: ['Trompeuse si classes déséquilibrées (ex: 95% classe 0)']
+                        }
+                    },
+                    {
+                        cmd: 'classification_report()',
+                        desc: 'Rapport complet (P, R, F1)',
+                        details: {
+                            explanation: 'Affiche precision, recall, F1-score et support pour chaque classe. Vue complète des performances.',
+                            syntax: 'classification_report(y_true, y_pred, target_names=None)',
+                            options: [
+                                { flag: 'target_names', desc: 'Noms des classes pour l\'affichage' },
+                                { flag: 'output_dict', desc: 'True pour obtenir un dict' },
+                                { flag: 'digits', desc: 'Nombre de décimales' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import classification_report', desc: 'Import' },
+                                { code: 'print(classification_report(y_test, y_pred))', desc: 'Afficher le rapport' },
+                                { code: 'report = classification_report(y_test, y_pred, output_dict=True)', desc: 'En dict' },
+                                { code: 'report["macro avg"]["f1-score"]', desc: 'Accéder au F1 macro' }
+                            ],
+                            tips: ['Precision = TP / (TP + FP)', 'Recall = TP / (TP + FN)', 'F1 = 2 * P * R / (P + R)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'confusion_matrix()',
+                        desc: 'Matrice de confusion',
+                        details: {
+                            explanation: 'Tableau des prédictions vs réalité. Visualise TP, TN, FP, FN.',
+                            syntax: 'confusion_matrix(y_true, y_pred)',
+                            options: [
+                                { flag: 'labels', desc: 'Ordre des classes' },
+                                { flag: 'normalize', desc: '"true", "pred", "all" pour pourcentages' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay', desc: 'Import' },
+                                { code: 'cm = confusion_matrix(y_test, y_pred)', desc: 'Calculer' },
+                                { code: 'ConfusionMatrixDisplay(cm).plot()', desc: 'Visualiser' },
+                                { code: 'confusion_matrix(y_test, y_pred, normalize="true")', desc: 'Normalisée par ligne' }
+                            ],
+                            tips: ['Diagonale = prédictions correctes', 'ConfusionMatrixDisplay pour visualiser'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'roc_auc_score()',
+                        desc: 'AUC-ROC (classification binaire)',
+                        details: {
+                            explanation: 'Area Under ROC Curve. Mesure la capacité à distinguer les classes. 0.5 = aléatoire, 1.0 = parfait.',
+                            syntax: 'roc_auc_score(y_true, y_score)',
+                            options: [
+                                { flag: 'multi_class', desc: '"ovr" ou "ovo" pour multiclasse' },
+                                { flag: 'average', desc: '"macro", "weighted", "micro"' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import roc_auc_score, roc_curve', desc: 'Import' },
+                                { code: 'y_proba = model.predict_proba(X_test)[:, 1]', desc: 'Probas classe positive' },
+                                { code: 'auc = roc_auc_score(y_test, y_proba)', desc: 'Calculer AUC' },
+                                { code: 'fpr, tpr, thresholds = roc_curve(y_test, y_proba)', desc: 'Courbe ROC' }
+                            ],
+                            tips: ['Nécessite des probabilités, pas des classes', 'Robuste aux classes déséquilibrées'],
+                            warnings: ['Pour binaire: utiliser proba de la classe positive']
+                        }
+                    },
+                    {
+                        cmd: 'f1_score()',
+                        desc: 'F1-Score (équilibre P et R)',
+                        details: {
+                            explanation: 'Moyenne harmonique de Precision et Recall. Idéal quand les deux sont importants.',
+                            syntax: 'f1_score(y_true, y_pred, average="binary")',
+                            options: [
+                                { flag: 'average', desc: '"binary", "micro", "macro", "weighted"' },
+                                { flag: 'pos_label', desc: 'Classe positive (pour binaire)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import f1_score', desc: 'Import' },
+                                { code: 'f1 = f1_score(y_test, y_pred)', desc: 'Binaire' },
+                                { code: 'f1_score(y_test, y_pred, average="macro")', desc: 'Multiclasse (moyenne)' },
+                                { code: 'f1_score(y_test, y_pred, average="weighted")', desc: 'Pondéré par support' }
+                            ],
+                            tips: ['macro = moyenne des F1 par classe', 'weighted = pondéré par le nombre d\'exemples'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'r2_score()',
+                        desc: 'R² (régression)',
+                        details: {
+                            explanation: 'Coefficient de détermination. Proportion de variance expliquée par le modèle. 1.0 = parfait.',
+                            syntax: 'r2_score(y_true, y_pred)',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.metrics import r2_score', desc: 'Import' },
+                                { code: 'r2 = r2_score(y_test, y_pred)', desc: 'Calculer R²' },
+                                { code: 'print(f"R² = {r2:.3f}")', desc: 'Afficher' }
+                            ],
+                            tips: ['R² = 1 - (SS_res / SS_tot)', '0.7+ est généralement bon'],
+                            warnings: ['Peut être négatif si le modèle est très mauvais']
+                        }
+                    },
+                    {
+                        cmd: 'mean_squared_error()',
+                        desc: 'MSE / RMSE (régression)',
+                        details: {
+                            explanation: 'Erreur quadratique moyenne. RMSE (racine) est plus interprétable (même unité que y).',
+                            syntax: 'mean_squared_error(y_true, y_pred, squared=True)',
+                            options: [
+                                { flag: 'squared', desc: 'False pour RMSE' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import mean_squared_error, mean_absolute_error', desc: 'Import' },
+                                { code: 'mse = mean_squared_error(y_test, y_pred)', desc: 'MSE' },
+                                { code: 'rmse = mean_squared_error(y_test, y_pred, squared=False)', desc: 'RMSE' },
+                                { code: 'mae = mean_absolute_error(y_test, y_pred)', desc: 'MAE (moins sensible outliers)' }
+                            ],
+                            tips: ['RMSE pénalise plus les grandes erreurs', 'MAE est plus robuste aux outliers'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'validation',
+                title: 'Validation & Tuning',
+                icon: 'fa-sync-alt',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'cross_val_score()',
+                        desc: 'Validation croisée',
+                        details: {
+                            explanation: 'Évalue le modèle sur plusieurs splits des données. Estimation plus fiable de la performance.',
+                            syntax: 'cross_val_score(estimator, X, y, cv=5, scoring="accuracy")',
+                            options: [
+                                { flag: 'cv', desc: 'Nombre de folds (5 ou 10)' },
+                                { flag: 'scoring', desc: 'Métrique: "accuracy", "f1", "neg_mean_squared_error"' },
+                                { flag: 'n_jobs', desc: '-1 pour paralléliser' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import cross_val_score', desc: 'Import' },
+                                { code: 'scores = cross_val_score(model, X, y, cv=5)', desc: '5-fold CV' },
+                                { code: 'print(f"{scores.mean():.3f} (+/- {scores.std():.3f})")', desc: 'Moyenne ± écart-type' },
+                                { code: 'cross_val_score(model, X, y, cv=5, scoring="f1")', desc: 'Avec F1-score' }
+                            ],
+                            tips: ['cv=5 ou cv=10 sont standards', 'StratifiedKFold utilisé par défaut pour classification'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'GridSearchCV()',
+                        desc: 'Grid Search (exhaustif)',
+                        details: {
+                            explanation: 'Teste TOUTES les combinaisons d\'hyperparamètres. Exhaustif mais peut être très long.',
+                            syntax: 'GridSearchCV(estimator, param_grid, cv=5, scoring="accuracy")',
+                            options: [
+                                { flag: 'param_grid', desc: 'Dict des paramètres à tester' },
+                                { flag: 'cv', desc: 'Nombre de folds' },
+                                { flag: 'scoring', desc: 'Métrique à optimiser' },
+                                { flag: 'n_jobs', desc: '-1 pour paralléliser' },
+                                { flag: 'refit', desc: 'Réentraîner sur tout le dataset (True)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import GridSearchCV', desc: 'Import' },
+                                { code: 'param_grid = {"C": [0.1, 1, 10], "kernel": ["rbf", "linear"]}', desc: 'Grille' },
+                                { code: 'grid = GridSearchCV(SVC(), param_grid, cv=5)', desc: 'Créer' },
+                                { code: 'grid.fit(X_train, y_train)', desc: 'Rechercher' },
+                                { code: 'grid.best_params_', desc: 'Meilleurs paramètres' },
+                                { code: 'grid.best_score_', desc: 'Meilleur score CV' }
+                            ],
+                            tips: ['best_estimator_ contient le meilleur modèle déjà entraîné', 'cv_results_ pour tous les résultats'],
+                            warnings: ['O(n^k) combinaisons - peut être très long']
+                        }
+                    },
+                    {
+                        cmd: 'RandomizedSearchCV()',
+                        desc: 'Random Search (échantillonné)',
+                        details: {
+                            explanation: 'Échantillonne aléatoirement les hyperparamètres. Plus rapide que GridSearch pour grands espaces.',
+                            syntax: 'RandomizedSearchCV(estimator, param_distributions, n_iter=100)',
+                            options: [
+                                { flag: 'param_distributions', desc: 'Dict avec distributions (scipy.stats)' },
+                                { flag: 'n_iter', desc: 'Nombre de combinaisons à tester' },
+                                { flag: 'cv', desc: 'Nombre de folds' },
+                                { flag: 'random_state', desc: 'Graine pour reproductibilité' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import RandomizedSearchCV', desc: 'Import' },
+                                { code: 'from scipy.stats import randint, uniform', desc: 'Distributions' },
+                                { code: 'param_dist = {"n_estimators": randint(50, 200), "max_depth": randint(3, 10)}', desc: 'Distributions' },
+                                { code: 'random_search = RandomizedSearchCV(rf, param_dist, n_iter=50, cv=5)', desc: 'Créer' },
+                                { code: 'random_search.fit(X_train, y_train)', desc: 'Rechercher' }
+                            ],
+                            tips: ['n_iter=100 est un bon compromis', 'Utiliser des distributions continues quand possible'],
+                            warnings: ['Pas exhaustif - peut rater le meilleur']
+                        }
+                    },
+                    {
+                        cmd: 'StratifiedKFold()',
+                        desc: 'K-Fold stratifié',
+                        details: {
+                            explanation: 'Split en K folds en préservant les proportions de classes. Essentiel pour classification.',
+                            syntax: 'StratifiedKFold(n_splits=5, shuffle=True, random_state=42)',
+                            options: [
+                                { flag: 'n_splits', desc: 'Nombre de folds' },
+                                { flag: 'shuffle', desc: 'Mélanger avant de splitter' },
+                                { flag: 'random_state', desc: 'Graine aléatoire' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import StratifiedKFold', desc: 'Import' },
+                                { code: 'skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)', desc: 'Créer' },
+                                { code: 'for train_idx, val_idx in skf.split(X, y):', desc: 'Itérer sur les folds' },
+                                { code: '    X_train, X_val = X[train_idx], X[val_idx]', desc: 'Récupérer les données' }
+                            ],
+                            tips: ['Utilisé automatiquement par cross_val_score pour classification', 'KFold simple pour régression'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'pipeline',
+                title: 'Pipelines',
+                icon: 'fa-stream',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Pipeline()',
+                        desc: 'Chaîner les étapes',
+                        details: {
+                            explanation: 'Enchaîne preprocessing + modèle en un seul objet. Évite le data leakage et simplifie le code.',
+                            syntax: 'Pipeline([(name, transformer), ..., (name, estimator)])',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.pipeline import Pipeline', desc: 'Import' },
+                                { code: 'pipe = Pipeline([\n    ("scaler", StandardScaler()),\n    ("clf", LogisticRegression())\n])', desc: 'Créer' },
+                                { code: 'pipe.fit(X_train, y_train)', desc: 'Fit tout le pipeline' },
+                                { code: 'pipe.predict(X_test)', desc: 'Predict (scale + predict)' },
+                                { code: 'pipe.score(X_test, y_test)', desc: 'Score sur test' }
+                            ],
+                            tips: ['Évite le data leakage: scaler fit uniquement sur train', 'Fonctionne avec GridSearchCV'],
+                            warnings: ['Le dernier élément doit être un estimateur (fit/predict)']
+                        }
+                    },
+                    {
+                        cmd: 'make_pipeline()',
+                        desc: 'Pipeline simplifié',
+                        details: {
+                            explanation: 'Version simplifiée de Pipeline. Génère automatiquement les noms des étapes.',
+                            syntax: 'make_pipeline(transformer1, transformer2, estimator)',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.pipeline import make_pipeline', desc: 'Import' },
+                                { code: 'pipe = make_pipeline(\n    StandardScaler(),\n    PCA(n_components=10),\n    LogisticRegression()\n)', desc: 'Créer' },
+                                { code: 'pipe.fit(X_train, y_train)', desc: 'Entraîner' },
+                                { code: 'pipe.named_steps["logisticregression"]', desc: 'Accéder à une étape' }
+                            ],
+                            tips: ['Noms auto: standardscaler, pca, logisticregression (lowercase)', 'Plus concis mais moins explicite'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ColumnTransformer()',
+                        desc: 'Transformer par colonnes',
+                        details: {
+                            explanation: 'Applique différentes transformations à différentes colonnes. Essentiel pour datasets mixtes (num + cat).',
+                            syntax: 'ColumnTransformer([(name, transformer, columns), ...])',
+                            options: [
+                                { flag: 'remainder', desc: '"drop", "passthrough" ou transformer' },
+                                { flag: 'sparse_threshold', desc: 'Seuil pour output sparse' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.compose import ColumnTransformer', desc: 'Import' },
+                                { code: 'ct = ColumnTransformer([\n    ("num", StandardScaler(), ["age", "salary"]),\n    ("cat", OneHotEncoder(), ["city", "gender"])\n])', desc: 'Créer' },
+                                { code: 'ct = ColumnTransformer([\n    ("num", StandardScaler(), ["age"]),\n    ("cat", OneHotEncoder(), ["city"])\n], remainder="passthrough")', desc: 'Garder autres colonnes' },
+                                { code: 'X_transformed = ct.fit_transform(X)', desc: 'Transformer' }
+                            ],
+                            tips: ['remainder="passthrough" pour garder les colonnes non listées', 'Combiner avec Pipeline pour un workflow complet'],
+                            warnings: ['L\'ordre des colonnes peut changer']
+                        }
+                    },
+                    {
+                        cmd: 'Pipeline + GridSearchCV',
+                        desc: 'Tuning avec pipeline',
+                        details: {
+                            explanation: 'Optimiser les hyperparamètres de tout le pipeline (preprocessing + modèle) en une fois.',
+                            syntax: 'GridSearchCV(pipe, {"step__param": values})',
+                            options: [],
+                            examples: [
+                                { code: 'pipe = make_pipeline(StandardScaler(), SVC())', desc: 'Pipeline' },
+                                { code: 'param_grid = {\n    "svc__C": [0.1, 1, 10],\n    "svc__kernel": ["rbf", "linear"]\n}', desc: 'Grille (step__param)' },
+                                { code: 'grid = GridSearchCV(pipe, param_grid, cv=5)', desc: 'Grid Search sur pipeline' },
+                                { code: 'grid.fit(X_train, y_train)', desc: 'Rechercher' },
+                                { code: 'grid.best_estimator_', desc: 'Meilleur pipeline complet' }
+                            ],
+                            tips: ['Syntaxe: "nom_étape__paramètre"', 'Permet de tuner scaler ET modèle ensemble'],
+                            warnings: ['Double underscore __ entre step et param']
+                        }
+                    },
+                    {
+                        cmd: 'FunctionTransformer()',
+                        desc: 'Transformer personnalisé',
+                        details: {
+                            explanation: 'Convertit une fonction en transformer compatible Pipeline. Pour preprocessing custom.',
+                            syntax: 'FunctionTransformer(func, inverse_func=None)',
+                            options: [
+                                { flag: 'func', desc: 'Fonction à appliquer' },
+                                { flag: 'inverse_func', desc: 'Fonction inverse (optionnel)' },
+                                { flag: 'validate', desc: 'Valider l\'input (True)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import FunctionTransformer', desc: 'Import' },
+                                { code: 'log_transformer = FunctionTransformer(np.log1p)', desc: 'Log transform' },
+                                { code: 'pipe = make_pipeline(\n    FunctionTransformer(np.log1p),\n    StandardScaler(),\n    LinearRegression()\n)', desc: 'Dans un pipeline' }
+                            ],
+                            tips: ['np.log1p = log(1+x) pour éviter log(0)', 'Pratique pour transformations simples'],
+                            warnings: ['Pour logique complexe, créer une classe avec fit/transform']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'utils',
+                title: 'Utilitaires',
+                icon: 'fa-toolbox',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'joblib.dump() / load()',
+                        desc: 'Sauvegarder/charger un modèle',
+                        details: {
+                            explanation: 'Sérialise le modèle entraîné pour le réutiliser plus tard. Plus efficace que pickle.',
+                            syntax: 'joblib.dump(model, "model.joblib")',
+                            options: [
+                                { flag: 'compress', desc: 'Niveau de compression (0-9)' }
+                            ],
+                            examples: [
+                                { code: 'import joblib', desc: 'Import' },
+                                { code: 'joblib.dump(model, "model.joblib")', desc: 'Sauvegarder' },
+                                { code: 'joblib.dump(model, "model.joblib", compress=3)', desc: 'Avec compression' },
+                                { code: 'model = joblib.load("model.joblib")', desc: 'Charger' },
+                                { code: 'model.predict(X_new)', desc: 'Utiliser le modèle chargé' }
+                            ],
+                            tips: ['Sauvegarder le pipeline complet, pas juste le modèle', 'joblib plus rapide que pickle pour arrays numpy'],
+                            warnings: ['Ne pas charger des fichiers de sources non fiables']
+                        }
+                    },
+                    {
+                        cmd: 'clone()',
+                        desc: 'Cloner un estimateur',
+                        details: {
+                            explanation: 'Crée une copie de l\'estimateur avec les mêmes paramètres mais non entraîné.',
+                            syntax: 'clone(estimator)',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.base import clone', desc: 'Import' },
+                                { code: 'model = RandomForestClassifier(n_estimators=100)', desc: 'Modèle original' },
+                                { code: 'model_copy = clone(model)', desc: 'Clone (non entraîné)' }
+                            ],
+                            tips: ['Utile pour comparer plusieurs entraînements', 'Le clone n\'a pas les données fit'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'learning_curve()',
+                        desc: 'Courbe d\'apprentissage',
+                        details: {
+                            explanation: 'Trace le score en fonction de la taille du train set. Diagnostique over/underfitting.',
+                            syntax: 'learning_curve(estimator, X, y, train_sizes, cv=5)',
+                            options: [
+                                { flag: 'train_sizes', desc: 'Proportions ou nombres absolus' },
+                                { flag: 'cv', desc: 'Nombre de folds' },
+                                { flag: 'scoring', desc: 'Métrique' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import learning_curve', desc: 'Import' },
+                                { code: 'train_sizes, train_scores, val_scores = learning_curve(\n    model, X, y, train_sizes=[0.2, 0.4, 0.6, 0.8, 1.0], cv=5\n)', desc: 'Calculer' },
+                                { code: 'plt.plot(train_sizes, train_scores.mean(axis=1), label="Train")', desc: 'Plot train' },
+                                { code: 'plt.plot(train_sizes, val_scores.mean(axis=1), label="Validation")', desc: 'Plot val' }
+                            ],
+                            tips: ['Si gap train/val → overfitting', 'Si les deux bas → underfitting'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'make_scorer()',
+                        desc: 'Créer une métrique custom',
+                        details: {
+                            explanation: 'Convertit une fonction en scorer utilisable dans cross_val_score ou GridSearchCV.',
+                            syntax: 'make_scorer(score_func, greater_is_better=True)',
+                            options: [
+                                { flag: 'greater_is_better', desc: 'True si score élevé = meilleur' },
+                                { flag: 'needs_proba', desc: 'True si besoin de probabilités' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import make_scorer', desc: 'Import' },
+                                { code: 'def custom_metric(y_true, y_pred):\n    return np.mean(y_true == y_pred)', desc: 'Fonction custom' },
+                                { code: 'scorer = make_scorer(custom_metric)', desc: 'Créer scorer' },
+                                { code: 'cross_val_score(model, X, y, scoring=scorer)', desc: 'Utiliser' }
+                            ],
+                            tips: ['Pour loss (à minimiser): greater_is_better=False', 'Sklearn inversera automatiquement le signe'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Windows Terminal : PowerShell et CMD pour l'administration système et les scripts.">
+    <title>Windows Terminal - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-500/20 mb-4 icon-glow">
+                    <i class="fab fa-windows text-3xl text-blue-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Windows Terminal</h1>
+                <p class="text-slate-400">PowerShell & CMD : Administration système et scripts d'automatisation</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'navigation',
+                title: 'Navigation (CMD/PS)',
+                icon: 'fa-compass',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'cd chemin',
+                        desc: 'Changer de répertoire',
+                        details: {
+                            explanation: 'Change le répertoire de travail. Fonctionne en CMD et PowerShell.',
+                            syntax: 'cd [chemin] ou Set-Location [chemin]',
+                            options: [
+                                { flag: 'cd ..', desc: 'Remonter d\'un niveau' },
+                                { flag: 'cd \\', desc: 'Aller à la racine du lecteur' },
+                                { flag: 'cd /d D:', desc: 'Changer de lecteur (CMD)' }
+                            ],
+                            examples: [
+                                { code: 'cd C:\\Users\\Documents', desc: 'Chemin absolu' },
+                                { code: 'cd ..\\projet', desc: 'Chemin relatif' },
+                                { code: 'Set-Location D:\\Data', desc: 'PowerShell complet' }
+                            ],
+                            tips: ['En PowerShell, cd est un alias de Set-Location'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'dir',
+                        desc: 'Lister le contenu d\'un répertoire',
+                        details: {
+                            explanation: 'Affiche les fichiers et dossiers. En PowerShell, c\'est un alias de Get-ChildItem.',
+                            syntax: 'dir [chemin] [options]',
+                            options: [
+                                { flag: '/a', desc: 'Afficher les fichiers cachés' },
+                                { flag: '/s', desc: 'Récursif (sous-dossiers)' },
+                                { flag: '/b', desc: 'Format simple (noms seulement)' }
+                            ],
+                            examples: [
+                                { code: 'dir', desc: 'Liste du dossier courant' },
+                                { code: 'dir /a /s', desc: 'Tout lister récursivement' },
+                                { code: 'Get-ChildItem -Recurse', desc: 'PowerShell équivalent' }
+                            ],
+                            tips: ['En PowerShell: ls ou gci sont aussi des alias'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'files',
+                title: 'Gestion des fichiers',
+                icon: 'fa-file',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'copy source destination',
+                        desc: 'Copier fichiers',
+                        details: {
+                            explanation: 'Copie un ou plusieurs fichiers vers une destination.',
+                            syntax: 'copy source destination [options]',
+                            options: [
+                                { flag: '/y', desc: 'Ne pas demander confirmation' },
+                                { flag: '/v', desc: 'Vérifier la copie' }
+                            ],
+                            examples: [
+                                { code: 'copy fichier.txt D:\\backup\\', desc: 'Copier vers backup' },
+                                { code: 'copy *.txt documents\\', desc: 'Copier tous les .txt' },
+                                { code: 'Copy-Item fichier.txt -Destination backup\\', desc: 'PowerShell' }
+                            ],
+                            tips: ['xcopy ou robocopy pour des copies avancées'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'del fichier',
+                        desc: 'Supprimer fichiers',
+                        details: {
+                            explanation: 'Supprime des fichiers. Pour les dossiers, utilisez rmdir.',
+                            syntax: 'del [options] fichier(s)',
+                            options: [
+                                { flag: '/q', desc: 'Mode silencieux (pas de confirmation)' },
+                                { flag: '/f', desc: 'Forcer la suppression (fichiers en lecture seule)' },
+                                { flag: '/s', desc: 'Supprimer dans les sous-dossiers' }
+                            ],
+                            examples: [
+                                { code: 'del fichier.txt', desc: 'Supprimer un fichier' },
+                                { code: 'del /q *.tmp', desc: 'Supprimer les .tmp sans confirmation' },
+                                { code: 'Remove-Item fichier.txt', desc: 'PowerShell' }
+                            ],
+                            tips: ['rmdir /s /q dossier pour supprimer un dossier et son contenu'],
+                            warnings: ['Pas de corbeille en ligne de commande !']
+                        }
+                    },
+                    {
+                        cmd: 'move source destination',
+                        desc: 'Déplacer/renommer',
+                        details: {
+                            explanation: 'Déplace ou renomme des fichiers et dossiers.',
+                            syntax: 'move [options] source destination',
+                            options: [
+                                { flag: '/y', desc: 'Ne pas demander confirmation' }
+                            ],
+                            examples: [
+                                { code: 'move ancien.txt nouveau.txt', desc: 'Renommer' },
+                                { code: 'move fichier.txt D:\\dossier\\', desc: 'Déplacer' },
+                                { code: 'Move-Item fichier.txt -Destination backup\\', desc: 'PowerShell' }
+                            ],
+                            tips: ['Fonctionne aussi pour les dossiers'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'powershell',
+                title: 'PowerShell avancé',
+                icon: 'fa-terminal',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Get-Process',
+                        desc: 'Lister les processus',
+                        details: {
+                            explanation: 'Affiche tous les processus en cours d\'exécution avec leur utilisation mémoire/CPU.',
+                            syntax: 'Get-Process [nom] [options]',
+                            options: [
+                                { flag: '-Name', desc: 'Filtrer par nom' },
+                                { flag: '-Id', desc: 'Filtrer par PID' }
+                            ],
+                            examples: [
+                                { code: 'Get-Process', desc: 'Tous les processus' },
+                                { code: 'Get-Process chrome', desc: 'Processus Chrome' },
+                                { code: 'Get-Process | Sort-Object CPU -Descending', desc: 'Triés par CPU' }
+                            ],
+                            tips: ['Stop-Process -Name chrome pour tuer un processus'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Get-Service',
+                        desc: 'Lister les services',
+                        details: {
+                            explanation: 'Affiche l\'état des services Windows (démarré, arrêté, etc.).',
+                            syntax: 'Get-Service [nom] [options]',
+                            options: [
+                                { flag: '-Name', desc: 'Filtrer par nom' },
+                                { flag: '-Status Running', desc: 'Services en cours' }
+                            ],
+                            examples: [
+                                { code: 'Get-Service', desc: 'Tous les services' },
+                                { code: 'Get-Service -Status Running', desc: 'Services actifs' },
+                                { code: 'Start-Service -Name wuauserv', desc: 'Démarrer Windows Update' }
+                            ],
+                            tips: ['Stop-Service et Restart-Service pour contrôler les services'],
+                            warnings: ['Nécessite les droits administrateur']
+                        }
+                    },
+                    {
+                        cmd: 'Get-Help commande',
+                        desc: 'Obtenir de l\'aide',
+                        details: {
+                            explanation: 'Affiche l\'aide détaillée sur une commande PowerShell.',
+                            syntax: 'Get-Help commande [-Full] [-Examples]',
+                            options: [
+                                { flag: '-Full', desc: 'Aide complète' },
+                                { flag: '-Examples', desc: 'Exemples seulement' },
+                                { flag: '-Online', desc: 'Ouvrir l\'aide en ligne' }
+                            ],
+                            examples: [
+                                { code: 'Get-Help Get-Process', desc: 'Aide basique' },
+                                { code: 'Get-Help Get-Service -Examples', desc: 'Voir les exemples' }
+                            ],
+                            tips: ['Update-Help pour télécharger l\'aide locale'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'network',
+                title: 'Réseau',
+                icon: 'fa-network-wired',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'ipconfig',
+                        desc: 'Configuration IP',
+                        details: {
+                            explanation: 'Affiche la configuration réseau de toutes les interfaces.',
+                            syntax: 'ipconfig [options]',
+                            options: [
+                                { flag: '/all', desc: 'Informations détaillées' },
+                                { flag: '/release', desc: 'Libérer l\'adresse IP DHCP' },
+                                { flag: '/renew', desc: 'Renouveler l\'adresse IP DHCP' },
+                                { flag: '/flushdns', desc: 'Vider le cache DNS' }
+                            ],
+                            examples: [
+                                { code: 'ipconfig', desc: 'Config basique' },
+                                { code: 'ipconfig /all', desc: 'Tout voir (MAC, DNS, etc.)' },
+                                { code: 'ipconfig /flushdns', desc: 'Résoudre problèmes DNS' }
+                            ],
+                            tips: ['En PowerShell: Get-NetIPAddress'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ping adresse',
+                        desc: 'Tester la connectivité',
+                        details: {
+                            explanation: 'Envoie des paquets ICMP pour tester la connexion réseau.',
+                            syntax: 'ping [options] adresse',
+                            options: [
+                                { flag: '-t', desc: 'Ping continu (Ctrl+C pour arrêter)' },
+                                { flag: '-n count', desc: 'Nombre de pings' }
+                            ],
+                            examples: [
+                                { code: 'ping google.com', desc: 'Tester connexion internet' },
+                                { code: 'ping -t 192.168.1.1', desc: 'Ping continu vers la box' },
+                                { code: 'Test-Connection google.com', desc: 'PowerShell' }
+                            ],
+                            tips: ['ping localhost ou ping 127.0.0.1 pour tester la pile TCP/IP'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'disk-storage',
+                title: 'Disques & Stockage',
+                icon: 'fa-hdd',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Get-Volume / Get-Disk',
+                        desc: 'Informations sur les disques',
+                        details: {
+                            explanation: 'Affiche les informations sur les volumes et disques du système.',
+                            syntax: 'Get-Volume [-DriveLetter X]\nGet-Disk [-Number N]',
+                            options: [
+                                { flag: 'Get-Volume', desc: 'Liste tous les volumes' },
+                                { flag: 'Get-Disk', desc: 'Liste tous les disques physiques' },
+                                { flag: 'Get-Partition', desc: 'Liste les partitions' }
+                            ],
+                            examples: [
+                                { code: 'Get-Volume', desc: 'Tous les volumes avec taille et espace libre' },
+                                { code: 'Get-Volume -DriveLetter C | Select-Object *', desc: 'Détails du volume C:' },
+                                { code: 'Get-Disk | Format-Table Number, FriendlyName, Size, PartitionStyle', desc: 'Info disques physiques' },
+                                { code: 'Get-Volume | Where-Object {$_.SizeRemaining -lt 10GB}', desc: 'Volumes avec moins de 10 Go' }
+                            ],
+                            tips: ['Utilisez Format-Table ou Select-Object pour personnaliser l\'affichage'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'diskpart',
+                        desc: 'Gestion des partitions (CMD)',
+                        details: {
+                            explanation: 'Outil en ligne de commande pour gérer disques et partitions.',
+                            syntax: 'diskpart (lance le mode interactif)',
+                            options: [
+                                { flag: 'list disk', desc: 'Lister les disques' },
+                                { flag: 'select disk N', desc: 'Sélectionner un disque' },
+                                { flag: 'list volume', desc: 'Lister les volumes' },
+                                { flag: 'clean', desc: 'Effacer le disque sélectionné' }
+                            ],
+                            examples: [
+                                { code: 'diskpart\nlist disk\nselect disk 1\nlist partition', desc: 'Voir les partitions du disque 1' },
+                                { code: 'diskpart\nlist volume\nselect volume 2\nextend size=10240', desc: 'Étendre de 10 Go' },
+                                { code: 'echo list disk | diskpart', desc: 'Commande non-interactive' }
+                            ],
+                            tips: ['clean efface TOUT le disque sans confirmation'],
+                            warnings: ['Attention: actions irréversibles ! Vérifiez le disque sélectionné']
+                        }
+                    },
+                    {
+                        cmd: 'robocopy',
+                        desc: 'Copie robuste de fichiers',
+                        details: {
+                            explanation: 'Outil de copie avancé avec reprise, miroir et options de filtrage.',
+                            syntax: 'robocopy source destination [options]',
+                            options: [
+                                { flag: '/E', desc: 'Copier sous-dossiers (même vides)' },
+                                { flag: '/MIR', desc: 'Mode miroir (supprime aussi)' },
+                                { flag: '/Z', desc: 'Mode reprise (restartable)' },
+                                { flag: '/MT:N', desc: 'Multi-thread (N threads)' },
+                                { flag: '/LOG:file', desc: 'Journaliser dans un fichier' }
+                            ],
+                            examples: [
+                                { code: 'robocopy C:\\Data D:\\Backup /E', desc: 'Copier tout le contenu' },
+                                { code: 'robocopy C:\\Data D:\\Backup /MIR', desc: 'Synchroniser (miroir exact)' },
+                                { code: 'robocopy C:\\Data D:\\Backup /E /Z /MT:8 /R:3 /W:10', desc: 'Copie multi-thread avec retry' },
+                                { code: 'robocopy C:\\Web D:\\Backup /E /XD node_modules .git', desc: 'Exclure des dossiers' }
+                            ],
+                            tips: ['/MT:8 améliore considérablement les performances'],
+                            warnings: ['/MIR supprime les fichiers de destination qui n\'existent plus dans la source']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'env-vars',
+                title: 'Variables & Environnement',
+                icon: 'fa-cog',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: '$env: / set / setx',
+                        desc: 'Gérer les variables d\'environnement',
+                        details: {
+                            explanation: 'Lire et définir des variables d\'environnement (session ou permanentes).',
+                            syntax: 'set VAR=value (CMD)\n$env:VAR = "value" (PS)',
+                            options: [
+                                { flag: 'set', desc: 'Variable pour la session (CMD)' },
+                                { flag: 'setx', desc: 'Variable permanente (CMD)' },
+                                { flag: '$env:VAR', desc: 'Accéder/définir en PowerShell' }
+                            ],
+                            examples: [
+                                { code: 'echo %PATH%', desc: 'Afficher PATH (CMD)' },
+                                { code: '$env:PATH', desc: 'Afficher PATH (PowerShell)' },
+                                { code: 'set MY_VAR=hello', desc: 'Variable temporaire (CMD)' },
+                                { code: 'setx MY_VAR "hello" /M', desc: 'Variable système permanente' },
+                                { code: '$env:MY_VAR = "hello"', desc: 'Variable temporaire (PS)' },
+                                { code: '[Environment]::SetEnvironmentVariable("MY_VAR", "hello", "User")', desc: 'Variable permanente (PS)' }
+                            ],
+                            tips: ['setx nécessite une nouvelle fenêtre pour prendre effet'],
+                            warnings: ['setx tronque les valeurs > 1024 caractères']
+                        }
+                    },
+                    {
+                        cmd: 'Get-ChildItem Env:',
+                        desc: 'Lister toutes les variables',
+                        details: {
+                            explanation: 'Affiche toutes les variables d\'environnement du système.',
+                            syntax: 'Get-ChildItem Env: | Sort-Object Name',
+                            options: [],
+                            examples: [
+                                { code: 'Get-ChildItem Env:', desc: 'Toutes les variables' },
+                                { code: 'Get-ChildItem Env: | Where-Object Name -like "*PATH*"', desc: 'Filtrer par nom' },
+                                { code: '$env:PATH -split ";"', desc: 'Afficher PATH ligne par ligne' },
+                                { code: 'set', desc: 'Équivalent CMD' }
+                            ],
+                            tips: ['Env: est un provider PowerShell comme un lecteur'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Modifier le PATH',
+                        desc: 'Ajouter au PATH système',
+                        details: {
+                            explanation: 'Ajouter un chemin au PATH utilisateur ou système.',
+                            syntax: 'setx PATH "%PATH%;nouveau_chemin"',
+                            options: [
+                                { flag: '/M', desc: 'Variable Machine (système)' },
+                                { flag: 'User', desc: 'Variable utilisateur (défaut)' }
+                            ],
+                            examples: [
+                                { code: 'setx PATH "%PATH%;C:\\Tools\\bin"', desc: 'Ajouter au PATH utilisateur (CMD)' },
+                                { code: '$newPath = $env:PATH + ";C:\\Tools\\bin"\n[Environment]::SetEnvironmentVariable("PATH", $newPath, "User")', desc: 'PowerShell permanent' },
+                                { code: '$env:PATH += ";C:\\Tools\\bin"', desc: 'PowerShell session seulement' }
+                            ],
+                            tips: ['Redémarrez le terminal après setx'],
+                            warnings: ['Attention à ne pas écraser le PATH existant']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'admin',
+                title: 'Administration Système',
+                icon: 'fa-user-shield',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Get-LocalUser / Get-LocalGroup',
+                        desc: 'Gestion des utilisateurs',
+                        details: {
+                            explanation: 'Gérer les utilisateurs et groupes locaux du système.',
+                            syntax: 'Get-LocalUser [-Name nom]',
+                            options: [
+                                { flag: 'Get-LocalUser', desc: 'Lister les utilisateurs' },
+                                { flag: 'New-LocalUser', desc: 'Créer un utilisateur' },
+                                { flag: 'Remove-LocalUser', desc: 'Supprimer un utilisateur' },
+                                { flag: 'Set-LocalUser', desc: 'Modifier un utilisateur' }
+                            ],
+                            examples: [
+                                { code: 'Get-LocalUser', desc: 'Lister tous les utilisateurs' },
+                                { code: 'Get-LocalUser | Where-Object Enabled', desc: 'Utilisateurs actifs' },
+                                { code: 'New-LocalUser -Name "dev" -Password (ConvertTo-SecureString "P@ssw0rd" -AsPlainText -Force) -FullName "Développeur"', desc: 'Créer un utilisateur' },
+                                { code: 'Add-LocalGroupMember -Group "Administrators" -Member "dev"', desc: 'Ajouter aux admins' }
+                            ],
+                            tips: ['Exécutez en tant qu\'Administrateur'],
+                            warnings: ['Les mots de passe en clair dans les scripts sont un risque de sécurité']
+                        }
+                    },
+                    {
+                        cmd: 'Get-EventLog / Get-WinEvent',
+                        desc: 'Consulter les logs Windows',
+                        details: {
+                            explanation: 'Accéder aux journaux d\'événements Windows.',
+                            syntax: 'Get-WinEvent -LogName "System" -MaxEvents 50',
+                            options: [
+                                { flag: '-LogName', desc: 'Nom du journal (System, Application, Security)' },
+                                { flag: '-MaxEvents', desc: 'Limiter le nombre de résultats' },
+                                { flag: '-FilterHashtable', desc: 'Filtrage avancé' }
+                            ],
+                            examples: [
+                                { code: 'Get-WinEvent -LogName System -MaxEvents 20', desc: 'Derniers événements système' },
+                                { code: 'Get-WinEvent -FilterHashtable @{LogName="System"; Level=2}', desc: 'Erreurs système seulement' },
+                                { code: 'Get-WinEvent -LogName Application | Where-Object {$_.Message -like "*error*"}', desc: 'Filtrer par message' },
+                                { code: 'Get-EventLog -LogName Security -Newest 10', desc: 'Événements sécurité récents' }
+                            ],
+                            tips: ['Level: 1=Critical, 2=Error, 3=Warning, 4=Information'],
+                            warnings: ['Le journal Security nécessite des droits Admin']
+                        }
+                    },
+                    {
+                        cmd: 'sfc / DISM',
+                        desc: 'Réparer le système',
+                        details: {
+                            explanation: 'Outils de vérification et réparation des fichiers système Windows.',
+                            syntax: 'sfc /scannow\nDISM /Online /Cleanup-Image /RestoreHealth',
+                            options: [
+                                { flag: 'sfc /scannow', desc: 'Vérifier et réparer les fichiers système' },
+                                { flag: 'sfc /verifyonly', desc: 'Vérifier sans réparer' },
+                                { flag: 'DISM /RestoreHealth', desc: 'Réparer le magasin de composants' }
+                            ],
+                            examples: [
+                                { code: 'sfc /scannow', desc: 'Scan et réparation automatique' },
+                                { code: 'DISM /Online /Cleanup-Image /CheckHealth', desc: 'Vérifier l\'état de l\'image' },
+                                { code: 'DISM /Online /Cleanup-Image /RestoreHealth', desc: 'Réparer l\'image Windows' },
+                                { code: 'DISM /Online /Cleanup-Image /StartComponentCleanup', desc: 'Nettoyer les anciens composants' }
+                            ],
+                            tips: ['Exécutez DISM avant sfc pour de meilleurs résultats'],
+                            warnings: ['Ces commandes nécessitent les droits Administrateur']
+                        }
+                    },
+                    {
+                        cmd: 'Get-ComputerInfo / systeminfo',
+                        desc: 'Informations système',
+                        details: {
+                            explanation: 'Affiche les informations détaillées sur le système.',
+                            syntax: 'systeminfo\nGet-ComputerInfo',
+                            options: [],
+                            examples: [
+                                { code: 'systeminfo', desc: 'Infos complètes (CMD)' },
+                                { code: 'systeminfo | findstr /C:"OS"', desc: 'Filtrer par OS' },
+                                { code: 'Get-ComputerInfo | Select-Object WindowsVersion, OsArchitecture, CsTotalPhysicalMemory', desc: 'Infos sélectionnées' },
+                                { code: '(Get-ComputerInfo).WindowsProductName', desc: 'Nom du produit Windows' }
+                            ],
+                            tips: ['Get-ComputerInfo est plus complet que systeminfo'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'scripting',
+                title: 'Scripting PowerShell',
+                icon: 'fa-code',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Variables & Types',
+                        desc: 'Syntaxe des variables PowerShell',
+                        details: {
+                            explanation: 'PowerShell utilise $ pour les variables et supporte les types .NET.',
+                            syntax: '$variable = valeur\n[type]$variable = valeur',
+                            options: [
+                                { flag: '[string]', desc: 'Chaîne de caractères' },
+                                { flag: '[int]', desc: 'Entier' },
+                                { flag: '[array]', desc: 'Tableau' },
+                                { flag: '[hashtable]', desc: 'Table de hachage' }
+                            ],
+                            examples: [
+                                { code: '$name = "John"\n$age = 30\n$enabled = $true', desc: 'Variables de base' },
+                                { code: '[int]$port = "8080"\n[datetime]$date = "2024-01-15"', desc: 'Variables typées' },
+                                { code: '$array = @(1, 2, 3, 4, 5)\n$array[0]  # Premier élément', desc: 'Tableau' },
+                                { code: '$hash = @{\n  Name = "Server01"\n  IP = "192.168.1.1"\n}\n$hash.Name', desc: 'Hashtable' }
+                            ],
+                            tips: ['$null, $true, $false sont des valeurs spéciales'],
+                            warnings: ['Les guillemets doubles interprètent les variables, les simples non']
+                        }
+                    },
+                    {
+                        cmd: 'Conditions & Boucles',
+                        desc: 'Structures de contrôle',
+                        details: {
+                            explanation: 'PowerShell supporte if/else, switch, for, foreach, while.',
+                            syntax: 'if (condition) { } else { }\nforeach ($item in $collection) { }',
+                            options: [
+                                { flag: '-eq, -ne', desc: 'Égal, non égal' },
+                                { flag: '-gt, -lt', desc: 'Plus grand, plus petit' },
+                                { flag: '-like, -match', desc: 'Pattern matching' },
+                                { flag: '-and, -or', desc: 'Opérateurs logiques' }
+                            ],
+                            examples: [
+                                { code: 'if ($age -ge 18) {\n  Write-Host "Majeur"\n} else {\n  Write-Host "Mineur"\n}', desc: 'Condition if/else' },
+                                { code: 'switch ($day) {\n  "Lundi" { "Début de semaine" }\n  "Vendredi" { "Fin de semaine" }\n  default { "Milieu de semaine" }\n}', desc: 'Switch' },
+                                { code: 'foreach ($file in Get-ChildItem *.txt) {\n  Write-Host $file.Name\n}', desc: 'Boucle foreach' },
+                                { code: '1..10 | ForEach-Object { $_ * 2 }', desc: 'Pipeline ForEach' }
+                            ],
+                            tips: ['$_ représente l\'objet courant dans le pipeline'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Fonctions',
+                        desc: 'Créer des fonctions réutilisables',
+                        details: {
+                            explanation: 'Les fonctions PowerShell peuvent avoir des paramètres typés et validés.',
+                            syntax: 'function Nom-Fonction {\n  param([type]$param)\n  # code\n}',
+                            options: [
+                                { flag: 'param()', desc: 'Déclaration des paramètres' },
+                                { flag: '[Parameter(Mandatory)]', desc: 'Paramètre obligatoire' },
+                                { flag: '[ValidateSet()]', desc: 'Valeurs autorisées' }
+                            ],
+                            examples: [
+                                { code: 'function Get-Greeting {\n  param([string]$Name = "World")\n  return "Hello, $Name!"\n}\nGet-Greeting -Name "Jean"', desc: 'Fonction simple' },
+                                { code: 'function Get-DiskSpace {\n  param(\n    [Parameter(Mandatory)]\n    [string]$DriveLetter\n  )\n  Get-Volume -DriveLetter $DriveLetter | \n    Select-Object DriveLetter, @{N="FreeGB";E={[math]::Round($_.SizeRemaining/1GB,2)}}\n}', desc: 'Fonction avec paramètre obligatoire' },
+                                { code: 'function Set-LogLevel {\n  param(\n    [ValidateSet("Debug","Info","Warning","Error")]\n    [string]$Level = "Info"\n  )\n  Write-Host "Log level: $Level"\n}', desc: 'Validation de paramètre' }
+                            ],
+                            tips: ['Utilisez le verbe-nom standard PowerShell (Get-, Set-, New-, Remove-)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Try/Catch/Finally',
+                        desc: 'Gestion des erreurs',
+                        details: {
+                            explanation: 'Capturer et gérer les erreurs dans les scripts PowerShell.',
+                            syntax: 'try { } catch { } finally { }',
+                            options: [
+                                { flag: '$_', desc: 'L\'exception dans le bloc catch' },
+                                { flag: '$_.Exception.Message', desc: 'Message d\'erreur' },
+                                { flag: '-ErrorAction Stop', desc: 'Transformer les erreurs en exceptions' }
+                            ],
+                            examples: [
+                                { code: 'try {\n  Get-Content "fichier_inexistant.txt" -ErrorAction Stop\n} catch {\n  Write-Host "Erreur: $_"\n}', desc: 'Gestion d\'erreur simple' },
+                                { code: 'try {\n  $result = 1/0\n} catch [System.DivideByZeroException] {\n  Write-Host "Division par zéro!"\n} catch {\n  Write-Host "Autre erreur: $_"\n} finally {\n  Write-Host "Nettoyage..."\n}', desc: 'Catch typé et finally' },
+                                { code: '$ErrorActionPreference = "Stop"\n# Toutes les erreurs deviennent des exceptions', desc: 'Mode strict global' }
+                            ],
+                            tips: ['-ErrorAction Stop est nécessaire pour que try/catch fonctionne avec les cmdlets'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'scheduled-tasks',
+                title: 'Tâches Planifiées',
+                icon: 'fa-clock',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Get-ScheduledTask',
+                        desc: 'Lister les tâches planifiées',
+                        details: {
+                            explanation: 'Affiche toutes les tâches planifiées sur le système.',
+                            syntax: 'Get-ScheduledTask [-TaskName nom] [-TaskPath chemin]',
+                            options: [
+                                { flag: '-TaskName', desc: 'Filtrer par nom' },
+                                { flag: '-TaskPath', desc: 'Filtrer par chemin' },
+                                { flag: 'Get-ScheduledTaskInfo', desc: 'Infos d\'exécution' }
+                            ],
+                            examples: [
+                                { code: 'Get-ScheduledTask', desc: 'Toutes les tâches' },
+                                { code: 'Get-ScheduledTask | Where-Object State -eq "Ready"', desc: 'Tâches actives' },
+                                { code: 'Get-ScheduledTask -TaskName "Backup*"', desc: 'Tâches commençant par Backup' },
+                                { code: 'Get-ScheduledTask "MyTask" | Get-ScheduledTaskInfo', desc: 'Dernière exécution' }
+                            ],
+                            tips: ['Combinez avec Get-ScheduledTaskInfo pour voir les dernières exécutions'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Register-ScheduledTask',
+                        desc: 'Créer une tâche planifiée',
+                        details: {
+                            explanation: 'Crée une nouvelle tâche planifiée avec action et déclencheur.',
+                            syntax: 'Register-ScheduledTask -TaskName nom -Action action -Trigger trigger',
+                            options: [
+                                { flag: 'New-ScheduledTaskAction', desc: 'Définir l\'action' },
+                                { flag: 'New-ScheduledTaskTrigger', desc: 'Définir le déclencheur' },
+                                { flag: 'New-ScheduledTaskPrincipal', desc: 'Définir le contexte d\'exécution' }
+                            ],
+                            examples: [
+                                { code: '$action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-File C:\\Scripts\\backup.ps1"\n$trigger = New-ScheduledTaskTrigger -Daily -At 2am\nRegister-ScheduledTask -TaskName "DailyBackup" -Action $action -Trigger $trigger', desc: 'Tâche quotidienne à 2h' },
+                                { code: '$action = New-ScheduledTaskAction -Execute "C:\\Scripts\\cleanup.bat"\n$trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At 3am\n$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -RunLevel Highest\nRegister-ScheduledTask -TaskName "WeeklyCleanup" -Action $action -Trigger $trigger -Principal $principal', desc: 'Tâche hebdomadaire en SYSTEM' },
+                                { code: '$trigger = New-ScheduledTaskTrigger -AtStartup\nRegister-ScheduledTask -TaskName "StartupScript" -Action $action -Trigger $trigger', desc: 'Tâche au démarrage' }
+                            ],
+                            tips: ['Utilisez -RunLevel Highest pour les tâches admin'],
+                            warnings: ['Les tâches SYSTEM s\'exécutent sans interface utilisateur']
+                        }
+                    },
+                    {
+                        cmd: 'schtasks (CMD)',
+                        desc: 'Équivalent CMD pour les tâches',
+                        details: {
+                            explanation: 'Commande CMD classique pour gérer les tâches planifiées.',
+                            syntax: 'schtasks /create /tn nom /tr commande /sc schedule',
+                            options: [
+                                { flag: '/create', desc: 'Créer une tâche' },
+                                { flag: '/query', desc: 'Lister les tâches' },
+                                { flag: '/run', desc: 'Exécuter immédiatement' },
+                                { flag: '/delete', desc: 'Supprimer une tâche' },
+                                { flag: '/sc', desc: 'Type de planification (daily, weekly, monthly)' }
+                            ],
+                            examples: [
+                                { code: 'schtasks /query /fo TABLE', desc: 'Lister les tâches' },
+                                { code: 'schtasks /create /tn "Backup" /tr "C:\\backup.bat" /sc daily /st 02:00', desc: 'Tâche quotidienne à 2h' },
+                                { code: 'schtasks /run /tn "Backup"', desc: 'Exécuter maintenant' },
+                                { code: 'schtasks /delete /tn "Backup" /f', desc: 'Supprimer (sans confirmation)' }
+                            ],
+                            tips: ['Utile pour les scripts batch et la compatibilité'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'remote',
+                title: 'Administration à Distance',
+                icon: 'fa-network-wired',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Enter-PSSession / Invoke-Command',
+                        desc: 'PowerShell Remoting',
+                        details: {
+                            explanation: 'Exécuter des commandes PowerShell sur des machines distantes.',
+                            syntax: 'Enter-PSSession -ComputerName serveur\nInvoke-Command -ComputerName serveur -ScriptBlock { }',
+                            options: [
+                                { flag: '-ComputerName', desc: 'Nom ou IP du serveur' },
+                                { flag: '-Credential', desc: 'Credentials pour l\'authentification' },
+                                { flag: '-ScriptBlock', desc: 'Bloc de code à exécuter' },
+                                { flag: '-FilePath', desc: 'Script local à exécuter à distance' }
+                            ],
+                            examples: [
+                                { code: 'Enter-PSSession -ComputerName Server01', desc: 'Session interactive' },
+                                { code: 'Invoke-Command -ComputerName Server01,Server02 -ScriptBlock { Get-Service }', desc: 'Commande sur plusieurs serveurs' },
+                                { code: '$cred = Get-Credential\nInvoke-Command -ComputerName Server01 -Credential $cred -ScriptBlock { Get-Process }', desc: 'Avec credentials' },
+                                { code: 'Invoke-Command -ComputerName Server01 -FilePath C:\\Scripts\\deploy.ps1', desc: 'Exécuter un script local' }
+                            ],
+                            tips: ['Enable-PSRemoting sur le serveur cible pour activer le remoting'],
+                            warnings: ['WinRM doit être configuré sur les machines cibles']
+                        }
+                    },
+                    {
+                        cmd: 'winrm / WinRM',
+                        desc: 'Configuration Windows Remote Management',
+                        details: {
+                            explanation: 'Configurer WinRM pour permettre l\'administration à distance.',
+                            syntax: 'winrm quickconfig\nEnable-PSRemoting -Force',
+                            options: [
+                                { flag: 'quickconfig', desc: 'Configuration rapide' },
+                                { flag: 'get', desc: 'Afficher la configuration' },
+                                { flag: 'set', desc: 'Modifier la configuration' }
+                            ],
+                            examples: [
+                                { code: 'Enable-PSRemoting -Force', desc: 'Activer le remoting (PowerShell)' },
+                                { code: 'winrm quickconfig', desc: 'Configuration rapide WinRM' },
+                                { code: 'winrm get winrm/config', desc: 'Voir la configuration' },
+                                { code: 'Set-Item WSMan:\\localhost\\Client\\TrustedHosts -Value "Server01,Server02"', desc: 'Ajouter des hôtes de confiance' }
+                            ],
+                            tips: ['Sur un réseau de domaine, WinRM fonctionne automatiquement'],
+                            warnings: ['TrustedHosts * est un risque de sécurité']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-admin',
+                title: '🚀 Projet: Script d\'Administration',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Structure du script',
+                        desc: 'Template PowerShell professionnel',
+                        details: {
+                            explanation: 'Créer un script PowerShell avec structure professionnelle.',
+                            syntax: '#Requires -Version 5.1\n#Requires -RunAsAdministrator',
+                            options: [],
+                            examples: [
+                                { code: '#Requires -Version 5.1\n#Requires -RunAsAdministrator\n<#\n.SYNOPSIS\n    Script d\'administration système\n.DESCRIPTION\n    Effectue des tâches de maintenance et monitoring\n.PARAMETER Action\n    Action à effectuer: Check, Cleanup, Backup, Report\n.EXAMPLE\n    .\\admin-script.ps1 -Action Check\n#>\n\n[CmdletBinding()]\nparam(\n    [Parameter(Mandatory)]\n    [ValidateSet("Check", "Cleanup", "Backup", "Report")]\n    [string]$Action,\n    \n    [switch]$Verbose,\n    [switch]$WhatIf\n)\n\n# Configuration\n$ErrorActionPreference = "Stop"\n$ScriptName = $MyInvocation.MyCommand.Name\n$LogPath = "C:\\Logs\\$ScriptName.log"\n$Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"', desc: 'En-tête avec paramètres' }
+                            ],
+                            tips: ['#Requires garantit les prérequis avant exécution'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: Fonctions de logging',
+                        desc: 'Journalisation professionnelle',
+                        details: {
+                            explanation: 'Fonctions pour logger les actions avec horodatage et niveaux.',
+                            syntax: 'function Write-Log { }',
+                            options: [],
+                            examples: [
+                                { code: 'function Write-Log {\n    param(\n        [Parameter(Mandatory)]\n        [string]$Message,\n        [ValidateSet("INFO", "WARN", "ERROR")]\n        [string]$Level = "INFO"\n    )\n    \n    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"\n    $logEntry = "[$timestamp] [$Level] $Message"\n    \n    # Couleur selon le niveau\n    switch ($Level) {\n        "INFO"  { Write-Host $logEntry -ForegroundColor Green }\n        "WARN"  { Write-Host $logEntry -ForegroundColor Yellow }\n        "ERROR" { Write-Host $logEntry -ForegroundColor Red }\n    }\n    \n    # Écriture dans le fichier\n    Add-Content -Path $LogPath -Value $logEntry\n}\n\n# Raccourcis\nfunction Write-Info  { param($Msg) Write-Log $Msg "INFO" }\nfunction Write-Warn  { param($Msg) Write-Log $Msg "WARN" }\nfunction Write-Err   { param($Msg) Write-Log $Msg "ERROR" }', desc: 'Fonctions de log' }
+                            ],
+                            tips: ['Utilisez des couleurs pour distinguer les niveaux visuellement'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Checks système',
+                        desc: 'Vérifications de santé',
+                        details: {
+                            explanation: 'Fonctions pour vérifier l\'état du système.',
+                            syntax: 'function Test-SystemHealth { }',
+                            options: [],
+                            examples: [
+                                { code: 'function Test-SystemHealth {\n    Write-Info "=== Vérification système ===\"\n    $issues = @()\n    \n    # Check espace disque\n    Get-Volume | Where-Object { $_.DriveLetter } | ForEach-Object {\n        $freePercent = [math]::Round(($_.SizeRemaining / $_.Size) * 100, 1)\n        if ($freePercent -lt 10) {\n            $issues += "Disque $($_.DriveLetter): seulement $freePercent% libre"\n            Write-Warn "Disque $($_.DriveLetter): $freePercent% libre - CRITIQUE"\n        } else {\n            Write-Info "Disque $($_.DriveLetter): $freePercent% libre - OK"\n        }\n    }\n    \n    # Check mémoire\n    $os = Get-CimInstance Win32_OperatingSystem\n    $memUsed = [math]::Round((($os.TotalVisibleMemorySize - $os.FreePhysicalMemory) / $os.TotalVisibleMemorySize) * 100, 1)\n    if ($memUsed -gt 90) {\n        $issues += "Mémoire: $memUsed% utilisée"\n        Write-Warn "Mémoire: $memUsed% - ÉLEVÉE"\n    } else {\n        Write-Info "Mémoire: $memUsed% utilisée - OK"\n    }\n    \n    # Check services critiques\n    $criticalServices = @("wuauserv", "WinDefend", "EventLog")\n    foreach ($svc in $criticalServices) {\n        $service = Get-Service -Name $svc -ErrorAction SilentlyContinue\n        if ($service.Status -ne "Running") {\n            $issues += "Service $svc non démarré"\n            Write-Warn "Service $svc: $($service.Status)"\n        } else {\n            Write-Info "Service $svc: Running - OK"\n        }\n    }\n    \n    return $issues\n}', desc: 'Fonction de health check' }
+                            ],
+                            tips: ['Retournez un tableau d\'issues pour un traitement ultérieur'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Nettoyage système',
+                        desc: 'Maintenance automatique',
+                        details: {
+                            explanation: 'Nettoyer les fichiers temporaires et logs anciens.',
+                            syntax: 'function Invoke-Cleanup { }',
+                            options: [],
+                            examples: [
+                                { code: 'function Invoke-Cleanup {\n    param([switch]$WhatIf)\n    \n    Write-Info "=== Nettoyage système ===\"\n    $totalFreed = 0\n    \n    # Dossiers à nettoyer\n    $cleanupPaths = @(\n        "$env:TEMP",\n        "C:\\Windows\\Temp",\n        "C:\\Windows\\SoftwareDistribution\\Download"\n    )\n    \n    foreach ($path in $cleanupPaths) {\n        if (Test-Path $path) {\n            $files = Get-ChildItem $path -Recurse -Force -ErrorAction SilentlyContinue | \n                     Where-Object { !$_.PSIsContainer -and $_.LastWriteTime -lt (Get-Date).AddDays(-7) }\n            \n            $size = ($files | Measure-Object -Property Length -Sum).Sum / 1MB\n            \n            if ($WhatIf) {\n                Write-Info "[WhatIf] Supprimerait $([math]::Round($size, 2)) MB de $path"\n            } else {\n                $files | Remove-Item -Force -ErrorAction SilentlyContinue\n                Write-Info "Nettoyé $([math]::Round($size, 2)) MB de $path"\n                $totalFreed += $size\n            }\n        }\n    }\n    \n    # Vider la corbeille\n    if (!$WhatIf) {\n        Clear-RecycleBin -Force -ErrorAction SilentlyContinue\n        Write-Info "Corbeille vidée"\n    }\n    \n    Write-Info "Total libéré: $([math]::Round($totalFreed, 2)) MB"\n    return $totalFreed\n}', desc: 'Fonction de nettoyage' }
+                            ],
+                            tips: ['Implémentez toujours -WhatIf pour tester sans risque'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Backup automatisé',
+                        desc: 'Sauvegarde des données importantes',
+                        details: {
+                            explanation: 'Sauvegarder des dossiers avec compression et rotation.',
+                            syntax: 'function Invoke-Backup { }',
+                            options: [],
+                            examples: [
+                                { code: 'function Invoke-Backup {\n    param(\n        [string[]]$Paths = @("C:\\Data", "C:\\Config"),\n        [string]$Destination = "D:\\Backups",\n        [int]$RetentionDays = 7\n    )\n    \n    Write-Info "=== Sauvegarde ===\"\n    $date = Get-Date -Format "yyyyMMdd_HHmmss"\n    $backupName = "backup_$date.zip"\n    $backupPath = Join-Path $Destination $backupName\n    \n    # Créer le dossier destination\n    if (!(Test-Path $Destination)) {\n        New-Item -ItemType Directory -Path $Destination -Force | Out-Null\n    }\n    \n    # Créer l\'archive\n    try {\n        $filesToBackup = $Paths | Where-Object { Test-Path $_ }\n        if ($filesToBackup.Count -eq 0) {\n            Write-Warn "Aucun chemin valide à sauvegarder"\n            return\n        }\n        \n        Compress-Archive -Path $filesToBackup -DestinationPath $backupPath -CompressionLevel Optimal\n        $size = (Get-Item $backupPath).Length / 1MB\n        Write-Info "Backup créé: $backupPath ($([math]::Round($size, 2)) MB)"\n    } catch {\n        Write-Err "Échec du backup: $_"\n        return\n    }\n    \n    # Rotation des anciens backups\n    Get-ChildItem $Destination -Filter "backup_*.zip" | \n        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-$RetentionDays) } | \n        ForEach-Object {\n            Remove-Item $_.FullName -Force\n            Write-Info "Ancien backup supprimé: $($_.Name)"\n        }\n}', desc: 'Fonction de backup' }
+                            ],
+                            tips: ['Compress-Archive est intégré depuis PowerShell 5.0'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Rapport HTML',
+                        desc: 'Générer un rapport visuel',
+                        details: {
+                            explanation: 'Créer un rapport HTML avec les informations système.',
+                            syntax: 'function New-SystemReport { }',
+                            options: [],
+                            examples: [
+                                { code: 'function New-SystemReport {\n    param([string]$OutputPath = "C:\\Reports\\report_$(Get-Date -Format yyyyMMdd).html")\n    \n    Write-Info "=== Génération du rapport ===\"\n    \n    $html = @"\n<!DOCTYPE html>\n<html>\n<head>\n    <title>Rapport Système - $env:COMPUTERNAME</title>\n    <style>\n        body { font-family: Arial; margin: 20px; }\n        h1 { color: #0066cc; }\n        table { border-collapse: collapse; width: 100%; margin: 20px 0; }\n        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }\n        th { background-color: #0066cc; color: white; }\n        tr:nth-child(even) { background-color: #f2f2f2; }\n        .ok { color: green; } .warn { color: orange; } .error { color: red; }\n    </style>\n</head>\n<body>\n    <h1>Rapport Système - $env:COMPUTERNAME</h1>\n    <p>Généré le: $(Get-Date -Format "dd/MM/yyyy HH:mm")</p>\n    \n    <h2>Espace Disque</h2>\n    <table>\n        <tr><th>Lecteur</th><th>Taille</th><th>Libre</th><th>%</th></tr>\n"@\n    \n    Get-Volume | Where-Object { $_.DriveLetter } | ForEach-Object {\n        $pct = [math]::Round(($_.SizeRemaining / $_.Size) * 100, 1)\n        $class = if ($pct -lt 10) { "error" } elseif ($pct -lt 20) { "warn" } else { "ok" }\n        $html += "        <tr><td>$($_.DriveLetter):</td><td>$([math]::Round($_.Size/1GB,1)) GB</td><td>$([math]::Round($_.SizeRemaining/1GB,1)) GB</td><td class=\'$class\'>$pct%</td></tr>`n"\n    }\n    \n    $html += "    </table></body></html>"\n    \n    # Créer le dossier si nécessaire\n    $dir = Split-Path $OutputPath\n    if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }\n    \n    $html | Out-File -FilePath $OutputPath -Encoding UTF8\n    Write-Info "Rapport généré: $OutputPath"\n    \n    # Ouvrir le rapport\n    Start-Process $OutputPath\n}', desc: 'Génération rapport HTML' }
+                            ],
+                            tips: ['Utilisez des here-strings @"..."@ pour le HTML multiligne'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Point d\'entrée',
+                        desc: 'Orchestration du script',
+                        details: {
+                            explanation: 'Fonction main qui orchestre l\'exécution selon l\'action demandée.',
+                            syntax: 'switch ($Action) { }',
+                            options: [],
+                            examples: [
+                                { code: '# Point d\'entrée principal\nWrite-Info "========================================"\nWrite-Info "  Script d\'Administration - $Action"\nWrite-Info "  Exécuté par: $env:USERNAME"\nWrite-Info "  Date: $Date"\nWrite-Info "========================================"\n\ntry {\n    switch ($Action) {\n        "Check" {\n            $issues = Test-SystemHealth\n            if ($issues.Count -eq 0) {\n                Write-Info "Aucun problème détecté!"\n            } else {\n                Write-Warn "$($issues.Count) problème(s) détecté(s)"\n                $issues | ForEach-Object { Write-Warn "  - $_" }\n            }\n        }\n        "Cleanup" {\n            $freed = Invoke-Cleanup -WhatIf:$WhatIf\n            Write-Info "Espace libéré: $freed MB"\n        }\n        "Backup" {\n            Invoke-Backup\n        }\n        "Report" {\n            New-SystemReport\n        }\n    }\n    \n    Write-Info "========================================"\n    Write-Info "  Script terminé avec succès"\n    Write-Info "========================================"\n    exit 0\n    \n} catch {\n    Write-Err "Erreur fatale: $_"\n    Write-Err $_.ScriptStackTrace\n    exit 1\n}', desc: 'Main et orchestration' },
+                                { code: '# Exemple d\'utilisation:\n# .\\admin-script.ps1 -Action Check\n# .\\admin-script.ps1 -Action Cleanup -WhatIf\n# .\\admin-script.ps1 -Action Backup\n# .\\admin-script.ps1 -Action Report\n\n# Tâche planifiée:\n# $action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-ExecutionPolicy Bypass -File C:\\Scripts\\admin-script.ps1 -Action Check"\n# $trigger = New-ScheduledTaskTrigger -Daily -At 6am\n# Register-ScheduledTask -TaskName "DailyHealthCheck" -Action $action -Trigger $trigger -RunLevel Highest', desc: 'Utilisation et planification' }
+                            ],
+                            tips: ['Retournez des codes de sortie appropriés (0=succès, 1=erreur)'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

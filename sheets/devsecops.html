@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire DevSecOps : sécurité CI/CD, scanning de vulnérabilités, secrets management et hardening.">
+    <title>DevSecOps - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-emerald-500/20 mb-4 icon-glow">
+                    <i class="fas fa-shield-alt text-3xl text-emerald-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">DevSecOps</h1>
+                <p class="text-slate-400">Sécurité CI/CD, scanning, secrets et hardening</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'sast',
+                title: 'SAST (Analyse Statique)',
+                icon: 'fa-search-plus',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Bandit (Python)',
+                        desc: 'Scanner de sécurité Python',
+                        details: {
+                            explanation: 'Bandit analyse le code Python pour détecter les failles de sécurité courantes (SQL injection, hardcoded passwords, etc.).',
+                            syntax: 'bandit -r <directory> [options]',
+                            options: [
+                                { flag: '-r', desc: 'Analyse récursive du répertoire' },
+                                { flag: '-f json/html/csv', desc: 'Format de sortie' },
+                                { flag: '-ll', desc: 'Niveau de sévérité minimum (LOW, MEDIUM, HIGH)' },
+                                { flag: '-s B101,B102', desc: 'Ignorer certains tests' },
+                                { flag: '--ini .bandit', desc: 'Fichier de configuration' }
+                            ],
+                            examples: [
+                                { code: 'pip install bandit\nbandit -r ./src -f json -o report.json', desc: 'Installation et scan avec rapport JSON' },
+                                { code: 'bandit -r . -ll -ii', desc: 'Scan avec sévérité LOW+ et confiance LOW+' },
+                                { code: '# CI/CD\nbandit -r ./app -f json -o bandit-report.json || exit 1', desc: 'Intégration CI (fail on issues)' }
+                            ],
+                            tips: ['Intégrez Bandit dans votre pre-commit hook ou pipeline CI'],
+                            warnings: ['Certains faux positifs possibles - utilisez # nosec pour les ignorer']
+                        }
+                    },
+                    {
+                        cmd: 'Semgrep',
+                        desc: 'Analyse multi-langage',
+                        details: {
+                            explanation: 'Outil SAST universel supportant 30+ langages avec des règles personnalisables.',
+                            syntax: 'semgrep --config <rules> <path>',
+                            options: [
+                                { flag: '--config auto', desc: 'Détection automatique des règles' },
+                                { flag: '--config p/security-audit', desc: 'Règles de sécurité prédéfinies' },
+                                { flag: '--config p/owasp-top-ten', desc: 'Règles OWASP Top 10' },
+                                { flag: '--json', desc: 'Sortie JSON' },
+                                { flag: '--sarif', desc: 'Format SARIF (GitHub Security)' }
+                            ],
+                            examples: [
+                                { code: 'pip install semgrep\nsemgrep --config auto .', desc: 'Scan automatique' },
+                                { code: 'semgrep --config p/security-audit --config p/secrets .', desc: 'Audit sécurité + secrets' },
+                                { code: '# GitHub Actions\nsemgrep scan --sarif --output=semgrep.sarif', desc: 'Pour GitHub Security' }
+                            ],
+                            tips: ['Les rulesets p/ sont maintenus par la communauté et Semgrep'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ESLint Security',
+                        desc: 'Linting sécurité JavaScript',
+                        details: {
+                            explanation: 'Plugins ESLint pour détecter les vulnérabilités dans le code JavaScript/TypeScript.',
+                            syntax: 'npm install eslint-plugin-security',
+                            options: [
+                                { flag: 'eslint-plugin-security', desc: 'Règles de sécurité générales' },
+                                { flag: 'eslint-plugin-no-secrets', desc: 'Détection de secrets hardcodés' },
+                                { flag: 'eslint-plugin-xss', desc: 'Détection XSS' }
+                            ],
+                            examples: [
+                                { code: 'npm install -D eslint-plugin-security\n// .eslintrc.json\n{\n  "plugins": ["security"],\n  "extends": ["plugin:security/recommended"]\n}', desc: 'Configuration ESLint' },
+                                { code: '// Détecte:\neval(userInput) // security/detect-eval-with-expression\nnew Function(code) // security/detect-new-function', desc: 'Exemples de détection' }
+                            ],
+                            tips: ['Combinez avec TypeScript pour une meilleure détection'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'sca',
+                title: 'SCA (Dépendances)',
+                icon: 'fa-cubes',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'npm audit / pip-audit',
+                        desc: 'Audit des dépendances',
+                        details: {
+                            explanation: 'Analyse les dépendances pour détecter les vulnérabilités connues (CVE).',
+                            syntax: 'npm audit [options]\npip-audit [options]',
+                            options: [
+                                { flag: 'npm audit', desc: 'Audit des packages npm' },
+                                { flag: 'npm audit fix', desc: 'Corrige automatiquement si possible' },
+                                { flag: 'npm audit --production', desc: 'Seulement les dépendances de prod' },
+                                { flag: 'pip-audit', desc: 'Audit des packages Python' },
+                                { flag: 'pip-audit -r requirements.txt', desc: 'Depuis requirements.txt' }
+                            ],
+                            examples: [
+                                { code: 'npm audit\n# Si vulnérabilités trouvées:\nnpm audit fix', desc: 'Audit et fix npm' },
+                                { code: 'pip install pip-audit\npip-audit', desc: 'Audit Python' },
+                                { code: '# CI/CD - fail si vulnérabilités critiques\nnpm audit --audit-level=critical', desc: 'Intégration CI' }
+                            ],
+                            tips: ['Exécutez régulièrement et avant chaque déploiement'],
+                            warnings: ['npm audit fix peut introduire des breaking changes']
+                        }
+                    },
+                    {
+                        cmd: 'Trivy',
+                        desc: 'Scanner universel de vulnérabilités',
+                        details: {
+                            explanation: 'Scanner open-source pour conteneurs, fichiers système, IaC et dépendances.',
+                            syntax: 'trivy <target> [options]',
+                            options: [
+                                { flag: 'trivy image', desc: 'Scanner une image Docker' },
+                                { flag: 'trivy fs', desc: 'Scanner le système de fichiers' },
+                                { flag: 'trivy config', desc: 'Scanner les fichiers IaC' },
+                                { flag: '--severity HIGH,CRITICAL', desc: 'Filtrer par sévérité' },
+                                { flag: '--exit-code 1', desc: 'Exit code si vulnérabilités' }
+                            ],
+                            examples: [
+                                { code: 'trivy image python:3.11', desc: 'Scanner une image' },
+                                { code: 'trivy fs --scanners vuln,secret .', desc: 'Scanner code + secrets' },
+                                { code: 'trivy config ./terraform', desc: 'Scanner Terraform/K8s' },
+                                { code: '# CI/CD\ntrivy image --exit-code 1 --severity HIGH,CRITICAL myapp:latest', desc: 'Pipeline avec fail' }
+                            ],
+                            tips: ['Trivy peut tout scanner : images, repos git, IaC, SBOM'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Snyk',
+                        desc: 'Plateforme de sécurité développeur',
+                        details: {
+                            explanation: 'Outil commercial (free tier) pour SCA, SAST et container security.',
+                            syntax: 'snyk test\nsnyk monitor',
+                            options: [
+                                { flag: 'snyk test', desc: 'Test local des vulnérabilités' },
+                                { flag: 'snyk monitor', desc: 'Surveille en continu' },
+                                { flag: 'snyk container test', desc: 'Scanner un conteneur' },
+                                { flag: 'snyk code test', desc: 'SAST du code source' }
+                            ],
+                            examples: [
+                                { code: 'npm install -g snyk\nsnyk auth\nsnyk test', desc: 'Setup et test' },
+                                { code: 'snyk container test node:18-alpine --file=Dockerfile', desc: 'Test conteneur' },
+                                { code: 'snyk code test --sarif > snyk.sarif', desc: 'SAST avec sortie SARIF' }
+                            ],
+                            tips: ['Intégration native avec GitHub, GitLab, Bitbucket'],
+                            warnings: ['Free tier limité en nombre de tests']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'secrets',
+                title: 'Secrets Management',
+                icon: 'fa-key',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'git-secrets',
+                        desc: 'Empêcher les commits de secrets',
+                        details: {
+                            explanation: 'Hook Git qui empêche de commiter des secrets (AWS keys, passwords, etc.).',
+                            syntax: 'git secrets --install\ngit secrets --scan',
+                            options: [
+                                { flag: '--install', desc: 'Installe les hooks dans le repo' },
+                                { flag: '--register-aws', desc: 'Ajoute les patterns AWS' },
+                                { flag: '--add <pattern>', desc: 'Ajoute un pattern personnalisé' },
+                                { flag: '--scan', desc: 'Scanne l\'historique' }
+                            ],
+                            examples: [
+                                { code: 'brew install git-secrets  # ou apt-get\ngit secrets --install\ngit secrets --register-aws', desc: 'Installation et setup AWS' },
+                                { code: 'git secrets --add "password\\s*=\\s*.+"', desc: 'Pattern personnalisé' },
+                                { code: 'git secrets --scan-history', desc: 'Scanner tout l\'historique' }
+                            ],
+                            tips: ['Installez globalement : git secrets --install --global'],
+                            warnings: ['Ne détecte que les patterns connus - pas de détection ML']
+                        }
+                    },
+                    {
+                        cmd: 'Gitleaks',
+                        desc: 'Détection de secrets dans Git',
+                        details: {
+                            explanation: 'Outil moderne de détection de secrets avec support regex et entropie.',
+                            syntax: 'gitleaks detect [options]',
+                            options: [
+                                { flag: 'detect', desc: 'Détecte les secrets' },
+                                { flag: '--source .', desc: 'Répertoire à scanner' },
+                                { flag: '--verbose', desc: 'Affiche les détails' },
+                                { flag: '--report-path', desc: 'Chemin du rapport' },
+                                { flag: '--baseline-path', desc: 'Ignorer les faux positifs connus' }
+                            ],
+                            examples: [
+                                { code: 'gitleaks detect --source . --verbose', desc: 'Scan du répertoire courant' },
+                                { code: 'gitleaks detect --source . --report-path gitleaks-report.json', desc: 'Avec rapport JSON' },
+                                { code: '# Pre-commit hook\ngitleaks protect --staged', desc: 'Hook pre-commit' }
+                            ],
+                            tips: ['Utilisez gitleaks protect en pre-commit hook'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'HashiCorp Vault',
+                        desc: 'Gestionnaire de secrets',
+                        details: {
+                            explanation: 'Solution enterprise pour stocker et accéder aux secrets de manière sécurisée.',
+                            syntax: 'vault kv put/get <path> <key>=<value>',
+                            options: [
+                                { flag: 'vault kv put', desc: 'Stocker un secret' },
+                                { flag: 'vault kv get', desc: 'Récupérer un secret' },
+                                { flag: 'vault kv list', desc: 'Lister les secrets' },
+                                { flag: 'vault token', desc: 'Gérer les tokens d\'accès' }
+                            ],
+                            examples: [
+                                { code: 'export VAULT_ADDR="http://127.0.0.1:8200"\nvault login\nvault kv put secret/myapp db_password="supersecret"', desc: 'Stocker un secret' },
+                                { code: 'vault kv get -field=db_password secret/myapp', desc: 'Récupérer une valeur' },
+                                { code: '# En Python\nimport hvac\nclient = hvac.Client(url="...")\nsecret = client.secrets.kv.read_secret_version(path="myapp")', desc: 'Client Python' }
+                            ],
+                            tips: ['Utilisez des dynamic secrets pour les bases de données'],
+                            warnings: ['Nécessite une infrastructure dédiée pour la production']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'dast',
+                title: 'DAST (Test Dynamique)',
+                icon: 'fa-bug',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'OWASP ZAP',
+                        desc: 'Scanner de vulnérabilités web',
+                        details: {
+                            explanation: 'Proxy et scanner de sécurité web open-source pour trouver les vulnérabilités.',
+                            syntax: 'zap-cli quick-scan <url>\nzap.sh -cmd -quickurl <url>',
+                            options: [
+                                { flag: 'quick-scan', desc: 'Scan rapide automatique' },
+                                { flag: 'active-scan', desc: 'Scan actif (plus intrusif)' },
+                                { flag: '-spider', desc: 'Découverte des URLs' },
+                                { flag: '-ajax-spider', desc: 'Spider pour SPA' }
+                            ],
+                            examples: [
+                                { code: 'docker run -t owasp/zap2docker-stable zap-baseline.py -t https://example.com', desc: 'Scan baseline Docker' },
+                                { code: 'zap-cli quick-scan --self-contained --start-options "-config api.disablekey=true" https://myapp.local', desc: 'Quick scan CLI' },
+                                { code: '# GitHub Actions\n- name: OWASP ZAP Scan\n  uses: zaproxy/action-baseline@v0.7.0\n  with:\n    target: ${{ env.APP_URL }}', desc: 'GitHub Action' }
+                            ],
+                            tips: ['Utilisez le mode baseline en CI, full scan manuellement'],
+                            warnings: ['Ne lancez JAMAIS sur des systèmes de production sans autorisation']
+                        }
+                    },
+                    {
+                        cmd: 'Nuclei',
+                        desc: 'Scanner de vulnérabilités basé sur templates',
+                        details: {
+                            explanation: 'Scanner rapide et extensible avec des templates pour diverses vulnérabilités.',
+                            syntax: 'nuclei -u <url> -t <templates>',
+                            options: [
+                                { flag: '-u <url>', desc: 'URL cible' },
+                                { flag: '-l <file>', desc: 'Liste d\'URLs' },
+                                { flag: '-t <templates>', desc: 'Templates à utiliser' },
+                                { flag: '-severity critical,high', desc: 'Filtrer par sévérité' },
+                                { flag: '-rate-limit 100', desc: 'Limiter les requêtes/sec' }
+                            ],
+                            examples: [
+                                { code: 'nuclei -u https://example.com -t cves/', desc: 'Scan des CVE connues' },
+                                { code: 'nuclei -u https://example.com -t exposures/ -t misconfiguration/', desc: 'Expositions et misconfig' },
+                                { code: 'nuclei -l urls.txt -t technologies/ -o report.txt', desc: 'Scan de liste avec rapport' }
+                            ],
+                            tips: ['Mettez à jour régulièrement les templates : nuclei -update-templates'],
+                            warnings: ['Certains templates sont intrusifs - testez en environnement contrôlé']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'container',
+                title: 'Container Security',
+                icon: 'fa-box',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Docker Scout',
+                        desc: 'Analyse de sécurité Docker native',
+                        details: {
+                            explanation: 'Outil intégré à Docker pour analyser les vulnérabilités des images.',
+                            syntax: 'docker scout cves <image>\ndocker scout quickview <image>',
+                            options: [
+                                { flag: 'cves', desc: 'Liste les CVE de l\'image' },
+                                { flag: 'quickview', desc: 'Vue résumée des vulnérabilités' },
+                                { flag: 'recommendations', desc: 'Suggestions de remédiation' },
+                                { flag: '--only-severity critical,high', desc: 'Filtrer par sévérité' }
+                            ],
+                            examples: [
+                                { code: 'docker scout quickview python:3.11', desc: 'Vue rapide' },
+                                { code: 'docker scout cves --only-fixed myapp:latest', desc: 'CVE avec fix disponible' },
+                                { code: 'docker scout recommendations myapp:latest', desc: 'Recommandations' }
+                            ],
+                            tips: ['Scout est inclus dans Docker Desktop'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Dockerfile Best Practices',
+                        desc: 'Sécuriser les images',
+                        details: {
+                            explanation: 'Bonnes pratiques pour créer des images Docker sécurisées.',
+                            syntax: 'Directives Dockerfile sécurisées',
+                            options: [
+                                { flag: 'USER non-root', desc: 'Ne pas exécuter en root' },
+                                { flag: 'FROM slim/alpine', desc: 'Images minimales' },
+                                { flag: 'COPY --chown', desc: 'Permissions explicites' },
+                                { flag: 'Multi-stage', desc: 'Réduire la surface d\'attaque' }
+                            ],
+                            examples: [
+                                { code: '# Image minimale\nFROM python:3.11-slim\n\n# Utilisateur non-root\nRUN useradd -m appuser\nUSER appuser\n\n# Copie avec permissions\nCOPY --chown=appuser:appuser . /app', desc: 'Dockerfile sécurisé basique' },
+                                { code: '# Multi-stage build\nFROM node:18 AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM nginx:alpine\nCOPY --from=builder /app/dist /usr/share/nginx/html', desc: 'Multi-stage pour réduire la taille' }
+                            ],
+                            tips: ['Utilisez hadolint pour valider vos Dockerfiles'],
+                            warnings: ['Évitez les images latest - utilisez des tags spécifiques']
+                        }
+                    },
+                    {
+                        cmd: 'Falco',
+                        desc: 'Runtime security',
+                        details: {
+                            explanation: 'Détection d\'intrusion en temps réel pour conteneurs et Kubernetes.',
+                            syntax: 'falco -r <rules> -o <output>',
+                            options: [
+                                { flag: '-r <rules.yaml>', desc: 'Fichier de règles' },
+                                { flag: '-o json_output=true', desc: 'Sortie JSON' },
+                                { flag: '-k <kubeconfig>', desc: 'Audit Kubernetes' }
+                            ],
+                            examples: [
+                                { code: 'helm install falco falcosecurity/falco --namespace falco', desc: 'Installation Kubernetes' },
+                                { code: '# Règle personnalisée\n- rule: Detect shell in container\n  condition: spawned_process and container and proc.name = bash\n  output: Shell spawned (user=%user.name command=%proc.cmdline)\n  priority: WARNING', desc: 'Règle custom' }
+                            ],
+                            tips: ['Falco détecte les comportements anormaux en runtime'],
+                            warnings: ['Impact performance possible - ajustez les règles']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'cicd',
+                title: 'CI/CD Security',
+                icon: 'fa-cogs',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'GitHub Actions Security',
+                        desc: 'Sécuriser les workflows',
+                        details: {
+                            explanation: 'Bonnes pratiques de sécurité pour les pipelines GitHub Actions.',
+                            syntax: 'Configurations sécurisées dans .github/workflows/',
+                            options: [
+                                { flag: 'permissions: read-all', desc: 'Principe du moindre privilège' },
+                                { flag: 'secrets.*', desc: 'Variables chiffrées' },
+                                { flag: '@sha', desc: 'Pinning des actions par SHA' }
+                            ],
+                            examples: [
+                                { code: 'name: Secure Pipeline\non: [push]\npermissions:\n  contents: read\n  security-events: write\njobs:\n  security:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: github/codeql-action/analyze@v2', desc: 'Workflow sécurisé' },
+                                { code: '# Pin actions par SHA\n- uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608  # v4.1.0', desc: 'Pinning SHA' },
+                                { code: '# Secrets\nenv:\n  API_KEY: ${{ secrets.API_KEY }}\n# Jamais: echo ${{ secrets.API_KEY }}', desc: 'Utilisation des secrets' }
+                            ],
+                            tips: ['Utilisez GITHUB_TOKEN plutôt que des PAT quand possible'],
+                            warnings: ['Ne jamais logger les secrets ou les mettre dans les outputs']
+                        }
+                    },
+                    {
+                        cmd: 'OIDC Federation',
+                        desc: 'Auth sans secrets longue durée',
+                        details: {
+                            explanation: 'Utilisez OIDC pour obtenir des credentials temporaires au lieu de secrets statiques.',
+                            syntax: 'permissions:\n  id-token: write',
+                            options: [
+                                { flag: 'AWS', desc: 'aws-actions/configure-aws-credentials avec role-to-assume' },
+                                { flag: 'GCP', desc: 'google-github-actions/auth avec workload_identity_provider' },
+                                { flag: 'Azure', desc: 'azure/login avec client-id et federated credentials' }
+                            ],
+                            examples: [
+                                { code: 'permissions:\n  id-token: write\n  contents: read\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: aws-actions/configure-aws-credentials@v4\n        with:\n          role-to-assume: arn:aws:iam::123456789:role/GitHubActionsRole\n          aws-region: eu-west-1', desc: 'OIDC vers AWS' },
+                                { code: '- uses: google-github-actions/auth@v2\n  with:\n    workload_identity_provider: projects/123/locations/global/workloadIdentityPools/github/providers/github\n    service_account: deploy@project.iam.gserviceaccount.com', desc: 'OIDC vers GCP' }
+                            ],
+                            tips: ['OIDC élimine le besoin de stocker des credentials cloud dans GitHub'],
+                            warnings: ['Configurez correctement les conditions sur le trust policy']
+                        }
+                    },
+                    {
+                        cmd: 'Security Pipeline',
+                        desc: 'Pipeline DevSecOps complet',
+                        details: {
+                            explanation: 'Structure d\'un pipeline CI/CD avec toutes les étapes de sécurité.',
+                            syntax: 'SAST → SCA → Build → DAST → Deploy',
+                            options: [
+                                { flag: '1. SAST', desc: 'Analyse statique du code' },
+                                { flag: '2. SCA', desc: 'Audit des dépendances' },
+                                { flag: '3. Secrets scan', desc: 'Détection de secrets' },
+                                { flag: '4. Container scan', desc: 'Vulnérabilités image' },
+                                { flag: '5. DAST', desc: 'Tests dynamiques (staging)' }
+                            ],
+                            examples: [
+                                { code: 'jobs:\n  sast:\n    steps:\n      - uses: returntocorp/semgrep-action@v1\n  sca:\n    steps:\n      - run: npm audit --audit-level=high\n  secrets:\n    steps:\n      - uses: gitleaks/gitleaks-action@v2\n  build:\n    needs: [sast, sca, secrets]\n    steps:\n      - run: docker build -t app .\n      - run: trivy image --exit-code 1 app\n  dast:\n    needs: [build]\n    steps:\n      - uses: zaproxy/action-baseline@v0.7.0', desc: 'Pipeline complet' }
+                            ],
+                            tips: ['Exécutez SAST/SCA/Secrets en parallèle pour gagner du temps'],
+                            warnings: ['DAST nécessite un environnement de test déployé']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'iac',
+                title: 'IaC Security',
+                icon: 'fa-server',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Checkov',
+                        desc: 'Scanner IaC multi-framework',
+                        details: {
+                            explanation: 'Analyse Terraform, CloudFormation, Kubernetes, Dockerfile et ARM pour détecter les misconfigurations.',
+                            syntax: 'checkov -d <directory> [options]',
+                            options: [
+                                { flag: '-d <dir>', desc: 'Répertoire à scanner' },
+                                { flag: '-f <file>', desc: 'Fichier spécifique' },
+                                { flag: '--framework terraform', desc: 'Framework spécifique' },
+                                { flag: '--check CKV_AWS_1,CKV_AWS_2', desc: 'Checks spécifiques' },
+                                { flag: '--skip-check', desc: 'Ignorer certains checks' },
+                                { flag: '-o json', desc: 'Format de sortie' }
+                            ],
+                            examples: [
+                                { code: 'pip install checkov\ncheckov -d ./terraform', desc: 'Scan Terraform' },
+                                { code: 'checkov -d . --framework kubernetes --output json', desc: 'Scan K8s manifests' },
+                                { code: '# CI/CD\ncheckov -d ./infra --soft-fail --output junitxml > checkov.xml', desc: 'CI avec rapport JUnit' },
+                                { code: '# Ignorer inline\n# checkov:skip=CKV_AWS_18:Not applicable for dev env', desc: 'Skip inline' }
+                            ],
+                            tips: ['Checkov supporte 1000+ règles prédéfinies'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'tfsec',
+                        desc: 'Scanner sécurité Terraform',
+                        details: {
+                            explanation: 'Analyse spécialisée pour Terraform avec détection des secrets et misconfigurations.',
+                            syntax: 'tfsec <path> [options]',
+                            options: [
+                                { flag: '--format json', desc: 'Sortie JSON' },
+                                { flag: '--soft-fail', desc: 'Exit 0 même si issues' },
+                                { flag: '--exclude-downloaded-modules', desc: 'Ignorer les modules téléchargés' },
+                                { flag: '--minimum-severity CRITICAL', desc: 'Seuil de sévérité' }
+                            ],
+                            examples: [
+                                { code: 'brew install tfsec  # ou go install\ntfsec ./terraform', desc: 'Scan basique' },
+                                { code: 'tfsec --format sarif --out tfsec.sarif ./terraform', desc: 'SARIF pour GitHub' },
+                                { code: '# GitHub Actions\n- name: tfsec\n  uses: aquasecurity/tfsec-action@v1.0.0\n  with:\n    soft_fail: true', desc: 'GitHub Action' }
+                            ],
+                            tips: ['tfsec est maintenant intégré dans Trivy'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Terraform Best Practices',
+                        desc: 'Sécuriser l\'infrastructure as code',
+                        details: {
+                            explanation: 'Bonnes pratiques pour écrire du Terraform sécurisé.',
+                            syntax: 'Patterns sécurisés Terraform',
+                            options: [
+                                { flag: 'Variables sensibles', desc: 'sensitive = true' },
+                                { flag: 'State chiffré', desc: 'Backend avec encryption' },
+                                { flag: 'Least privilege', desc: 'IAM minimales' },
+                                { flag: 'Tagging', desc: 'Traçabilité des ressources' }
+                            ],
+                            examples: [
+                                { code: '# Variables sensibles\nvariable "db_password" {\n  type      = string\n  sensitive = true  # Masqué dans les logs\n}\n\n# Ne jamais hardcoder\nresource "aws_db_instance" "db" {\n  password = var.db_password  # Via TF_VAR_ ou secrets manager\n}', desc: 'Variables sensibles' },
+                                { code: '# Backend sécurisé (S3)\nterraform {\n  backend "s3" {\n    bucket         = "terraform-state-secure"\n    key            = "prod/terraform.tfstate"\n    region         = "eu-west-1"\n    encrypt        = true\n    dynamodb_table = "terraform-locks"\n  }\n}', desc: 'State chiffré avec lock' },
+                                { code: '# Encryption par défaut\nresource "aws_s3_bucket" "data" {\n  bucket = "my-data-bucket"\n}\n\nresource "aws_s3_bucket_server_side_encryption_configuration" "data" {\n  bucket = aws_s3_bucket.data.id\n  rule {\n    apply_server_side_encryption_by_default {\n      sse_algorithm = "aws:kms"\n    }\n  }\n}', desc: 'S3 chiffré' }
+                            ],
+                            tips: ['Utilisez Terraform Cloud ou Spacelift pour la gestion centralisée'],
+                            warnings: ['Ne commitez JAMAIS terraform.tfstate ou .tfvars avec des secrets']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'k8s-security',
+                title: 'Kubernetes Security',
+                icon: 'fa-dharmachakra',
+                color: 'border-l-4 border-sky-500',
+                commands: [
+                    {
+                        cmd: 'kube-bench',
+                        desc: 'Audit CIS Benchmark',
+                        details: {
+                            explanation: 'Vérifie la conformité du cluster Kubernetes aux benchmarks CIS.',
+                            syntax: 'kube-bench run [options]',
+                            options: [
+                                { flag: 'run', desc: 'Exécuter l\'audit' },
+                                { flag: '--targets master,node', desc: 'Composants à auditer' },
+                                { flag: '--json', desc: 'Sortie JSON' },
+                                { flag: '--benchmark cis-1.6', desc: 'Version du benchmark' }
+                            ],
+                            examples: [
+                                { code: '# Run as Job in cluster\nkubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/job.yaml\nkubectl logs job/kube-bench', desc: 'Run via Job' },
+                                { code: '# Run locally on node\ndocker run --rm -v /etc:/etc:ro -v /var:/var:ro aquasec/kube-bench:latest', desc: 'Run via Docker' },
+                                { code: '# Specific checks\nkube-bench run --targets master --check 1.2.1,1.2.2', desc: 'Checks spécifiques' }
+                            ],
+                            tips: ['Exécutez régulièrement et après chaque upgrade de cluster'],
+                            warnings: ['Certains checks nécessitent un accès root au node']
+                        }
+                    },
+                    {
+                        cmd: 'kubeaudit',
+                        desc: 'Audit des manifests et cluster',
+                        details: {
+                            explanation: 'Détecte les configurations dangereuses dans les workloads Kubernetes.',
+                            syntax: 'kubeaudit all [options]',
+                            options: [
+                                { flag: 'all', desc: 'Tous les audits' },
+                                { flag: '-f manifest.yaml', desc: 'Auditer un fichier' },
+                                { flag: '-c', desc: 'Mode cluster (kubectl)' },
+                                { flag: '--json', desc: 'Sortie JSON' }
+                            ],
+                            examples: [
+                                { code: '# Audit fichier manifest\nkubeaudit all -f deployment.yaml', desc: 'Audit manifest' },
+                                { code: '# Audit cluster entier\nkubeaudit all -c', desc: 'Audit cluster' },
+                                { code: '# Checks spécifiques\nkubeaudit privileged -c\nkubeaudit rootfs -c\nkubeaudit nonroot -c', desc: 'Checks individuels' }
+                            ],
+                            tips: ['Intégrez dans votre pipeline de validation des manifests'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Pod Security Standards',
+                        desc: 'Politiques de sécurité natives K8s',
+                        details: {
+                            explanation: 'Les Pod Security Standards (PSS) remplacent PodSecurityPolicy depuis K8s 1.25.',
+                            syntax: 'Labels sur namespace: pod-security.kubernetes.io/*',
+                            options: [
+                                { flag: 'privileged', desc: 'Pas de restrictions (legacy)' },
+                                { flag: 'baseline', desc: 'Minimalement restrictif' },
+                                { flag: 'restricted', desc: 'Hautement sécurisé' },
+                                { flag: 'enforce/audit/warn', desc: 'Mode d\'application' }
+                            ],
+                            examples: [
+                                { code: '# Namespace sécurisé\napiVersion: v1\nkind: Namespace\nmetadata:\n  name: production\n  labels:\n    pod-security.kubernetes.io/enforce: restricted\n    pod-security.kubernetes.io/audit: restricted\n    pod-security.kubernetes.io/warn: restricted', desc: 'Namespace restrictif' },
+                                { code: '# Pod conforme "restricted"\napiVersion: v1\nkind: Pod\nmetadata:\n  name: secure-pod\nspec:\n  securityContext:\n    runAsNonRoot: true\n    seccompProfile:\n      type: RuntimeDefault\n  containers:\n  - name: app\n    image: myapp:1.0\n    securityContext:\n      allowPrivilegeEscalation: false\n      capabilities:\n        drop: ["ALL"]\n      readOnlyRootFilesystem: true', desc: 'Pod sécurisé' }
+                            ],
+                            tips: ['Commencez par warn/audit avant enforce'],
+                            warnings: ['restricted peut casser des apps legacy']
+                        }
+                    },
+                    {
+                        cmd: 'Network Policies',
+                        desc: 'Segmentation réseau des pods',
+                        details: {
+                            explanation: 'Contrôle le trafic réseau entre les pods (micro-segmentation).',
+                            syntax: 'NetworkPolicy avec ingress/egress rules',
+                            options: [
+                                { flag: 'podSelector', desc: 'Pods ciblés par la policy' },
+                                { flag: 'ingress', desc: 'Trafic entrant autorisé' },
+                                { flag: 'egress', desc: 'Trafic sortant autorisé' },
+                                { flag: 'namespaceSelector', desc: 'Filtrer par namespace' }
+                            ],
+                            examples: [
+                                { code: '# Deny all par défaut\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny-all\n  namespace: production\nspec:\n  podSelector: {}\n  policyTypes:\n  - Ingress\n  - Egress', desc: 'Deny all baseline' },
+                                { code: '# Autoriser frontend → backend\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: backend-policy\nspec:\n  podSelector:\n    matchLabels:\n      app: backend\n  ingress:\n  - from:\n    - podSelector:\n        matchLabels:\n          app: frontend\n    ports:\n    - port: 8080', desc: 'Policy spécifique' }
+                            ],
+                            tips: ['Commencez par deny-all puis autorisez explicitement'],
+                            warnings: ['Nécessite un CNI compatible (Calico, Cilium, etc.)']
+                        }
+                    },
+                    {
+                        cmd: 'RBAC & Service Accounts',
+                        desc: 'Contrôle d\'accès Kubernetes',
+                        details: {
+                            explanation: 'Gestion fine des permissions avec Role-Based Access Control.',
+                            syntax: 'Role/ClusterRole + RoleBinding/ClusterRoleBinding',
+                            options: [
+                                { flag: 'Role', desc: 'Permissions dans un namespace' },
+                                { flag: 'ClusterRole', desc: 'Permissions cluster-wide' },
+                                { flag: 'RoleBinding', desc: 'Lier Role à un user/SA' },
+                                { flag: 'ServiceAccount', desc: 'Identité des pods' }
+                            ],
+                            examples: [
+                                { code: '# ServiceAccount dédié\napiVersion: v1\nkind: ServiceAccount\nmetadata:\n  name: app-sa\n  namespace: production\nautomountServiceAccountToken: false  # Sécurité!', desc: 'ServiceAccount sécurisé' },
+                                { code: '# Role least-privilege\napiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata:\n  name: app-role\nrules:\n- apiGroups: [""]\n  resources: ["configmaps", "secrets"]\n  verbs: ["get"]\n  resourceNames: ["app-config", "app-secret"]  # Spécifique!', desc: 'Role minimal' },
+                                { code: '# Binding\napiVersion: rbac.authorization.k8s.io/v1\nkind: RoleBinding\nmetadata:\n  name: app-binding\nsubjects:\n- kind: ServiceAccount\n  name: app-sa\nroleRef:\n  kind: Role\n  name: app-role\n  apiGroup: rbac.authorization.k8s.io', desc: 'RoleBinding' }
+                            ],
+                            tips: ['automountServiceAccountToken: false sauf si nécessaire'],
+                            warnings: ['Évitez cluster-admin sauf pour les admins']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'monitoring',
+                title: 'Security Monitoring',
+                icon: 'fa-chart-line',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Security Headers',
+                        desc: 'Vérifier les headers HTTP',
+                        details: {
+                            explanation: 'Analysez les headers de sécurité HTTP de vos applications web.',
+                            syntax: 'curl -I <url> | analyse',
+                            options: [
+                                { flag: 'Content-Security-Policy', desc: 'Prévient XSS' },
+                                { flag: 'X-Frame-Options', desc: 'Prévient clickjacking' },
+                                { flag: 'Strict-Transport-Security', desc: 'Force HTTPS' },
+                                { flag: 'X-Content-Type-Options', desc: 'Prévient MIME sniffing' }
+                            ],
+                            examples: [
+                                { code: 'curl -I https://example.com | grep -i security', desc: 'Check basique' },
+                                { code: '# Headers recommandés (nginx)\nadd_header Content-Security-Policy "default-src \'self\'";\nadd_header X-Frame-Options "DENY";\nadd_header X-Content-Type-Options "nosniff";\nadd_header Strict-Transport-Security "max-age=31536000; includeSubDomains";\nadd_header Referrer-Policy "strict-origin-when-cross-origin";', desc: 'Config nginx' },
+                                { code: '# Scan avec securityheaders.com ou\nnpx security-headers https://example.com', desc: 'Scan automatisé' }
+                            ],
+                            tips: ['Utilisez securityheaders.com pour un rapport détaillé'],
+                            warnings: ['CSP trop restrictive peut casser votre app']
+                        }
+                    },
+                    {
+                        cmd: 'Audit Logs',
+                        desc: 'Centraliser les logs de sécurité',
+                        details: {
+                            explanation: 'Collectez et analysez les logs pour détecter les incidents de sécurité.',
+                            syntax: 'Collecte → Centralisation → Alerting',
+                            options: [
+                                { flag: 'Kubernetes audit', desc: 'API server audit logs' },
+                                { flag: 'Application logs', desc: 'Auth, errors, access' },
+                                { flag: 'Cloud trail', desc: 'AWS/GCP/Azure audit' }
+                            ],
+                            examples: [
+                                { code: '# K8s audit policy\napiVersion: audit.k8s.io/v1\nkind: Policy\nrules:\n- level: Metadata\n  resources:\n  - group: ""\n    resources: ["secrets", "configmaps"]\n- level: RequestResponse\n  users: ["system:anonymous"]\n  verbs: ["create", "update", "delete"]', desc: 'Audit policy K8s' },
+                                { code: '# Alertes critiques à monitorer:\n- Authentification échouée répétée\n- Élévation de privilèges\n- Accès aux secrets\n- Modifications RBAC\n- Pods privilégiés créés', desc: 'Alertes critiques' }
+                            ],
+                            tips: ['Envoyez les logs vers SIEM (Splunk, Elastic, etc.)'],
+                            warnings: ['Attention aux logs sensibles (PII, secrets)']
+                        }
+                    },
+                    {
+                        cmd: 'Dependency Watch',
+                        desc: 'Surveillance continue des CVE',
+                        details: {
+                            explanation: 'Surveillez en continu les nouvelles vulnérabilités dans vos dépendances.',
+                            syntax: 'Snyk monitor / Dependabot / Renovate',
+                            options: [
+                                { flag: 'Dependabot', desc: 'GitHub natif, PRs automatiques' },
+                                { flag: 'Snyk monitor', desc: 'Surveillance continue' },
+                                { flag: 'Renovate', desc: 'Self-hosted, très configurable' }
+                            ],
+                            examples: [
+                                { code: '# .github/dependabot.yml\nversion: 2\nupdates:\n  - package-ecosystem: "npm"\n    directory: "/"\n    schedule:\n      interval: "weekly"\n    open-pull-requests-limit: 10\n    groups:\n      dev-dependencies:\n        patterns:\n          - "*"\n        update-types:\n          - "minor"\n          - "patch"', desc: 'Config Dependabot' },
+                                { code: '# Snyk monitoring\nsnyk monitor --org=my-org --project-name=my-app', desc: 'Snyk monitor' },
+                                { code: '# Renovate config (renovate.json)\n{\n  "extends": ["config:base", "security:openssf-scorecard"],\n  "automerge": true,\n  "automergeType": "pr",\n  "platformAutomerge": true\n}', desc: 'Renovate automerge' }
+                            ],
+                            tips: ['Activez automerge pour les patches de sécurité'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-devsecops',
+                title: '🛡️ Projet: Pipeline DevSecOps',
+                icon: 'fa-shield-virus',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Pre-commit hooks',
+                        desc: 'Première ligne de défense',
+                        details: {
+                            explanation: 'Détectez les problèmes avant même qu\'ils n\'atteignent le repo.',
+                            syntax: 'pre-commit framework + hooks sécurité',
+                            options: [],
+                            examples: [
+                                { code: '# .pre-commit-config.yaml\nrepos:\n  - repo: https://github.com/pre-commit/pre-commit-hooks\n    rev: v4.5.0\n    hooks:\n      - id: detect-private-key\n      - id: detect-aws-credentials\n      - id: check-added-large-files\n\n  - repo: https://github.com/gitleaks/gitleaks\n    rev: v8.18.0\n    hooks:\n      - id: gitleaks\n\n  - repo: https://github.com/PyCQA/bandit\n    rev: 1.7.6\n    hooks:\n      - id: bandit\n        args: [\"-c\", \"bandit.yaml\"]', desc: 'Config pre-commit' },
+                                { code: '# Installation\npip install pre-commit\npre-commit install\n\n# Test sur tous les fichiers\npre-commit run --all-files', desc: 'Setup pre-commit' }
+                            ],
+                            tips: ['pre-commit install --hook-type commit-msg pour conventional commits'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: SAST dans la CI',
+                        desc: 'Analyse statique automatisée',
+                        details: {
+                            explanation: 'Intégrez l\'analyse statique de sécurité dans votre pipeline CI.',
+                            syntax: 'GitHub Actions avec SAST tools',
+                            options: [],
+                            examples: [
+                                { code: '# .github/workflows/security.yml\nname: Security Scan\non: [push, pull_request]\n\njobs:\n  sast:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      \n      - name: Semgrep SAST\n        uses: returntocorp/semgrep-action@v1\n        with:\n          config: >-\n            p/security-audit\n            p/secrets\n            p/owasp-top-ten\n      \n      - name: Upload SARIF\n        uses: github/codeql-action/upload-sarif@v3\n        with:\n          sarif_file: semgrep.sarif', desc: 'SAST avec Semgrep' },
+                                { code: '  # CodeQL pour analyse profonde\n  codeql:\n    runs-on: ubuntu-latest\n    permissions:\n      security-events: write\n    steps:\n      - uses: actions/checkout@v4\n      - uses: github/codeql-action/init@v3\n        with:\n          languages: javascript, python\n      - uses: github/codeql-action/analyze@v3', desc: 'CodeQL (gratuit pour repos publics)' }
+                            ],
+                            tips: ['Les résultats SARIF apparaissent dans l\'onglet Security de GitHub'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: SCA et Secrets',
+                        desc: 'Dépendances et secrets exposés',
+                        details: {
+                            explanation: 'Vérifiez les vulnérabilités des dépendances et les secrets dans le code.',
+                            syntax: 'Trivy + Gitleaks + npm audit',
+                            options: [],
+                            examples: [
+                                { code: '  # Dans security.yml\n  dependencies:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      \n      - name: Trivy vulnerability scan\n        uses: aquasecurity/trivy-action@master\n        with:\n          scan-type: fs\n          scan-ref: .\n          format: sarif\n          output: trivy-results.sarif\n          severity: HIGH,CRITICAL\n      \n      - name: Upload Trivy results\n        uses: github/codeql-action/upload-sarif@v3\n        with:\n          sarif_file: trivy-results.sarif', desc: 'Scan dépendances' },
+                                { code: '  secrets-scan:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          fetch-depth: 0  # Full history for secrets\n      \n      - name: Gitleaks\n        uses: gitleaks/gitleaks-action@v2\n        env:\n          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}', desc: 'Scan secrets' }
+                            ],
+                            tips: ['fetch-depth: 0 scanne tout l\'historique pour les secrets'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Container Security',
+                        desc: 'Scanner les images Docker',
+                        details: {
+                            explanation: 'Analysez les images Docker pour les vulnérabilités avant déploiement.',
+                            syntax: 'Build → Scan → Push si OK',
+                            options: [],
+                            examples: [
+                                { code: '  container-security:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      \n      - name: Build image\n        run: docker build -t myapp:${{ github.sha }} .\n      \n      - name: Trivy image scan\n        uses: aquasecurity/trivy-action@master\n        with:\n          image-ref: myapp:${{ github.sha }}\n          format: sarif\n          output: trivy-image.sarif\n          exit-code: 1\n          severity: CRITICAL\n      \n      - name: Upload scan results\n        uses: github/codeql-action/upload-sarif@v3\n        if: always()\n        with:\n          sarif_file: trivy-image.sarif', desc: 'Scan image Docker' },
+                                { code: '      # Push seulement si scan OK\n      - name: Login to registry\n        if: success()\n        uses: docker/login-action@v3\n        with:\n          registry: ghcr.io\n          username: ${{ github.actor }}\n          password: ${{ secrets.GITHUB_TOKEN }}\n      \n      - name: Push image\n        if: success()\n        run: |\n          docker tag myapp:${{ github.sha }} ghcr.io/${{ github.repository }}:${{ github.sha }}\n          docker push ghcr.io/${{ github.repository }}:${{ github.sha }}', desc: 'Push conditionnel' }
+                            ],
+                            tips: ['exit-code: 1 fait échouer le job si vulnérabilités critiques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: IaC Security',
+                        desc: 'Valider l\'infrastructure',
+                        details: {
+                            explanation: 'Scannez Terraform, Kubernetes manifests et Helm charts.',
+                            syntax: 'Checkov + tfsec + kubeaudit',
+                            options: [],
+                            examples: [
+                                { code: '  iac-security:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      \n      - name: Checkov IaC scan\n        uses: bridgecrewio/checkov-action@master\n        with:\n          directory: ./terraform\n          framework: terraform\n          soft_fail: false\n          output_format: sarif\n          output_file_path: checkov.sarif\n      \n      - name: Upload Checkov results\n        uses: github/codeql-action/upload-sarif@v3\n        if: always()\n        with:\n          sarif_file: checkov.sarif', desc: 'Scan Terraform' },
+                                { code: '      # Kubernetes manifests\n      - name: Kubeaudit\n        run: |\n          curl -LO https://github.com/Shopify/kubeaudit/releases/latest/download/kubeaudit_linux_amd64.tar.gz\n          tar -xzf kubeaudit_linux_amd64.tar.gz\n          ./kubeaudit all -f ./k8s/ --exitcode 2', desc: 'Scan K8s manifests' }
+                            ],
+                            tips: ['Scannez aussi les Helm charts avec helm template | kubeaudit'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: DAST en staging',
+                        desc: 'Tests dynamiques post-déploiement',
+                        details: {
+                            explanation: 'Exécutez des tests de sécurité dynamiques sur l\'application déployée.',
+                            syntax: 'Deploy staging → OWASP ZAP → Report',
+                            options: [],
+                            examples: [
+                                { code: '  dast:\n    runs-on: ubuntu-latest\n    needs: [deploy-staging]  # Après déploiement\n    steps:\n      - name: OWASP ZAP Baseline Scan\n        uses: zaproxy/action-baseline@v0.10.0\n        with:\n          target: ${{ vars.STAGING_URL }}\n          rules_file_name: .zap/rules.tsv\n          cmd_options: "-a"\n      \n      - name: Upload ZAP Report\n        uses: actions/upload-artifact@v4\n        if: always()\n        with:\n          name: zap-report\n          path: report_html.html', desc: 'ZAP Baseline scan' },
+                                { code: '# .zap/rules.tsv - Tuning des règles\n10015\tIGNORE\t(Re-evaluate Strict-Transport...)\n10096\tIGNORE\t(Timestamp Disclosure)\n10055\tWARN\t(CSP Scanner)', desc: 'Tuning ZAP rules' }
+                            ],
+                            tips: ['Baseline scan en CI, Full scan manuellement avant release'],
+                            warnings: ['Ne lancez JAMAIS DAST sur la production!']
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Security Gates',
+                        desc: 'Bloquer le déploiement si risque',
+                        details: {
+                            explanation: 'Configurez des portes de sécurité qui bloquent le déploiement.',
+                            syntax: 'Branch protection + Required checks',
+                            options: [],
+                            examples: [
+                                { code: '# Workflow complet avec gates\nname: Security Pipeline\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  security-gate:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      \n      # Tous les scans en parallèle\n      - name: Run all security scans\n        run: |\n          # SAST, SCA, Secrets, IaC...\n          exit 0  # ou exit 1 si échec\n    \n  deploy-staging:\n    needs: [security-gate]\n    if: success()\n    # ...\n    \n  deploy-production:\n    needs: [deploy-staging, dast]\n    if: success() && github.ref == \'refs/heads/main\'\n    environment:\n      name: production\n      url: https://app.example.com\n    # ...', desc: 'Pipeline avec gates' },
+                                { code: '# Branch protection (GitHub Settings)\n# main branch:\n# ✅ Require status checks:\n#    - security-gate\n#    - tests\n# ✅ Require review from code owners\n# ✅ Require signed commits\n# ✅ Include administrators', desc: 'Branch protection rules' }
+                            ],
+                            tips: ['Utilisez GitHub Environments pour les approbations manuelles'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 8: Reporting & Metrics',
+                        desc: 'Tableau de bord sécurité',
+                        details: {
+                            explanation: 'Centralisez les métriques de sécurité pour le suivi et l\'amélioration.',
+                            syntax: 'SARIF → GitHub Security → Dashboard',
+                            options: [],
+                            examples: [
+                                { code: '# Tous les outils uploadent en SARIF\n# → Visible dans GitHub Security tab\n# → Alertes automatiques\n# → Tracking de la dette sécurité\n\n# Métriques à suivre:\n# - Time to remediation (TTR)\n# - Open vulnerabilities by severity\n# - Security coverage\n# - False positive rate', desc: 'Métriques clés' },
+                                { code: '# Rapport hebdomadaire automatisé\nname: Weekly Security Report\non:\n  schedule:\n    - cron: "0 9 * * 1"  # Lundi 9h\n\njobs:\n  report:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Generate report\n        uses: github/codeql-action/analyze@v3\n        \n      - name: Send to Slack\n        uses: slackapi/slack-github-action@v1\n        with:\n          payload: |\n            {\n              "text": "Weekly Security Report: X open issues"\n            }', desc: 'Rapport automatisé' }
+                            ],
+                            tips: ['Intégrez avec SIEM pour une vue complète'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

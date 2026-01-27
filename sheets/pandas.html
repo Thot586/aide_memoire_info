@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Python Pandas : manipulation de DataFrames, imports et nettoyage de données.">
+    <title>Python Pandas - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-indigo-500/20 mb-4 icon-glow">
+                    <i class="fas fa-table text-3xl text-indigo-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Python Pandas</h1>
+                <p class="text-slate-400">Manipulation de DataFrames et analyse de données</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'io',
+                title: 'Import / Export',
+                icon: 'fa-file-import',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'pd.read_csv("fichier.csv")',
+                        desc: 'Lire un fichier CSV',
+                        details: {
+                            explanation: 'Charge un fichier CSV dans un DataFrame Pandas. C\'est la méthode la plus courante pour importer des données tabulaires.',
+                            syntax: 'pd.read_csv(filepath, sep=",", header=0, encoding="utf-8")',
+                            options: [
+                                { flag: 'sep', desc: 'Séparateur de colonnes (défaut: virgule)' },
+                                { flag: 'header', desc: 'Ligne d\'en-tête (0 = première ligne)' },
+                                { flag: 'encoding', desc: 'Encodage du fichier (utf-8, latin1, etc.)' },
+                                { flag: 'na_values', desc: 'Valeurs à considérer comme NaN' },
+                                { flag: 'usecols', desc: 'Liste des colonnes à charger' },
+                                { flag: 'dtype', desc: 'Dictionnaire des types de colonnes' },
+                                { flag: 'parse_dates', desc: 'Colonnes à convertir en datetime' }
+                            ],
+                            examples: [
+                                { code: 'df = pd.read_csv("data.csv")', desc: 'Import basique' },
+                                { code: 'df = pd.read_csv("data.csv", sep=";", encoding="latin1")', desc: 'CSV français avec point-virgule' },
+                                { code: 'df = pd.read_csv("data.csv", usecols=["nom", "age"], dtype={"age": int})', desc: 'Colonnes et types spécifiques' },
+                                { code: 'df = pd.read_csv("data.csv", parse_dates=["date_achat"])', desc: 'Avec parsing de dates' }
+                            ],
+                            tips: ['Utilisez encoding="latin1" pour les fichiers Excel français'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'pd.read_excel("fichier.xlsx")',
+                        desc: 'Lire un fichier Excel',
+                        details: {
+                            explanation: 'Charge un fichier Excel dans un DataFrame. Nécessite openpyxl ou xlrd.',
+                            syntax: 'pd.read_excel(filepath, sheet_name=0)',
+                            options: [
+                                { flag: 'sheet_name', desc: 'Nom ou index de la feuille (0 = première)' },
+                                { flag: 'header', desc: 'Ligne d\'en-tête' },
+                                { flag: 'usecols', desc: 'Colonnes à charger ("A:C" ou liste)' }
+                            ],
+                            examples: [
+                                { code: 'df = pd.read_excel("data.xlsx")', desc: 'Première feuille' },
+                                { code: 'df = pd.read_excel("data.xlsx", sheet_name="Ventes")', desc: 'Feuille par nom' },
+                                { code: 'dfs = pd.read_excel("data.xlsx", sheet_name=None)', desc: 'Toutes les feuilles (dict)' }
+                            ],
+                            tips: ['sheet_name=None charge toutes les feuilles dans un dictionnaire'],
+                            warnings: ['Nécessite: pip install openpyxl']
+                        }
+                    },
+                    {
+                        cmd: 'df.to_csv("output.csv", index=False)',
+                        desc: 'Exporter vers CSV',
+                        details: {
+                            explanation: 'Sauvegarde un DataFrame dans un fichier CSV.',
+                            syntax: 'df.to_csv(path, index=False, sep=",")',
+                            options: [
+                                { flag: 'index', desc: 'Inclure l\'index (False recommandé)' },
+                                { flag: 'sep', desc: 'Séparateur de colonnes' },
+                                { flag: 'encoding', desc: 'Encodage (utf-8, utf-8-sig pour Excel)' }
+                            ],
+                            examples: [
+                                { code: 'df.to_csv("resultat.csv", index=False)', desc: 'Export sans index' },
+                                { code: 'df.to_csv("resultat.csv", index=False, encoding="utf-8-sig")', desc: 'Pour Excel (accents)' }
+                            ],
+                            tips: ['Mettez index=False pour éviter une colonne inutile', 'utf-8-sig pour les accents dans Excel'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'explore',
+                title: 'Exploration',
+                icon: 'fa-search',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'df.head() / df.tail()',
+                        desc: 'Premières / dernières lignes',
+                        details: {
+                            explanation: 'Affiche les premières ou dernières lignes du DataFrame.',
+                            syntax: 'df.head(n=5)\ndf.tail(n=5)',
+                            options: [
+                                { flag: 'n', desc: 'Nombre de lignes à afficher (défaut: 5)' }
+                            ],
+                            examples: [
+                                { code: 'df.head()', desc: 'Les 5 premières lignes' },
+                                { code: 'df.tail(10)', desc: 'Les 10 dernières lignes' },
+                                { code: 'df.sample(5)', desc: '5 lignes aléatoires' }
+                            ],
+                            tips: ['sample() est utile pour explorer de grands datasets'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.shape / df.columns',
+                        desc: 'Dimensions et colonnes',
+                        details: {
+                            explanation: 'Obtient les dimensions (lignes, colonnes) et la liste des colonnes.',
+                            syntax: 'df.shape  # (n_lignes, n_colonnes)\ndf.columns  # Index des colonnes',
+                            options: [],
+                            examples: [
+                                { code: 'df.shape', desc: '(1000, 15) - 1000 lignes, 15 colonnes' },
+                                { code: 'df.columns.tolist()', desc: 'Liste des noms de colonnes' },
+                                { code: 'len(df)', desc: 'Nombre de lignes' }
+                            ],
+                            tips: ['df.shape[0] = lignes, df.shape[1] = colonnes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.describe()',
+                        desc: 'Statistiques descriptives',
+                        details: {
+                            explanation: 'Calcule des statistiques résumées (moyenne, écart-type, min, max, quartiles) pour les colonnes numériques.',
+                            syntax: 'df.describe(include="all")',
+                            options: [
+                                { flag: 'include', desc: '"all" pour inclure les colonnes non-numériques' },
+                                { flag: 'percentiles', desc: 'Liste des percentiles [0.25, 0.5, 0.75]' }
+                            ],
+                            examples: [
+                                { code: 'df.describe()', desc: 'Stats des colonnes numériques' },
+                                { code: 'df.describe(include="all")', desc: 'Stats de toutes les colonnes' },
+                                { code: 'df["col"].describe()', desc: 'Stats d\'une seule colonne' }
+                            ],
+                            tips: ['Parfait pour un premier aperçu des données'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.info()',
+                        desc: 'Informations sur le DataFrame',
+                        details: {
+                            explanation: 'Affiche le nombre de lignes, colonnes, types de données, valeurs non-nulles et mémoire utilisée.',
+                            syntax: 'df.info()',
+                            options: [],
+                            examples: [
+                                { code: 'df.info()', desc: 'Résumé complet du DataFrame' },
+                                { code: 'df.dtypes', desc: 'Types de chaque colonne' },
+                                { code: 'df.memory_usage(deep=True)', desc: 'Mémoire détaillée' }
+                            ],
+                            tips: ['Utile pour détecter les valeurs manquantes et types incorrects'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.value_counts()',
+                        desc: 'Compter les valeurs uniques',
+                        details: {
+                            explanation: 'Compte les occurrences de chaque valeur unique dans une colonne.',
+                            syntax: 'df["col"].value_counts(normalize=False)',
+                            options: [
+                                { flag: 'normalize', desc: 'True pour obtenir des proportions' },
+                                { flag: 'dropna', desc: 'Inclure ou non les NaN (True par défaut)' }
+                            ],
+                            examples: [
+                                { code: 'df["ville"].value_counts()', desc: 'Compte par ville' },
+                                { code: 'df["ville"].value_counts(normalize=True)', desc: 'Proportions' },
+                                { code: 'df["ville"].nunique()', desc: 'Nombre de valeurs uniques' }
+                            ],
+                            tips: ['nunique() donne le nombre de valeurs uniques'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'selection',
+                title: 'Sélection & Filtrage',
+                icon: 'fa-hand-pointer',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'df["colonne"]',
+                        desc: 'Sélectionner une/des colonnes',
+                        details: {
+                            explanation: 'Retourne une Series (une colonne) ou un DataFrame (plusieurs colonnes).',
+                            syntax: 'df["nom_colonne"]\ndf[["col1", "col2"]]',
+                            options: [],
+                            examples: [
+                                { code: 'df["age"]', desc: 'Sélectionne la colonne age (Series)' },
+                                { code: 'df[["nom", "age"]]', desc: 'Plusieurs colonnes (DataFrame)' },
+                                { code: 'df.nom', desc: 'Notation point (éviter si espaces dans nom)' }
+                            ],
+                            tips: ['Utilisez des crochets doubles [[]] pour plusieurs colonnes'],
+                            warnings: ['df.col ne fonctionne pas si le nom contient des espaces']
+                        }
+                    },
+                    {
+                        cmd: 'df.loc[lignes, colonnes]',
+                        desc: 'Sélection par labels',
+                        details: {
+                            explanation: 'Sélectionne des données par index/labels de lignes et colonnes. Inclut les bornes.',
+                            syntax: 'df.loc[selection_lignes, selection_colonnes]',
+                            options: [],
+                            examples: [
+                                { code: 'df.loc[0:5, "nom"]', desc: 'Lignes 0 à 5 inclus, colonne nom' },
+                                { code: 'df.loc[df["age"] > 18]', desc: 'Filtrer par condition' },
+                                { code: 'df.loc[df["age"] > 18, ["nom", "age"]]', desc: 'Filtrer + sélectionner colonnes' },
+                                { code: 'df.loc[mask, "col"] = valeur', desc: 'Modifier des valeurs' }
+                            ],
+                            tips: ['loc inclut la borne de fin (contrairement à iloc)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.iloc[lignes, colonnes]',
+                        desc: 'Sélection par position',
+                        details: {
+                            explanation: 'Sélectionne des données par position numérique (comme les listes Python). Exclut la borne de fin.',
+                            syntax: 'df.iloc[index_lignes, index_colonnes]',
+                            options: [],
+                            examples: [
+                                { code: 'df.iloc[0:5, 0:3]', desc: '5 premières lignes, 3 premières colonnes' },
+                                { code: 'df.iloc[-1]', desc: 'Dernière ligne' },
+                                { code: 'df.iloc[:, 0]', desc: 'Toutes les lignes, première colonne' },
+                                { code: 'df.iloc[::2]', desc: 'Une ligne sur deux' }
+                            ],
+                            tips: ['iloc exclut la borne de fin (comme Python standard)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.query("condition")',
+                        desc: 'Filtrer avec une expression string',
+                        details: {
+                            explanation: 'Filtre les lignes avec une expression sous forme de chaîne. Plus lisible pour des conditions complexes.',
+                            syntax: 'df.query("expression")',
+                            options: [
+                                { flag: '@variable', desc: 'Référencer une variable Python externe' }
+                            ],
+                            examples: [
+                                { code: 'df.query("age > 18")', desc: 'Majeurs' },
+                                { code: 'df.query("ville == \'Paris\' and age > 25")', desc: 'Condition multiple' },
+                                { code: 'seuil = 1000\\ndf.query("ventes > @seuil")', desc: 'Avec variable externe' }
+                            ],
+                            tips: ['Plus lisible que df[df["col"] > val] pour les conditions complexes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df[condition]',
+                        desc: 'Filtrage booléen',
+                        details: {
+                            explanation: 'Filtre les lignes selon une condition booléenne (masque).',
+                            syntax: 'df[df["col"] > valeur]',
+                            options: [],
+                            examples: [
+                                { code: 'df[df["age"] > 18]', desc: 'Majeurs' },
+                                { code: 'df[(df["age"] > 18) & (df["ville"] == "Paris")]', desc: 'ET logique' },
+                                { code: 'df[(df["age"] < 18) | (df["age"] > 65)]', desc: 'OU logique' },
+                                { code: 'df[~df["actif"]]', desc: 'NON logique (inversion)' },
+                                { code: 'df[df["ville"].isin(["Paris", "Lyon"])]', desc: 'Dans une liste' }
+                            ],
+                            tips: ['Utilisez & (ET), | (OU), ~ (NON) avec des parenthèses'],
+                            warnings: ['Attention: & et | (pas and/or) avec des parenthèses obligatoires']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'transform',
+                title: 'Transformation',
+                icon: 'fa-random',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'df.groupby("col").agg()',
+                        desc: 'Grouper et agréger',
+                        details: {
+                            explanation: 'Groupe les données par une colonne et applique des fonctions d\'agrégation.',
+                            syntax: 'df.groupby("colonne").agg({"col": "fonction"})',
+                            options: [
+                                { flag: 'as_index=False', desc: 'Garde les groupes comme colonnes' }
+                            ],
+                            examples: [
+                                { code: 'df.groupby("ville")["ventes"].sum()', desc: 'Somme des ventes par ville' },
+                                { code: 'df.groupby("ville").agg({"ventes": "sum", "clients": "count"})', desc: 'Plusieurs agrégations' },
+                                { code: 'df.groupby("ville").agg(\\n    total=("ventes", "sum"),\\n    moyenne=("ventes", "mean")\\n)', desc: 'Nommer les colonnes résultantes' },
+                                { code: 'df.groupby(["ville", "annee"])["ventes"].sum()', desc: 'Grouper par plusieurs colonnes' }
+                            ],
+                            tips: ['Combinez avec reset_index() pour un DataFrame propre'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.apply(func)',
+                        desc: 'Appliquer une fonction',
+                        details: {
+                            explanation: 'Applique une fonction à chaque ligne ou colonne du DataFrame.',
+                            syntax: 'df.apply(fonction, axis=0)',
+                            options: [
+                                { flag: 'axis=0', desc: 'Appliquer sur chaque colonne' },
+                                { flag: 'axis=1', desc: 'Appliquer sur chaque ligne' }
+                            ],
+                            examples: [
+                                { code: 'df["age"].apply(lambda x: x * 12)', desc: 'Âge en mois' },
+                                { code: 'df.apply(lambda row: row["prix"] * row["qte"], axis=1)', desc: 'Calcul par ligne' },
+                                { code: 'df["nom"].map({"Alice": "A", "Bob": "B"})', desc: 'map() pour remapper des valeurs' },
+                                { code: 'df["col"] = df["col"].apply(ma_fonction)', desc: 'Fonction personnalisée' }
+                            ],
+                            tips: ['map() est plus rapide pour les Series avec un dictionnaire'],
+                            warnings: ['apply() peut être lent - préférez les opérations vectorisées']
+                        }
+                    },
+                    {
+                        cmd: 'df.sort_values()',
+                        desc: 'Trier les données',
+                        details: {
+                            explanation: 'Trie le DataFrame selon une ou plusieurs colonnes.',
+                            syntax: 'df.sort_values(by="col", ascending=True)',
+                            options: [
+                                { flag: 'by', desc: 'Colonne(s) de tri' },
+                                { flag: 'ascending', desc: 'True (croissant) ou False (décroissant)' },
+                                { flag: 'na_position', desc: '"first" ou "last" pour les NaN' }
+                            ],
+                            examples: [
+                                { code: 'df.sort_values("age")', desc: 'Tri croissant par âge' },
+                                { code: 'df.sort_values("ventes", ascending=False)', desc: 'Tri décroissant' },
+                                { code: 'df.sort_values(["ville", "age"], ascending=[True, False])', desc: 'Tri multiple' }
+                            ],
+                            tips: ['sort_index() trie par l\'index'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.rename(columns={})',
+                        desc: 'Renommer des colonnes',
+                        details: {
+                            explanation: 'Renomme une ou plusieurs colonnes du DataFrame.',
+                            syntax: 'df.rename(columns={"ancien": "nouveau"})',
+                            options: [
+                                { flag: 'columns', desc: 'Dictionnaire {ancien_nom: nouveau_nom}' },
+                                { flag: 'inplace', desc: 'Modifier en place (True/False)' }
+                            ],
+                            examples: [
+                                { code: 'df.rename(columns={"old_name": "new_name"})', desc: 'Renommer une colonne' },
+                                { code: 'df.columns = ["col1", "col2", "col3"]', desc: 'Renommer toutes les colonnes' },
+                                { code: 'df.columns = df.columns.str.lower()', desc: 'Tout en minuscules' }
+                            ],
+                            tips: ['df.columns.str.replace() pour des modifications en masse'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'cleaning',
+                title: 'Nettoyage',
+                icon: 'fa-broom',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'df.dropna()',
+                        desc: 'Supprimer les valeurs manquantes',
+                        details: {
+                            explanation: 'Supprime les lignes ou colonnes contenant des valeurs NaN.',
+                            syntax: 'df.dropna(axis=0, how="any", subset=None)',
+                            options: [
+                                { flag: 'axis', desc: '0 = lignes, 1 = colonnes' },
+                                { flag: 'how', desc: '"any" (au moins un NaN) ou "all" (tous NaN)' },
+                                { flag: 'subset', desc: 'Colonnes à vérifier' }
+                            ],
+                            examples: [
+                                { code: 'df.dropna()', desc: 'Supprime les lignes avec NaN' },
+                                { code: 'df.dropna(subset=["age", "email"])', desc: 'Si NaN dans age OU email' },
+                                { code: 'df.dropna(how="all")', desc: 'Lignes entièrement vides' }
+                            ],
+                            tips: ['Utilisez fillna() pour remplacer au lieu de supprimer'],
+                            warnings: ['Peut supprimer beaucoup de données!']
+                        }
+                    },
+                    {
+                        cmd: 'df.fillna()',
+                        desc: 'Remplacer les valeurs manquantes',
+                        details: {
+                            explanation: 'Remplace les valeurs NaN par une valeur spécifiée ou une stratégie.',
+                            syntax: 'df.fillna(value, method=None)',
+                            options: [
+                                { flag: 'value', desc: 'Valeur de remplacement (ou dict par colonne)' },
+                                { flag: 'method', desc: '"ffill" (forward fill) ou "bfill" (backward fill)' }
+                            ],
+                            examples: [
+                                { code: 'df.fillna(0)', desc: 'Remplacer par 0' },
+                                { code: 'df["age"].fillna(df["age"].mean())', desc: 'Par la moyenne' },
+                                { code: 'df.fillna({"age": 0, "ville": "Inconnu"})', desc: 'Valeurs différentes par colonne' },
+                                { code: 'df.fillna(method="ffill")', desc: 'Propager la dernière valeur valide' }
+                            ],
+                            tips: ['ffill est utile pour les séries temporelles'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.duplicated() / df.drop_duplicates()',
+                        desc: 'Gérer les doublons',
+                        details: {
+                            explanation: 'Détecte ou supprime les lignes en double.',
+                            syntax: 'df.duplicated(subset=None, keep="first")\ndf.drop_duplicates()',
+                            options: [
+                                { flag: 'subset', desc: 'Colonnes pour identifier les doublons' },
+                                { flag: 'keep', desc: '"first", "last" ou False (supprimer tous)' }
+                            ],
+                            examples: [
+                                { code: 'df.duplicated().sum()', desc: 'Nombre de doublons' },
+                                { code: 'df.drop_duplicates()', desc: 'Supprimer les doublons' },
+                                { code: 'df.drop_duplicates(subset=["email"])', desc: 'Doublons par email' },
+                                { code: 'df[df.duplicated(keep=False)]', desc: 'Voir toutes les lignes en double' }
+                            ],
+                            tips: ['keep=False marque TOUS les doublons, pas juste le 2e'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.astype()',
+                        desc: 'Convertir les types',
+                        details: {
+                            explanation: 'Convertit le type de données d\'une ou plusieurs colonnes.',
+                            syntax: 'df["col"].astype(dtype)',
+                            options: [
+                                { flag: 'int, float, str', desc: 'Types de base' },
+                                { flag: 'category', desc: 'Type catégoriel (économise mémoire)' },
+                                { flag: 'datetime64', desc: 'Type datetime' }
+                            ],
+                            examples: [
+                                { code: 'df["age"] = df["age"].astype(int)', desc: 'Convertir en entier' },
+                                { code: 'df["prix"] = df["prix"].astype(float)', desc: 'Convertir en flottant' },
+                                { code: 'df["ville"] = df["ville"].astype("category")', desc: 'Type catégoriel' },
+                                { code: 'df = df.astype({"col1": int, "col2": str})', desc: 'Plusieurs colonnes' }
+                            ],
+                            tips: ['category économise de la mémoire pour les colonnes à peu de valeurs uniques'],
+                            warnings: ['astype(int) échoue si NaN présents - utilisez Int64 (nullable)']
+                        }
+                    },
+                    {
+                        cmd: 'df.replace()',
+                        desc: 'Remplacer des valeurs',
+                        details: {
+                            explanation: 'Remplace des valeurs spécifiques dans le DataFrame.',
+                            syntax: 'df.replace(to_replace, value)',
+                            options: [
+                                { flag: 'regex', desc: 'True pour utiliser des expressions régulières' }
+                            ],
+                            examples: [
+                                { code: 'df.replace("ancien", "nouveau")', desc: 'Remplacement simple' },
+                                { code: 'df.replace({"M": "Masculin", "F": "Féminin"})', desc: 'Avec dictionnaire' },
+                                { code: 'df["col"].replace({"oui": 1, "non": 0})', desc: 'Sur une colonne' },
+                                { code: 'df.replace(r"\\s+", " ", regex=True)', desc: 'Avec regex' }
+                            ],
+                            tips: ['Utile pour normaliser les données catégorielles'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'merge',
+                title: 'Jointures & Concat',
+                icon: 'fa-link',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'pd.merge(df1, df2)',
+                        desc: 'Joindre deux DataFrames',
+                        details: {
+                            explanation: 'Fusionne deux DataFrames comme une jointure SQL.',
+                            syntax: 'pd.merge(left, right, on="col", how="inner")',
+                            options: [
+                                { flag: 'on', desc: 'Colonne(s) de jointure' },
+                                { flag: 'how', desc: '"inner", "left", "right", "outer"' },
+                                { flag: 'left_on/right_on', desc: 'Si noms différents' },
+                                { flag: 'suffixes', desc: 'Suffixes pour colonnes en commun' }
+                            ],
+                            examples: [
+                                { code: 'pd.merge(clients, commandes, on="client_id")', desc: 'Inner join' },
+                                { code: 'pd.merge(df1, df2, on="id", how="left")', desc: 'Left join' },
+                                { code: 'pd.merge(df1, df2, left_on="id_a", right_on="id_b")', desc: 'Colonnes différentes' },
+                                { code: 'df1.merge(df2, on="id")', desc: 'Syntaxe alternative' }
+                            ],
+                            tips: ['how="left" garde toutes les lignes de gauche'],
+                            warnings: ['Attention aux doublons après un merge many-to-many']
+                        }
+                    },
+                    {
+                        cmd: 'pd.concat([df1, df2])',
+                        desc: 'Concaténer des DataFrames',
+                        details: {
+                            explanation: 'Empile des DataFrames verticalement ou horizontalement.',
+                            syntax: 'pd.concat([df1, df2], axis=0, ignore_index=True)',
+                            options: [
+                                { flag: 'axis', desc: '0 = empiler (lignes), 1 = côte à côte (colonnes)' },
+                                { flag: 'ignore_index', desc: 'Réinitialiser l\'index' },
+                                { flag: 'keys', desc: 'Créer un index hiérarchique' }
+                            ],
+                            examples: [
+                                { code: 'pd.concat([df1, df2])', desc: 'Empiler verticalement' },
+                                { code: 'pd.concat([df1, df2], ignore_index=True)', desc: 'Avec nouvel index' },
+                                { code: 'pd.concat([df1, df2], axis=1)', desc: 'Côte à côte' },
+                                { code: 'pd.concat([df1, df2], keys=["A", "B"])', desc: 'Avec labels' }
+                            ],
+                            tips: ['ignore_index=True évite les doublons d\'index'],
+                            warnings: ['Les colonnes doivent correspondre pour axis=0']
+                        }
+                    },
+                    {
+                        cmd: 'df.join()',
+                        desc: 'Joindre sur l\'index',
+                        details: {
+                            explanation: 'Joint des DataFrames en utilisant leurs index.',
+                            syntax: 'df1.join(df2, how="left")',
+                            options: [
+                                { flag: 'how', desc: '"left", "right", "outer", "inner"' },
+                                { flag: 'lsuffix/rsuffix', desc: 'Suffixes pour colonnes en commun' }
+                            ],
+                            examples: [
+                                { code: 'df1.join(df2)', desc: 'Join sur index' },
+                                { code: 'df1.join(df2, how="outer")', desc: 'Outer join' },
+                                { code: 'df1.set_index("id").join(df2.set_index("id"))', desc: 'Après set_index' }
+                            ],
+                            tips: ['Plus simple que merge quand l\'index est la clé'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'pivot',
+                title: 'Pivot & Reshape',
+                icon: 'fa-table',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'df.pivot_table()',
+                        desc: 'Tableau croisé dynamique',
+                        details: {
+                            explanation: 'Crée un tableau croisé avec agrégation (comme Excel).',
+                            syntax: 'df.pivot_table(values, index, columns, aggfunc="mean")',
+                            options: [
+                                { flag: 'values', desc: 'Colonne à agréger' },
+                                { flag: 'index', desc: 'Colonne pour les lignes' },
+                                { flag: 'columns', desc: 'Colonne pour les colonnes' },
+                                { flag: 'aggfunc', desc: '"mean", "sum", "count", etc.' },
+                                { flag: 'margins', desc: 'Ajouter les totaux (True/False)' }
+                            ],
+                            examples: [
+                                { code: 'df.pivot_table(values="ventes", index="ville", columns="annee", aggfunc="sum")', desc: 'Ventes par ville et année' },
+                                { code: 'df.pivot_table(values="ventes", index="ville", aggfunc=["sum", "mean"])', desc: 'Plusieurs agrégations' },
+                                { code: 'df.pivot_table(values="ventes", index="ville", margins=True)', desc: 'Avec totaux' }
+                            ],
+                            tips: ['margins=True ajoute une ligne/colonne "All" avec les totaux'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'pd.crosstab()',
+                        desc: 'Tableau de contingence',
+                        details: {
+                            explanation: 'Calcule un tableau de fréquences croisées entre deux variables.',
+                            syntax: 'pd.crosstab(df["col1"], df["col2"], normalize=False)',
+                            options: [
+                                { flag: 'normalize', desc: '"index", "columns", "all" ou False' },
+                                { flag: 'margins', desc: 'Ajouter les totaux' }
+                            ],
+                            examples: [
+                                { code: 'pd.crosstab(df["genre"], df["achat"])', desc: 'Fréquences genre × achat' },
+                                { code: 'pd.crosstab(df["genre"], df["achat"], normalize="index")', desc: 'Proportions par ligne' }
+                            ],
+                            tips: ['Utile pour l\'analyse catégorielle'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.melt()',
+                        desc: 'Format large → long',
+                        details: {
+                            explanation: 'Transforme un DataFrame de format large en format long (tidy).',
+                            syntax: 'df.melt(id_vars, value_vars, var_name, value_name)',
+                            options: [
+                                { flag: 'id_vars', desc: 'Colonnes à garder fixes' },
+                                { flag: 'value_vars', desc: 'Colonnes à "fondre"' },
+                                { flag: 'var_name', desc: 'Nom pour la colonne des variables' },
+                                { flag: 'value_name', desc: 'Nom pour la colonne des valeurs' }
+                            ],
+                            examples: [
+                                { code: 'df.melt(id_vars=["id"], value_vars=["jan", "fev", "mar"], var_name="mois", value_name="ventes")', desc: 'Mois en lignes' }
+                            ],
+                            tips: ['L\'inverse de pivot - utile pour ggplot/seaborn'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'datetime',
+                title: 'Dates & Temps',
+                icon: 'fa-calendar',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'pd.to_datetime()',
+                        desc: 'Convertir en datetime',
+                        details: {
+                            explanation: 'Convertit une colonne texte en type datetime.',
+                            syntax: 'pd.to_datetime(arg, format=None)',
+                            options: [
+                                { flag: 'format', desc: 'Format de la date (ex: "%d/%m/%Y")' },
+                                { flag: 'errors', desc: '"coerce" pour mettre NaT si erreur' },
+                                { flag: 'dayfirst', desc: 'True si jour avant mois (européen)' }
+                            ],
+                            examples: [
+                                { code: 'df["date"] = pd.to_datetime(df["date"])', desc: 'Conversion auto' },
+                                { code: 'pd.to_datetime(df["date"], format="%d/%m/%Y")', desc: 'Format français' },
+                                { code: 'pd.to_datetime(df["date"], dayfirst=True)', desc: 'Jour en premier' },
+                                { code: 'pd.to_datetime(df["date"], errors="coerce")', desc: 'NaT si erreur' }
+                            ],
+                            tips: ['%Y = année 4 chiffres, %m = mois, %d = jour'],
+                            warnings: ['Attention au format américain (mois/jour) vs européen (jour/mois)']
+                        }
+                    },
+                    {
+                        cmd: 'df["date"].dt.accessor',
+                        desc: 'Extraire des composants',
+                        details: {
+                            explanation: 'L\'accesseur .dt permet d\'extraire des composants d\'une colonne datetime.',
+                            syntax: 'df["date"].dt.year/month/day/...',
+                            options: [
+                                { flag: '.year', desc: 'Année' },
+                                { flag: '.month', desc: 'Mois (1-12)' },
+                                { flag: '.day', desc: 'Jour du mois' },
+                                { flag: '.dayofweek', desc: 'Jour de la semaine (0=lundi)' },
+                                { flag: '.hour', desc: 'Heure' },
+                                { flag: '.date', desc: 'Partie date seulement' },
+                                { flag: '.strftime()', desc: 'Formater en string' }
+                            ],
+                            examples: [
+                                { code: 'df["annee"] = df["date"].dt.year', desc: 'Extraire l\'année' },
+                                { code: 'df["mois"] = df["date"].dt.month', desc: 'Extraire le mois' },
+                                { code: 'df["jour_semaine"] = df["date"].dt.day_name()', desc: 'Nom du jour' },
+                                { code: 'df["date_str"] = df["date"].dt.strftime("%d/%m/%Y")', desc: 'Formater' }
+                            ],
+                            tips: ['day_name() et month_name() donnent les noms'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df.resample()',
+                        desc: 'Rééchantillonnage temporel',
+                        details: {
+                            explanation: 'Agrège les données par période (jour, semaine, mois, etc.).',
+                            syntax: 'df.resample("freq").agg()',
+                            options: [
+                                { flag: '"D"', desc: 'Jour' },
+                                { flag: '"W"', desc: 'Semaine' },
+                                { flag: '"M"', desc: 'Mois' },
+                                { flag: '"Q"', desc: 'Trimestre' },
+                                { flag: '"Y"', desc: 'Année' }
+                            ],
+                            examples: [
+                                { code: 'df.set_index("date").resample("M")["ventes"].sum()', desc: 'Ventes mensuelles' },
+                                { code: 'df.resample("W", on="date")["prix"].mean()', desc: 'Prix moyen hebdo' }
+                            ],
+                            tips: ['L\'index doit être de type datetime ou utiliser on="col"'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'strings',
+                title: 'Chaînes de caractères',
+                icon: 'fa-font',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'df["col"].str.accessor',
+                        desc: 'Méthodes string vectorisées',
+                        details: {
+                            explanation: 'L\'accesseur .str permet d\'appliquer des méthodes string à toute une colonne.',
+                            syntax: 'df["col"].str.method()',
+                            options: [
+                                { flag: '.lower()', desc: 'Minuscules' },
+                                { flag: '.upper()', desc: 'Majuscules' },
+                                { flag: '.strip()', desc: 'Supprimer espaces' },
+                                { flag: '.replace()', desc: 'Remplacer' },
+                                { flag: '.contains()', desc: 'Contient (retourne bool)' },
+                                { flag: '.split()', desc: 'Diviser' },
+                                { flag: '.len()', desc: 'Longueur' }
+                            ],
+                            examples: [
+                                { code: 'df["nom"].str.lower()', desc: 'Tout en minuscules' },
+                                { code: 'df["email"].str.strip()', desc: 'Supprimer espaces' },
+                                { code: 'df["texte"].str.replace("ancien", "nouveau")', desc: 'Remplacer' },
+                                { code: 'df[df["nom"].str.contains("Jean", na=False)]', desc: 'Filtrer par contenu' }
+                            ],
+                            tips: ['Ajoutez na=False à contains() pour éviter les erreurs avec NaN'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df["col"].str.extract()',
+                        desc: 'Extraire avec regex',
+                        details: {
+                            explanation: 'Extrait des sous-chaînes avec des expressions régulières.',
+                            syntax: 'df["col"].str.extract(r"pattern")',
+                            options: [
+                                { flag: 'expand', desc: 'True pour retourner un DataFrame' }
+                            ],
+                            examples: [
+                                { code: 'df["email"].str.extract(r"@(.+)\\.com")', desc: 'Extraire le domaine' },
+                                { code: 'df["code"].str.extract(r"([A-Z]+)(\\d+)")', desc: 'Lettres et chiffres séparément' },
+                                { code: 'df["tel"].str.extractall(r"(\\d{2})")', desc: 'Toutes les occurrences' }
+                            ],
+                            tips: ['Utilisez des groupes () pour capturer les parties voulues'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'df["col"].str.split()',
+                        desc: 'Diviser en colonnes',
+                        details: {
+                            explanation: 'Divise une colonne en plusieurs selon un séparateur.',
+                            syntax: 'df["col"].str.split(sep, expand=True)',
+                            options: [
+                                { flag: 'sep', desc: 'Séparateur' },
+                                { flag: 'expand', desc: 'True pour créer des colonnes' },
+                                { flag: 'n', desc: 'Nombre max de divisions' }
+                            ],
+                            examples: [
+                                { code: 'df["nom_complet"].str.split(" ", expand=True)', desc: 'Prénom / Nom' },
+                                { code: 'df[["prenom", "nom"]] = df["nom_complet"].str.split(" ", n=1, expand=True)', desc: 'Assigner à des colonnes' }
+                            ],
+                            tips: ['n=1 divise seulement au premier séparateur'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

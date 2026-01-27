@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Matplotlib & Seaborn : création de graphiques et visualisation de données en Python.">
+    <title>Matplotlib & Seaborn - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-teal-500/20 mb-4 icon-glow">
+                    <i class="fas fa-chart-line text-3xl text-teal-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Matplotlib & Seaborn</h1>
+                <p class="text-slate-400">Création de graphiques et visualisation de données</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'basic',
+                title: 'Graphiques de base',
+                icon: 'fa-chart-line',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'plt.plot(x, y)',
+                        desc: 'Graphique linéaire',
+                        details: {
+                            explanation: 'Crée un graphique linéaire reliant les points (x, y). Le type de graphique le plus basique.',
+                            syntax: 'plt.plot(x, y, format, **kwargs)',
+                            options: [
+                                { flag: 'color', desc: 'Couleur: "red", "b", "#FF0000", (0.1, 0.2, 0.5)' },
+                                { flag: 'linestyle', desc: 'Style: "-" (solide), "--" (tirets), ":" (pointillé), "-." (mixte)' },
+                                { flag: 'linewidth / lw', desc: 'Épaisseur de la ligne' },
+                                { flag: 'marker', desc: 'Marqueur: "o" (cercle), "s" (carré), "^" (triangle), "x", "*"' },
+                                { flag: 'markersize / ms', desc: 'Taille des marqueurs' },
+                                { flag: 'label', desc: 'Texte pour la légende' }
+                            ],
+                            examples: [
+                                { code: 'import matplotlib.pyplot as plt', desc: 'Import standard' },
+                                { code: 'plt.plot([1,2,3], [1,4,9])', desc: 'Courbe simple' },
+                                { code: 'plt.plot(x, y, "r--", lw=2)', desc: 'Rouge pointillé, épaisseur 2' },
+                                { code: 'plt.plot(x, y, "bo-", label="Données")', desc: 'Bleu, cercles, ligne' },
+                                { code: 'plt.plot(x, y1, x, y2)', desc: 'Plusieurs courbes' }
+                            ],
+                            tips: ['Format raccourci: "couleur marqueur ligne" ex: "ro--" = rouge, cercles, tirets', 'plt.show() pour afficher'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.scatter(x, y)',
+                        desc: 'Nuage de points',
+                        details: {
+                            explanation: 'Affiche des points individuels sans les relier. Idéal pour visualiser corrélations et distributions.',
+                            syntax: 'plt.scatter(x, y, s=size, c=colors, **kwargs)',
+                            options: [
+                                { flag: 's', desc: 'Taille des points (scalaire ou array)' },
+                                { flag: 'c', desc: 'Couleur(s) (scalaire, array, ou séquence)' },
+                                { flag: 'alpha', desc: 'Transparence (0=invisible, 1=opaque)' },
+                                { flag: 'cmap', desc: 'Palette de couleurs si c est numérique' },
+                                { flag: 'marker', desc: 'Forme des points' },
+                                { flag: 'edgecolors', desc: 'Couleur du contour' }
+                            ],
+                            examples: [
+                                { code: 'plt.scatter(x, y)', desc: 'Nuage basique' },
+                                { code: 'plt.scatter(x, y, c=z, cmap="viridis")', desc: 'Couleur selon z' },
+                                { code: 'plt.scatter(x, y, s=sizes, alpha=0.5)', desc: 'Tailles variables, transparent' },
+                                { code: 'plt.colorbar()', desc: 'Ajouter échelle de couleurs' }
+                            ],
+                            tips: ['Utilisez alpha<1 si les points se chevauchent', 'plt.colorbar() après scatter avec cmap'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.bar(x, height)',
+                        desc: 'Graphique en barres',
+                        details: {
+                            explanation: 'Crée un diagramme à barres verticales. Idéal pour comparer des catégories.',
+                            syntax: 'plt.bar(x, height, width=0.8, **kwargs)',
+                            options: [
+                                { flag: 'width', desc: 'Largeur des barres (défaut: 0.8)' },
+                                { flag: 'color', desc: 'Couleur des barres' },
+                                { flag: 'edgecolor', desc: 'Couleur du contour' },
+                                { flag: 'bottom', desc: 'Base des barres (pour empiler)' },
+                                { flag: 'align', desc: '"center" (défaut) ou "edge"' }
+                            ],
+                            examples: [
+                                { code: 'plt.bar(["A", "B", "C"], [10, 20, 15])', desc: 'Barres simples' },
+                                { code: 'plt.barh(categories, values)', desc: 'Barres horizontales' },
+                                { code: 'plt.bar(x, y1); plt.bar(x, y2, bottom=y1)', desc: 'Barres empilées' },
+                                { code: 'plt.bar(x-0.2, y1, 0.4); plt.bar(x+0.2, y2, 0.4)', desc: 'Barres groupées' }
+                            ],
+                            tips: ['plt.barh() pour barres horizontales', 'Décaler x pour grouper les barres côte à côte'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.hist(x)',
+                        desc: 'Histogramme',
+                        details: {
+                            explanation: 'Affiche la distribution d\'une variable continue en comptant les valeurs par intervalles.',
+                            syntax: 'plt.hist(x, bins=10, **kwargs)',
+                            options: [
+                                { flag: 'bins', desc: 'Nombre d\'intervalles ou liste de limites' },
+                                { flag: 'density', desc: 'True pour normaliser (aire=1)' },
+                                { flag: 'cumulative', desc: 'True pour histogramme cumulatif' },
+                                { flag: 'histtype', desc: '"bar", "step", "stepfilled"' },
+                                { flag: 'alpha', desc: 'Transparence' }
+                            ],
+                            examples: [
+                                { code: 'plt.hist(data, bins=30)', desc: '30 intervalles' },
+                                { code: 'plt.hist(data, bins=[0,10,20,50,100])', desc: 'Intervalles personnalisés' },
+                                { code: 'plt.hist(data, density=True, alpha=0.7)', desc: 'Normalisé, transparent' },
+                                { code: 'plt.hist([d1, d2], label=["A","B"])', desc: 'Comparer 2 distributions' }
+                            ],
+                            tips: ['Retourne (counts, bins, patches) pour récupérer les valeurs', 'density=True pour comparer des distributions de tailles différentes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.pie(sizes)',
+                        desc: 'Diagramme circulaire (camembert)',
+                        details: {
+                            explanation: 'Affiche les proportions d\'un ensemble de données sous forme de secteurs.',
+                            syntax: 'plt.pie(sizes, labels=names, autopct="%1.1f%%")',
+                            options: [
+                                { flag: 'labels', desc: 'Noms des secteurs' },
+                                { flag: 'autopct', desc: 'Format des pourcentages' },
+                                { flag: 'explode', desc: 'Décaler des secteurs (liste de distances)' },
+                                { flag: 'colors', desc: 'Liste de couleurs' },
+                                { flag: 'startangle', desc: 'Angle de départ (90 = haut)' }
+                            ],
+                            examples: [
+                                { code: 'plt.pie([30, 20, 50], labels=["A", "B", "C"])', desc: 'Camembert simple' },
+                                { code: 'plt.pie(sizes, autopct="%1.1f%%", startangle=90)', desc: 'Avec pourcentages' },
+                                { code: 'plt.pie(sizes, explode=[0, 0.1, 0])', desc: 'Décaler un secteur' },
+                                { code: 'plt.axis("equal")', desc: 'Cercle parfait (pas ellipse)' }
+                            ],
+                            tips: ['plt.axis("equal") pour un cercle parfait', 'Éviter les camemberts pour >5 catégories'],
+                            warnings: ['Les camemberts sont souvent difficiles à lire - préférer barplot']
+                        }
+                    },
+                    {
+                        cmd: 'plt.fill_between(x, y)',
+                        desc: 'Remplir sous une courbe',
+                        details: {
+                            explanation: 'Remplit l\'aire entre une courbe et une ligne de référence. Idéal pour montrer les intervalles de confiance.',
+                            syntax: 'plt.fill_between(x, y1, y2=0, alpha=0.3)',
+                            options: [
+                                { flag: 'y2', desc: 'Limite inférieure (défaut: 0)' },
+                                { flag: 'alpha', desc: 'Transparence' },
+                                { flag: 'where', desc: 'Condition pour remplir' },
+                                { flag: 'interpolate', desc: 'Interpoler aux intersections' }
+                            ],
+                            examples: [
+                                { code: 'plt.fill_between(x, y, alpha=0.3)', desc: 'Aire sous la courbe' },
+                                { code: 'plt.fill_between(x, y-std, y+std, alpha=0.2)', desc: 'Intervalle de confiance' },
+                                { code: 'plt.fill_between(x, y1, y2, where=(y1>y2))', desc: 'Remplir où y1 > y2' }
+                            ],
+                            tips: ['Parfait pour bandes d\'erreur: moyenne ± écart-type'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'seaborn',
+                title: 'Seaborn - Distributions',
+                icon: 'fa-chart-area',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'sns.histplot(data)',
+                        desc: 'Histogramme avancé',
+                        details: {
+                            explanation: 'Histogramme avec options avancées: KDE, empilé, multiples variables.',
+                            syntax: 'sns.histplot(data=df, x=col, hue=group, kde=True)',
+                            options: [
+                                { flag: 'data', desc: 'DataFrame source' },
+                                { flag: 'x / y', desc: 'Colonne à visualiser' },
+                                { flag: 'hue', desc: 'Variable de groupement (couleurs)' },
+                                { flag: 'bins', desc: 'Nombre d\'intervalles' },
+                                { flag: 'kde', desc: 'Ajouter courbe de densité' },
+                                { flag: 'stat', desc: '"count", "density", "probability"' },
+                                { flag: 'multiple', desc: '"layer", "stack", "dodge", "fill"' }
+                            ],
+                            examples: [
+                                { code: 'import seaborn as sns', desc: 'Import' },
+                                { code: 'sns.histplot(df, x="age", kde=True)', desc: 'Avec courbe de densité' },
+                                { code: 'sns.histplot(df, x="age", hue="genre", multiple="stack")', desc: 'Empilé par genre' },
+                                { code: 'sns.histplot(df, x="salaire", stat="density")', desc: 'Normalisé' }
+                            ],
+                            tips: ['multiple="dodge" pour comparer côte à côte'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.kdeplot(data)',
+                        desc: 'Estimation de densité (KDE)',
+                        details: {
+                            explanation: 'Courbe lissée montrant la densité de probabilité. Plus élégant qu\'un histogramme.',
+                            syntax: 'sns.kdeplot(data=df, x=col, hue=group)',
+                            options: [
+                                { flag: 'bw_adjust', desc: 'Ajuster le lissage (>1 = plus lisse)' },
+                                { flag: 'fill', desc: 'Remplir sous la courbe' },
+                                { flag: 'common_norm', desc: 'Normalisation commune (hue)' },
+                                { flag: 'multiple', desc: '"layer", "stack", "fill"' }
+                            ],
+                            examples: [
+                                { code: 'sns.kdeplot(data=df, x="age")', desc: 'KDE simple' },
+                                { code: 'sns.kdeplot(df, x="age", hue="genre", fill=True)', desc: 'Par groupe, rempli' },
+                                { code: 'sns.kdeplot(df, x="x", y="y")', desc: 'KDE 2D (contours)' }
+                            ],
+                            tips: ['fill=True pour mieux distinguer les groupes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.boxplot()',
+                        desc: 'Boîte à moustaches',
+                        details: {
+                            explanation: 'Affiche médiane, quartiles (boîte) et valeurs aberrantes (points). Compare les distributions.',
+                            syntax: 'sns.boxplot(data=df, x=cat, y=val, hue=group)',
+                            options: [
+                                { flag: 'x / y', desc: 'Variable catégorielle / numérique' },
+                                { flag: 'hue', desc: 'Groupement supplémentaire' },
+                                { flag: 'palette', desc: 'Palette de couleurs' },
+                                { flag: 'whis', desc: 'Étendue des moustaches (défaut: 1.5 IQR)' },
+                                { flag: 'showfliers', desc: 'Afficher les outliers' }
+                            ],
+                            examples: [
+                                { code: 'sns.boxplot(data=df, x="jour", y="ventes")', desc: 'Ventes par jour' },
+                                { code: 'sns.boxplot(df, x="categorie", y="prix", hue="magasin")', desc: 'Avec groupement' },
+                                { code: 'sns.boxplot(df, y="salaire", orient="h")', desc: 'Horizontal' }
+                            ],
+                            tips: ['Boîte = Q1 à Q3, trait = médiane, moustaches = 1.5×IQR'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.violinplot()',
+                        desc: 'Violin plot',
+                        details: {
+                            explanation: 'Combine boxplot et KDE: montre la distribution complète avec sa forme.',
+                            syntax: 'sns.violinplot(data=df, x=cat, y=val)',
+                            options: [
+                                { flag: 'split', desc: 'Diviser le violon par hue' },
+                                { flag: 'inner', desc: '"box", "quartile", "point", "stick"' },
+                                { flag: 'cut', desc: 'Extension au-delà des données' },
+                                { flag: 'bw', desc: 'Bandwidth du KDE' }
+                            ],
+                            examples: [
+                                { code: 'sns.violinplot(data=df, x="jour", y="tips")', desc: 'Distribution par jour' },
+                                { code: 'sns.violinplot(df, x="jour", y="tips", hue="sexe", split=True)', desc: 'Comparaison divisée' },
+                                { code: 'sns.violinplot(df, y="value", inner="quartile")', desc: 'Avec quartiles' }
+                            ],
+                            tips: ['split=True pour comparer 2 groupes sur le même violon'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'seaborn_cat',
+                title: 'Seaborn - Catégories',
+                icon: 'fa-tags',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'sns.countplot()',
+                        desc: 'Compter les occurrences',
+                        details: {
+                            explanation: 'Barplot comptant automatiquement le nombre d\'observations par catégorie.',
+                            syntax: 'sns.countplot(data=df, x=col, hue=group)',
+                            options: [
+                                { flag: 'x / y', desc: 'Variable catégorielle' },
+                                { flag: 'hue', desc: 'Groupement par couleur' },
+                                { flag: 'order', desc: 'Ordre des catégories' },
+                                { flag: 'palette', desc: 'Palette de couleurs' }
+                            ],
+                            examples: [
+                                { code: 'sns.countplot(data=df, x="classe")', desc: 'Comptage par classe' },
+                                { code: 'sns.countplot(df, y="pays", order=df["pays"].value_counts().index)', desc: 'Trié par fréquence' },
+                                { code: 'sns.countplot(df, x="jour", hue="fumeur")', desc: 'Groupé' }
+                            ],
+                            tips: ['Équivalent de df[col].value_counts().plot(kind="bar")'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.barplot()',
+                        desc: 'Barres avec agrégation',
+                        details: {
+                            explanation: 'Barplot affichant une statistique (moyenne par défaut) avec intervalle de confiance.',
+                            syntax: 'sns.barplot(data=df, x=cat, y=val, estimator=np.mean)',
+                            options: [
+                                { flag: 'estimator', desc: 'Fonction d\'agrégation (mean, median, sum...)' },
+                                { flag: 'errorbar', desc: '"ci" (95%), "sd", "se", ou None' },
+                                { flag: 'orient', desc: '"v" (vertical) ou "h" (horizontal)' },
+                                { flag: 'hue', desc: 'Variable de groupement' }
+                            ],
+                            examples: [
+                                { code: 'sns.barplot(data=df, x="jour", y="pourboire")', desc: 'Moyenne par jour' },
+                                { code: 'sns.barplot(df, x="jour", y="total", estimator=sum)', desc: 'Somme par jour' },
+                                { code: 'sns.barplot(df, x="jour", y="tips", errorbar="sd")', desc: 'Avec écart-type' }
+                            ],
+                            tips: ['Les barres d\'erreur montrent l\'intervalle de confiance à 95% par défaut'],
+                            warnings: ['Différent de countplot: ici on agrège une variable numérique']
+                        }
+                    },
+                    {
+                        cmd: 'sns.stripplot() / swarmplot()',
+                        desc: 'Points par catégorie',
+                        details: {
+                            explanation: 'Affiche tous les points individuels. stripplot les disperse aléatoirement, swarmplot les organise sans chevauchement.',
+                            syntax: 'sns.stripplot(data=df, x=cat, y=val)',
+                            options: [
+                                { flag: 'jitter', desc: 'Dispersion horizontale (stripplot)' },
+                                { flag: 'dodge', desc: 'Séparer les groupes (hue)' },
+                                { flag: 'size', desc: 'Taille des points' },
+                                { flag: 'alpha', desc: 'Transparence' }
+                            ],
+                            examples: [
+                                { code: 'sns.stripplot(data=df, x="jour", y="tips", alpha=0.5)', desc: 'Points dispersés' },
+                                { code: 'sns.swarmplot(data=df, x="jour", y="tips")', desc: 'Points organisés (sans chevauchement)' },
+                                { code: 'sns.boxplot(df, x="jour", y="tips"); sns.stripplot(df, x="jour", y="tips", color="black", alpha=0.3)', desc: 'Combiné avec boxplot' }
+                            ],
+                            tips: ['Combiner avec boxplot pour voir distribution ET points'],
+                            warnings: ['swarmplot lent sur grands datasets']
+                        }
+                    },
+                    {
+                        cmd: 'sns.catplot()',
+                        desc: 'Figure catégorielle multi-facettes',
+                        details: {
+                            explanation: 'Interface unifiée pour graphiques catégoriels avec possibilité de facettes (row/col).',
+                            syntax: 'sns.catplot(data=df, x=cat, y=val, kind="box", col=facet)',
+                            options: [
+                                { flag: 'kind', desc: '"strip", "swarm", "box", "violin", "bar", "count", "point"' },
+                                { flag: 'col / row', desc: 'Variable pour créer des facettes' },
+                                { flag: 'col_wrap', desc: 'Nombre de colonnes max' },
+                                { flag: 'height', desc: 'Hauteur de chaque facette' },
+                                { flag: 'aspect', desc: 'Ratio largeur/hauteur' }
+                            ],
+                            examples: [
+                                { code: 'sns.catplot(df, x="jour", y="tips", kind="box")', desc: 'Boxplot' },
+                                { code: 'sns.catplot(df, x="jour", y="tips", col="sexe", kind="violin")', desc: 'Violons par sexe' },
+                                { code: 'sns.catplot(df, x="jour", kind="count", col="fumeur")', desc: 'Comptage avec facettes' }
+                            ],
+                            tips: ['Retourne un FacetGrid, pas des axes Matplotlib'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'seaborn_rel',
+                title: 'Seaborn - Relations',
+                icon: 'fa-project-diagram',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'sns.scatterplot()',
+                        desc: 'Nuage de points avancé',
+                        details: {
+                            explanation: 'Scatter plot avec encodage sémantique via hue, size et style.',
+                            syntax: 'sns.scatterplot(data=df, x=col1, y=col2, hue=group, size=var)',
+                            options: [
+                                { flag: 'hue', desc: 'Variable pour la couleur' },
+                                { flag: 'size', desc: 'Variable pour la taille' },
+                                { flag: 'style', desc: 'Variable pour le marqueur' },
+                                { flag: 'palette', desc: 'Palette de couleurs' },
+                                { flag: 'sizes', desc: 'Plage de tailles (min, max)' }
+                            ],
+                            examples: [
+                                { code: 'sns.scatterplot(data=df, x="age", y="salaire")', desc: 'Simple' },
+                                { code: 'sns.scatterplot(df, x="age", y="salaire", hue="dept")', desc: 'Coloré par département' },
+                                { code: 'sns.scatterplot(df, x="x", y="y", hue="cat", size="val", sizes=(20, 200))', desc: 'Multi-encodage' }
+                            ],
+                            tips: ['Combiner hue + size + style pour 5 dimensions'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.lineplot()',
+                        desc: 'Graphique linéaire avec CI',
+                        details: {
+                            explanation: 'Tracé linéaire avec agrégation automatique et intervalle de confiance.',
+                            syntax: 'sns.lineplot(data=df, x=col1, y=col2, hue=group)',
+                            options: [
+                                { flag: 'hue', desc: 'Variable de groupement' },
+                                { flag: 'style', desc: 'Variable pour le style de ligne' },
+                                { flag: 'markers', desc: 'Ajouter des marqueurs' },
+                                { flag: 'errorbar', desc: '"ci", "sd", "se", "pi"' },
+                                { flag: 'estimator', desc: 'Fonction d\'agrégation' }
+                            ],
+                            examples: [
+                                { code: 'sns.lineplot(data=df, x="annee", y="ventes")', desc: 'Série temporelle' },
+                                { code: 'sns.lineplot(df, x="mois", y="ventes", hue="produit")', desc: 'Par produit' },
+                                { code: 'sns.lineplot(df, x="x", y="y", errorbar="sd")', desc: 'Avec écart-type' }
+                            ],
+                            tips: ['Agrège automatiquement si plusieurs y pour chaque x'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.regplot() / lmplot()',
+                        desc: 'Régression linéaire',
+                        details: {
+                            explanation: 'Scatter plot avec droite de régression et intervalle de confiance.',
+                            syntax: 'sns.regplot(data=df, x=col1, y=col2)',
+                            options: [
+                                { flag: 'ci', desc: 'Niveau de confiance (95 par défaut)' },
+                                { flag: 'order', desc: 'Ordre du polynôme (2 pour quadratique)' },
+                                { flag: 'lowess', desc: 'True pour régression locale' },
+                                { flag: 'robust', desc: 'True pour régression robuste' }
+                            ],
+                            examples: [
+                                { code: 'sns.regplot(data=df, x="age", y="salaire")', desc: 'Régression linéaire' },
+                                { code: 'sns.lmplot(df, x="age", y="salaire", hue="genre")', desc: 'Par groupe (FacetGrid)' },
+                                { code: 'sns.regplot(df, x="x", y="y", order=2)', desc: 'Régression polynomiale' }
+                            ],
+                            tips: ['regplot = axes level, lmplot = figure level (facettes)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.heatmap()',
+                        desc: 'Carte de chaleur',
+                        details: {
+                            explanation: 'Visualise une matrice 2D avec des couleurs. Idéal pour les corrélations.',
+                            syntax: 'sns.heatmap(data, annot=True, cmap="coolwarm")',
+                            options: [
+                                { flag: 'annot', desc: 'Afficher les valeurs' },
+                                { flag: 'fmt', desc: 'Format des annotations (".2f", "d")' },
+                                { flag: 'cmap', desc: 'Palette: "coolwarm", "viridis", "RdBu_r"' },
+                                { flag: 'vmin, vmax', desc: 'Limites de l\'échelle de couleurs' },
+                                { flag: 'center', desc: 'Valeur centrale (0 pour divergent)' },
+                                { flag: 'linewidths', desc: 'Largeur des séparateurs' }
+                            ],
+                            examples: [
+                                { code: 'sns.heatmap(df.corr(), annot=True, cmap="coolwarm")', desc: 'Matrice de corrélation' },
+                                { code: 'sns.heatmap(pivot_table, annot=True, fmt=".0f")', desc: 'Tableau croisé' },
+                                { code: 'sns.heatmap(corr, mask=np.triu(corr))', desc: 'Demi-matrice (triangle)' }
+                            ],
+                            tips: ['center=0 pour palettes divergentes (négatif/positif)', 'mask pour cacher des cellules'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.pairplot()',
+                        desc: 'Matrice de scatter plots',
+                        details: {
+                            explanation: 'Grille de graphiques pour explorer toutes les paires de variables. Diagonal = distribution.',
+                            syntax: 'sns.pairplot(df, hue=group, diag_kind="kde")',
+                            options: [
+                                { flag: 'hue', desc: 'Variable de groupement (couleurs)' },
+                                { flag: 'vars', desc: 'Liste des colonnes à inclure' },
+                                { flag: 'diag_kind', desc: '"hist" ou "kde" pour la diagonale' },
+                                { flag: 'kind', desc: '"scatter", "kde", "hist", "reg"' },
+                                { flag: 'corner', desc: 'True pour demi-matrice' }
+                            ],
+                            examples: [
+                                { code: 'sns.pairplot(df)', desc: 'Toutes les variables numériques' },
+                                { code: 'sns.pairplot(df, hue="species")', desc: 'Coloré par espèce' },
+                                { code: 'sns.pairplot(df, vars=["x", "y", "z"], diag_kind="kde")', desc: 'Variables sélectionnées' },
+                                { code: 'sns.pairplot(df, kind="reg", corner=True)', desc: 'Régression, demi-matrice' }
+                            ],
+                            tips: ['Excellent pour l\'exploration initiale des données'],
+                            warnings: ['Lent sur beaucoup de variables']
+                        }
+                    },
+                    {
+                        cmd: 'sns.jointplot()',
+                        desc: 'Distribution jointe',
+                        details: {
+                            explanation: 'Scatter plot central avec histogrammes marginaux pour voir la distribution bivariée.',
+                            syntax: 'sns.jointplot(data=df, x=col1, y=col2, kind="scatter")',
+                            options: [
+                                { flag: 'kind', desc: '"scatter", "kde", "hist", "hex", "reg"' },
+                                { flag: 'hue', desc: 'Variable de groupement' },
+                                { flag: 'height', desc: 'Taille de la figure' },
+                                { flag: 'ratio', desc: 'Ratio central/marginal' }
+                            ],
+                            examples: [
+                                { code: 'sns.jointplot(data=df, x="age", y="salaire")', desc: 'Scatter + histogrammes' },
+                                { code: 'sns.jointplot(df, x="x", y="y", kind="kde")', desc: 'KDE 2D avec marginaux' },
+                                { code: 'sns.jointplot(df, x="x", y="y", kind="hex")', desc: 'Hexbin (grands datasets)' }
+                            ],
+                            tips: ['kind="hex" efficace pour grands datasets'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'customize',
+                title: 'Personnalisation',
+                icon: 'fa-palette',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'plt.title() / xlabel() / ylabel()',
+                        desc: 'Titres et labels',
+                        details: {
+                            explanation: 'Ajoute titre et labels pour rendre le graphique compréhensible et professionnel.',
+                            syntax: 'plt.title("Titre", fontsize=14, fontweight="bold")',
+                            options: [
+                                { flag: 'fontsize', desc: 'Taille de la police' },
+                                { flag: 'fontweight', desc: '"bold", "normal", "light"' },
+                                { flag: 'color', desc: 'Couleur du texte' },
+                                { flag: 'loc', desc: '"left", "center", "right" (pour title)' },
+                                { flag: 'pad', desc: 'Espacement' }
+                            ],
+                            examples: [
+                                { code: 'plt.title("Ventes 2024", fontsize=16, fontweight="bold")', desc: 'Titre en gras' },
+                                { code: 'plt.xlabel("Mois", fontsize=12)', desc: 'Label axe X' },
+                                { code: 'plt.ylabel("Chiffre d\'affaires (€)")', desc: 'Label axe Y' },
+                                { code: 'ax.set_title("Titre"); ax.set_xlabel("X")', desc: 'Syntaxe objet' }
+                            ],
+                            tips: ['Syntaxe objet (ax.set_*) recommandée avec subplots'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.legend()',
+                        desc: 'Légende',
+                        details: {
+                            explanation: 'Affiche la légende pour identifier les différentes séries.',
+                            syntax: 'plt.legend(loc="best", fontsize=10)',
+                            options: [
+                                { flag: 'loc', desc: '"best", "upper right", "lower left", etc.' },
+                                { flag: 'fontsize', desc: 'Taille du texte' },
+                                { flag: 'title', desc: 'Titre de la légende' },
+                                { flag: 'ncol', desc: 'Nombre de colonnes' },
+                                { flag: 'frameon', desc: 'Afficher le cadre (True/False)' },
+                                { flag: 'bbox_to_anchor', desc: 'Position précise (x, y)' }
+                            ],
+                            examples: [
+                                { code: 'plt.plot(x, y, label="Série A"); plt.legend()', desc: 'Basique' },
+                                { code: 'plt.legend(loc="upper right", fontsize=10)', desc: 'Position et taille' },
+                                { code: 'plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")', desc: 'Hors du graphique' },
+                                { code: 'plt.legend(ncol=2, title="Groupes")', desc: 'En colonnes avec titre' }
+                            ],
+                            tips: ['Définir label= dans plot() pour que la légende s\'affiche'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.xlim() / plt.ylim()',
+                        desc: 'Limites des axes',
+                        details: {
+                            explanation: 'Définit les limites visibles des axes X et Y.',
+                            syntax: 'plt.xlim(left, right)',
+                            options: [],
+                            examples: [
+                                { code: 'plt.xlim(0, 100)', desc: 'X entre 0 et 100' },
+                                { code: 'plt.ylim(bottom=0)', desc: 'Y commence à 0' },
+                                { code: 'ax.set_xlim([0, 100]); ax.set_ylim([0, 50])', desc: 'Syntaxe objet' },
+                                { code: 'plt.axis([0, 100, 0, 50])', desc: 'xmin, xmax, ymin, ymax en une fois' }
+                            ],
+                            tips: ['plt.axis("equal") pour même échelle X et Y', 'plt.axis("off") pour cacher les axes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.xticks() / plt.yticks()',
+                        desc: 'Graduations des axes',
+                        details: {
+                            explanation: 'Personnalise les positions et labels des graduations.',
+                            syntax: 'plt.xticks(positions, labels, rotation=45)',
+                            options: [
+                                { flag: 'rotation', desc: 'Angle de rotation du texte' },
+                                { flag: 'fontsize', desc: 'Taille de la police' },
+                                { flag: 'ha', desc: 'Alignement horizontal ("right", "center")' }
+                            ],
+                            examples: [
+                                { code: 'plt.xticks([0, 1, 2], ["A", "B", "C"])', desc: 'Labels personnalisés' },
+                                { code: 'plt.xticks(rotation=45, ha="right")', desc: 'Rotation 45°' },
+                                { code: 'ax.set_xticks([0, 5, 10])', desc: 'Positions seulement' },
+                                { code: 'ax.set_xticklabels(["Jan", "Fév", "Mar"])', desc: 'Labels seulement' }
+                            ],
+                            tips: ['rotation=45 avec ha="right" pour labels longs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.annotate()',
+                        desc: 'Annotations et flèches',
+                        details: {
+                            explanation: 'Ajoute du texte avec optionnellement une flèche pointant vers un élément.',
+                            syntax: 'plt.annotate(text, xy=(x,y), xytext=(x2,y2), arrowprops={})',
+                            options: [
+                                { flag: 'xy', desc: 'Point cible de la flèche' },
+                                { flag: 'xytext', desc: 'Position du texte' },
+                                { flag: 'arrowprops', desc: 'Propriétés de la flèche' },
+                                { flag: 'fontsize', desc: 'Taille du texte' },
+                                { flag: 'ha, va', desc: 'Alignement horizontal/vertical' }
+                            ],
+                            examples: [
+                                { code: 'plt.annotate("Maximum", xy=(5, 10), xytext=(6, 12),\n            arrowprops=dict(arrowstyle="->"))', desc: 'Avec flèche' },
+                                { code: 'plt.text(5, 10, "Label", fontsize=12)', desc: 'Texte simple (sans flèche)' },
+                                { code: 'ax.annotate("A", (x, y), fontsize=9, ha="center")', desc: 'Centré sur le point' }
+                            ],
+                            tips: ['arrowstyle: "->", "-|>", "fancy", "wedge"'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.grid()',
+                        desc: 'Grille',
+                        details: {
+                            explanation: 'Ajoute une grille pour faciliter la lecture des valeurs.',
+                            syntax: 'plt.grid(True, which="major", linestyle="--", alpha=0.7)',
+                            options: [
+                                { flag: 'which', desc: '"major", "minor", "both"' },
+                                { flag: 'axis', desc: '"both", "x", "y"' },
+                                { flag: 'linestyle', desc: '"-", "--", ":", "-."' },
+                                { flag: 'alpha', desc: 'Transparence' },
+                                { flag: 'color', desc: 'Couleur' }
+                            ],
+                            examples: [
+                                { code: 'plt.grid(True)', desc: 'Grille simple' },
+                                { code: 'plt.grid(True, linestyle="--", alpha=0.5)', desc: 'Pointillé, transparent' },
+                                { code: 'plt.grid(axis="y")', desc: 'Lignes horizontales seulement' }
+                            ],
+                            tips: ['alpha=0.5 pour une grille discrète'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.savefig()',
+                        desc: 'Sauvegarder',
+                        details: {
+                            explanation: 'Exporte le graphique dans un fichier image ou vectoriel.',
+                            syntax: 'plt.savefig(filename, dpi=300, bbox_inches="tight")',
+                            options: [
+                                { flag: 'dpi', desc: 'Résolution (300 pour impression)' },
+                                { flag: 'bbox_inches', desc: '"tight" pour ajuster les marges' },
+                                { flag: 'transparent', desc: 'Fond transparent' },
+                                { flag: 'facecolor', desc: 'Couleur du fond' },
+                                { flag: 'format', desc: 'Format explicite ("png", "pdf", "svg")' }
+                            ],
+                            examples: [
+                                { code: 'plt.savefig("graph.png", dpi=300, bbox_inches="tight")', desc: 'PNG haute résolution' },
+                                { code: 'plt.savefig("graph.pdf")', desc: 'PDF vectoriel' },
+                                { code: 'plt.savefig("graph.svg")', desc: 'SVG (web)' },
+                                { code: 'plt.savefig("graph.png", transparent=True)', desc: 'Fond transparent' }
+                            ],
+                            tips: ['Appeler AVANT plt.show()', 'PDF/SVG pour documents (vectoriel)'],
+                            warnings: ['savefig() après show() produit une image vide']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'subplots',
+                title: 'Subplots & Layout',
+                icon: 'fa-th-large',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'fig, ax = plt.subplots()',
+                        desc: 'Créer figure et axes',
+                        details: {
+                            explanation: 'Méthode recommandée pour créer des graphiques. Retourne la figure et les axes.',
+                            syntax: 'fig, ax = plt.subplots(nrows, ncols, figsize=(w, h))',
+                            options: [
+                                { flag: 'nrows, ncols', desc: 'Grille de sous-graphiques' },
+                                { flag: 'figsize', desc: 'Taille (largeur, hauteur) en pouces' },
+                                { flag: 'sharex, sharey', desc: 'Partager les axes' },
+                                { flag: 'constrained_layout', desc: 'Ajustement automatique' },
+                                { flag: 'gridspec_kw', desc: 'Options de la grille' }
+                            ],
+                            examples: [
+                                { code: 'fig, ax = plt.subplots(figsize=(10, 6))', desc: 'Figure unique' },
+                                { code: 'fig, axes = plt.subplots(2, 2, figsize=(12, 10))', desc: 'Grille 2×2' },
+                                { code: 'fig, (ax1, ax2) = plt.subplots(1, 2)', desc: 'Deux côte à côte' },
+                                { code: 'axes[0, 0].plot(x, y)', desc: 'Tracer sur axes[row, col]' },
+                                { code: 'fig, axes = plt.subplots(2, 2, sharex=True)', desc: 'Axes X partagés' }
+                            ],
+                            tips: ['Utilisez ax.set_* au lieu de plt.* avec subplots', 'constrained_layout=True évite les chevauchements'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ax.set_*()',
+                        desc: 'Configurer un axe',
+                        details: {
+                            explanation: 'Méthodes pour personnaliser un axe spécifique dans une figure.',
+                            syntax: 'ax.set_title() / ax.set_xlabel() / ax.set_xlim() ...',
+                            options: [],
+                            examples: [
+                                { code: 'ax.set_title("Titre")', desc: 'Titre de l\'axe' },
+                                { code: 'ax.set_xlabel("X"); ax.set_ylabel("Y")', desc: 'Labels' },
+                                { code: 'ax.set_xlim(0, 100); ax.set_ylim(0, 50)', desc: 'Limites' },
+                                { code: 'ax.set(title="T", xlabel="X", ylabel="Y")', desc: 'Tout en une fois' },
+                                { code: 'ax.legend()', desc: 'Légende pour cet axe' }
+                            ],
+                            tips: ['ax.set() pour définir plusieurs propriétés en une ligne'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.tight_layout()',
+                        desc: 'Ajuster l\'espacement',
+                        details: {
+                            explanation: 'Ajuste automatiquement les espacements pour éviter les chevauchements.',
+                            syntax: 'plt.tight_layout(pad=1.0)',
+                            options: [
+                                { flag: 'pad', desc: 'Espacement global' },
+                                { flag: 'h_pad', desc: 'Espacement vertical' },
+                                { flag: 'w_pad', desc: 'Espacement horizontal' }
+                            ],
+                            examples: [
+                                { code: 'plt.tight_layout()', desc: 'Ajustement automatique' },
+                                { code: 'fig.tight_layout(pad=2.0)', desc: 'Plus d\'espace' },
+                                { code: 'plt.subplots(constrained_layout=True)', desc: 'Alternative moderne' }
+                            ],
+                            tips: ['constrained_layout=True dans subplots() est préféré'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'fig.add_subplot()',
+                        desc: 'Ajouter un subplot',
+                        details: {
+                            explanation: 'Ajoute un subplot à une figure existante avec notation row-col-index.',
+                            syntax: 'fig.add_subplot(nrows, ncols, index)',
+                            options: [],
+                            examples: [
+                                { code: 'fig = plt.figure(figsize=(10, 8))', desc: 'Créer figure vide' },
+                                { code: 'ax1 = fig.add_subplot(2, 2, 1)', desc: 'Premier d\'une grille 2×2' },
+                                { code: 'ax2 = fig.add_subplot(2, 2, 2)', desc: 'Deuxième' },
+                                { code: 'ax1 = fig.add_subplot(221)', desc: 'Notation compacte' }
+                            ],
+                            tips: ['Index commence à 1, pas 0'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'GridSpec',
+                        desc: 'Grille flexible',
+                        details: {
+                            explanation: 'Crée des layouts complexes avec des subplots de tailles différentes.',
+                            syntax: 'gs = GridSpec(nrows, ncols, figure=fig)',
+                            options: [
+                                { flag: 'width_ratios', desc: 'Ratios des largeurs de colonnes' },
+                                { flag: 'height_ratios', desc: 'Ratios des hauteurs de lignes' },
+                                { flag: 'hspace, wspace', desc: 'Espacement' }
+                            ],
+                            examples: [
+                                { code: 'from matplotlib.gridspec import GridSpec', desc: 'Import' },
+                                { code: 'fig = plt.figure(figsize=(10, 8))\ngs = GridSpec(2, 2, figure=fig)', desc: 'Créer grille' },
+                                { code: 'ax1 = fig.add_subplot(gs[0, :])', desc: 'Toute la première ligne' },
+                                { code: 'ax2 = fig.add_subplot(gs[1, 0])', desc: 'En bas à gauche' },
+                                { code: 'gs = GridSpec(2, 2, width_ratios=[2, 1])', desc: 'Colonne gauche 2× plus large' }
+                            ],
+                            tips: ['gs[0, :] = première ligne, toutes colonnes', 'gs[:, 0] = toutes lignes, première colonne'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'styles',
+                title: 'Styles & Thèmes',
+                icon: 'fa-paint-brush',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'plt.style.use()',
+                        desc: 'Appliquer un style',
+                        details: {
+                            explanation: 'Change le style global des graphiques. Matplotlib inclut plusieurs styles prédéfinis.',
+                            syntax: 'plt.style.use("style_name")',
+                            options: [],
+                            examples: [
+                                { code: 'plt.style.available', desc: 'Liste des styles disponibles' },
+                                { code: 'plt.style.use("seaborn-v0_8")', desc: 'Style Seaborn' },
+                                { code: 'plt.style.use("ggplot")', desc: 'Style R ggplot' },
+                                { code: 'plt.style.use("dark_background")', desc: 'Fond sombre' },
+                                { code: 'plt.style.use(["seaborn-v0_8", "custom.mplstyle"])', desc: 'Combiner styles' }
+                            ],
+                            tips: ['Styles: "seaborn-v0_8", "ggplot", "bmh", "fivethirtyeight", "dark_background"'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.set_theme()',
+                        desc: 'Thème Seaborn',
+                        details: {
+                            explanation: 'Configure le style, le contexte et la palette de Seaborn globalement.',
+                            syntax: 'sns.set_theme(style="darkgrid", context="paper", palette="deep")',
+                            options: [
+                                { flag: 'style', desc: '"darkgrid", "whitegrid", "dark", "white", "ticks"' },
+                                { flag: 'context', desc: '"paper", "notebook", "talk", "poster"' },
+                                { flag: 'palette', desc: 'Palette de couleurs' },
+                                { flag: 'font_scale', desc: 'Facteur d\'échelle des polices' }
+                            ],
+                            examples: [
+                                { code: 'sns.set_theme()', desc: 'Thème par défaut' },
+                                { code: 'sns.set_theme(style="whitegrid")', desc: 'Grille sur fond blanc' },
+                                { code: 'sns.set_theme(context="talk", font_scale=1.2)', desc: 'Pour présentation' },
+                                { code: 'sns.set_theme(style="ticks", palette="pastel")', desc: 'Style épuré, couleurs pastel' }
+                            ],
+                            tips: ['context="talk" ou "poster" pour présentations (plus grand)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Palettes de couleurs',
+                        desc: 'Choisir les couleurs',
+                        details: {
+                            explanation: 'Seaborn offre plusieurs palettes pour des visualisations efficaces.',
+                            syntax: 'sns.color_palette("name", n_colors)',
+                            options: [
+                                { flag: 'Qualitatives', desc: '"deep", "muted", "bright", "pastel", "dark"' },
+                                { flag: 'Séquentielles', desc: '"Blues", "Greens", "Reds", "viridis", "magma"' },
+                                { flag: 'Divergentes', desc: '"coolwarm", "RdBu", "BrBG"' }
+                            ],
+                            examples: [
+                                { code: 'sns.color_palette("husl", 8)', desc: '8 couleurs distinctes' },
+                                { code: 'sns.color_palette("Blues", as_cmap=True)', desc: 'Comme colormap' },
+                                { code: 'sns.set_palette("pastel")', desc: 'Définir par défaut' },
+                                { code: 'sns.palplot(sns.color_palette("viridis", 10))', desc: 'Visualiser une palette' }
+                            ],
+                            tips: ['Qualitatives: catégories distinctes', 'Séquentielles: valeurs ordonnées', 'Divergentes: écarts autour d\'un centre'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'rcParams',
+                        desc: 'Configuration globale',
+                        details: {
+                            explanation: 'Modifie les paramètres par défaut de Matplotlib pour tous les graphiques.',
+                            syntax: 'plt.rcParams["param"] = value',
+                            options: [],
+                            examples: [
+                                { code: 'plt.rcParams["figure.figsize"] = [10, 6]', desc: 'Taille par défaut' },
+                                { code: 'plt.rcParams["font.size"] = 12', desc: 'Taille de police' },
+                                { code: 'plt.rcParams["axes.labelsize"] = 14', desc: 'Taille des labels' },
+                                { code: 'plt.rcParams["figure.dpi"] = 100', desc: 'Résolution' },
+                                { code: 'plt.rcdefaults()', desc: 'Réinitialiser' }
+                            ],
+                            tips: ['Mettre au début du script pour affecter tous les graphiques'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'plotly',
+                title: 'Plotly (interactif)',
+                icon: 'fa-hand-pointer',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'px.scatter() / px.line()',
+                        desc: 'Graphiques de base',
+                        details: {
+                            explanation: 'Plotly Express crée des graphiques interactifs (zoom, hover) en une ligne.',
+                            syntax: 'px.scatter(df, x=col1, y=col2, color=group)',
+                            options: [
+                                { flag: 'color', desc: 'Variable pour la couleur' },
+                                { flag: 'size', desc: 'Variable pour la taille' },
+                                { flag: 'hover_data', desc: 'Colonnes affichées au survol' },
+                                { flag: 'animation_frame', desc: 'Variable pour animation' },
+                                { flag: 'facet_col', desc: 'Facettes en colonnes' }
+                            ],
+                            examples: [
+                                { code: 'import plotly.express as px', desc: 'Import' },
+                                { code: 'px.scatter(df, x="x", y="y")', desc: 'Scatter simple' },
+                                { code: 'px.scatter(df, x="x", y="y", color="cat", size="val")', desc: 'Multi-encodage' },
+                                { code: 'px.line(df, x="date", y="value", color="serie")', desc: 'Lignes' },
+                                { code: 'fig = px.scatter(...); fig.show()', desc: 'Afficher' }
+                            ],
+                            tips: ['Installation: pip install plotly', 'Hover, zoom et pan par défaut'],
+                            warnings: ['Bibliothèque externe: pip install plotly']
+                        }
+                    },
+                    {
+                        cmd: 'px.bar() / px.histogram()',
+                        desc: 'Barres et histogrammes',
+                        details: {
+                            explanation: 'Graphiques interactifs pour données catégorielles et distributions.',
+                            syntax: 'px.bar(df, x=cat, y=val, color=group)',
+                            options: [
+                                { flag: 'barmode', desc: '"group", "stack", "relative"' },
+                                { flag: 'text_auto', desc: 'Afficher les valeurs sur les barres' },
+                                { flag: 'nbins', desc: 'Nombre d\'intervalles (histogram)' }
+                            ],
+                            examples: [
+                                { code: 'px.bar(df, x="pays", y="ventes", color="produit")', desc: 'Barres groupées' },
+                                { code: 'px.bar(df, x="pays", y="ventes", barmode="stack")', desc: 'Barres empilées' },
+                                { code: 'px.histogram(df, x="age", nbins=30)', desc: 'Histogramme' },
+                                { code: 'px.histogram(df, x="age", color="genre")', desc: 'Histogramme par groupe' }
+                            ],
+                            tips: ['text_auto=True pour afficher les valeurs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'px.box() / px.violin()',
+                        desc: 'Distributions',
+                        details: {
+                            explanation: 'Boxplots et violin plots interactifs.',
+                            syntax: 'px.box(df, x=cat, y=val, color=group)',
+                            options: [
+                                { flag: 'points', desc: '"all", "outliers", "suspectedoutliers", False' },
+                                { flag: 'notched', desc: 'Encoche pour intervalle de confiance' }
+                            ],
+                            examples: [
+                                { code: 'px.box(df, x="jour", y="tips", color="fumeur")', desc: 'Boxplot' },
+                                { code: 'px.box(df, x="jour", y="tips", points="all")', desc: 'Avec tous les points' },
+                                { code: 'px.violin(df, x="jour", y="tips", box=True)', desc: 'Violin avec boxplot' }
+                            ],
+                            tips: ['Survoler pour voir les statistiques détaillées'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'fig.update_*()',
+                        desc: 'Personnaliser',
+                        details: {
+                            explanation: 'Méthodes pour personnaliser les figures Plotly.',
+                            syntax: 'fig.update_layout(title="...", template="...")',
+                            options: [
+                                { flag: 'template', desc: '"plotly_dark", "ggplot2", "seaborn", "simple_white"' },
+                                { flag: 'title', desc: 'Titre du graphique' },
+                                { flag: 'xaxis_title', desc: 'Titre de l\'axe X' }
+                            ],
+                            examples: [
+                                { code: 'fig.update_layout(title="Mon graphique")', desc: 'Ajouter titre' },
+                                { code: 'fig.update_layout(template="plotly_dark")', desc: 'Thème sombre' },
+                                { code: 'fig.update_traces(marker_size=10)', desc: 'Modifier les traces' },
+                                { code: 'fig.write_html("graph.html")', desc: 'Sauvegarder HTML interactif' },
+                                { code: 'fig.write_image("graph.png")', desc: 'Sauvegarder image (kaleido)' }
+                            ],
+                            tips: ['write_html() pour partager des graphiques interactifs'],
+                            warnings: ['write_image() nécessite pip install kaleido']
+                        }
+                    },
+                    {
+                        cmd: 'Animations',
+                        desc: 'Graphiques animés',
+                        details: {
+                            explanation: 'Créer des animations avec animation_frame pour montrer l\'évolution des données.',
+                            syntax: 'px.scatter(df, animation_frame=col, animation_group=id)',
+                            options: [
+                                { flag: 'animation_frame', desc: 'Variable pour les frames (ex: année)' },
+                                { flag: 'animation_group', desc: 'Identifiant des entités animées' },
+                                { flag: 'range_x, range_y', desc: 'Fixer les limites des axes' }
+                            ],
+                            examples: [
+                                { code: 'px.scatter(df, x="gdp", y="life_exp", animation_frame="year",\n           size="pop", color="continent", hover_name="country",\n           range_x=[0, 50000], range_y=[25, 90])', desc: 'Gapminder style' },
+                                { code: 'px.bar(df, x="pays", y="ventes", animation_frame="annee")', desc: 'Barres animées' }
+                            ],
+                            tips: ['Fixer range_x/y pour éviter les sauts d\'axes'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: '3d',
+                title: 'Graphiques 3D',
+                icon: 'fa-cube',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'ax = fig.add_subplot(projection="3d")',
+                        desc: 'Créer un axe 3D',
+                        details: {
+                            explanation: 'Matplotlib supporte les graphiques 3D via mpl_toolkits.mplot3d.',
+                            syntax: 'from mpl_toolkits.mplot3d import Axes3D\nax = fig.add_subplot(projection="3d")',
+                            options: [],
+                            examples: [
+                                { code: 'import matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\n\nfig = plt.figure(figsize=(10, 8))\nax = fig.add_subplot(111, projection="3d")', desc: 'Créer figure 3D' },
+                                { code: 'fig, ax = plt.subplots(subplot_kw={"projection": "3d"})', desc: 'Alternative avec subplots' }
+                            ],
+                            tips: ['L\'import de Axes3D active la projection 3D'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ax.scatter3D(x, y, z)',
+                        desc: 'Nuage de points 3D',
+                        details: {
+                            explanation: 'Affiche des points dans un espace tridimensionnel.',
+                            syntax: 'ax.scatter3D(x, y, z, c=colors, cmap="viridis")',
+                            options: [
+                                { flag: 'c', desc: 'Couleur(s) des points' },
+                                { flag: 's', desc: 'Taille des points' },
+                                { flag: 'cmap', desc: 'Palette de couleurs' },
+                                { flag: 'alpha', desc: 'Transparence' }
+                            ],
+                            examples: [
+                                { code: 'ax.scatter3D(x, y, z, c=z, cmap="viridis")', desc: 'Points colorés par altitude' },
+                                { code: 'ax.scatter3D(x, y, z, c=labels, cmap="Set1", s=50)', desc: 'Coloré par catégorie' }
+                            ],
+                            tips: ['Cliquez-glissez pour faire pivoter la vue'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ax.plot_surface(X, Y, Z)',
+                        desc: 'Surface 3D',
+                        details: {
+                            explanation: 'Trace une surface à partir d\'une grille 2D de valeurs Z.',
+                            syntax: 'ax.plot_surface(X, Y, Z, cmap="coolwarm")',
+                            options: [
+                                { flag: 'cmap', desc: 'Palette de couleurs' },
+                                { flag: 'alpha', desc: 'Transparence' },
+                                { flag: 'rstride, cstride', desc: 'Pas d\'échantillonnage lignes/colonnes' },
+                                { flag: 'antialiased', desc: 'Lissage des bords' }
+                            ],
+                            examples: [
+                                { code: 'import numpy as np\nX = np.linspace(-5, 5, 50)\nY = np.linspace(-5, 5, 50)\nX, Y = np.meshgrid(X, Y)\nZ = np.sin(np.sqrt(X**2 + Y**2))\n\nax.plot_surface(X, Y, Z, cmap="coolwarm")', desc: 'Surface sinusoïdale' },
+                                { code: 'ax.plot_wireframe(X, Y, Z, color="black")', desc: 'Surface en fil de fer' }
+                            ],
+                            tips: ['Utilisez np.meshgrid pour créer les grilles X, Y'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ax.contour3D(X, Y, Z)',
+                        desc: 'Contours 3D',
+                        details: {
+                            explanation: 'Affiche des lignes de niveau en 3D.',
+                            syntax: 'ax.contour3D(X, Y, Z, levels, cmap)',
+                            options: [
+                                { flag: 'levels', desc: 'Nombre de niveaux ou liste de valeurs' },
+                                { flag: 'cmap', desc: 'Palette de couleurs' }
+                            ],
+                            examples: [
+                                { code: 'ax.contour3D(X, Y, Z, 50, cmap="viridis")', desc: '50 niveaux de contour' },
+                                { code: 'ax.contourf(X, Y, Z, cmap="RdBu")\nplt.colorbar()', desc: 'Contours remplis (2D)' }
+                            ],
+                            tips: ['contour3D en 3D, contour/contourf en 2D'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ax.plot3D(x, y, z)',
+                        desc: 'Ligne 3D',
+                        details: {
+                            explanation: 'Trace une ligne/courbe dans l\'espace 3D.',
+                            syntax: 'ax.plot3D(x, y, z, color, linewidth)',
+                            options: [],
+                            examples: [
+                                { code: 't = np.linspace(0, 10*np.pi, 1000)\nx = np.sin(t)\ny = np.cos(t)\nz = t\nax.plot3D(x, y, z, "blue")', desc: 'Hélice 3D' },
+                                { code: 'ax.plot3D(x, y, z, "r-", linewidth=2, label="Trajectoire")', desc: 'Avec style' }
+                            ],
+                            tips: ['Parfait pour visualiser des trajectoires'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ax.bar3d(x, y, z, dx, dy, dz)',
+                        desc: 'Barres 3D',
+                        details: {
+                            explanation: 'Crée un diagramme à barres en 3D.',
+                            syntax: 'ax.bar3d(x, y, z, dx, dy, dz, color)',
+                            options: [
+                                { flag: 'x, y, z', desc: 'Positions des barres' },
+                                { flag: 'dx, dy, dz', desc: 'Dimensions des barres' }
+                            ],
+                            examples: [
+                                { code: 'x = [1, 2, 3, 1, 2, 3]\ny = [1, 1, 1, 2, 2, 2]\nz = np.zeros(6)\ndx = dy = 0.5\ndz = [1, 2, 3, 2, 3, 4]\n\nax.bar3d(x, y, z, dx, dy, dz, color="cyan")', desc: 'Barres 3D basiques' }
+                            ],
+                            tips: ['z=0 et dz=hauteur pour barres partant du sol'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ax.view_init(elev, azim)',
+                        desc: 'Changer l\'angle de vue',
+                        details: {
+                            explanation: 'Définit l\'angle d\'élévation et d\'azimut pour la vue 3D.',
+                            syntax: 'ax.view_init(elev=30, azim=45)',
+                            options: [
+                                { flag: 'elev', desc: 'Élévation en degrés (haut/bas)' },
+                                { flag: 'azim', desc: 'Azimut en degrés (rotation horizontale)' }
+                            ],
+                            examples: [
+                                { code: 'ax.view_init(elev=30, azim=45)', desc: 'Vue standard' },
+                                { code: 'ax.view_init(elev=90, azim=0)', desc: 'Vue du dessus' },
+                                { code: 'ax.view_init(elev=0, azim=0)', desc: 'Vue de face' }
+                            ],
+                            tips: ['Expérimentez pour trouver le meilleur angle'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'advanced',
+                title: 'Graphiques avancés',
+                icon: 'fa-chart-pie',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'plt.polar() / ax.set_theta_*',
+                        desc: 'Graphique polaire / Radar',
+                        details: {
+                            explanation: 'Graphiques en coordonnées polaires pour données cycliques ou comparaisons radar.',
+                            syntax: 'ax = plt.subplot(projection="polar")',
+                            options: [
+                                { flag: 'set_theta_offset', desc: 'Décaler l\'origine angulaire' },
+                                { flag: 'set_theta_direction', desc: '-1 pour sens horaire' },
+                                { flag: 'set_rlabel_position', desc: 'Position des labels radiaux' }
+                            ],
+                            examples: [
+                                { code: 'angles = np.linspace(0, 2*np.pi, 6, endpoint=False)\nvaleurs = [4, 3, 5, 2, 4, 3]\n\nax = plt.subplot(projection="polar")\nax.fill(angles, valeurs, alpha=0.3)\nax.plot(angles, valeurs, "o-")', desc: 'Radar simple' },
+                                { code: '# Radar avec catégories\ncategories = ["Force", "Vitesse", "Endurance", "Agilité", "Intelligence"]\nN = len(categories)\nangles = np.linspace(0, 2*np.pi, N, endpoint=False).tolist()\nangles += angles[:1]  # Fermer le polygone\nvaleurs += valeurs[:1]\n\nax.set_xticks(angles[:-1])\nax.set_xticklabels(categories)', desc: 'Radar avec labels' }
+                            ],
+                            tips: ['Fermez le polygone en répétant la première valeur'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.imshow(matrix)',
+                        desc: 'Afficher une matrice/image',
+                        details: {
+                            explanation: 'Affiche une matrice 2D comme une image avec des couleurs.',
+                            syntax: 'plt.imshow(data, cmap, aspect, interpolation)',
+                            options: [
+                                { flag: 'cmap', desc: 'Palette de couleurs' },
+                                { flag: 'aspect', desc: '"auto", "equal" ou ratio' },
+                                { flag: 'interpolation', desc: '"nearest", "bilinear", "bicubic"' },
+                                { flag: 'vmin, vmax', desc: 'Limites de l\'échelle' }
+                            ],
+                            examples: [
+                                { code: 'matrix = np.random.rand(10, 10)\nplt.imshow(matrix, cmap="hot")\nplt.colorbar()', desc: 'Matrice aléatoire' },
+                                { code: 'from PIL import Image\nimg = Image.open("photo.jpg")\nplt.imshow(img)', desc: 'Afficher une image' },
+                                { code: 'plt.imshow(confusion_matrix, cmap="Blues")\nplt.colorbar()', desc: 'Matrice de confusion' }
+                            ],
+                            tips: ['aspect="auto" pour éviter la distorsion'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.stackplot(x, y1, y2, ...)',
+                        desc: 'Graphique en aires empilées',
+                        details: {
+                            explanation: 'Empile plusieurs séries de données pour montrer la composition totale.',
+                            syntax: 'plt.stackplot(x, y1, y2, ..., labels, colors)',
+                            options: [
+                                { flag: 'labels', desc: 'Noms des séries pour la légende' },
+                                { flag: 'colors', desc: 'Couleurs des aires' },
+                                { flag: 'baseline', desc: '"zero", "sym", "wiggle"' }
+                            ],
+                            examples: [
+                                { code: 'x = [1, 2, 3, 4, 5]\ny1 = [1, 2, 3, 4, 5]\ny2 = [2, 3, 4, 5, 6]\ny3 = [1, 1, 1, 1, 1]\n\nplt.stackplot(x, y1, y2, y3, labels=["A", "B", "C"])\nplt.legend(loc="upper left")', desc: 'Aires empilées' }
+                            ],
+                            tips: ['Idéal pour montrer l\'évolution de parts de marché'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.errorbar(x, y, yerr)',
+                        desc: 'Graphique avec barres d\'erreur',
+                        details: {
+                            explanation: 'Affiche des points avec des barres d\'erreur verticales et/ou horizontales.',
+                            syntax: 'plt.errorbar(x, y, yerr, xerr, fmt)',
+                            options: [
+                                { flag: 'yerr', desc: 'Erreur verticale (scalaire ou array)' },
+                                { flag: 'xerr', desc: 'Erreur horizontale' },
+                                { flag: 'fmt', desc: 'Format des points ("o", "s", etc.)' },
+                                { flag: 'capsize', desc: 'Taille des barres horizontales' },
+                                { flag: 'ecolor', desc: 'Couleur des barres d\'erreur' }
+                            ],
+                            examples: [
+                                { code: 'x = [1, 2, 3, 4]\ny = [10, 20, 15, 25]\nerr = [1, 2, 1.5, 3]\n\nplt.errorbar(x, y, yerr=err, fmt="o", capsize=5)', desc: 'Erreurs symétriques' },
+                                { code: 'plt.errorbar(x, y, yerr=[err_low, err_high], fmt="s")', desc: 'Erreurs asymétriques' }
+                            ],
+                            tips: ['yerr=[bas, haut] pour erreurs asymétriques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.stem(x, y)',
+                        desc: 'Graphique en tiges (stem plot)',
+                        details: {
+                            explanation: 'Affiche des lignes verticales depuis une ligne de base vers les points de données.',
+                            syntax: 'plt.stem(x, y, linefmt, markerfmt, basefmt)',
+                            options: [
+                                { flag: 'linefmt', desc: 'Format des lignes ("C0-")' },
+                                { flag: 'markerfmt', desc: 'Format des marqueurs ("C0o")' },
+                                { flag: 'basefmt', desc: 'Format de la ligne de base ("k-")' }
+                            ],
+                            examples: [
+                                { code: 'x = np.linspace(0, 2*np.pi, 20)\ny = np.sin(x)\nplt.stem(x, y)', desc: 'Stem plot basique' },
+                                { code: 'plt.stem(x, y, linefmt="grey", markerfmt="D", basefmt="r-")', desc: 'Personnalisé' }
+                            ],
+                            tips: ['Idéal pour données discrètes ou signaux'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.quiver(X, Y, U, V)',
+                        desc: 'Champ de vecteurs',
+                        details: {
+                            explanation: 'Affiche des flèches représentant un champ vectoriel 2D.',
+                            syntax: 'plt.quiver(X, Y, U, V, C)',
+                            options: [
+                                { flag: 'X, Y', desc: 'Positions des flèches' },
+                                { flag: 'U, V', desc: 'Composantes des vecteurs' },
+                                { flag: 'C', desc: 'Couleurs selon magnitude' },
+                                { flag: 'scale', desc: 'Échelle des flèches' }
+                            ],
+                            examples: [
+                                { code: 'X, Y = np.meshgrid(np.arange(0, 10), np.arange(0, 10))\nU = np.cos(X)\nV = np.sin(Y)\n\nplt.quiver(X, Y, U, V)', desc: 'Champ vectoriel' },
+                                { code: 'plt.streamplot(X, Y, U, V)', desc: 'Lignes de courant (alternative)' }
+                            ],
+                            tips: ['streamplot pour des lignes continues au lieu de flèches'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ax.axhline() / ax.axvline()',
+                        desc: 'Lignes de référence',
+                        details: {
+                            explanation: 'Ajoute des lignes horizontales ou verticales de référence.',
+                            syntax: 'ax.axhline(y=0, color="r", linestyle="--")',
+                            options: [
+                                { flag: 'y / x', desc: 'Position de la ligne' },
+                                { flag: 'color', desc: 'Couleur' },
+                                { flag: 'linestyle', desc: 'Style de ligne' },
+                                { flag: 'xmin, xmax', desc: 'Étendue (0-1, relatif)' }
+                            ],
+                            examples: [
+                                { code: 'plt.plot(x, y)\nplt.axhline(y=0, color="r", linestyle="--", label="Zéro")\nplt.axvline(x=5, color="g", linestyle=":", label="Seuil")', desc: 'Lignes de référence' },
+                                { code: 'plt.axhspan(ymin=2, ymax=4, alpha=0.3, color="yellow")', desc: 'Bande horizontale' }
+                            ],
+                            tips: ['axhspan/axvspan pour des bandes colorées'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'plt.table()',
+                        desc: 'Ajouter un tableau au graphique',
+                        details: {
+                            explanation: 'Intègre un tableau de données directement dans la figure.',
+                            syntax: 'plt.table(cellText, rowLabels, colLabels, loc)',
+                            options: [
+                                { flag: 'cellText', desc: 'Contenu des cellules (2D list)' },
+                                { flag: 'rowLabels', desc: 'Labels des lignes' },
+                                { flag: 'colLabels', desc: 'Labels des colonnes' },
+                                { flag: 'loc', desc: 'Position: "bottom", "top", "center"' }
+                            ],
+                            examples: [
+                                { code: 'data = [[1, 2, 3], [4, 5, 6]]\nplt.table(cellText=data,\n         rowLabels=["Ligne 1", "Ligne 2"],\n         colLabels=["A", "B", "C"],\n         loc="bottom")\nplt.subplots_adjust(bottom=0.3)', desc: 'Tableau sous le graphique' }
+                            ],
+                            tips: ['Ajustez les marges avec subplots_adjust()'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'seaborn_stat',
+                title: 'Seaborn - Statistiques',
+                icon: 'fa-calculator',
+                color: 'border-l-4 border-lime-500',
+                commands: [
+                    {
+                        cmd: 'sns.displot()',
+                        desc: 'Distribution avec facettes',
+                        details: {
+                            explanation: 'Interface figure-level pour visualiser des distributions avec support des facettes.',
+                            syntax: 'sns.displot(data, x, hue, kind, col, row)',
+                            options: [
+                                { flag: 'kind', desc: '"hist", "kde", "ecdf"' },
+                                { flag: 'col / row', desc: 'Variables de facettes' },
+                                { flag: 'rug', desc: 'Ajouter des traits pour chaque point' },
+                                { flag: 'stat', desc: '"count", "density", "probability"' }
+                            ],
+                            examples: [
+                                { code: 'sns.displot(df, x="age", kind="kde", hue="genre")', desc: 'KDE par genre' },
+                                { code: 'sns.displot(df, x="salaire", col="departement", kind="hist")', desc: 'Histogrammes en facettes' },
+                                { code: 'sns.displot(df, x="score", kind="ecdf")', desc: 'Distribution cumulative' }
+                            ],
+                            tips: ['ecdf = Empirical Cumulative Distribution Function'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.ecdfplot()',
+                        desc: 'Distribution cumulative',
+                        details: {
+                            explanation: 'Affiche la fonction de répartition empirique (ECDF).',
+                            syntax: 'sns.ecdfplot(data, x, hue, stat)',
+                            options: [
+                                { flag: 'stat', desc: '"proportion" (défaut) ou "count"' },
+                                { flag: 'complementary', desc: 'True pour 1-ECDF' }
+                            ],
+                            examples: [
+                                { code: 'sns.ecdfplot(data=df, x="age")', desc: 'ECDF simple' },
+                                { code: 'sns.ecdfplot(df, x="salaire", hue="niveau")', desc: 'Par groupe' }
+                            ],
+                            tips: ['Utile pour comparer des distributions et trouver des percentiles'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.rugplot()',
+                        desc: 'Traits marginaux',
+                        details: {
+                            explanation: 'Ajoute des petits traits verticaux pour chaque observation.',
+                            syntax: 'sns.rugplot(data, x, height)',
+                            options: [
+                                { flag: 'height', desc: 'Hauteur des traits (0-1)' },
+                                { flag: 'expand_margins', desc: 'Agrandir les marges' }
+                            ],
+                            examples: [
+                                { code: 'sns.kdeplot(data=df, x="age")\nsns.rugplot(data=df, x="age", height=0.05)', desc: 'KDE avec rug' }
+                            ],
+                            tips: ['Combine bien avec kdeplot pour voir les données brutes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.residplot()',
+                        desc: 'Graphique des résidus',
+                        details: {
+                            explanation: 'Affiche les résidus d\'une régression pour diagnostiquer le modèle.',
+                            syntax: 'sns.residplot(data, x, y, lowess)',
+                            options: [
+                                { flag: 'lowess', desc: 'True pour ajouter courbe lissée' },
+                                { flag: 'order', desc: 'Ordre du polynôme' }
+                            ],
+                            examples: [
+                                { code: 'sns.residplot(data=df, x="x", y="y", lowess=True)', desc: 'Résidus avec lissage' }
+                            ],
+                            tips: ['Résidus aléatoires autour de 0 = bon modèle'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.clustermap()',
+                        desc: 'Heatmap avec clustering',
+                        details: {
+                            explanation: 'Heatmap avec dendrogrammes montrant le clustering hiérarchique.',
+                            syntax: 'sns.clustermap(data, method, cmap, standard_scale)',
+                            options: [
+                                { flag: 'method', desc: 'Méthode de linkage: "average", "single", "complete"' },
+                                { flag: 'metric', desc: 'Distance: "euclidean", "correlation"' },
+                                { flag: 'standard_scale', desc: '0 pour lignes, 1 pour colonnes' },
+                                { flag: 'row_cluster / col_cluster', desc: 'Activer/désactiver le clustering' }
+                            ],
+                            examples: [
+                                { code: 'sns.clustermap(df.corr(), cmap="coolwarm", annot=True)', desc: 'Corrélations clustérisées' },
+                                { code: 'sns.clustermap(matrix, standard_scale=1, cmap="viridis")', desc: 'Normalisation par colonne' }
+                            ],
+                            tips: ['Révèle les groupes de variables similaires'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.FacetGrid()',
+                        desc: 'Grille de facettes personnalisée',
+                        details: {
+                            explanation: 'Crée une grille de sous-graphiques basée sur des variables catégorielles.',
+                            syntax: 'g = sns.FacetGrid(df, col, row, hue)\ng.map(plt.hist, "column")',
+                            options: [
+                                { flag: 'col / row', desc: 'Variables pour les facettes' },
+                                { flag: 'hue', desc: 'Variable de couleur' },
+                                { flag: 'col_wrap', desc: 'Nombre de colonnes max' },
+                                { flag: 'height', desc: 'Hauteur de chaque facette' },
+                                { flag: 'aspect', desc: 'Ratio largeur/hauteur' }
+                            ],
+                            examples: [
+                                { code: 'g = sns.FacetGrid(df, col="time", row="sex")\ng.map(plt.hist, "total_bill")', desc: 'Histogrammes en grille' },
+                                { code: 'g = sns.FacetGrid(df, col="day", hue="smoker")\ng.map(plt.scatter, "total_bill", "tip")\ng.add_legend()', desc: 'Scatter en facettes' }
+                            ],
+                            tips: ['map_dataframe pour des fonctions prenant un DataFrame'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'sns.PairGrid()',
+                        desc: 'Grille de paires personnalisée',
+                        details: {
+                            explanation: 'Version personnalisable de pairplot pour contrôler chaque type de graphique.',
+                            syntax: 'g = sns.PairGrid(df)\ng.map_upper(sns.scatterplot)\ng.map_lower(sns.kdeplot)\ng.map_diag(sns.histplot)',
+                            options: [
+                                { flag: 'map_upper', desc: 'Graphique triangle supérieur' },
+                                { flag: 'map_lower', desc: 'Graphique triangle inférieur' },
+                                { flag: 'map_diag', desc: 'Graphique diagonal' }
+                            ],
+                            examples: [
+                                { code: 'g = sns.PairGrid(df, hue="species")\ng.map_upper(sns.scatterplot)\ng.map_lower(sns.kdeplot, fill=True)\ng.map_diag(sns.histplot)\ng.add_legend()', desc: 'Grille mixte' }
+                            ],
+                            tips: ['Plus flexible que pairplot pour des visualisations complexes'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

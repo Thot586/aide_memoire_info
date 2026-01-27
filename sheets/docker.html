@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Docker : gestion des conteneurs, images et Docker Compose.">
+    <title>Docker Mémo - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-sky-500/20 mb-4 icon-glow">
+                    <i class="fab fa-docker text-3xl text-sky-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Docker Mémo</h1>
+                <p class="text-slate-400">Gestion des conteneurs, images et Dockerfile de base</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'images',
+                title: 'Images',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-sky-500',
+                commands: [
+                    {
+                        cmd: 'docker build -t nom:tag .',
+                        desc: 'Construire une image',
+                        details: {
+                            explanation: 'Construit une image Docker à partir d\'un Dockerfile dans le répertoire courant.',
+                            syntax: 'docker build [options] chemin',
+                            options: [
+                                { flag: '-t nom:tag', desc: 'Nommer et taguer l\'image' },
+                                { flag: '-f Dockerfile', desc: 'Spécifier un Dockerfile différent' },
+                                { flag: '--no-cache', desc: 'Ne pas utiliser le cache' }
+                            ],
+                            examples: [
+                                { code: 'docker build -t monapp:1.0 .', desc: 'Build avec tag' },
+                                { code: 'docker build -t monapp:latest --no-cache .', desc: 'Build sans cache' }
+                            ],
+                            tips: ['Le point "." à la fin indique le contexte de build'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'docker images',
+                        desc: 'Lister les images',
+                        details: {
+                            explanation: 'Affiche toutes les images Docker présentes localement.',
+                            syntax: 'docker images [options]',
+                            options: [
+                                { flag: '-a', desc: 'Afficher toutes les images (y compris intermédiaires)' },
+                                { flag: '-q', desc: 'Afficher uniquement les IDs' }
+                            ],
+                            examples: [
+                                { code: 'docker images', desc: 'Liste des images' },
+                                { code: 'docker images -q', desc: 'IDs seulement' },
+                                { code: 'docker rmi image_id', desc: 'Supprimer une image' }
+                            ],
+                            tips: ['docker image prune pour nettoyer les images non utilisées'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'docker pull image:tag',
+                        desc: 'Télécharger une image',
+                        details: {
+                            explanation: 'Télécharge une image depuis Docker Hub ou un autre registre.',
+                            syntax: 'docker pull image[:tag]',
+                            options: [],
+                            examples: [
+                                { code: 'docker pull python:3.11', desc: 'Image Python 3.11' },
+                                { code: 'docker pull nginx:alpine', desc: 'Nginx version légère' },
+                                { code: 'docker pull postgres:15', desc: 'PostgreSQL 15' }
+                            ],
+                            tips: ['Sans tag, "latest" est utilisé par défaut'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'containers',
+                title: 'Conteneurs',
+                icon: 'fa-box',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'docker run image',
+                        desc: 'Lancer un conteneur',
+                        details: {
+                            explanation: 'Crée et démarre un nouveau conteneur à partir d\'une image.',
+                            syntax: 'docker run [options] image [commande]',
+                            options: [
+                                { flag: '-d', desc: 'Mode détaché (arrière-plan)' },
+                                { flag: '-p 8080:80', desc: 'Mapper port hôte:conteneur' },
+                                { flag: '-v /host:/container', desc: 'Monter un volume' },
+                                { flag: '--name mon_conteneur', desc: 'Nommer le conteneur' },
+                                { flag: '-e VAR=value', desc: 'Variable d\'environnement' },
+                                { flag: '--rm', desc: 'Supprimer après arrêt' },
+                                { flag: '-it', desc: 'Mode interactif avec terminal' }
+                            ],
+                            examples: [
+                                { code: 'docker run -d -p 8080:80 nginx', desc: 'Nginx sur port 8080' },
+                                { code: 'docker run -it python:3.11 bash', desc: 'Shell interactif Python' },
+                                { code: 'docker run -d --name db -e POSTGRES_PASSWORD=secret postgres', desc: 'PostgreSQL avec mot de passe' }
+                            ],
+                            tips: ['Combinez -d et --rm pour des conteneurs temporaires'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'docker ps',
+                        desc: 'Lister les conteneurs',
+                        details: {
+                            explanation: 'Affiche les conteneurs en cours d\'exécution.',
+                            syntax: 'docker ps [options]',
+                            options: [
+                                { flag: '-a', desc: 'Tous les conteneurs (y compris arrêtés)' },
+                                { flag: '-q', desc: 'IDs seulement' }
+                            ],
+                            examples: [
+                                { code: 'docker ps', desc: 'Conteneurs actifs' },
+                                { code: 'docker ps -a', desc: 'Tous les conteneurs' }
+                            ],
+                            tips: ['docker stats pour voir l\'utilisation des ressources'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'docker stop conteneur',
+                        desc: 'Arrêter un conteneur',
+                        details: {
+                            explanation: 'Arrête gracieusement un conteneur en cours d\'exécution.',
+                            syntax: 'docker stop conteneur_id_ou_nom',
+                            options: [
+                                { flag: '-t seconds', desc: 'Timeout avant kill (défaut: 10s)' }
+                            ],
+                            examples: [
+                                { code: 'docker stop mon_conteneur', desc: 'Arrêter par nom' },
+                                { code: 'docker stop $(docker ps -q)', desc: 'Arrêter tous les conteneurs' },
+                                { code: 'docker rm conteneur', desc: 'Supprimer un conteneur arrêté' }
+                            ],
+                            tips: ['docker kill pour forcer l\'arrêt immédiat'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'compose',
+                title: 'Docker Compose',
+                icon: 'fa-cubes',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'docker compose up',
+                        desc: 'Démarrer les services',
+                        details: {
+                            explanation: 'Démarre tous les services définis dans docker-compose.yml.',
+                            syntax: 'docker compose up [options] [service...]',
+                            options: [
+                                { flag: '-d', desc: 'Mode détaché' },
+                                { flag: '--build', desc: 'Reconstruire les images avant' },
+                                { flag: '--force-recreate', desc: 'Recréer les conteneurs' }
+                            ],
+                            examples: [
+                                { code: 'docker compose up -d', desc: 'Démarrer en arrière-plan' },
+                                { code: 'docker compose up --build', desc: 'Rebuild et démarrer' },
+                                { code: 'docker compose up -d web db', desc: 'Services spécifiques' }
+                            ],
+                            tips: ['docker-compose (avec tiret) pour les anciennes versions'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'docker compose down',
+                        desc: 'Arrêter et supprimer',
+                        details: {
+                            explanation: 'Arrête et supprime les conteneurs, réseaux créés par "up".',
+                            syntax: 'docker compose down [options]',
+                            options: [
+                                { flag: '-v', desc: 'Supprimer aussi les volumes' },
+                                { flag: '--rmi all', desc: 'Supprimer les images' }
+                            ],
+                            examples: [
+                                { code: 'docker compose down', desc: 'Arrêter proprement' },
+                                { code: 'docker compose down -v', desc: 'Arrêter et supprimer les données' }
+                            ],
+                            tips: ['Sans -v, les volumes persistent'],
+                            warnings: ['-v supprime les données des volumes !']
+                        }
+                    },
+                    {
+                        cmd: 'docker compose logs',
+                        desc: 'Voir les logs',
+                        details: {
+                            explanation: 'Affiche les logs de tous les services ou d\'un service spécifique.',
+                            syntax: 'docker compose logs [options] [service]',
+                            options: [
+                                { flag: '-f', desc: 'Suivre en temps réel' },
+                                { flag: '--tail 100', desc: 'Dernières N lignes' }
+                            ],
+                            examples: [
+                                { code: 'docker compose logs', desc: 'Tous les logs' },
+                                { code: 'docker compose logs -f web', desc: 'Suivre les logs du service web' }
+                            ],
+                            tips: ['Ctrl+C pour arrêter le suivi (-f)'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'debug',
+                title: 'Débogage',
+                icon: 'fa-bug',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'docker exec -it conteneur bash',
+                        desc: 'Entrer dans un conteneur',
+                        details: {
+                            explanation: 'Exécute une commande dans un conteneur en cours. Avec bash, ouvre un shell.',
+                            syntax: 'docker exec [options] conteneur commande',
+                            options: [
+                                { flag: '-it', desc: 'Mode interactif avec TTY' },
+                                { flag: '-u user', desc: 'Exécuter en tant qu\'utilisateur' }
+                            ],
+                            examples: [
+                                { code: 'docker exec -it web bash', desc: 'Shell bash' },
+                                { code: 'docker exec -it web sh', desc: 'Shell sh (si pas de bash)' },
+                                { code: 'docker exec web cat /etc/hosts', desc: 'Commande simple' }
+                            ],
+                            tips: ['Utilisez sh si bash n\'est pas disponible (images Alpine)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'docker logs conteneur',
+                        desc: 'Voir les logs d\'un conteneur',
+                        details: {
+                            explanation: 'Affiche les logs (stdout/stderr) d\'un conteneur.',
+                            syntax: 'docker logs [options] conteneur',
+                            options: [
+                                { flag: '-f', desc: 'Suivre en temps réel' },
+                                { flag: '--tail N', desc: 'Dernières N lignes' },
+                                { flag: '--since 1h', desc: 'Depuis 1 heure' }
+                            ],
+                            examples: [
+                                { code: 'docker logs web', desc: 'Tous les logs' },
+                                { code: 'docker logs -f --tail 50 web', desc: 'Suivre les 50 dernières lignes' }
+                            ],
+                            tips: ['Les logs persistent même si le conteneur est arrêté'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'networking',
+                title: 'Réseau Docker',
+                icon: 'fa-network-wired',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'docker network ls',
+                        desc: 'Lister les réseaux',
+                        details: {
+                            explanation: 'Affiche tous les réseaux Docker disponibles sur l\'hôte.',
+                            syntax: 'docker network ls [options]',
+                            options: [
+                                { flag: '--filter driver=bridge', desc: 'Filtrer par type de driver' },
+                                { flag: '-q', desc: 'Afficher uniquement les IDs' }
+                            ],
+                            examples: [
+                                { code: 'docker network ls', desc: 'Liste tous les réseaux' },
+                                { code: 'docker network inspect bridge', desc: 'Détails du réseau bridge' }
+                            ],
+                            tips: ['Les réseaux par défaut : bridge, host, none'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'docker network create',
+                        desc: 'Créer un réseau personnalisé',
+                        details: {
+                            explanation: 'Crée un réseau Docker pour isoler et connecter des conteneurs.',
+                            syntax: 'docker network create [options] <nom>',
+                            options: [
+                                { flag: '--driver bridge', desc: 'Type de réseau (bridge, overlay, macvlan)' },
+                                { flag: '--subnet 172.20.0.0/16', desc: 'Définir le sous-réseau' },
+                                { flag: '--gateway 172.20.0.1', desc: 'Passerelle du réseau' },
+                                { flag: '--ip-range', desc: 'Plage d\'IPs allouables' }
+                            ],
+                            examples: [
+                                { code: 'docker network create mon-reseau', desc: 'Réseau bridge simple' },
+                                { code: 'docker network create --driver bridge --subnet 172.28.0.0/16 app-network', desc: 'Réseau avec subnet personnalisé' },
+                                { code: 'docker run -d --network mon-reseau --name web nginx', desc: 'Conteneur sur réseau custom' }
+                            ],
+                            tips: ['Les conteneurs sur le même réseau custom peuvent communiquer par nom'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'docker network connect',
+                        desc: 'Connecter un conteneur à un réseau',
+                        details: {
+                            explanation: 'Attache un conteneur existant à un réseau supplémentaire.',
+                            syntax: 'docker network connect [options] <réseau> <conteneur>',
+                            options: [
+                                { flag: '--ip 172.20.0.10', desc: 'IP fixe dans le réseau' },
+                                { flag: '--alias web-alias', desc: 'Alias DNS dans le réseau' }
+                            ],
+                            examples: [
+                                { code: 'docker network connect mon-reseau mon-conteneur', desc: 'Connexion simple' },
+                                { code: 'docker network disconnect mon-reseau mon-conteneur', desc: 'Déconnexion' },
+                                { code: 'docker run -d --network=host nginx', desc: 'Utiliser le réseau hôte' }
+                            ],
+                            tips: ['Un conteneur peut être sur plusieurs réseaux simultanément'],
+                            warnings: ['Le mode --network=host expose tous les ports sur l\'hôte']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'volumes',
+                title: 'Volumes & Stockage',
+                icon: 'fa-hdd',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'docker volume create',
+                        desc: 'Créer un volume nommé',
+                        details: {
+                            explanation: 'Crée un volume Docker persistant géré par Docker.',
+                            syntax: 'docker volume create [options] <nom>',
+                            options: [
+                                { flag: '--driver local', desc: 'Driver de stockage' },
+                                { flag: '--label key=value', desc: 'Ajouter des labels' }
+                            ],
+                            examples: [
+                                { code: 'docker volume create db-data', desc: 'Créer un volume' },
+                                { code: 'docker volume ls', desc: 'Lister les volumes' },
+                                { code: 'docker volume inspect db-data', desc: 'Détails du volume' }
+                            ],
+                            tips: ['Les volumes persistent même après suppression du conteneur'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '-v ou --mount',
+                        desc: 'Monter un volume dans un conteneur',
+                        details: {
+                            explanation: 'Attache un volume ou un répertoire hôte à un conteneur.',
+                            syntax: 'docker run -v <source>:<destination>[:options]',
+                            options: [
+                                { flag: '-v nom:/chemin', desc: 'Volume nommé' },
+                                { flag: '-v /host:/container', desc: 'Bind mount (répertoire hôte)' },
+                                { flag: '-v /chemin:ro', desc: 'Montage en lecture seule' },
+                                { flag: '--mount type=volume,src=nom,dst=/chemin', desc: 'Syntaxe explicite' }
+                            ],
+                            examples: [
+                                { code: 'docker run -d -v db-data:/var/lib/postgresql/data postgres', desc: 'Volume nommé pour PostgreSQL' },
+                                { code: 'docker run -d -v $(pwd):/app:ro node:18', desc: 'Code source en lecture seule' },
+                                { code: 'docker run -d --mount type=bind,src=/data,dst=/data,readonly nginx', desc: 'Mount explicite readonly' }
+                            ],
+                            tips: ['--mount est plus explicite et recommandé pour les cas complexes'],
+                            warnings: ['Les bind mounts peuvent écraser des fichiers existants dans le conteneur']
+                        }
+                    },
+                    {
+                        cmd: 'docker volume prune',
+                        desc: 'Nettoyer les volumes inutilisés',
+                        details: {
+                            explanation: 'Supprime tous les volumes non utilisés par au moins un conteneur.',
+                            syntax: 'docker volume prune [options]',
+                            options: [
+                                { flag: '-f, --force', desc: 'Ne pas demander confirmation' },
+                                { flag: '--filter', desc: 'Filtrer les volumes à supprimer' }
+                            ],
+                            examples: [
+                                { code: 'docker volume prune', desc: 'Supprimer volumes orphelins' },
+                                { code: 'docker volume rm db-data', desc: 'Supprimer un volume spécifique' },
+                                { code: 'docker system prune -a --volumes', desc: 'Nettoyage complet (images, conteneurs, volumes)' }
+                            ],
+                            tips: ['Faites un backup avant de supprimer des volumes de données'],
+                            warnings: ['prune supprime définitivement les données!']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'multistage',
+                title: 'Multi-stage & Optimisation',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Multi-stage Build',
+                        desc: 'Réduire la taille des images',
+                        details: {
+                            explanation: 'Utilise plusieurs FROM pour séparer build et runtime, réduisant drastiquement la taille finale.',
+                            syntax: 'FROM image AS builder\\n...\\nFROM image-finale\\nCOPY --from=builder ...',
+                            options: [
+                                { flag: 'AS <nom>', desc: 'Nommer une étape' },
+                                { flag: '--from=<étape>', desc: 'Copier depuis une étape' },
+                                { flag: '--target=<étape>', desc: 'Construire jusqu\'à une étape' }
+                            ],
+                            examples: [
+                                { code: '# Étape build\nFROM node:18 AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\n# Étape production\nFROM node:18-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nCMD ["node", "dist/index.js"]', desc: 'Node.js multi-stage' },
+                                { code: '# Python multi-stage\nFROM python:3.11 AS builder\nRUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt\n\nFROM python:3.11-slim\nCOPY --from=builder /wheels /wheels\nRUN pip install --no-cache /wheels/*', desc: 'Python avec wheels' }
+                            ],
+                            tips: ['Image finale jusqu\'à 10x plus petite avec multi-stage'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Cache des layers',
+                        desc: 'Optimiser le build avec le cache',
+                        details: {
+                            explanation: 'Ordonnez les instructions pour maximiser la réutilisation du cache Docker.',
+                            syntax: 'Ordre optimal: OS deps → App deps → Code source',
+                            options: [
+                                { flag: 'COPY package*.json', desc: 'Copier d\'abord les fichiers de dépendances' },
+                                { flag: 'RUN npm ci', desc: 'Installer les dépendances (cachées si package.json inchangé)' },
+                                { flag: 'COPY . .', desc: 'Copier le code source en dernier' }
+                            ],
+                            examples: [
+                                { code: '# ❌ Mauvais - cache invalidé à chaque changement de code\nCOPY . .\nRUN npm install\n\n# ✅ Bon - cache des dépendances préservé\nCOPY package*.json ./\nRUN npm ci\nCOPY . .', desc: 'Optimisation cache Node.js' },
+                                { code: '# Python avec cache\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .', desc: 'Optimisation cache Python' }
+                            ],
+                            tips: ['Les instructions qui changent peu doivent être en haut du Dockerfile'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: '.dockerignore',
+                        desc: 'Exclure des fichiers du build',
+                        details: {
+                            explanation: 'Réduit le contexte de build et évite de copier des fichiers inutiles.',
+                            syntax: 'Patterns similaires à .gitignore',
+                            options: [
+                                { flag: 'node_modules', desc: 'Exclure dépendances locales' },
+                                { flag: '.git', desc: 'Exclure historique Git' },
+                                { flag: '*.log', desc: 'Exclure fichiers de log' },
+                                { flag: '.env*', desc: 'Exclure variables d\'environnement' }
+                            ],
+                            examples: [
+                                { code: '# .dockerignore\nnode_modules\n.git\n.gitignore\n*.md\n.env*\n.vscode\ncoverage\n*.log\nDockerfile*\ndocker-compose*', desc: 'Exemple complet Node.js' },
+                                { code: '# Python .dockerignore\n__pycache__\n*.pyc\n.venv\n.git\n*.egg-info\n.pytest_cache\n.coverage', desc: 'Exemple Python' }
+                            ],
+                            tips: ['Toujours exclure node_modules et .git'],
+                            warnings: ['Sans .dockerignore, tout le répertoire est envoyé au daemon']
+                        }
+                    },
+                    {
+                        cmd: 'Images Alpine/Slim',
+                        desc: 'Choisir des images de base légères',
+                        details: {
+                            explanation: 'Utilisez des variantes minimales pour réduire taille et surface d\'attaque.',
+                            syntax: 'FROM <image>:<tag>-alpine|slim',
+                            options: [
+                                { flag: 'alpine', desc: 'Image minimale ~5MB (musl libc)' },
+                                { flag: 'slim', desc: 'Debian allégée ~50MB (glibc)' },
+                                { flag: 'distroless', desc: 'Google distroless (pas de shell)' }
+                            ],
+                            examples: [
+                                { code: '# Comparaison tailles Python\npython:3.11        # ~900MB\npython:3.11-slim   # ~150MB\npython:3.11-alpine # ~50MB', desc: 'Comparaison images Python' },
+                                { code: '# Node.js\nFROM node:18-alpine\nRUN apk add --no-cache dumb-init\nENTRYPOINT ["dumb-init", "--"]', desc: 'Alpine avec init propre' },
+                                { code: '# Distroless (ultra secure)\nFROM gcr.io/distroless/python3\nCOPY --from=builder /app /app\nCMD ["app.py"]', desc: 'Image distroless' }
+                            ],
+                            tips: ['Alpine peut avoir des incompatibilités avec certaines libs (musl vs glibc)'],
+                            warnings: ['Testez bien avec Alpine avant de déployer en production']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-docker',
+                title: '🚀 Projet: Dockerisation App',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Analyse de l\'application',
+                        desc: 'Identifier les besoins de l\'app',
+                        details: {
+                            explanation: 'Avant de dockeriser, analysez les dépendances, ports, variables d\'environnement et volumes nécessaires.',
+                            syntax: 'Checklist pré-dockerisation',
+                            options: [
+                                { flag: 'Runtime', desc: 'Node.js, Python, Go, Java...' },
+                                { flag: 'Dépendances système', desc: 'Libs natives, compilateurs' },
+                                { flag: 'Ports exposés', desc: 'HTTP, WebSocket, DB...' },
+                                { flag: 'Variables env', desc: 'Configuration, secrets' },
+                                { flag: 'Données persistantes', desc: 'Uploads, logs, DB' }
+                            ],
+                            examples: [
+                                { code: '# Exemple analyse app Node.js\n- Runtime: Node.js 18\n- Deps système: aucune\n- Port: 3000 (HTTP)\n- Env: DATABASE_URL, JWT_SECRET\n- Volumes: ./uploads (fichiers utilisateurs)', desc: 'Checklist exemple' }
+                            ],
+                            tips: ['Documentez toutes les dépendances avant de commencer'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: Dockerfile de développement',
+                        desc: 'Image avec hot-reload',
+                        details: {
+                            explanation: 'Créez d\'abord un Dockerfile.dev pour le développement local avec rechargement automatique.',
+                            syntax: 'Dockerfile.dev avec volumes montés',
+                            options: [],
+                            examples: [
+                                { code: '# Dockerfile.dev\nFROM node:18-alpine\n\nWORKDIR /app\n\n# Dépendances\nCOPY package*.json ./\nRUN npm install\n\n# Le code sera monté en volume\n# COPY . .  <- pas nécessaire en dev\n\nEXPOSE 3000\n\n# Hot reload avec nodemon\nCMD ["npm", "run", "dev"]', desc: 'Dockerfile développement' },
+                                { code: '# docker-compose.dev.yml\nservices:\n  app:\n    build:\n      context: .\n      dockerfile: Dockerfile.dev\n    volumes:\n      - .:/app\n      - /app/node_modules\n    ports:\n      - "3000:3000"\n    environment:\n      - NODE_ENV=development', desc: 'Compose dev avec hot-reload' }
+                            ],
+                            tips: ['Le volume /app/node_modules empêche l\'écrasement des dépendances'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Dockerfile de production',
+                        desc: 'Image optimisée multi-stage',
+                        details: {
+                            explanation: 'Créez un Dockerfile optimisé pour la production avec multi-stage build.',
+                            syntax: 'Multi-stage: build → production',
+                            options: [],
+                            examples: [
+                                { code: '# Dockerfile (production)\n# === Build stage ===\nFROM node:18-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\nCOPY . .\nRUN npm run build\n\n# === Production stage ===\nFROM node:18-alpine\nWORKDIR /app\n\n# Sécurité: utilisateur non-root\nRUN addgroup -g 1001 -S nodejs && \\\n    adduser -S nodejs -u 1001\n\nCOPY --from=builder --chown=nodejs:nodejs /app/dist ./dist\nCOPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules\n\nUSER nodejs\nEXPOSE 3000\n\nCMD ["node", "dist/index.js"]', desc: 'Dockerfile production Node.js' }
+                            ],
+                            tips: ['Toujours utiliser un utilisateur non-root en production'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: docker-compose.yml',
+                        desc: 'Orchestration multi-services',
+                        details: {
+                            explanation: 'Définissez l\'ensemble des services (app, DB, cache, etc.) avec Docker Compose.',
+                            syntax: 'docker-compose.yml avec tous les services',
+                            options: [],
+                            examples: [
+                                { code: '# docker-compose.yml\nversion: "3.8"\n\nservices:\n  app:\n    build: .\n    ports:\n      - "3000:3000"\n    environment:\n      - DATABASE_URL=postgres://user:pass@db:5432/mydb\n      - REDIS_URL=redis://cache:6379\n    depends_on:\n      db:\n        condition: service_healthy\n      cache:\n        condition: service_started\n    restart: unless-stopped\n\n  db:\n    image: postgres:15-alpine\n    environment:\n      POSTGRES_USER: user\n      POSTGRES_PASSWORD: pass\n      POSTGRES_DB: mydb\n    volumes:\n      - postgres_data:/var/lib/postgresql/data\n    healthcheck:\n      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n\n  cache:\n    image: redis:7-alpine\n    volumes:\n      - redis_data:/data\n\nvolumes:\n  postgres_data:\n  redis_data:', desc: 'Compose complet avec healthcheck' }
+                            ],
+                            tips: ['Utilisez depends_on avec condition pour l\'ordre de démarrage'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Variables d\'environnement',
+                        desc: 'Gestion sécurisée des configs',
+                        details: {
+                            explanation: 'Séparez la configuration de l\'image avec des fichiers .env et des secrets.',
+                            syntax: 'Fichiers .env + docker secrets',
+                            options: [],
+                            examples: [
+                                { code: '# .env.example (à versionner)\nDATABASE_URL=postgres://user:pass@db:5432/mydb\nJWT_SECRET=your-secret-here\nNODE_ENV=production\n\n# .env (à NE PAS versionner)\nDATABASE_URL=postgres://prod:realpass@db:5432/proddb\nJWT_SECRET=super-long-random-secret-here', desc: 'Fichiers .env' },
+                                { code: '# docker-compose.yml avec env_file\nservices:\n  app:\n    env_file:\n      - .env\n    # Ou secrets Docker (plus sécurisé)\n    secrets:\n      - db_password\n\nsecrets:\n  db_password:\n    file: ./secrets/db_password.txt', desc: 'Utilisation env_file et secrets' }
+                            ],
+                            tips: ['Ajoutez .env au .gitignore, versionnez .env.example'],
+                            warnings: ['Ne jamais hardcoder de secrets dans le Dockerfile ou docker-compose.yml']
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Build et test local',
+                        desc: 'Valider l\'image avant déploiement',
+                        details: {
+                            explanation: 'Construisez et testez l\'image localement avant de la pousser en production.',
+                            syntax: 'docker build + docker compose up',
+                            options: [],
+                            examples: [
+                                { code: '# Build de l\'image\ndocker build -t monapp:1.0 .\n\n# Vérifier la taille\ndocker images monapp:1.0\n\n# Scanner les vulnérabilités\ndocker scout cves monapp:1.0\n\n# Test local\ndocker compose up -d\n\n# Vérifier les logs\ndocker compose logs -f app\n\n# Test de l\'API\ncurl http://localhost:3000/health', desc: 'Workflow de test complet' }
+                            ],
+                            tips: ['Toujours scanner les vulnérabilités avant de pousser'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Push vers un registre',
+                        desc: 'Publier l\'image',
+                        details: {
+                            explanation: 'Poussez l\'image vers Docker Hub, GitHub Container Registry ou un registre privé.',
+                            syntax: 'docker tag + docker push',
+                            options: [],
+                            examples: [
+                                { code: '# Docker Hub\ndocker login\ndocker tag monapp:1.0 username/monapp:1.0\ndocker push username/monapp:1.0', desc: 'Push vers Docker Hub' },
+                                { code: '# GitHub Container Registry\necho $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin\ndocker tag monapp:1.0 ghcr.io/username/monapp:1.0\ndocker push ghcr.io/username/monapp:1.0', desc: 'Push vers GHCR' },
+                                { code: '# AWS ECR\naws ecr get-login-password | docker login --username AWS --password-stdin 123456789.dkr.ecr.eu-west-1.amazonaws.com\ndocker tag monapp:1.0 123456789.dkr.ecr.eu-west-1.amazonaws.com/monapp:1.0\ndocker push 123456789.dkr.ecr.eu-west-1.amazonaws.com/monapp:1.0', desc: 'Push vers AWS ECR' }
+                            ],
+                            tips: ['Utilisez des tags sémantiques (v1.0.0) et latest'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 8: CI/CD Pipeline',
+                        desc: 'Automatiser le build et déploiement',
+                        details: {
+                            explanation: 'Intégrez Docker dans votre pipeline CI/CD pour automatiser le processus.',
+                            syntax: 'GitHub Actions / GitLab CI',
+                            options: [],
+                            examples: [
+                                { code: '# .github/workflows/docker.yml\nname: Docker Build & Push\non:\n  push:\n    branches: [main]\n    tags: ["v*"]\n\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      \n      - name: Set up Docker Buildx\n        uses: docker/setup-buildx-action@v3\n      \n      - name: Login to GHCR\n        uses: docker/login-action@v3\n        with:\n          registry: ghcr.io\n          username: ${{ github.actor }}\n          password: ${{ secrets.GITHUB_TOKEN }}\n      \n      - name: Build and push\n        uses: docker/build-push-action@v5\n        with:\n          context: .\n          push: true\n          tags: |\n            ghcr.io/${{ github.repository }}:latest\n            ghcr.io/${{ github.repository }}:${{ github.sha }}\n          cache-from: type=gha\n          cache-to: type=gha,mode=max', desc: 'GitHub Actions complet' }
+                            ],
+                            tips: ['Utilisez le cache GHA pour accélérer les builds'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

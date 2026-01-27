@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__list_console_messages"
+    ]
+  }
+}

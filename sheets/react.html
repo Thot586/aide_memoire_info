@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire React Hooks : useState, useEffect, useRef et le cycle de vie des composants.">
+    <title>React Hooks - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-cyan-500/20 mb-4 icon-glow">
+                    <i class="fab fa-react text-3xl text-cyan-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">React Hooks</h1>
+                <p class="text-slate-400">Aide-mémoire pour useState, useEffect et le cycle de vie</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'state',
+                title: 'État (State)',
+                icon: 'fa-database',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'useState(initialValue)',
+                        desc: 'Gérer l\'état local',
+                        details: {
+                            explanation: 'Crée une variable d\'état et une fonction pour la mettre à jour. Provoque un re-render quand l\'état change.',
+                            syntax: 'const [state, setState] = useState(initialValue)',
+                            options: [
+                                { flag: 'initialValue', desc: 'Valeur initiale (peut être une fonction)' },
+                                { flag: 'state', desc: 'Valeur actuelle' },
+                                { flag: 'setState', desc: 'Fonction pour mettre à jour' }
+                            ],
+                            examples: [
+                                { code: 'const [count, setCount] = useState(0)', desc: 'Compteur initialisé à 0' },
+                                { code: 'const [user, setUser] = useState(null)', desc: 'Utilisateur (null initial)' },
+                                { code: 'setCount(count + 1)', desc: 'Incrémenter' },
+                                { code: 'setCount(prev => prev + 1)', desc: 'Avec fonction (recommandé)' }
+                            ],
+                            tips: ['Utilisez la forme fonction (prev => ...) pour les mises à jour basées sur l\'état précédent'],
+                            warnings: ['Ne jamais modifier l\'état directement (state = ... est interdit)']
+                        }
+                    },
+                    {
+                        cmd: 'useReducer(reducer, initialState)',
+                        desc: 'État complexe avec actions',
+                        details: {
+                            explanation: 'Alternative à useState pour une logique d\'état complexe. Similaire à Redux.',
+                            syntax: 'const [state, dispatch] = useReducer(reducer, initialState)',
+                            options: [
+                                { flag: 'reducer', desc: 'Fonction (state, action) => newState' },
+                                { flag: 'dispatch', desc: 'Fonction pour envoyer des actions' }
+                            ],
+                            examples: [
+                                { code: 'const reducer = (state, action) => {\n  switch(action.type) {\n    case "increment": return { count: state.count + 1 }\n    default: return state\n  }\n}', desc: 'Reducer simple' },
+                                { code: 'const [state, dispatch] = useReducer(reducer, { count: 0 })', desc: 'Utilisation' },
+                                { code: 'dispatch({ type: "increment" })', desc: 'Dispatch une action' }
+                            ],
+                            tips: ['Préférez useReducer quand l\'état a plusieurs sous-valeurs liées'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'effects',
+                title: 'Effets (Effects)',
+                icon: 'fa-bolt',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'useEffect(() => {}, [deps])',
+                        desc: 'Effets secondaires',
+                        details: {
+                            explanation: 'Exécute du code après le rendu. Gère le cycle de vie : montage, mise à jour, démontage.',
+                            syntax: 'useEffect(callback, dependencies)',
+                            options: [
+                                { flag: '[]', desc: 'Exécute une seule fois (au montage)' },
+                                { flag: '[dep1, dep2]', desc: 'Exécute quand dep1 ou dep2 change' },
+                                { flag: 'sans tableau', desc: 'Exécute à chaque rendu (rare)' }
+                            ],
+                            examples: [
+                                { code: 'useEffect(() => {\n  console.log("Composant monté")\n}, [])', desc: 'Au montage uniquement' },
+                                { code: 'useEffect(() => {\n  fetchData(userId)\n}, [userId])', desc: 'Quand userId change' },
+                                { code: 'useEffect(() => {\n  const timer = setInterval(...)\n  return () => clearInterval(timer) // Cleanup\n}, [])', desc: 'Avec nettoyage' }
+                            ],
+                            tips: ['Retournez une fonction pour nettoyer (timers, subscriptions, etc.)'],
+                            warnings: ['Attention aux boucles infinies si dépendances mal définies']
+                        }
+                    },
+                    {
+                        cmd: 'useLayoutEffect',
+                        desc: 'Effet synchrone avant peinture',
+                        details: {
+                            explanation: 'Comme useEffect mais s\'exécute de manière synchrone après les mutations DOM, avant que le navigateur ne peigne.',
+                            syntax: 'useLayoutEffect(callback, dependencies)',
+                            options: [],
+                            examples: [
+                                { code: 'useLayoutEffect(() => {\n  // Mesurer le DOM avant affichage\n  const height = ref.current.getBoundingClientRect().height\n}, [])', desc: 'Mesure DOM synchrone' }
+                            ],
+                            tips: ['Utilisez-le pour les mesures DOM ou éviter les flashs visuels'],
+                            warnings: ['Peut bloquer le rendu visuel, préférez useEffect par défaut']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'refs',
+                title: 'Références (Refs)',
+                icon: 'fa-link',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'useRef(initialValue)',
+                        desc: 'Référence persistante',
+                        details: {
+                            explanation: 'Crée une référence mutable qui persiste entre les rendus sans provoquer de re-render.',
+                            syntax: 'const ref = useRef(initialValue)',
+                            options: [
+                                { flag: 'ref.current', desc: 'Accède/modifie la valeur' }
+                            ],
+                            examples: [
+                                { code: 'const inputRef = useRef(null)\n<input ref={inputRef} />\ninputRef.current.focus()', desc: 'Référence à un élément DOM' },
+                                { code: 'const countRef = useRef(0)\ncountRef.current++', desc: 'Valeur qui persiste sans re-render' },
+                                { code: 'const prevValue = useRef(value)\nuseEffect(() => {\n  prevValue.current = value\n})', desc: 'Garder la valeur précédente' }
+                            ],
+                            tips: ['Idéal pour accéder aux éléments DOM ou stocker des valeurs sans re-render'],
+                            warnings: ['Modifier ref.current ne déclenche PAS de re-render']
+                        }
+                    },
+                    {
+                        cmd: 'forwardRef',
+                        desc: 'Transmettre une ref à un composant enfant',
+                        details: {
+                            explanation: 'Permet à un composant parent de passer une ref à un composant enfant.',
+                            syntax: 'forwardRef((props, ref) => <element ref={ref} />)',
+                            options: [],
+                            examples: [
+                                { code: 'const Input = forwardRef((props, ref) => (\n  <input ref={ref} {...props} />\n))', desc: 'Composant avec ref transmise' },
+                                { code: 'const ref = useRef()\n<Input ref={ref} />', desc: 'Utilisation' }
+                            ],
+                            tips: ['Nécessaire pour passer des refs aux composants custom'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'context',
+                title: 'Contexte',
+                icon: 'fa-share-alt',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'useContext(Context)',
+                        desc: 'Consommer un contexte',
+                        details: {
+                            explanation: 'Accède à la valeur d\'un contexte React sans prop drilling.',
+                            syntax: 'const value = useContext(MyContext)',
+                            options: [],
+                            examples: [
+                                { code: 'const ThemeContext = createContext("light")', desc: 'Créer un contexte' },
+                                { code: '<ThemeContext.Provider value="dark">\n  <App />\n</ThemeContext.Provider>', desc: 'Fournir la valeur' },
+                                { code: 'const theme = useContext(ThemeContext)', desc: 'Consommer dans un composant' }
+                            ],
+                            tips: ['Évite de passer des props à travers de nombreux niveaux'],
+                            warnings: ['Tous les consommateurs re-render quand la valeur change']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'performance',
+                title: 'Performance',
+                icon: 'fa-tachometer-alt',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'useMemo(() => value, [deps])',
+                        desc: 'Mémoriser une valeur calculée',
+                        details: {
+                            explanation: 'Mémorise le résultat d\'un calcul coûteux. Ne recalcule que si les dépendances changent.',
+                            syntax: 'const memoizedValue = useMemo(() => compute(a, b), [a, b])',
+                            options: [],
+                            examples: [
+                                { code: 'const sortedList = useMemo(\n  () => items.sort((a, b) => a.name.localeCompare(b.name)),\n  [items]\n)', desc: 'Tri mémorisé' },
+                                { code: 'const expensiveValue = useMemo(\n  () => computeExpensive(data),\n  [data]\n)', desc: 'Calcul coûteux' }
+                            ],
+                            tips: ['N\'utilisez que pour des calculs vraiment coûteux'],
+                            warnings: ['L\'optimisation prématurée peut être contre-productive']
+                        }
+                    },
+                    {
+                        cmd: 'useCallback(fn, [deps])',
+                        desc: 'Mémoriser une fonction',
+                        details: {
+                            explanation: 'Mémorise une fonction pour éviter de la recréer à chaque rendu. Utile pour les props de composants enfants.',
+                            syntax: 'const memoizedFn = useCallback(fn, [deps])',
+                            options: [],
+                            examples: [
+                                { code: 'const handleClick = useCallback(\n  () => setCount(c => c + 1),\n  []\n)', desc: 'Handler mémorisé' },
+                                { code: 'const handleSubmit = useCallback(\n  (data) => save(userId, data),\n  [userId]\n)', desc: 'Avec dépendance' }
+                            ],
+                            tips: ['Utile avec React.memo() pour éviter les re-renders inutiles'],
+                            warnings: ['Inutile si le composant enfant n\'est pas mémorisé']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'custom',
+                title: 'Hooks Personnalisés',
+                icon: 'fa-puzzle-piece',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Créer un Custom Hook',
+                        desc: 'Extraire la logique réutilisable',
+                        details: {
+                            explanation: 'Les custom hooks permettent d\'extraire et réutiliser de la logique d\'état entre composants.',
+                            syntax: 'function useMyHook(params) {\n  // useState, useEffect, etc.\n  return { ... }\n}',
+                            options: [
+                                { flag: 'use*', desc: 'Convention de nommage obligatoire' },
+                                { flag: 'return', desc: 'Retourne état et/ou fonctions' }
+                            ],
+                            examples: [
+                                { code: '// useLocalStorage.js\nfunction useLocalStorage(key, initialValue) {\n  const [value, setValue] = useState(() => {\n    const stored = localStorage.getItem(key)\n    return stored ? JSON.parse(stored) : initialValue\n  })\n  \n  useEffect(() => {\n    localStorage.setItem(key, JSON.stringify(value))\n  }, [key, value])\n  \n  return [value, setValue]\n}\n\n// Usage\nconst [theme, setTheme] = useLocalStorage("theme", "dark")', desc: 'useLocalStorage' },
+                                { code: '// useToggle.js\nfunction useToggle(initial = false) {\n  const [value, setValue] = useState(initial)\n  const toggle = useCallback(() => setValue(v => !v), [])\n  const setTrue = useCallback(() => setValue(true), [])\n  const setFalse = useCallback(() => setValue(false), [])\n  \n  return { value, toggle, setTrue, setFalse }\n}\n\n// Usage\nconst { value: isOpen, toggle } = useToggle()', desc: 'useToggle' }
+                            ],
+                            tips: ['Nommez toujours vos hooks avec le préfixe "use"'],
+                            warnings: ['Les custom hooks partagent la logique, pas l\'état entre composants']
+                        }
+                    },
+                    {
+                        cmd: 'useDebounce',
+                        desc: 'Debouncer une valeur',
+                        details: {
+                            explanation: 'Retarde la mise à jour d\'une valeur. Utile pour les recherches en temps réel.',
+                            syntax: 'const debouncedValue = useDebounce(value, delay)',
+                            options: [],
+                            examples: [
+                                { code: 'function useDebounce(value, delay = 500) {\n  const [debouncedValue, setDebouncedValue] = useState(value)\n  \n  useEffect(() => {\n    const timer = setTimeout(() => {\n      setDebouncedValue(value)\n    }, delay)\n    \n    return () => clearTimeout(timer)\n  }, [value, delay])\n  \n  return debouncedValue\n}', desc: 'Implémentation' },
+                                { code: '// Usage pour une recherche\nfunction Search() {\n  const [query, setQuery] = useState("")\n  const debouncedQuery = useDebounce(query, 300)\n  \n  useEffect(() => {\n    if (debouncedQuery) {\n      searchAPI(debouncedQuery)\n    }\n  }, [debouncedQuery])\n  \n  return <input value={query} onChange={e => setQuery(e.target.value)} />\n}', desc: 'Recherche avec debounce' }
+                            ],
+                            tips: ['300-500ms est un bon délai pour les recherches'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'useClickOutside',
+                        desc: 'Détecter les clics extérieurs',
+                        details: {
+                            explanation: 'Détecte les clics en dehors d\'un élément. Utile pour les modales et dropdowns.',
+                            syntax: 'useClickOutside(ref, callback)',
+                            options: [],
+                            examples: [
+                                { code: 'function useClickOutside(ref, handler) {\n  useEffect(() => {\n    const listener = (event) => {\n      if (!ref.current || ref.current.contains(event.target)) {\n        return\n      }\n      handler(event)\n    }\n    \n    document.addEventListener("mousedown", listener)\n    document.addEventListener("touchstart", listener)\n    \n    return () => {\n      document.removeEventListener("mousedown", listener)\n      document.removeEventListener("touchstart", listener)\n    }\n  }, [ref, handler])\n}', desc: 'Implémentation' },
+                                { code: '// Usage pour un dropdown\nfunction Dropdown() {\n  const [isOpen, setIsOpen] = useState(false)\n  const ref = useRef(null)\n  \n  useClickOutside(ref, () => setIsOpen(false))\n  \n  return (\n    <div ref={ref}>\n      <button onClick={() => setIsOpen(!isOpen)}>Menu</button>\n      {isOpen && <ul>...</ul>}\n    </div>\n  )\n}', desc: 'Dropdown avec fermeture auto' }
+                            ],
+                            tips: ['Utilisez useCallback pour le handler si défini inline'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'fetching',
+                title: 'Data Fetching',
+                icon: 'fa-cloud-download-alt',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'useFetch (custom)',
+                        desc: 'Hook de fetch basique',
+                        details: {
+                            explanation: 'Hook personnalisé pour les appels API avec gestion loading/error.',
+                            syntax: 'const { data, loading, error } = useFetch(url)',
+                            options: [],
+                            examples: [
+                                { code: 'function useFetch(url) {\n  const [data, setData] = useState(null)\n  const [loading, setLoading] = useState(true)\n  const [error, setError] = useState(null)\n  \n  useEffect(() => {\n    let cancelled = false\n    setLoading(true)\n    \n    fetch(url)\n      .then(res => {\n        if (!res.ok) throw new Error(res.statusText)\n        return res.json()\n      })\n      .then(data => {\n        if (!cancelled) {\n          setData(data)\n          setError(null)\n        }\n      })\n      .catch(err => {\n        if (!cancelled) setError(err.message)\n      })\n      .finally(() => {\n        if (!cancelled) setLoading(false)\n      })\n    \n    return () => { cancelled = true }\n  }, [url])\n  \n  return { data, loading, error }\n}', desc: 'useFetch complet' },
+                                { code: '// Usage\nfunction UserProfile({ userId }) {\n  const { data: user, loading, error } = useFetch(\n    `/api/users/${userId}`\n  )\n  \n  if (loading) return <Spinner />\n  if (error) return <Error message={error} />\n  return <div>{user.name}</div>\n}', desc: 'Utilisation' }
+                            ],
+                            tips: ['Utilisez cancelled pour éviter les updates sur composants démontés'],
+                            warnings: ['Pour les apps complexes, préférez React Query ou SWR']
+                        }
+                    },
+                    {
+                        cmd: 'React Query (TanStack)',
+                        desc: 'Gestion avancée des données serveur',
+                        details: {
+                            explanation: 'Librairie de data fetching avec cache, revalidation et gestion d\'état serveur.',
+                            syntax: 'const { data, isLoading } = useQuery({ queryKey, queryFn })',
+                            options: [
+                                { flag: 'queryKey', desc: 'Clé unique pour le cache' },
+                                { flag: 'queryFn', desc: 'Fonction de fetch' },
+                                { flag: 'staleTime', desc: 'Durée avant revalidation' },
+                                { flag: 'refetchOnWindowFocus', desc: 'Refetch au focus' }
+                            ],
+                            examples: [
+                                { code: '// Setup dans App.jsx\nimport { QueryClient, QueryClientProvider } from "@tanstack/react-query"\n\nconst queryClient = new QueryClient()\n\nfunction App() {\n  return (\n    <QueryClientProvider client={queryClient}>\n      <MyApp />\n    </QueryClientProvider>\n  )\n}', desc: 'Configuration' },
+                                { code: '// Lecture de données\nimport { useQuery } from "@tanstack/react-query"\n\nfunction Users() {\n  const { data, isLoading, error } = useQuery({\n    queryKey: ["users"],\n    queryFn: () => fetch("/api/users").then(r => r.json()),\n    staleTime: 5 * 60 * 1000 // 5 minutes\n  })\n  \n  if (isLoading) return <Spinner />\n  return <UserList users={data} />\n}', desc: 'useQuery basique' },
+                                { code: '// Mutation (POST/PUT/DELETE)\nimport { useMutation, useQueryClient } from "@tanstack/react-query"\n\nfunction CreateUser() {\n  const queryClient = useQueryClient()\n  \n  const mutation = useMutation({\n    mutationFn: (newUser) => \n      fetch("/api/users", {\n        method: "POST",\n        body: JSON.stringify(newUser)\n      }),\n    onSuccess: () => {\n      queryClient.invalidateQueries({ queryKey: ["users"] })\n    }\n  })\n  \n  return <button onClick={() => mutation.mutate({ name: "Alice" })}>\n    {mutation.isPending ? "..." : "Créer"}\n  </button>\n}', desc: 'useMutation' }
+                            ],
+                            tips: ['queryKey doit être un tableau pour permettre l\'invalidation partielle'],
+                            warnings: ['Installez: npm install @tanstack/react-query']
+                        }
+                    },
+                    {
+                        cmd: 'SWR',
+                        desc: 'Alternative légère à React Query',
+                        details: {
+                            explanation: 'SWR (stale-while-revalidate) de Vercel - plus léger que React Query.',
+                            syntax: 'const { data, error, isLoading } = useSWR(key, fetcher)',
+                            options: [
+                                { flag: 'key', desc: 'URL ou clé unique' },
+                                { flag: 'fetcher', desc: 'Fonction de fetch' },
+                                { flag: 'revalidateOnFocus', desc: 'Revalider au focus' },
+                                { flag: 'refreshInterval', desc: 'Polling automatique' }
+                            ],
+                            examples: [
+                                { code: '// Fetcher global\nimport useSWR, { SWRConfig } from "swr"\n\nconst fetcher = url => fetch(url).then(r => r.json())\n\nfunction App() {\n  return (\n    <SWRConfig value={{ fetcher }}>\n      <MyApp />\n    </SWRConfig>\n  )\n}', desc: 'Configuration globale' },
+                                { code: '// Usage simple\nfunction Profile() {\n  const { data, error, isLoading } = useSWR("/api/user")\n  \n  if (isLoading) return <Spinner />\n  if (error) return <div>Erreur</div>\n  return <div>Bonjour {data.name}</div>\n}', desc: 'useSWR basique' },
+                                { code: '// Mutation avec mutate\nimport useSWR, { mutate } from "swr"\n\nfunction UpdateName() {\n  async function handleUpdate() {\n    await fetch("/api/user", { method: "PUT", body: ... })\n    mutate("/api/user") // Revalider le cache\n  }\n  return <button onClick={handleUpdate}>Update</button>\n}\n\n// Ou mutation optimiste\nmutate("/api/user", { ...data, name: "New" }, false)', desc: 'Mutation et revalidation' }
+                            ],
+                            tips: ['SWR est plus simple que React Query pour les cas basiques'],
+                            warnings: ['Installez: npm install swr']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'patterns',
+                title: 'Patterns & Bonnes Pratiques',
+                icon: 'fa-lightbulb',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Composition vs Héritage',
+                        desc: 'Préférer la composition',
+                        details: {
+                            explanation: 'React privilégie la composition plutôt que l\'héritage pour réutiliser le code.',
+                            syntax: 'Composition via props et children',
+                            options: [
+                                { flag: 'children', desc: 'Contenu enfant' },
+                                { flag: 'render props', desc: 'Fonction comme prop' },
+                                { flag: 'slots', desc: 'Props nommées pour le contenu' }
+                            ],
+                            examples: [
+                                { code: '// Composition avec children\nfunction Card({ title, children }) {\n  return (\n    <div className="card">\n      <h2>{title}</h2>\n      <div className="card-body">{children}</div>\n    </div>\n  )\n}\n\n<Card title="Utilisateur">\n  <UserInfo user={user} />\n  <UserActions />\n</Card>', desc: 'Pattern children' },
+                                { code: '// Slots nommés\nfunction Layout({ header, sidebar, children }) {\n  return (\n    <div className="layout">\n      <header>{header}</header>\n      <aside>{sidebar}</aside>\n      <main>{children}</main>\n    </div>\n  )\n}\n\n<Layout \n  header={<NavBar />}\n  sidebar={<Menu />}\n>\n  <Content />\n</Layout>', desc: 'Pattern slots' },
+                                { code: '// Render props\nfunction MouseTracker({ render }) {\n  const [pos, setPos] = useState({ x: 0, y: 0 })\n  // ... tracking logic\n  return render(pos)\n}\n\n<MouseTracker render={({ x, y }) => (\n  <div>Position: {x}, {y}</div>\n)} />', desc: 'Pattern render props' }
+                            ],
+                            tips: ['children est le pattern le plus simple et le plus courant'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Controlled vs Uncontrolled',
+                        desc: 'Gérer les inputs',
+                        details: {
+                            explanation: 'Deux approches pour gérer les formulaires : état React (controlled) ou DOM (uncontrolled).',
+                            syntax: 'Controlled: value + onChange\nUncontrolled: ref + defaultValue',
+                            options: [
+                                { flag: 'Controlled', desc: 'React gère la valeur' },
+                                { flag: 'Uncontrolled', desc: 'Le DOM gère la valeur' }
+                            ],
+                            examples: [
+                                { code: '// Controlled (recommandé)\nfunction ControlledInput() {\n  const [value, setValue] = useState("")\n  \n  return (\n    <input \n      value={value}\n      onChange={(e) => setValue(e.target.value)}\n    />\n  )\n}', desc: 'Input contrôlé' },
+                                { code: '// Uncontrolled avec ref\nfunction UncontrolledInput() {\n  const inputRef = useRef(null)\n  \n  const handleSubmit = () => {\n    console.log(inputRef.current.value)\n  }\n  \n  return (\n    <>\n      <input ref={inputRef} defaultValue="initial" />\n      <button onClick={handleSubmit}>Submit</button>\n    </>\n  )\n}', desc: 'Input non contrôlé' },
+                                { code: '// Cas d\'usage uncontrolled : fichiers\nfunction FileInput() {\n  const fileRef = useRef(null)\n  \n  const handleUpload = () => {\n    const file = fileRef.current.files[0]\n    uploadFile(file)\n  }\n  \n  return <input type="file" ref={fileRef} onChange={handleUpload} />\n}', desc: 'Input fichier (toujours uncontrolled)' }
+                            ],
+                            tips: ['Utilisez controlled pour validation en temps réel, uncontrolled pour simplicité'],
+                            warnings: ['Ne mélangez pas controlled et uncontrolled sur le même input']
+                        }
+                    },
+                    {
+                        cmd: 'Error Boundaries',
+                        desc: 'Capturer les erreurs de rendu',
+                        details: {
+                            explanation: 'Composants qui capturent les erreurs JavaScript dans leurs enfants.',
+                            syntax: 'Classe avec componentDidCatch ou librairie',
+                            options: [
+                                { flag: 'componentDidCatch', desc: 'Lifecycle pour logger' },
+                                { flag: 'getDerivedStateFromError', desc: 'Mettre à jour l\'état' }
+                            ],
+                            examples: [
+                                { code: '// Classe Error Boundary\nclass ErrorBoundary extends React.Component {\n  state = { hasError: false, error: null }\n  \n  static getDerivedStateFromError(error) {\n    return { hasError: true, error }\n  }\n  \n  componentDidCatch(error, errorInfo) {\n    console.error("Error caught:", error, errorInfo)\n    // Envoyer à un service de logging\n  }\n  \n  render() {\n    if (this.state.hasError) {\n      return <div>Quelque chose s\'est mal passé.</div>\n    }\n    return this.props.children\n  }\n}', desc: 'Error Boundary classe' },
+                                { code: '// Usage\n<ErrorBoundary>\n  <ComponentQuiPeutPlanter />\n</ErrorBoundary>\n\n// Avec fallback personnalisé\n<ErrorBoundary fallback={<ErrorPage />}>\n  <App />\n</ErrorBoundary>', desc: 'Utilisation' },
+                                { code: '// Avec react-error-boundary (recommandé)\nimport { ErrorBoundary } from "react-error-boundary"\n\nfunction ErrorFallback({ error, resetErrorBoundary }) {\n  return (\n    <div>\n      <p>Erreur: {error.message}</p>\n      <button onClick={resetErrorBoundary}>Réessayer</button>\n    </div>\n  )\n}\n\n<ErrorBoundary FallbackComponent={ErrorFallback}>\n  <App />\n</ErrorBoundary>', desc: 'react-error-boundary' }
+                            ],
+                            tips: ['Utilisez react-error-boundary pour éviter d\'écrire des classes'],
+                            warnings: ['Les Error Boundaries ne capturent pas les erreurs async ou les event handlers']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'react19',
+                title: 'React 19+',
+                icon: 'fa-star',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'use() Hook',
+                        desc: 'Lire des ressources async',
+                        details: {
+                            explanation: 'Nouveau hook React 19 pour lire des Promises et Context de manière synchrone.',
+                            syntax: 'const value = use(resource)',
+                            options: [
+                                { flag: 'use(Promise)', desc: 'Lit une Promise (avec Suspense)' },
+                                { flag: 'use(Context)', desc: 'Lit un Context (alternative à useContext)' }
+                            ],
+                            examples: [
+                                { code: '// Lire une Promise\nimport { use, Suspense } from "react"\n\nfunction UserProfile({ userPromise }) {\n  const user = use(userPromise) // Suspend jusqu\'à résolution\n  return <div>{user.name}</div>\n}\n\n// Parent avec Suspense\nfunction App() {\n  const userPromise = fetchUser(1)\n  return (\n    <Suspense fallback={<Spinner />}>\n      <UserProfile userPromise={userPromise} />\n    </Suspense>\n  )\n}', desc: 'use() avec Promise' },
+                                { code: '// Lire un Context (peut être conditionnel!)\nfunction Theme({ isDark }) {\n  if (isDark) {\n    const theme = use(DarkThemeContext)\n    return <div style={{ background: theme.bg }}>...</div>\n  }\n  return <div>Light mode</div>\n}', desc: 'use() avec Context conditionnel' },
+                                { code: '// Contrairement à useContext, use() peut être dans des conditions\nfunction Component({ showUser }) {\n  if (showUser) {\n    const user = use(fetchUser()) // OK!\n  }\n  // useContext(Ctx) devrait être en haut, use() peut être conditionnel\n}', desc: 'use() conditionnel' }
+                            ],
+                            tips: ['use() permet de lire des Promises sans useEffect'],
+                            warnings: ['Nécessite React 19+ et Suspense pour les Promises']
+                        }
+                    },
+                    {
+                        cmd: 'Actions & useFormStatus',
+                        desc: 'Formulaires avec Server Actions',
+                        details: {
+                            explanation: 'Nouvelles API pour les formulaires avec mutations serveur (React 19 + Next.js).',
+                            syntax: '<form action={serverAction}>\nuseFormStatus()',
+                            options: [
+                                { flag: 'action', desc: 'Server Action dans form' },
+                                { flag: 'useFormStatus', desc: 'État du formulaire (pending)' },
+                                { flag: 'useFormState', desc: 'État retourné par l\'action' }
+                            ],
+                            examples: [
+                                { code: '// Server Action (Next.js)\n"use server"\n\nasync function createUser(formData: FormData) {\n  const name = formData.get("name")\n  await db.users.create({ name })\n  revalidatePath("/users")\n}', desc: 'Server Action' },
+                                { code: '// Formulaire avec action\nimport { useFormStatus } from "react-dom"\n\nfunction SubmitButton() {\n  const { pending } = useFormStatus()\n  return (\n    <button disabled={pending}>\n      {pending ? "Envoi..." : "Envoyer"}\n    </button>\n  )\n}\n\nfunction UserForm() {\n  return (\n    <form action={createUser}>\n      <input name="name" required />\n      <SubmitButton />\n    </form>\n  )\n}', desc: 'useFormStatus' },
+                                { code: '// useFormState pour les erreurs\nimport { useFormState } from "react-dom"\n\nfunction Form() {\n  const [state, formAction] = useFormState(createUser, null)\n  \n  return (\n    <form action={formAction}>\n      <input name="email" />\n      {state?.error && <p className="error">{state.error}</p>}\n      <SubmitButton />\n    </form>\n  )\n}', desc: 'useFormState pour erreurs' }
+                            ],
+                            tips: ['useFormStatus doit être dans un composant enfant du form'],
+                            warnings: ['Server Actions nécessitent un framework comme Next.js']
+                        }
+                    },
+                    {
+                        cmd: 'useOptimistic',
+                        desc: 'Mises à jour optimistes',
+                        details: {
+                            explanation: 'Montre immédiatement le résultat attendu pendant qu\'une action async s\'exécute.',
+                            syntax: 'const [optimisticState, addOptimistic] = useOptimistic(state, updateFn)',
+                            options: [
+                                { flag: 'state', desc: 'État actuel' },
+                                { flag: 'updateFn', desc: 'Fonction de mise à jour optimiste' },
+                                { flag: 'addOptimistic', desc: 'Ajouter une valeur optimiste' }
+                            ],
+                            examples: [
+                                { code: 'import { useOptimistic } from "react"\n\nfunction Messages({ messages, sendMessage }) {\n  const [optimisticMessages, addOptimisticMessage] = useOptimistic(\n    messages,\n    (currentMessages, newMessage) => [\n      ...currentMessages,\n      { ...newMessage, sending: true }\n    ]\n  )\n  \n  async function handleSend(formData) {\n    const text = formData.get("text")\n    addOptimisticMessage({ text, id: Date.now() })\n    await sendMessage(text)\n  }\n  \n  return (\n    <>\n      {optimisticMessages.map(msg => (\n        <div key={msg.id} style={{ opacity: msg.sending ? 0.5 : 1 }}>\n          {msg.text}\n        </div>\n      ))}\n      <form action={handleSend}>\n        <input name="text" />\n        <button>Envoyer</button>\n      </form>\n    </>\n  )\n}', desc: 'Messages optimistes' }
+                            ],
+                            tips: ['L\'état optimiste se réinitialise automatiquement quand l\'action se termine'],
+                            warnings: ['Gérez le cas d\'erreur pour revenir à l\'état précédent']
+                        }
+                    },
+                    {
+                        cmd: 'useTransition avancé',
+                        desc: 'Transitions non-bloquantes',
+                        details: {
+                            explanation: 'Marque des mises à jour comme non-urgentes pour garder l\'UI réactive.',
+                            syntax: 'const [isPending, startTransition] = useTransition()',
+                            options: [
+                                { flag: 'isPending', desc: 'True pendant la transition' },
+                                { flag: 'startTransition', desc: 'Wrappe les updates non-urgentes' }
+                            ],
+                            examples: [
+                                { code: 'import { useTransition, useState } from "react"\n\nfunction Search() {\n  const [query, setQuery] = useState("")\n  const [results, setResults] = useState([])\n  const [isPending, startTransition] = useTransition()\n  \n  function handleChange(e) {\n    // Update urgent : input reste réactif\n    setQuery(e.target.value)\n    \n    // Update non-urgent : peut être interrompue\n    startTransition(() => {\n      setResults(filterHugeList(e.target.value))\n    })\n  }\n  \n  return (\n    <>\n      <input value={query} onChange={handleChange} />\n      {isPending && <Spinner />}\n      <ResultsList results={results} />\n    </>\n  )\n}', desc: 'Recherche non-bloquante' },
+                                { code: '// Navigation avec transition\nfunction Tabs() {\n  const [tab, setTab] = useState("home")\n  const [isPending, startTransition] = useTransition()\n  \n  function selectTab(nextTab) {\n    startTransition(() => {\n      setTab(nextTab)\n    })\n  }\n  \n  return (\n    <>\n      <TabButton onClick={() => selectTab("home")}>Home</TabButton>\n      <TabButton onClick={() => selectTab("posts")}>Posts</TabButton>\n      {isPending ? <Spinner /> : <TabContent tab={tab} />}\n    </>\n  )\n}', desc: 'Onglets avec transition' }
+                            ],
+                            tips: ['startTransition rend les updates interruptibles par des interactions urgentes'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project',
+                title: '🚀 Projet: App Notes',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-gradient-to-r from-cyan-500 to-blue-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Setup & Structure',
+                        desc: 'Créer le projet React',
+                        details: {
+                            explanation: 'Initialisation d\'un projet React avec Vite et la structure de fichiers.',
+                            syntax: 'Configuration initiale du projet',
+                            options: [],
+                            examples: [
+                                { code: '# Créer le projet\nnpm create vite@latest notes-app -- --template react\ncd notes-app\nnpm install\n\n# Structure recommandée\nsrc/\n  components/\n    NoteCard.jsx\n    NoteForm.jsx\n    NoteList.jsx\n    SearchBar.jsx\n  hooks/\n    useLocalStorage.js\n    useDebounce.js\n  context/\n    NotesContext.jsx\n  App.jsx\n  main.jsx', desc: 'Setup projet' },
+                                { code: '// main.jsx\nimport React from "react"\nimport ReactDOM from "react-dom/client"\nimport App from "./App"\nimport "./index.css"\n\nReactDOM.createRoot(document.getElementById("root")).render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n)', desc: 'Point d\'entrée' }
+                            ],
+                            tips: ['Vite est plus rapide que Create React App'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: Context & État Global',
+                        desc: 'Créer le contexte des notes',
+                        details: {
+                            explanation: 'Mise en place du contexte React pour gérer l\'état global des notes.',
+                            syntax: 'Context avec useReducer',
+                            options: [],
+                            examples: [
+                                { code: '// context/NotesContext.jsx\nimport { createContext, useContext, useReducer, useEffect } from "react"\n\nconst NotesContext = createContext(null)\n\nconst initialState = {\n  notes: JSON.parse(localStorage.getItem("notes")) || [],\n  filter: "all",\n  searchQuery: ""\n}\n\nfunction notesReducer(state, action) {\n  switch (action.type) {\n    case "ADD_NOTE":\n      return { ...state, notes: [...state.notes, action.payload] }\n    case "UPDATE_NOTE":\n      return {\n        ...state,\n        notes: state.notes.map(n => \n          n.id === action.payload.id ? action.payload : n\n        )\n      }\n    case "DELETE_NOTE":\n      return {\n        ...state,\n        notes: state.notes.filter(n => n.id !== action.payload)\n      }\n    case "SET_FILTER":\n      return { ...state, filter: action.payload }\n    case "SET_SEARCH":\n      return { ...state, searchQuery: action.payload }\n    default:\n      return state\n  }\n}\n\nexport function NotesProvider({ children }) {\n  const [state, dispatch] = useReducer(notesReducer, initialState)\n  \n  // Persist to localStorage\n  useEffect(() => {\n    localStorage.setItem("notes", JSON.stringify(state.notes))\n  }, [state.notes])\n  \n  return (\n    <NotesContext.Provider value={{ state, dispatch }}>\n      {children}\n    </NotesContext.Provider>\n  )\n}\n\nexport function useNotes() {\n  const context = useContext(NotesContext)\n  if (!context) throw new Error("useNotes must be used within NotesProvider")\n  return context\n}', desc: 'NotesContext complet' }
+                            ],
+                            tips: ['useReducer est plus adapté que useState pour un état complexe'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Composant NoteForm',
+                        desc: 'Formulaire de création/édition',
+                        details: {
+                            explanation: 'Composant de formulaire contrôlé pour créer et modifier des notes.',
+                            syntax: 'Formulaire avec useState',
+                            options: [],
+                            examples: [
+                                { code: '// components/NoteForm.jsx\nimport { useState, useEffect } from "react"\nimport { useNotes } from "../context/NotesContext"\n\nexport function NoteForm({ editNote, onClose }) {\n  const { dispatch } = useNotes()\n  const [title, setTitle] = useState(editNote?.title || "")\n  const [content, setContent] = useState(editNote?.content || "")\n  const [color, setColor] = useState(editNote?.color || "#fef3c7")\n  \n  const colors = ["#fef3c7", "#dbeafe", "#dcfce7", "#fce7f3", "#f3e8ff"]\n  \n  const handleSubmit = (e) => {\n    e.preventDefault()\n    if (!title.trim()) return\n    \n    const note = {\n      id: editNote?.id || Date.now().toString(),\n      title: title.trim(),\n      content: content.trim(),\n      color,\n      createdAt: editNote?.createdAt || new Date().toISOString(),\n      updatedAt: new Date().toISOString()\n    }\n    \n    dispatch({\n      type: editNote ? "UPDATE_NOTE" : "ADD_NOTE",\n      payload: note\n    })\n    \n    setTitle("")\n    setContent("")\n    onClose?.()\n  }\n  \n  return (\n    <form onSubmit={handleSubmit} className="note-form">\n      <input\n        type="text"\n        placeholder="Titre de la note"\n        value={title}\n        onChange={(e) => setTitle(e.target.value)}\n        required\n      />\n      <textarea\n        placeholder="Contenu..."\n        value={content}\n        onChange={(e) => setContent(e.target.value)}\n        rows={4}\n      />\n      <div className="color-picker">\n        {colors.map(c => (\n          <button\n            key={c}\n            type="button"\n            style={{ background: c }}\n            className={color === c ? "selected" : ""}\n            onClick={() => setColor(c)}\n          />\n        ))}\n      </div>\n      <button type="submit">\n        {editNote ? "Modifier" : "Ajouter"}\n      </button>\n    </form>\n  )\n}', desc: 'NoteForm complet' }
+                            ],
+                            tips: ['Réinitialisez le formulaire après soumission'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Liste & Filtrage',
+                        desc: 'Affichage filtré des notes',
+                        details: {
+                            explanation: 'Composants pour afficher et filtrer la liste des notes avec recherche.',
+                            syntax: 'Liste avec useMemo pour les filtres',
+                            options: [],
+                            examples: [
+                                { code: '// components/NoteList.jsx\nimport { useMemo } from "react"\nimport { useNotes } from "../context/NotesContext"\nimport { NoteCard } from "./NoteCard"\n\nexport function NoteList() {\n  const { state } = useNotes()\n  const { notes, filter, searchQuery } = state\n  \n  const filteredNotes = useMemo(() => {\n    return notes\n      .filter(note => {\n        // Filtre par recherche\n        if (searchQuery) {\n          const query = searchQuery.toLowerCase()\n          return note.title.toLowerCase().includes(query) ||\n                 note.content.toLowerCase().includes(query)\n        }\n        return true\n      })\n      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))\n  }, [notes, filter, searchQuery])\n  \n  if (filteredNotes.length === 0) {\n    return (\n      <div className="empty-state">\n        <p>Aucune note trouvée</p>\n      </div>\n    )\n  }\n  \n  return (\n    <div className="notes-grid">\n      {filteredNotes.map(note => (\n        <NoteCard key={note.id} note={note} />\n      ))}\n    </div>\n  )\n}', desc: 'NoteList avec filtrage' },
+                                { code: '// components/SearchBar.jsx\nimport { useNotes } from "../context/NotesContext"\nimport { useDebounce } from "../hooks/useDebounce"\nimport { useState, useEffect } from "react"\n\nexport function SearchBar() {\n  const { dispatch } = useNotes()\n  const [query, setQuery] = useState("")\n  const debouncedQuery = useDebounce(query, 300)\n  \n  useEffect(() => {\n    dispatch({ type: "SET_SEARCH", payload: debouncedQuery })\n  }, [debouncedQuery, dispatch])\n  \n  return (\n    <input\n      type="search"\n      placeholder="Rechercher une note..."\n      value={query}\n      onChange={(e) => setQuery(e.target.value)}\n      className="search-input"\n    />\n  )\n}', desc: 'SearchBar avec debounce' }
+                            ],
+                            tips: ['useMemo évite de recalculer les filtres à chaque rendu'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Carte Note',
+                        desc: 'Composant NoteCard avec actions',
+                        details: {
+                            explanation: 'Carte de note avec édition, suppression et confirmation.',
+                            syntax: 'Composant avec état local pour le mode édition',
+                            options: [],
+                            examples: [
+                                { code: '// components/NoteCard.jsx\nimport { useState } from "react"\nimport { useNotes } from "../context/NotesContext"\nimport { NoteForm } from "./NoteForm"\n\nexport function NoteCard({ note }) {\n  const { dispatch } = useNotes()\n  const [isEditing, setIsEditing] = useState(false)\n  const [showConfirm, setShowConfirm] = useState(false)\n  \n  const handleDelete = () => {\n    dispatch({ type: "DELETE_NOTE", payload: note.id })\n  }\n  \n  const formatDate = (dateString) => {\n    return new Date(dateString).toLocaleDateString("fr-FR", {\n      day: "numeric",\n      month: "short",\n      hour: "2-digit",\n      minute: "2-digit"\n    })\n  }\n  \n  if (isEditing) {\n    return (\n      <div className="note-card" style={{ background: note.color }}>\n        <NoteForm \n          editNote={note} \n          onClose={() => setIsEditing(false)} \n        />\n      </div>\n    )\n  }\n  \n  return (\n    <article className="note-card" style={{ background: note.color }}>\n      <h3>{note.title}</h3>\n      <p>{note.content}</p>\n      <time>{formatDate(note.updatedAt)}</time>\n      \n      <div className="note-actions">\n        <button onClick={() => setIsEditing(true)}>✏️</button>\n        <button onClick={() => setShowConfirm(true)}>🗑️</button>\n      </div>\n      \n      {showConfirm && (\n        <div className="confirm-dialog">\n          <p>Supprimer cette note?</p>\n          <button onClick={handleDelete}>Oui</button>\n          <button onClick={() => setShowConfirm(false)}>Non</button>\n        </div>\n      )}\n    </article>\n  )\n}', desc: 'NoteCard complet' }
+                            ],
+                            tips: ['Utilisez une confirmation avant suppression pour éviter les erreurs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: App & Styles',
+                        desc: 'Assembler et styliser',
+                        details: {
+                            explanation: 'Composant App principal et styles CSS de l\'application.',
+                            syntax: 'Assemblage final',
+                            options: [],
+                            examples: [
+                                { code: '// App.jsx\nimport { useState } from "react"\nimport { NotesProvider } from "./context/NotesContext"\nimport { NoteForm } from "./components/NoteForm"\nimport { NoteList } from "./components/NoteList"\nimport { SearchBar } from "./components/SearchBar"\nimport "./App.css"\n\nfunction App() {\n  const [showForm, setShowForm] = useState(false)\n  \n  return (\n    <NotesProvider>\n      <div className="app">\n        <header>\n          <h1>📝 Mes Notes</h1>\n          <SearchBar />\n          <button \n            className="add-btn"\n            onClick={() => setShowForm(!showForm)}\n          >\n            {showForm ? "Fermer" : "+ Nouvelle note"}\n          </button>\n        </header>\n        \n        {showForm && (\n          <NoteForm onClose={() => setShowForm(false)} />\n        )}\n        \n        <main>\n          <NoteList />\n        </main>\n      </div>\n    </NotesProvider>\n  )\n}', desc: 'App.jsx' },
+                                { code: '/* App.css */\n.app {\n  max-width: 1200px;\n  margin: 0 auto;\n  padding: 20px;\n}\n\nheader {\n  display: flex;\n  align-items: center;\n  gap: 20px;\n  margin-bottom: 30px;\n}\n\n.notes-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));\n  gap: 20px;\n}\n\n.note-card {\n  padding: 16px;\n  border-radius: 12px;\n  box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n  transition: transform 0.2s;\n}\n\n.note-card:hover {\n  transform: translateY(-4px);\n}\n\n.note-form {\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n  padding: 20px;\n  background: white;\n  border-radius: 12px;\n  margin-bottom: 20px;\n}\n\n.color-picker {\n  display: flex;\n  gap: 8px;\n}\n\n.color-picker button {\n  width: 30px;\n  height: 30px;\n  border-radius: 50%;\n  border: 2px solid transparent;\n}\n\n.color-picker button.selected {\n  border-color: #333;\n}', desc: 'Styles CSS' }
+                            ],
+                            tips: ['CSS Grid est parfait pour les layouts de cartes responsives'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire Computer Vision : OpenCV, PIL, détection d'objets et traitement d'images.">
+    <title>Computer Vision - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-rose-500/20 mb-4 icon-glow">
+                    <i class="fas fa-eye text-3xl text-rose-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Computer Vision</h1>
+                <p class="text-slate-400">OpenCV, PIL, détection d'objets et traitement d'images</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'opencv-basic',
+                title: 'OpenCV - Fondamentaux',
+                icon: 'fa-image',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'cv2.imread("image.jpg")',
+                        desc: 'Charger une image',
+                        details: {
+                            explanation: 'Lit une image depuis le disque et la retourne sous forme de tableau NumPy (BGR par défaut).',
+                            syntax: 'cv2.imread(filename, flags)',
+                            options: [
+                                { flag: 'cv2.IMREAD_COLOR', desc: 'Charge en couleur (BGR), ignore transparence' },
+                                { flag: 'cv2.IMREAD_GRAYSCALE', desc: 'Charge en niveaux de gris' },
+                                { flag: 'cv2.IMREAD_UNCHANGED', desc: 'Charge avec canal alpha si présent' }
+                            ],
+                            examples: [
+                                { code: 'import cv2\nimg = cv2.imread("photo.jpg")', desc: 'Chargement basique' },
+                                { code: 'gray = cv2.imread("photo.jpg", cv2.IMREAD_GRAYSCALE)', desc: 'En niveaux de gris' }
+                            ],
+                            tips: ['OpenCV charge les images en BGR, pas RGB !'],
+                            warnings: ['Retourne None si le fichier n\'existe pas']
+                        }
+                    },
+                    {
+                        cmd: 'cv2.imshow("Window", img)',
+                        desc: 'Afficher une image',
+                        details: {
+                            explanation: 'Affiche une image dans une fenêtre. Nécessite cv2.waitKey() pour maintenir la fenêtre.',
+                            syntax: 'cv2.imshow(window_name, image)',
+                            options: [],
+                            examples: [
+                                { code: 'cv2.imshow("Image", img)\ncv2.waitKey(0)\ncv2.destroyAllWindows()', desc: 'Affichage avec attente' }
+                            ],
+                            tips: ['waitKey(0) attend une touche, waitKey(1) attend 1ms'],
+                            warnings: ['Ne fonctionne pas dans Jupyter, utilisez matplotlib']
+                        }
+                    },
+                    {
+                        cmd: 'cv2.imwrite("output.jpg", img)',
+                        desc: 'Sauvegarder une image',
+                        details: {
+                            explanation: 'Enregistre une image sur le disque. Le format est déterminé par l\'extension.',
+                            syntax: 'cv2.imwrite(filename, image, params)',
+                            options: [
+                                { flag: '[cv2.IMWRITE_JPEG_QUALITY, 95]', desc: 'Qualité JPEG (0-100)' },
+                                { flag: '[cv2.IMWRITE_PNG_COMPRESSION, 9]', desc: 'Compression PNG (0-9)' }
+                            ],
+                            examples: [
+                                { code: 'cv2.imwrite("result.png", img)', desc: 'Sauvegarde simple' },
+                                { code: 'cv2.imwrite("result.jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])', desc: 'JPEG qualité 90%' }
+                            ],
+                            tips: ['Retourne True si succès, False sinon'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cv2.cvtColor(img, cv2.COLOR_BGR2RGB)',
+                        desc: 'Convertir l\'espace colorimétrique',
+                        details: {
+                            explanation: 'Convertit une image d\'un espace couleur à un autre (BGR, RGB, HSV, LAB, etc.).',
+                            syntax: 'cv2.cvtColor(src, code)',
+                            options: [
+                                { flag: 'COLOR_BGR2RGB', desc: 'BGR vers RGB' },
+                                { flag: 'COLOR_BGR2GRAY', desc: 'BGR vers niveaux de gris' },
+                                { flag: 'COLOR_BGR2HSV', desc: 'BGR vers HSV' },
+                                { flag: 'COLOR_RGB2BGR', desc: 'RGB vers BGR' }
+                            ],
+                            examples: [
+                                { code: 'rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)', desc: 'Pour matplotlib' },
+                                { code: 'hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)', desc: 'Pour détection couleur' }
+                            ],
+                            tips: ['Convertissez en RGB avant d\'afficher avec matplotlib'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'transforms',
+                title: 'Transformations',
+                icon: 'fa-crop-alt',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'cv2.resize(img, (width, height))',
+                        desc: 'Redimensionner une image',
+                        details: {
+                            explanation: 'Change la taille d\'une image avec différentes méthodes d\'interpolation.',
+                            syntax: 'cv2.resize(src, dsize, fx, fy, interpolation)',
+                            options: [
+                                { flag: 'cv2.INTER_LINEAR', desc: 'Interpolation bilinéaire (défaut)' },
+                                { flag: 'cv2.INTER_AREA', desc: 'Meilleur pour réduction' },
+                                { flag: 'cv2.INTER_CUBIC', desc: 'Meilleur pour agrandissement' }
+                            ],
+                            examples: [
+                                { code: 'resized = cv2.resize(img, (640, 480))', desc: 'Taille fixe' },
+                                { code: 'resized = cv2.resize(img, None, fx=0.5, fy=0.5)', desc: 'Réduire de 50%' }
+                            ],
+                            tips: ['INTER_AREA évite le moiré lors de la réduction'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)',
+                        desc: 'Rotation de l\'image',
+                        details: {
+                            explanation: 'Effectue des rotations de 90°, 180° ou 270°.',
+                            syntax: 'cv2.rotate(src, rotateCode)',
+                            options: [
+                                { flag: 'ROTATE_90_CLOCKWISE', desc: 'Rotation 90° horaire' },
+                                { flag: 'ROTATE_180', desc: 'Rotation 180°' },
+                                { flag: 'ROTATE_90_COUNTERCLOCKWISE', desc: 'Rotation 90° anti-horaire' }
+                            ],
+                            examples: [
+                                { code: 'rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)', desc: 'Rotation 90°' }
+                            ],
+                            tips: ['Pour des angles arbitraires, utilisez cv2.warpAffine()'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cv2.GaussianBlur(img, (5, 5), 0)',
+                        desc: 'Flou gaussien',
+                        details: {
+                            explanation: 'Applique un flou gaussien pour réduire le bruit ou lisser l\'image.',
+                            syntax: 'cv2.GaussianBlur(src, ksize, sigmaX)',
+                            options: [
+                                { flag: 'ksize', desc: 'Taille du kernel (doit être impair)' },
+                                { flag: 'sigmaX', desc: 'Écart-type (0 = calculé auto)' }
+                            ],
+                            examples: [
+                                { code: 'blur = cv2.GaussianBlur(img, (5, 5), 0)', desc: 'Flou léger' },
+                                { code: 'blur = cv2.GaussianBlur(img, (15, 15), 0)', desc: 'Flou fort' }
+                            ],
+                            tips: ['Utile avant la détection de contours'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cv2.Canny(img, 100, 200)',
+                        desc: 'Détection de contours',
+                        details: {
+                            explanation: 'Algorithme de Canny pour détecter les bords/contours dans une image.',
+                            syntax: 'cv2.Canny(image, threshold1, threshold2)',
+                            options: [
+                                { flag: 'threshold1', desc: 'Seuil bas (pixels en dessous ignorés)' },
+                                { flag: 'threshold2', desc: 'Seuil haut (pixels au-dessus = contours)' }
+                            ],
+                            examples: [
+                                { code: 'edges = cv2.Canny(gray, 50, 150)', desc: 'Détection standard' },
+                                { code: 'edges = cv2.Canny(cv2.GaussianBlur(img, (5,5), 0), 50, 150)', desc: 'Avec flou préalable' }
+                            ],
+                            tips: ['Ratio recommandé threshold2/threshold1 entre 2:1 et 3:1'],
+                            warnings: ['L\'image doit être en niveaux de gris']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'pil',
+                title: 'PIL / Pillow',
+                icon: 'fa-palette',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Image.open("image.jpg")',
+                        desc: 'Ouvrir une image avec PIL',
+                        details: {
+                            explanation: 'Charge une image avec Pillow. Plus simple que OpenCV pour des opérations basiques.',
+                            syntax: 'from PIL import Image\nimg = Image.open(filename)',
+                            options: [],
+                            examples: [
+                                { code: 'from PIL import Image\nimg = Image.open("photo.jpg")\nimg.show()', desc: 'Ouvrir et afficher' },
+                                { code: 'print(img.size, img.mode)', desc: 'Taille et mode (RGB, L, etc.)' }
+                            ],
+                            tips: ['PIL utilise RGB par défaut, pas BGR'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'img.resize((width, height))',
+                        desc: 'Redimensionner avec PIL',
+                        details: {
+                            explanation: 'Redimensionne l\'image à une nouvelle taille.',
+                            syntax: 'img.resize(size, resample)',
+                            options: [
+                                { flag: 'Image.LANCZOS', desc: 'Haute qualité (lent)' },
+                                { flag: 'Image.BILINEAR', desc: 'Qualité moyenne' },
+                                { flag: 'Image.NEAREST', desc: 'Rapide, basse qualité' }
+                            ],
+                            examples: [
+                                { code: 'resized = img.resize((800, 600), Image.LANCZOS)', desc: 'Redimensionnement HQ' },
+                                { code: 'thumb = img.copy()\nthumb.thumbnail((128, 128))', desc: 'Thumbnail (garde ratio)' }
+                            ],
+                            tips: ['thumbnail() modifie l\'image en place et garde le ratio'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'np.array(img)',
+                        desc: 'Convertir PIL vers NumPy',
+                        details: {
+                            explanation: 'Convertit une image PIL en tableau NumPy pour traitement avancé.',
+                            syntax: 'import numpy as np\narr = np.array(pil_image)',
+                            options: [],
+                            examples: [
+                                { code: 'import numpy as np\nfrom PIL import Image\n\nimg = Image.open("photo.jpg")\narr = np.array(img)  # Shape: (H, W, 3)', desc: 'PIL vers NumPy' },
+                                { code: 'pil_img = Image.fromarray(arr)', desc: 'NumPy vers PIL' }
+                            ],
+                            tips: ['Utilisez cette conversion pour passer entre PIL et OpenCV'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'detection',
+                title: 'Détection d\'objets',
+                icon: 'fa-object-group',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'cv2.CascadeClassifier()',
+                        desc: 'Détection par cascade (visages)',
+                        details: {
+                            explanation: 'Utilise des classificateurs Haar cascade pour détecter des objets (visages, yeux, etc.).',
+                            syntax: 'cascade = cv2.CascadeClassifier(xml_path)',
+                            options: [],
+                            examples: [
+                                { code: 'face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")\ngray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\nfaces = face_cascade.detectMultiScale(gray, 1.1, 4)\nfor (x, y, w, h) in faces:\n    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)', desc: 'Détection de visages' }
+                            ],
+                            tips: ['Méthode classique mais moins précise que YOLO/SSD'],
+                            warnings: ['Sensible aux conditions d\'éclairage']
+                        }
+                    },
+                    {
+                        cmd: 'YOLO / Ultralytics',
+                        desc: 'Détection moderne avec YOLO',
+                        details: {
+                            explanation: 'YOLO (You Only Look Once) est l\'état de l\'art pour la détection d\'objets en temps réel.',
+                            syntax: 'from ultralytics import YOLO\nmodel = YOLO("yolov8n.pt")',
+                            options: [
+                                { flag: 'yolov8n', desc: 'Nano - très rapide, moins précis' },
+                                { flag: 'yolov8s', desc: 'Small - bon compromis' },
+                                { flag: 'yolov8m', desc: 'Medium' },
+                                { flag: 'yolov8l/x', desc: 'Large/XLarge - plus précis' }
+                            ],
+                            examples: [
+                                { code: 'from ultralytics import YOLO\n\nmodel = YOLO("yolov8n.pt")\nresults = model("image.jpg")\nresults[0].show()', desc: 'Détection simple' },
+                                { code: 'for r in results:\n    for box in r.boxes:\n        print(box.xyxy, box.conf, box.cls)', desc: 'Accéder aux détections' }
+                            ],
+                            tips: ['pip install ultralytics'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'cv2.findContours()',
+                        desc: 'Trouver les contours',
+                        details: {
+                            explanation: 'Trouve les contours dans une image binaire (après seuillage ou Canny).',
+                            syntax: 'contours, hierarchy = cv2.findContours(img, mode, method)',
+                            options: [
+                                { flag: 'cv2.RETR_EXTERNAL', desc: 'Contours externes uniquement' },
+                                { flag: 'cv2.RETR_TREE', desc: 'Tous les contours avec hiérarchie' },
+                                { flag: 'cv2.CHAIN_APPROX_SIMPLE', desc: 'Compresse les segments' }
+                            ],
+                            examples: [
+                                { code: 'gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n_, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)\ncontours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)\ncv2.drawContours(img, contours, -1, (0, 255, 0), 2)', desc: 'Détection et dessin' }
+                            ],
+                            tips: ['Utilisez cv2.contourArea() pour filtrer par taille'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'deeplearning',
+                title: 'Deep Learning Vision',
+                icon: 'fa-robot',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'torchvision.models.resnet50()',
+                        desc: 'Modèle pré-entraîné PyTorch',
+                        details: {
+                            explanation: 'Charge un modèle de classification d\'images pré-entraîné sur ImageNet.',
+                            syntax: 'from torchvision import models\nmodel = models.resnet50(pretrained=True)',
+                            options: [
+                                { flag: 'resnet18/34/50/101', desc: 'ResNet de différentes tailles' },
+                                { flag: 'vgg16/19', desc: 'VGG networks' },
+                                { flag: 'efficientnet_b0-b7', desc: 'EfficientNet' }
+                            ],
+                            examples: [
+                                { code: 'import torch\nfrom torchvision import models, transforms\n\nmodel = models.resnet50(weights="IMAGENET1K_V2")\nmodel.eval()', desc: 'Charger ResNet50' }
+                            ],
+                            tips: ['Utilisez weights= au lieu de pretrained= (déprécié)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'transforms.Compose([...])',
+                        desc: 'Pipeline de transformations',
+                        details: {
+                            explanation: 'Crée une séquence de transformations pour prétraiter les images.',
+                            syntax: 'from torchvision import transforms',
+                            options: [],
+                            examples: [
+                                { code: 'transform = transforms.Compose([\n    transforms.Resize(256),\n    transforms.CenterCrop(224),\n    transforms.ToTensor(),\n    transforms.Normalize(\n        mean=[0.485, 0.456, 0.406],\n        std=[0.229, 0.224, 0.225]\n    )\n])', desc: 'Prétraitement ImageNet standard' }
+                            ],
+                            tips: ['Ces valeurs de normalisation sont standard pour ImageNet'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'pipeline("image-classification")',
+                        desc: 'Classification avec Transformers',
+                        details: {
+                            explanation: 'Utilise Hugging Face pour la classification d\'images avec des modèles Vision Transformer.',
+                            syntax: 'from transformers import pipeline',
+                            options: [],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\nclassifier = pipeline("image-classification")\nresult = classifier("image.jpg")\nprint(result)', desc: 'Classification simple' },
+                                { code: 'classifier = pipeline("image-classification", model="google/vit-base-patch16-224")', desc: 'Avec ViT spécifique' }
+                            ],
+                            tips: ['Vision Transformers (ViT) rivalisent avec les CNNs'],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>
