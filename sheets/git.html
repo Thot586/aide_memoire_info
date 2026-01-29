@@ -71,928 +71,1440 @@
     <!-- Données spécifiques à Git -->
     <script>
         const cheatsheetData = [
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 1: CONFIGURATION INITIALE
+            // ═══════════════════════════════════════════════════════════════
             {
-                id: 'config',
-                title: 'Configuration & Initialisation',
+                id: 'config-init',
+                title: 'Configuration Initiale',
                 icon: 'fa-cogs',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'git config --global user.name "Nom"',
-                        desc: 'Définir le nom de l\'utilisateur',
+                        cmd: 'Configurer mon identité Git',
+                        desc: 'Obligatoire avant de pouvoir faire des commits',
                         details: {
-                            explanation: 'Cette commande configure votre identité dans Git. Le nom que vous définissez apparaîtra dans chaque commit que vous créez. C\'est une configuration obligatoire avant de pouvoir faire des commits.',
-                            syntax: 'git config [--global|--local|--system] user.name "<votre nom>"',
+                            explanation: 'Git a besoin de savoir qui vous êtes pour signer vos commits. Cette configuration est obligatoire et doit être faite une seule fois sur chaque machine.',
+                            syntax: 'git config --global user.name "Prénom Nom"\ngit config --global user.email "email@exemple.com"',
                             options: [
-                                { flag: '--global', desc: 'Applique la configuration à tous vos projets Git (stocké dans ~/.gitconfig)' },
-                                { flag: '--local', desc: 'Applique uniquement au projet courant (stocké dans .git/config)' },
-                                { flag: '--system', desc: 'Applique à tous les utilisateurs de la machine' }
+                                { flag: '--global', desc: 'Configuration pour tous vos projets (recommandé)' },
+                                { flag: '--local', desc: 'Configuration pour ce projet uniquement' }
                             ],
                             examples: [
-                                { code: 'git config --global user.name "Jean Dupont"', desc: 'Configuration globale avec prénom et nom' },
-                                { code: 'git config --local user.name "JDupont-Pro"', desc: 'Configuration spécifique pour un projet professionnel' },
-                                { code: 'git config user.name', desc: 'Afficher le nom actuellement configuré' }
+                                { code: `# Configuration initiale (à faire une seule fois)
+git config --global user.name "Jean Dupont"
+git config --global user.email "jean.dupont@email.com"
+
+# Vérifier la configuration
+git config --global --list`, desc: 'Configuration complète' },
+                                { code: `# Configuration spécifique pour un projet pro
+git config --local user.name "JDupont"
+git config --local user.email "j.dupont@entreprise.com"`, desc: 'Configuration projet spécifique' }
                             ],
-                            tips: ['Utilisez votre vrai nom pour que vos collaborateurs vous identifient facilement', 'La configuration globale est suffisante pour la plupart des cas'],
+                            tips: [
+                                'Utilisez le même email que votre compte GitHub pour lier vos commits',
+                                'La configuration globale est suffisante pour la plupart des cas'
+                            ],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'git config --global user.email "mail"',
-                        desc: 'Définir l\'email de l\'utilisateur',
+                        cmd: 'Cloner un projet existant',
+                        desc: 'Rejoindre un projet déjà sur GitHub',
                         details: {
-                            explanation: 'Configure l\'adresse email associée à vos commits. Sur GitHub, cet email est utilisé pour lier vos commits à votre compte.',
-                            syntax: 'git config [--global|--local] user.email "<votre email>"',
+                            explanation: 'Clone télécharge une copie complète d\'un dépôt distant (GitHub, GitLab...) sur votre machine, avec tout son historique.',
+                            syntax: 'git clone <url> [nom-dossier]',
                             options: [
-                                { flag: '--global', desc: 'Configuration pour tous vos projets' },
-                                { flag: '--local', desc: 'Configuration pour le projet courant uniquement' }
+                                { flag: 'HTTPS', desc: 'Plus simple, demande identifiants' },
+                                { flag: 'SSH', desc: 'Plus sécurisé, nécessite clé SSH configurée' }
                             ],
                             examples: [
-                                { code: 'git config --global user.email "jean.dupont@email.com"', desc: 'Email personnel pour tous les projets' },
-                                { code: 'git config --global --list', desc: 'Voir toutes vos configurations globales' }
+                                { code: `# Cloner via HTTPS (plus simple)
+git clone https://github.com/user/mon-projet.git
+
+# Entrer dans le dossier
+cd mon-projet
+
+# Vérifier que tout est OK
+git status`, desc: 'Clone basique' },
+                                { code: `# Cloner via SSH (recommandé si clé configurée)
+git clone git@github.com:user/mon-projet.git
+
+# Cloner avec un nom de dossier personnalisé
+git clone https://github.com/user/projet.git mon-nouveau-nom`, desc: 'Variantes de clone' }
                             ],
-                            tips: ['Utilisez l\'email de votre compte GitHub pour que vos commits apparaissent sur votre profil'],
+                            tips: [
+                                'Le remote "origin" est automatiquement configuré avec clone',
+                                'Préférez SSH si vous avez configuré vos clés (pas de mot de passe à chaque push)'
+                            ],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'git init',
-                        desc: 'Initialiser un nouveau dépôt local',
+                        cmd: 'Initialiser un nouveau projet',
+                        desc: 'Créer un projet local et le lier à GitHub',
                         details: {
-                            explanation: 'Transforme un dossier ordinaire en dépôt Git. Cette commande crée un sous-dossier caché .git qui contient toute la structure nécessaire au versionnement.',
-                            syntax: 'git init [nom-du-dossier]',
+                            explanation: 'Transforme un dossier en dépôt Git et le connecte à un dépôt distant GitHub.',
+                            syntax: 'git init → add → commit → remote add → push',
                             options: [
-                                { flag: '-b <nom>', desc: 'Définit le nom de la branche initiale (par défaut: master ou main)' },
-                                { flag: '--bare', desc: 'Crée un dépôt "nu" sans répertoire de travail (pour les serveurs)' }
+                                { flag: 'git init', desc: 'Crée le dossier .git (initialise le versionnement)' },
+                                { flag: 'git remote add origin', desc: 'Connecte au dépôt GitHub' },
+                                { flag: 'git push -u origin main', desc: 'Envoie et lie les branches' }
                             ],
                             examples: [
-                                { code: 'git init', desc: 'Initialise Git dans le dossier courant' },
-                                { code: 'git init -b main', desc: 'Initialise avec "main" comme branche principale (convention GitHub)' }
+                                { code: `# 1. Dans votre dossier projet
+git init
+
+# 2. Renommer la branche en "main" (convention GitHub)
+git branch -M main
+
+# 3. Ajouter les fichiers
+git add .
+
+# 4. Premier commit
+git commit -m "feat: initial commit"
+
+# 5. Créer le repo vide sur github.com, puis :
+git remote add origin https://github.com/user/mon-projet.git
+
+# 6. Pousser vers GitHub
+git push -u origin main`, desc: 'Workflow complet Local → GitHub' }
                             ],
-                            tips: ['Après git init, pensez à créer un fichier .gitignore'],
-                            warnings: [],
-                            notes: ['Par défaut, Git crée une branche "master". GitHub utilise "main" depuis 2020. Configurez avec: git config --global init.defaultBranch main']
-                        }
-                    },
-                    {
-                        cmd: 'git clone <url>',
-                        desc: 'Cloner un dépôt distant existant',
-                        details: {
-                            explanation: 'Télécharge une copie complète d\'un dépôt distant sur votre machine, incluant tout l\'historique et les branches.',
-                            syntax: 'git clone <url> [nom-dossier-local]',
-                            options: [
-                                { flag: '--depth <n>', desc: 'Clone uniquement les n derniers commits (plus rapide)' },
-                                { flag: '-b <branche>', desc: 'Clone une branche spécifique' }
+                            tips: [
+                                'Créez d\'abord le repo VIDE sur GitHub (sans README)',
+                                'L\'option -u de push permet ensuite de faire juste "git push"'
                             ],
-                            examples: [
-                                { code: 'git clone https://github.com/user/repo.git', desc: 'Clone via HTTPS' },
-                                { code: 'git clone git@github.com:user/repo.git', desc: 'Clone via SSH' }
-                            ],
-                            tips: ['Préférez SSH pour éviter de saisir vos identifiants'],
-                            warnings: []
+                            warnings: [
+                                'Si GitHub a déjà un README, utilisez: git pull origin main --allow-unrelated-histories'
+                            ]
                         }
                     }
                 ]
             },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 2: WORKFLOWS QUOTIDIENS (FOCUS PRINCIPAL)
+            // ═══════════════════════════════════════════════════════════════
             {
-                id: 'first-steps',
-                title: '🚀 Premiers Pas',
-                icon: 'fa-rocket',
+                id: 'daily-workflows',
+                title: '📅 Workflows Quotidiens',
+                icon: 'fa-calendar-check',
                 color: 'border-l-4 border-emerald-500',
                 commands: [
                     {
-                        cmd: 'Local → GitHub (Nouveau projet)',
-                        desc: 'Pousser un projet local vers GitHub',
+                        cmd: 'Rejoindre une branche existante',
+                        desc: 'Basculer vers une branche pour y travailler',
                         details: {
-                            explanation: 'Workflow complet pour initialiser un projet local et le connecter à un nouveau dépôt GitHub. Suivez ces étapes dans l\'ordre pour votre premier commit.',
-                            syntax: 'git init → branch -M → add → commit → remote add → push',
+                            explanation: 'Permet de changer de branche pour travailler sur une fonctionnalité spécifique ou revenir sur main.',
+                            syntax: 'git checkout <branche>\ngit switch <branche>',
                             options: [
-                                { flag: 'git init', desc: 'Initialise le dépôt Git local (crée .git/)' },
-                                { flag: 'git branch -M main', desc: 'Renomme la branche par défaut en "main"' },
-                                { flag: 'git add .', desc: 'Ajoute tous les fichiers au staging' },
-                                { flag: 'git commit -m "msg"', desc: 'Crée le premier snapshot (commit)' },
-                                { flag: 'git remote add origin', desc: 'Connecte au dépôt GitHub' },
-                                { flag: 'git push -u origin main', desc: 'Envoie et lie la branche' }
+                                { flag: 'git checkout', desc: 'Commande classique (fonctionne partout)' },
+                                { flag: 'git switch', desc: 'Nouvelle commande plus claire (Git 2.23+)' }
                             ],
                             examples: [
-                                { code: '# 1. Initialiser le dépôt local\ngit init\n\n# 2. Renommer la branche en "main" (convention GitHub)\ngit branch -M main\n\n# 3. Ajouter tous les fichiers au staging\ngit add .\n\n# 4. Créer le premier commit\ngit commit -m "Initial commit: setup project"\n\n# 5. Connecter au dépôt GitHub (créez-le d\'abord sur github.com)\ngit remote add origin https://github.com/user/repo.git\n\n# 6. Pousser vers GitHub (-u lie les branches)\ngit push -u origin main', desc: 'Workflow complet Local → GitHub' },
-                                { code: '# Si GitHub a déjà un README (historiques indépendants)\n# Après git remote add origin...\n\n# Récupérer et fusionner les historiques indépendants\ngit pull origin main --rebase --allow-unrelated-histories\n\n# Puis pousser normalement\ngit push -u origin main', desc: 'Fusionner avec un repo GitHub non-vide' }
+                                { code: `# Voir toutes les branches disponibles
+git branch -a
+
+# Rejoindre une branche existante
+git checkout feature/login
+# ou
+git switch feature/login
+
+# IMPORTANT: Toujours récupérer les dernières modifs après
+git pull`, desc: 'Rejoindre une branche' },
+                                { code: `# Rejoindre une branche distante (première fois)
+git checkout -b feature/api origin/feature/api
+# ou
+git switch -c feature/api origin/feature/api`, desc: 'Rejoindre une branche distante' }
                             ],
                             tips: [
-                                'Créez d\'abord le repo vide sur GitHub (sans README ni .gitignore)',
-                                'L\'option -u de push permet ensuite de faire juste "git push"',
-                                'git branch -M main renomme même si la branche existe déjà'
+                                'Toujours faire git pull après avoir changé de branche',
+                                'git branch -a montre les branches locales ET distantes'
                             ],
-                            warnings: ['Si GitHub a un README, utilisez --allow-unrelated-histories pour fusionner (voir 2ème exemple)'],
-                            notes: ['La branche n\'existe physiquement qu\'après le premier commit. git branch -M main la prépare.']
+                            warnings: [
+                                'Commitez ou stashez vos modifications avant de changer de branche'
+                            ]
                         }
                     },
                     {
-                        cmd: 'GitHub → Local (Cloner)',
-                        desc: 'Récupérer un projet existant depuis GitHub',
+                        cmd: 'Créer une branche de travail',
+                        desc: 'Ne jamais travailler directement sur main',
                         details: {
-                            explanation: 'Workflow pour cloner un dépôt GitHub existant et commencer à travailler dessus. Utilisez cette méthode quand le projet existe déjà sur GitHub.',
-                            syntax: 'git clone → cd → (branch) → add → commit → push',
+                            explanation: 'Avant de modifier du code, créez toujours une branche dédiée. Cela protège main et permet le travail en parallèle.',
+                            syntax: 'git checkout -b <type>/<nom-descriptif>',
                             options: [
-                                { flag: 'git clone <url>', desc: 'Télécharge tout le repo et son historique' },
-                                { flag: 'cd <repo>', desc: 'Entre dans le dossier du projet' },
-                                { flag: 'git checkout -b feature', desc: 'Crée une branche de travail (optionnel)' },
-                                { flag: 'git add/commit/push', desc: 'Workflow normal de travail' }
+                                { flag: 'feature/', desc: 'Nouvelle fonctionnalité (feature/user-login)' },
+                                { flag: 'fix/', desc: 'Correction de bug (fix/header-responsive)' },
+                                { flag: 'hotfix/', desc: 'Correction urgente prod (hotfix/security-patch)' },
+                                { flag: 'docs/', desc: 'Documentation (docs/api-readme)' },
+                                { flag: 'refactor/', desc: 'Refactoring (refactor/clean-utils)' }
                             ],
                             examples: [
-                                { code: '# 1. Cloner le dépôt (via HTTPS)\ngit clone https://github.com/user/repo.git\n\n# 2. Entrer dans le dossier\ncd repo\n\n# 3. Vérifier l\'état\ngit status\ngit branch -a\n\n# 4. (Optionnel) Créer une branche de travail\ngit checkout -b feature/ma-feature\n\n# 5. Travailler normalement\ngit add .\ngit commit -m "feat: add new feature"\ngit push -u origin feature/ma-feature', desc: 'Workflow GitHub → Local' },
-                                { code: '# Clone via SSH (recommandé si clé configurée)\ngit clone git@github.com:user/repo.git\n\n# Clone avec un nom de dossier personnalisé\ngit clone https://github.com/user/repo.git mon-projet', desc: 'Variantes de clone' }
+                                { code: `# 1. Se placer sur main et récupérer les dernières modifs
+git checkout main
+git pull origin main
+
+# 2. Créer la branche de travail
+git checkout -b feature/ajout-panier
+
+# 3. Vérifier qu'on est sur la bonne branche
+git branch`, desc: 'Workflow création de branche' },
+                                { code: `# Exemples de noms de branches (conventions)
+feature/user-authentication
+feature/shopping-cart-v2
+fix/login-button-broken
+fix/mobile-menu-overflow
+hotfix/critical-security-fix
+docs/api-endpoints
+refactor/simplify-utils`, desc: '📝 Conventions de nommage' }
                             ],
                             tips: [
-                                'Préférez SSH si vous avez configuré vos clés (pas de mot de passe)',
-                                'Créez une branche feature pour ne pas travailler directement sur main',
-                                'git clone configure automatiquement origin'
+                                'Toujours partir d\'une branche main à jour',
+                                'Utilisez des noms descriptifs en minuscules avec des tirets',
+                                'Une branche = une fonctionnalité ou un bug'
                             ],
-                            warnings: [],
-                            notes: ['Avec clone, le remote "origin" est déjà configuré. Pas besoin de git remote add.']
+                            warnings: [
+                                'Ne travaillez JAMAIS directement sur main',
+                                'Évitez les noms génériques comme "dev" ou "test"'
+                            ]
                         }
                     },
                     {
-                        cmd: 'GitHub → Local (Fork)',
-                        desc: 'Contribuer à un projet open source',
+                        cmd: 'Voir mes modifications',
+                        desc: 'Vérifier ce qui a changé avant de commiter',
                         details: {
-                            explanation: 'Workflow pour forker un projet, le cloner et proposer des modifications via Pull Request.',
-                            syntax: 'Fork (GitHub) → clone → upstream → branch → commit → PR',
+                            explanation: 'Avant de commiter, vérifiez toujours ce que vous allez enregistrer. C\'est essentiel pour des commits propres.',
+                            syntax: 'git status\ngit diff',
                             options: [
-                                { flag: 'Fork', desc: 'Copie le repo sur votre compte GitHub (bouton sur github.com)' },
-                                { flag: 'clone votre-fork', desc: 'Clone VOTRE fork, pas l\'original' },
-                                { flag: 'remote add upstream', desc: 'Ajoute le repo original pour sync' },
-                                { flag: 'fetch upstream', desc: 'Récupère les mises à jour de l\'original' }
+                                { flag: 'git status', desc: 'Vue d\'ensemble des fichiers modifiés' },
+                                { flag: 'git diff', desc: 'Détail des modifications non stagées' },
+                                { flag: 'git diff --staged', desc: 'Détail des modifications stagées (prêtes à commit)' }
                             ],
                             examples: [
-                                { code: '# 1. Forker sur GitHub (cliquez sur le bouton Fork)\n\n# 2. Cloner VOTRE fork\ngit clone https://github.com/VOTRE-USER/repo.git\ncd repo\n\n# 3. Ajouter le repo original comme "upstream"\ngit remote add upstream https://github.com/ORIGINAL/repo.git\n\n# 4. Vérifier les remotes\ngit remote -v\n# origin    → votre fork\n# upstream  → repo original\n\n# 5. Créer une branche pour vos modifications\ngit checkout -b fix/typo-readme\n\n# 6. Faire vos modifications, commit et push\ngit add .\ngit commit -m "fix: correct typo in README"\ngit push origin fix/typo-readme\n\n# 7. Créer une Pull Request sur GitHub', desc: 'Workflow Fork complet' },
-                                { code: '# Synchroniser votre fork avec l\'original\ngit fetch upstream\ngit checkout main\ngit merge upstream/main\ngit push origin main', desc: 'Sync fork avec upstream' }
+                                { code: `# 1. Vue d'ensemble
+git status
+# Rouge = modifié mais pas stagé
+# Vert = stagé (prêt à commit)
+
+# 2. Voir le détail des modifications
+git diff              # Changements non stagés
+git diff --staged     # Changements stagés
+
+# 3. Voir les modifications d'un fichier spécifique
+git diff src/app.js`, desc: 'Workflow de vérification' },
+                                { code: `# Version compacte du status
+git status -s
+# M  = Modifié
+# A  = Ajouté
+# D  = Supprimé
+# ?? = Non suivi`, desc: 'Status compact' }
                             ],
                             tips: [
-                                'Toujours travailler sur une branche, jamais directement sur main',
-                                'Synchronisez régulièrement avec upstream pour éviter les conflits',
-                                'La PR se fait sur GitHub, pas en ligne de commande'
+                                'Faites git status AVANT chaque commit',
+                                'git diff --staged montre exactement ce qui sera commité'
                             ],
-                            warnings: ['Ne confondez pas origin (votre fork) et upstream (repo original)'],
-                            notes: ['origin = votre fork | upstream = repo original. Cette convention est standard.']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'changes',
-                title: 'Gestion des Fichiers (Staging)',
-                icon: 'fa-file-code',
-                color: 'border-l-4 border-yellow-500',
-                commands: [
-                    {
-                        cmd: 'git status',
-                        desc: 'Voir l\'état des fichiers modifiés',
-                        details: {
-                            explanation: 'Affiche l\'état actuel de votre répertoire de travail : fichiers modifiés, stagés, et non suivis.',
-                            syntax: 'git status [options]',
-                            options: [
-                                { flag: '-s', desc: 'Affichage compact (short)' },
-                                { flag: '-b', desc: 'Affiche aussi la branche courante' }
-                            ],
-                            examples: [
-                                { code: 'git status', desc: 'Affichage complet' },
-                                { code: 'git status -sb', desc: 'Compact avec branche' }
-                            ],
-                            tips: ['Utilisez git status avant chaque commit pour vérifier ce que vous allez enregistrer'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'git add <fichier>',
-                        desc: 'Ajouter un fichier à l\'index (stage)',
+                        cmd: 'Sauvegarder mon travail (commit)',
+                        desc: 'Créer un point de sauvegarde avec un message clair',
                         details: {
-                            explanation: 'Ajoute un fichier à la zone de staging. Seuls les fichiers stagés seront inclus dans le prochain commit.',
-                            syntax: 'git add <fichier(s)>',
+                            explanation: 'Un commit est une photo de votre code à un instant T. Faites des commits fréquents et atomiques (un commit = un changement logique).',
+                            syntax: 'git add <fichiers>\ngit commit -m "<type>: <description>"',
                             options: [
-                                { flag: '-p', desc: 'Mode interactif : choisir quelles parties ajouter' },
-                                { flag: '-A', desc: 'Ajoute tous les fichiers (ajouts + modifications + suppressions)' },
-                                { flag: '-u', desc: 'Uniquement les fichiers déjà suivis' }
+                                { flag: 'feat:', desc: 'Nouvelle fonctionnalité' },
+                                { flag: 'fix:', desc: 'Correction de bug' },
+                                { flag: 'docs:', desc: 'Documentation' },
+                                { flag: 'style:', desc: 'Formatage, pas de changement de code' },
+                                { flag: 'refactor:', desc: 'Refactoring sans changement fonctionnel' },
+                                { flag: 'test:', desc: 'Ajout/modification de tests' },
+                                { flag: 'chore:', desc: 'Maintenance, dépendances' }
                             ],
                             examples: [
-                                { code: 'git add index.html', desc: 'Ajoute un fichier spécifique' },
-                                { code: 'git add .', desc: 'Ajoute tout le dossier courant' },
-                                { code: 'git add -A', desc: 'Ajoute absolument tout' }
+                                { code: `# 1. Ajouter les fichiers modifiés
+git add .                    # Tout ajouter
+git add src/login.js         # Fichier spécifique
+git add src/                 # Dossier entier
+
+# 2. Créer le commit avec un message clair
+git commit -m "feat: ajoute la page de connexion"
+
+# 3. Vérifier
+git log --oneline -3`, desc: 'Workflow commit standard' },
+                                { code: `# Exemples de messages de commit (Conventional Commits)
+git commit -m "feat: ajoute l'authentification JWT"
+git commit -m "fix: corrige le bug d'affichage du menu"
+git commit -m "docs: met à jour le README"
+git commit -m "refactor: simplifie la logique de validation"
+git commit -m "style: reformate le code avec prettier"
+git commit -m "test: ajoute tests unitaires pour login"
+git commit -m "chore: met à jour les dépendances"`, desc: '📝 Conventions de messages' },
+                                { code: `# Raccourci : add + commit en une commande
+# (uniquement pour les fichiers DÉJÀ suivis par Git)
+git commit -am "fix: corrige le bug d'affichage"`, desc: 'Raccourci commit -am' }
                             ],
-                            tips: ['Préférez ajouter les fichiers un par un pour des commits clairs'],
-                            warnings: ['Attention à ne pas ajouter des fichiers sensibles (.env, mots de passe)']
+                            tips: [
+                                'Commits fréquents et atomiques : un commit = un changement logique',
+                                'Message clair : décrit le QUOI, pas le COMMENT',
+                                'Utilisez les préfixes feat:, fix:, docs: pour un historique lisible'
+                            ],
+                            warnings: [
+                                'git commit -am ne fonctionne PAS pour les nouveaux fichiers'
+                            ]
                         }
                     },
                     {
-                        cmd: 'git rm <fichier>',
-                        desc: 'Supprimer un fichier du suivi',
+                        cmd: 'Envoyer mon travail sur GitHub',
+                        desc: 'Pousser mes commits vers le dépôt distant',
                         details: {
-                            explanation: 'Supprime un fichier du suivi Git ET du disque.',
-                            syntax: 'git rm [options] <fichier>',
+                            explanation: 'Push envoie vos commits locaux vers GitHub. Faites-le régulièrement pour sauvegarder votre travail.',
+                            syntax: 'git push [-u] origin <branche>',
                             options: [
-                                { flag: '--cached', desc: 'Retire du suivi Git mais GARDE le fichier sur le disque' },
-                                { flag: '-r', desc: 'Suppression récursive (pour les dossiers)' }
+                                { flag: '-u', desc: 'Lie la branche locale à la distante (première fois)' },
+                                { flag: 'origin', desc: 'Nom du remote (par défaut avec clone)' }
                             ],
                             examples: [
-                                { code: 'git rm --cached .env', desc: 'Retire .env du suivi mais le garde sur le disque' }
+                                { code: `# Première fois sur une nouvelle branche
+git push -u origin feature/login
+# -u = upstream, lie les branches
+
+# Ensuite, juste :
+git push`, desc: 'Push standard' },
+                                { code: `# Workflow quotidien complet
+# 1. Vérifier les modifications
+git status
+
+# 2. Ajouter et commiter
+git add .
+git commit -m "feat: ajoute validation formulaire"
+
+# 3. Pousser
+git push`, desc: 'Workflow complet' }
                             ],
-                            tips: ['Utilisez --cached quand vous avez oublié d\'ajouter un fichier au .gitignore'],
-                            warnings: ['Sans --cached, le fichier sera définitivement supprimé!']
+                            tips: [
+                                'Après -u, vous pouvez juste faire "git push"',
+                                'Poussez régulièrement pour ne pas perdre votre travail'
+                            ],
+                            warnings: [
+                                'Si push échoue avec "rejected", faites d\'abord git pull'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Récupérer les dernières modifications',
+                        desc: 'Mettre à jour ma branche avec les changements distants',
+                        details: {
+                            explanation: 'Pull récupère et fusionne les modifications du dépôt distant. Faites-le régulièrement, surtout avant de commencer à travailler.',
+                            syntax: 'git pull [origin] [branche]',
+                            options: [
+                                { flag: 'git pull', desc: 'Récupère la branche courante' },
+                                { flag: 'git pull origin main', desc: 'Récupère une branche spécifique' },
+                                { flag: '--rebase', desc: 'Rejoue vos commits après ceux récupérés (historique linéaire)' }
+                            ],
+                            examples: [
+                                { code: `# Récupérer les modifications de ma branche
+git pull
+
+# Récupérer les modifications de main
+git pull origin main
+
+# Récupérer avec rebase (historique plus propre)
+git pull --rebase origin main`, desc: 'Variantes de pull' },
+                                { code: `# Routine recommandée le matin
+git checkout main
+git pull
+git checkout ma-feature
+git pull
+# Maintenant vous êtes à jour !`, desc: 'Routine matinale' }
+                            ],
+                            tips: [
+                                'Faites git pull AVANT de commencer à travailler',
+                                'git pull = git fetch + git merge',
+                                '--rebase garde un historique plus propre'
+                            ],
+                            warnings: [
+                                'Si des conflits apparaissent, voir "Résoudre un conflit de fusion"'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Mettre mon travail de côté (stash)',
+                        desc: 'Sauvegarder temporairement sans commiter',
+                        details: {
+                            explanation: 'Stash met de côté vos modifications non commitées. Utile quand vous devez changer de branche rapidement.',
+                            syntax: 'git stash\ngit stash pop',
+                            options: [
+                                { flag: 'git stash', desc: 'Met de côté les modifications' },
+                                { flag: 'git stash pop', desc: 'Récupère et supprime le stash' },
+                                { flag: 'git stash list', desc: 'Liste tous les stashs' },
+                                { flag: 'git stash drop', desc: 'Supprime le dernier stash' }
+                            ],
+                            examples: [
+                                { code: `# Scénario : vous travaillez sur feature/login
+# mais on vous demande de corriger un bug urgent
+
+# 1. Mettre de côté le travail en cours
+git stash
+
+# 2. Changer de branche et corriger le bug
+git checkout main
+git checkout -b hotfix/urgent-bug
+# ... correction ...
+git commit -am "fix: correction urgente"
+git push
+
+# 3. Revenir à votre travail
+git checkout feature/login
+git stash pop`, desc: 'Cas d\'usage typique' },
+                                { code: `# Stash avec un message (recommandé)
+git stash push -m "WIP: formulaire de login"
+
+# Voir tous les stashs
+git stash list
+
+# Récupérer un stash spécifique
+git stash pop stash@{1}`, desc: 'Stash avancé' }
+                            ],
+                            tips: [
+                                'Utilisez un message avec -m pour vous souvenir du contenu',
+                                'stash pop récupère ET supprime, stash apply garde le stash'
+                            ],
+                            warnings: [
+                                'Le stash peut créer des conflits au moment du pop'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Ma branche est validée → Fusionner',
+                        desc: 'Intégrer ma branche dans main après validation',
+                        details: {
+                            explanation: 'Une fois votre branche validée (PR approuvée ou tests passés), fusionnez-la dans main.',
+                            syntax: 'git checkout main → pull → merge → push',
+                            options: [
+                                { flag: '--no-ff', desc: 'Garde l\'historique de la branche (commit de merge)' },
+                                { flag: '-d', desc: 'Supprime la branche après merge' }
+                            ],
+                            examples: [
+                                { code: `# 1. Revenir sur main et mettre à jour
+git checkout main
+git pull origin main
+
+# 2. Fusionner votre branche
+git merge feature/login
+# ou avec historique visible :
+git merge --no-ff feature/login
+
+# 3. Pousser
+git push origin main
+
+# 4. Supprimer la branche (elle est fusionnée)
+git branch -d feature/login
+git push origin --delete feature/login`, desc: 'Workflow merge complet' },
+                                { code: `# Alternative : via Pull Request (recommandé en équipe)
+# 1. Pousser votre branche
+git push -u origin feature/login
+
+# 2. Sur GitHub : créer une Pull Request
+# 3. Après review : "Merge" ou "Squash and Merge"
+# 4. En local, nettoyer :
+git checkout main
+git pull
+git branch -d feature/login`, desc: 'Via Pull Request' }
+                            ],
+                            tips: [
+                                'En équipe, préférez les Pull Requests au merge direct',
+                                'Supprimez les branches fusionnées pour garder le repo propre',
+                                '--no-ff préserve l\'historique visuel de la branche'
+                            ],
+                            warnings: [
+                                'Ne jamais force push sur main'
+                            ]
                         }
                     }
                 ]
             },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 3: TRAVAILLER EN ÉQUIPE
+            // ═══════════════════════════════════════════════════════════════
             {
-                id: 'commit',
-                title: 'Sauvegarde (Commit)',
-                icon: 'fa-check-circle',
-                color: 'border-l-4 border-green-500',
-                commands: [
-                    {
-                        cmd: 'git commit -m "Message"',
-                        desc: 'Enregistrer les modifications indexées',
-                        details: {
-                            explanation: 'Crée un instantané permanent de tous les fichiers stagés avec un message descriptif.',
-                            syntax: 'git commit [options] -m "<message>"',
-                            options: [
-                                { flag: '-m "<msg>"', desc: 'Message de commit (obligatoire)' },
-                                { flag: '-a', desc: 'Stage automatiquement tous les fichiers MODIFIÉS (pas les nouveaux)' },
-                                { flag: '-am "<msg>"', desc: 'Combine -a et -m' }
-                            ],
-                            examples: [
-                                { code: 'git commit -m "Ajout de la page login"', desc: 'Commit simple' },
-                                { code: 'git commit -am "Fix bug #42"', desc: 'Stage + commit en une commande' }
-                            ],
-                            tips: ['Écrivez des messages clairs', 'Convention : feat:, fix:, docs:, refactor:'],
-                            warnings: ['Le flag -a n\'ajoute PAS les nouveaux fichiers']
-                        }
-                    },
-                    {
-                        cmd: 'git commit --amend',
-                        desc: 'Modifier le dernier commit',
-                        details: {
-                            explanation: 'Modifie le dernier commit (message ou contenu).',
-                            syntax: 'git commit --amend [options]',
-                            options: [
-                                { flag: '-m "<msg>"', desc: 'Nouveau message' },
-                                { flag: '--no-edit', desc: 'Garde le message existant' }
-                            ],
-                            examples: [
-                                { code: 'git commit --amend -m "Nouveau message"', desc: 'Corrige le message' },
-                                { code: 'git add oubli.js && git commit --amend --no-edit', desc: 'Ajoute un fichier oublié' }
-                            ],
-                            tips: ['Parfait pour corriger une faute de frappe'],
-                            warnings: ['Ne JAMAIS amend un commit déjà poussé!']
-                        }
-                    },
-                    {
-                        cmd: 'git log --oneline',
-                        desc: 'Historique compact des commits',
-                        details: {
-                            explanation: 'Affiche l\'historique des commits en format condensé.',
-                            syntax: 'git log --oneline [options]',
-                            options: [
-                                { flag: '-n <nombre>', desc: 'Limite aux n derniers commits' },
-                                { flag: '--graph', desc: 'Affiche un graphique des branches' },
-                                { flag: '--all', desc: 'Affiche toutes les branches' }
-                            ],
-                            examples: [
-                                { code: 'git log --oneline -10', desc: 'Les 10 derniers commits' },
-                                { code: 'git log --oneline --graph --all', desc: 'Vue graphique complète' }
-                            ],
-                            tips: ['Appuyez sur q pour quitter'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'branches',
-                title: 'Branches & Fusion',
-                icon: 'fa-code-branch',
+                id: 'team-work',
+                title: '👥 Travailler en Équipe',
+                icon: 'fa-users',
                 color: 'border-l-4 border-purple-500',
                 commands: [
                     {
-                        cmd: 'git branch',
-                        desc: 'Lister les branches locales',
+                        cmd: 'Combiner mon travail avec celui d\'un collègue',
+                        desc: 'Récupérer les modifications d\'un collègue sur la même branche',
                         details: {
-                            explanation: 'Affiche la liste des branches locales. La branche courante est marquée d\'un *.',
-                            syntax: 'git branch [options] [nom-branche]',
+                            explanation: 'Quand vous et un collègue travaillez sur la même branche, utilisez pull --rebase pour garder un historique propre.',
+                            syntax: 'git pull --rebase origin <branche>',
                             options: [
-                                { flag: '-a', desc: 'Liste toutes les branches (locales + distantes)' },
-                                { flag: '-d <nom>', desc: 'Supprime une branche (si fusionnée)' },
-                                { flag: '-D <nom>', desc: 'Force la suppression' }
+                                { flag: '--rebase', desc: 'Rejoue vos commits après ceux du collègue (historique linéaire)' },
+                                { flag: 'sans --rebase', desc: 'Crée un commit de merge (historique en diamant)' }
                             ],
                             examples: [
-                                { code: 'git branch', desc: 'Liste les branches locales' },
-                                { code: 'git branch feature/login', desc: 'Crée une nouvelle branche' }
+                                { code: `# Scénario : vous et votre collègue travaillez sur feature/api
+
+# 1. Sauvegarder votre travail
+git add .
+git commit -m "feat: ajoute endpoint users"
+
+# 2. Récupérer le travail du collègue avec rebase
+git pull --rebase origin feature/api
+
+# 3. Si tout va bien, pousser
+git push origin feature/api`, desc: 'Workflow avec rebase (recommandé)' },
+                                { code: `# En cas de conflit pendant le rebase :
+# 1. Git s'arrête et indique les fichiers en conflit
+# 2. Résoudre les conflits dans les fichiers
+# 3. Ajouter les fichiers résolus
+git add .
+# 4. Continuer le rebase
+git rebase --continue
+
+# Pour annuler complètement :
+git rebase --abort`, desc: 'Gérer les conflits de rebase' }
                             ],
-                            tips: ['Convention : feature/, bugfix/, hotfix/'],
-                            warnings: [],
-                            notes: ['Git utilise "master" par défaut, GitHub utilise "main"']
+                            tips: [
+                                'Rebase = historique propre et linéaire',
+                                'Communiquez avec vos collègues pour éviter les mêmes fichiers',
+                                'Commitez souvent pour des conflits plus petits'
+                            ],
+                            warnings: [
+                                'Ne jamais rebase des commits déjà poussés et partagés'
+                            ]
                         }
                     },
                     {
-                        cmd: 'git checkout -b <nom>',
-                        desc: 'Créer et basculer vers une branche',
+                        cmd: 'Résoudre un conflit de fusion',
+                        desc: 'Quand Git ne peut pas fusionner automatiquement',
                         details: {
-                            explanation: 'Crée une nouvelle branche ET y bascule immédiatement.',
-                            syntax: 'git checkout -b <nom-branche>',
+                            explanation: 'Un conflit survient quand deux personnes modifient les mêmes lignes. Git marque les zones en conflit et vous devez choisir.',
+                            syntax: 'Éditer les fichiers → git add → git commit',
                             options: [
-                                { flag: '-b', desc: 'Crée la branche avant de basculer' }
+                                { flag: '<<<<<<< HEAD', desc: 'Début de VOS modifications' },
+                                { flag: '=======', desc: 'Séparateur entre les deux versions' },
+                                { flag: '>>>>>>> branch', desc: 'Fin des modifications de l\'AUTRE branche' }
                             ],
                             examples: [
-                                { code: 'git checkout -b feature/panier', desc: 'Crée et bascule vers feature/panier' },
-                                { code: 'git checkout main', desc: 'Bascule vers main' }
+                                { code: `# 1. Identifier les fichiers en conflit
+git status
+# "both modified: src/app.js"
+
+# 2. Ouvrir le fichier - vous verrez :
+<<<<<<< HEAD
+const message = "Bonjour";
+=======
+const message = "Hello";
+>>>>>>> feature/english
+
+# 3. Choisir/combiner et SUPPRIMER les marqueurs
+const message = "Bonjour / Hello";
+
+# 4. Marquer comme résolu
+git add src/app.js
+
+# 5. Finaliser
+git commit -m "fix: résout conflit de merge dans app.js"`, desc: 'Résolution étape par étape' },
+                                { code: `# Utiliser l'outil de merge de VSCode :
+# 1. Cliquer sur "Accept Current Change" (votre version)
+# 2. Ou "Accept Incoming Change" (l'autre version)
+# 3. Ou "Accept Both Changes" (les deux)
+# 4. Ou éditer manuellement
+
+# Annuler si vous êtes bloqué :
+git merge --abort   # Annule un merge
+git rebase --abort  # Annule un rebase`, desc: 'Avec VSCode ou annuler' }
                             ],
-                            tips: ['git checkout - retourne à la branche précédente'],
-                            warnings: ['Commitez vos modifications avant de changer de branche'],
-                            notes: ['La branche par défaut peut être "master" ou "main"']
+                            tips: [
+                                'VSCode et les IDE modernes ont des outils visuels pour résoudre',
+                                'Prenez le temps de comprendre les deux versions',
+                                'Testez le code après résolution'
+                            ],
+                            warnings: [
+                                'Ne commitez JAMAIS avec les marqueurs de conflit encore présents',
+                                'Vérifiez TOUS les fichiers en conflit avec git status'
+                            ]
                         }
                     },
                     {
-                        cmd: 'git merge <branche>',
-                        desc: 'Fusionner une branche',
+                        cmd: 'Synchroniser ma branche avec main',
+                        desc: 'Mettre à jour ma branche avec les dernières modifications de main',
                         details: {
-                            explanation: 'Intègre les modifications d\'une autre branche dans la branche courante.',
-                            syntax: 'git merge [options] <branche-source>',
+                            explanation: 'Pendant le développement d\'une feature longue, synchronisez régulièrement avec main pour éviter les gros conflits.',
+                            syntax: 'git checkout ma-branche → git merge main\nou git rebase main',
                             options: [
-                                { flag: '--no-ff', desc: 'Force un commit de merge' },
-                                { flag: '--abort', desc: 'Annule un merge en cours' }
+                                { flag: 'merge main', desc: 'Crée un commit de merge (simple, visible)' },
+                                { flag: 'rebase main', desc: 'Rejoue vos commits après main (historique linéaire)' }
                             ],
                             examples: [
-                                { code: 'git checkout main && git merge feature/login', desc: 'Fusionne feature/login dans main' }
+                                { code: `# Méthode 1 : Merge (plus simple)
+# 1. Mettre à jour main
+git checkout main
+git pull origin main
+
+# 2. Revenir sur votre branche et merger main
+git checkout feature/long-feature
+git merge main
+
+# 3. Résoudre les conflits si nécessaire
+# 4. Continuer à travailler`, desc: 'Synchroniser avec merge' },
+                                { code: `# Méthode 2 : Rebase (historique plus propre)
+# 1. Mettre à jour main
+git checkout main
+git pull origin main
+
+# 2. Rebase votre branche sur main
+git checkout feature/long-feature
+git rebase main
+
+# 3. Si conflits, résoudre puis :
+git add .
+git rebase --continue
+
+# 4. Force push (car historique réécrit)
+git push --force-with-lease origin feature/long-feature`, desc: 'Synchroniser avec rebase' }
                             ],
-                            tips: ['Assurez-vous d\'être sur la branche cible avant de merger'],
-                            warnings: ['En cas de conflit, éditez les fichiers puis git add + git commit']
+                            tips: [
+                                'Synchronisez au moins une fois par semaine sur les longues features',
+                                'Merge est plus simple, rebase donne un historique plus propre',
+                                'Utilisez --force-with-lease au lieu de --force (plus sûr)'
+                            ],
+                            warnings: [
+                                'Rebase réécrit l\'historique : attention si branche partagée'
+                            ]
                         }
-                    }
-                ]
-            },
-            {
-                id: 'remote',
-                title: 'Synchronisation (Remote)',
-                icon: 'fa-cloud-upload-alt',
-                color: 'border-l-4 border-orange-500',
-                commands: [
+                    },
                     {
-                        cmd: 'git remote -v',
-                        desc: 'Voir les dépôts distants',
+                        cmd: 'Créer une Pull Request',
+                        desc: 'Demander la revue et l\'intégration de ma branche',
                         details: {
-                            explanation: 'Liste tous les dépôts distants configurés et leurs URLs.',
-                            syntax: 'git remote [options]',
+                            explanation: 'Une Pull Request (PR) permet à vos collègues de revoir votre code avant de l\'intégrer dans main.',
+                            syntax: 'Push branche → GitHub → New Pull Request',
                             options: [
-                                { flag: '-v', desc: 'Affiche les URLs' },
-                                { flag: 'add <nom> <url>', desc: 'Ajoute un nouveau remote' }
+                                { flag: 'Title', desc: 'Titre clair décrivant le changement' },
+                                { flag: 'Description', desc: 'Contexte, ce qui a été fait, comment tester' },
+                                { flag: 'Reviewers', desc: 'Collègues qui doivent valider' }
                             ],
                             examples: [
-                                { code: 'git remote -v', desc: 'Liste les remotes' },
-                                { code: 'git remote add origin https://github.com/user/repo.git', desc: 'Connecte à GitHub' }
+                                { code: `# 1. S'assurer que la branche est à jour
+git checkout feature/user-profile
+git pull origin main
+git merge main  # Résoudre conflits si nécessaire
+
+# 2. Pousser la branche
+git push -u origin feature/user-profile
+
+# 3. Sur GitHub : "Compare & Pull Request"
+
+# 4. Template de description PR :
+## Description
+Ajoute la page de profil utilisateur avec :
+- Affichage des informations
+- Upload d'avatar
+- Modification du mot de passe
+
+## Comment tester
+1. Se connecter avec user@test.com
+2. Aller sur /profile
+3. Tester l'upload d'image
+
+## Screenshots
+[Si changements UI]`, desc: 'Créer une PR complète' },
+                                { code: `# Avec GitHub CLI (gh)
+gh pr create --title "feat: user profile page" \\
+  --body "Adds profile editing and avatar upload"
+
+# Voir l'état des PRs
+gh pr list
+
+# Checkout une PR pour la tester
+gh pr checkout 123`, desc: 'Avec GitHub CLI' }
                             ],
-                            tips: ['"origin" est le nom par défaut du remote'],
+                            tips: [
+                                'PRs petites (< 400 lignes) sont plus faciles à reviewer',
+                                'Expliquez le POURQUOI, pas le QUOI (le code montre le quoi)',
+                                'Ajoutez des screenshots pour les changements UI'
+                            ],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'git pull origin <branche>',
-                        desc: 'Récupérer et fusionner les changements',
+                        cmd: 'Contribuer à un projet open source',
+                        desc: 'Fork → Clone → Branch → PR',
                         details: {
-                            explanation: 'Télécharge les modifications du dépôt distant ET les fusionne.',
-                            syntax: 'git pull [remote] [branche]',
+                            explanation: 'Pour contribuer à un projet dont vous n\'êtes pas membre, utilisez le workflow Fork.',
+                            syntax: 'Fork → Clone → Upstream → Branch → Push → PR',
                             options: [
-                                { flag: '--rebase', desc: 'Utilise rebase au lieu de merge' }
+                                { flag: 'origin', desc: 'VOTRE fork (où vous poussez)' },
+                                { flag: 'upstream', desc: 'Le repo ORIGINAL (pour sync)' }
                             ],
                             examples: [
-                                { code: 'git pull origin main', desc: 'Récupère et fusionne main' },
-                                { code: 'git pull --rebase origin main', desc: 'Pull avec rebase' }
+                                { code: `# 1. Sur GitHub : cliquer "Fork" sur le repo original
+
+# 2. Cloner VOTRE fork
+git clone https://github.com/VOTRE-USER/projet.git
+cd projet
+
+# 3. Ajouter le repo original comme "upstream"
+git remote add upstream https://github.com/ORIGINAL/projet.git
+
+# 4. Vérifier les remotes
+git remote -v
+# origin    → votre fork
+# upstream  → repo original
+
+# 5. Créer une branche pour votre contribution
+git checkout -b fix/typo-readme
+
+# 6. Faire les modifications, commit et push
+git add .
+git commit -m "docs: fix typo in README"
+git push origin fix/typo-readme
+
+# 7. Sur GitHub : créer la Pull Request`, desc: 'Workflow Fork complet' },
+                                { code: `# Synchroniser votre fork avec l'original
+git fetch upstream
+git checkout main
+git merge upstream/main
+git push origin main
+
+# Puis mettre à jour votre branche de travail
+git checkout ma-branche
+git rebase main`, desc: 'Synchroniser le fork' }
                             ],
-                            tips: ['Faites un pull avant de commencer à travailler'],
-                            warnings: ['Pull peut créer des conflits'],
-                            notes: ['GitHub utilise "main", Git utilise "master" par défaut']
-                        }
-                    },
-                    {
-                        cmd: 'git push origin <branche>',
-                        desc: 'Envoyer les commits vers le distant',
-                        details: {
-                            explanation: 'Envoie vos commits locaux vers le dépôt distant.',
-                            syntax: 'git push [options] [remote] [branche]',
-                            options: [
-                                { flag: '-u', desc: 'Définit la branche distante comme upstream (à faire une fois)' },
-                                { flag: '--force', desc: 'Force le push (DANGER!)' },
-                                { flag: '--force-with-lease', desc: 'Force sécurisé' }
+                            tips: [
+                                'origin = votre fork, upstream = repo original',
+                                'Synchronisez régulièrement avec upstream',
+                                'Lisez le CONTRIBUTING.md du projet'
                             ],
-                            examples: [
-                                { code: 'git push -u origin feature/login', desc: 'Premier push avec suivi' },
-                                { code: 'git push', desc: 'Pousse vers l\'upstream configuré' }
-                            ],
-                            tips: ['Utilisez -u lors du premier push d\'une branche'],
-                            warnings: ['--force réécrit l\'historique. Ne JAMAIS sur main/master partagé!'],
-                            notes: ['La branche par défaut peut être "master" ou "main"']
+                            warnings: [
+                                'Ne confondez pas origin (fork) et upstream (original)'
+                            ]
                         }
                     }
                 ]
             },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 4: CORRIGER SES ERREURS
+            // ═══════════════════════════════════════════════════════════════
             {
-                id: 'undo',
-                title: 'Annulation & Nettoyage',
-                icon: 'fa-undo',
+                id: 'fix-errors',
+                title: '🔧 Corriger ses Erreurs',
+                icon: 'fa-eraser',
                 color: 'border-l-4 border-red-500',
                 commands: [
                     {
-                        cmd: 'git restore <fichier>',
-                        desc: 'Annuler les modifications d\'un fichier',
+                        cmd: 'Annuler mes modifications non commitées',
+                        desc: 'Revenir à la version du dernier commit',
                         details: {
-                            explanation: 'Restaure un fichier à son état du dernier commit (Git 2.23+).',
-                            syntax: 'git restore [options] <fichier>',
+                            explanation: 'Supprime les modifications d\'un fichier pour revenir à la version du dernier commit.',
+                            syntax: 'git restore <fichier>\ngit checkout -- <fichier>',
                             options: [
-                                { flag: '--staged', desc: 'Retire du staging (annule git add)' }
+                                { flag: 'git restore', desc: 'Nouvelle commande (Git 2.23+)' },
+                                { flag: 'git checkout --', desc: 'Ancienne méthode (fonctionne partout)' }
                             ],
                             examples: [
-                                { code: 'git restore index.html', desc: 'Annule les modifications' },
-                                { code: 'git restore --staged index.html', desc: 'Unstage le fichier' }
+                                { code: `# Annuler les modifications d'un fichier
+git restore src/app.js
+# ou (ancienne syntaxe)
+git checkout -- src/app.js
+
+# Annuler TOUS les fichiers modifiés
+git restore .
+# ou
+git checkout -- .`, desc: 'Annuler des modifications' }
                             ],
-                            tips: ['Préféré à git checkout -- <fichier>'],
-                            warnings: ['Les modifications sont perdues définitivement!']
+                            tips: [
+                                'Utilisez git diff avant pour voir ce que vous allez perdre'
+                            ],
+                            warnings: [
+                                '⚠️ IRRÉVERSIBLE : les modifications sont perdues définitivement'
+                            ]
                         }
                     },
                     {
-                        cmd: 'git reset --hard',
-                        desc: 'Annuler tous les changements (DANGER)',
+                        cmd: 'Retirer un fichier du staging',
+                        desc: 'Annuler un git add (avant commit)',
                         details: {
-                            explanation: 'Réinitialise complètement votre répertoire de travail.',
-                            syntax: 'git reset --hard [commit]',
+                            explanation: 'Retire un fichier de la zone de staging sans perdre les modifications.',
+                            syntax: 'git restore --staged <fichier>\ngit reset HEAD <fichier>',
                             options: [
-                                { flag: '--hard', desc: 'Supprime modifications ET staging' },
-                                { flag: '--soft', desc: 'Garde les fichiers stagés' },
-                                { flag: 'HEAD~1', desc: 'Revient à l\'avant-dernier commit' }
+                                { flag: '--staged', desc: 'Retire du staging, garde les modifications' }
                             ],
                             examples: [
-                                { code: 'git reset --hard', desc: 'Annule toutes les modifications locales' },
-                                { code: 'git reset --hard HEAD~1', desc: 'Supprime le dernier commit' }
+                                { code: `# Après un git add accidentel
+git add .  # Oups, j'ai ajouté trop de fichiers
+
+# Retirer un fichier du staging
+git restore --staged config.secret.js
+# ou (ancienne syntaxe)
+git reset HEAD config.secret.js
+
+# Le fichier est toujours modifié, juste pas stagé`, desc: 'Unstage un fichier' },
+                                { code: `# Retirer TOUS les fichiers du staging
+git restore --staged .
+# ou
+git reset HEAD`, desc: 'Unstage tout' }
                             ],
-                            tips: ['git stash avant si vous n\'êtes pas sûr'],
-                            warnings: ['TOUTES les modifications seront PERDUES!', 'Ne JAMAIS sur des commits déjà push']
+                            tips: [
+                                'Les modifications sont conservées, seul le staging est annulé'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Corriger mon dernier commit',
+                        desc: 'Modifier le message ou ajouter des fichiers oubliés',
+                        details: {
+                            explanation: 'Permet de modifier le dernier commit (message ou contenu) sans créer un nouveau commit.',
+                            syntax: 'git commit --amend',
+                            options: [
+                                { flag: '--amend', desc: 'Modifie le dernier commit' },
+                                { flag: '-m "nouveau msg"', desc: 'Change le message' },
+                                { flag: '--no-edit', desc: 'Garde le même message' }
+                            ],
+                            examples: [
+                                { code: `# Corriger le message du dernier commit
+git commit --amend -m "feat: nouveau message corrigé"
+
+# Ajouter un fichier oublié au dernier commit
+git add fichier-oublie.js
+git commit --amend --no-edit`, desc: 'Corriger le dernier commit' }
+                            ],
+                            tips: [
+                                '--no-edit garde le message existant'
+                            ],
+                            warnings: [
+                                '⚠️ Ne jamais amend un commit déjà poussé (sauf force push)'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Annuler mon dernier commit',
+                        desc: 'Garder les fichiers mais supprimer le commit',
+                        details: {
+                            explanation: 'Annule le dernier commit mais conserve les modifications dans vos fichiers.',
+                            syntax: 'git reset --soft HEAD~1',
+                            options: [
+                                { flag: '--soft', desc: 'Garde les fichiers stagés' },
+                                { flag: '--mixed', desc: 'Garde les fichiers, unstage (par défaut)' },
+                                { flag: '--hard', desc: '⚠️ SUPPRIME tout' },
+                                { flag: 'HEAD~1', desc: 'Un commit en arrière' },
+                                { flag: 'HEAD~3', desc: 'Trois commits en arrière' }
+                            ],
+                            examples: [
+                                { code: `# Annuler le dernier commit, garder les fichiers stagés
+git reset --soft HEAD~1
+
+# Annuler le dernier commit, garder les fichiers non stagés
+git reset HEAD~1  # équivalent à --mixed
+
+# Annuler les 3 derniers commits
+git reset --soft HEAD~3`, desc: 'Annuler des commits' }
+                            ],
+                            tips: [
+                                '--soft garde tout prêt à re-commiter',
+                                'Utile pour refaire un commit plus propre'
+                            ],
+                            warnings: [
+                                'Ne pas utiliser sur des commits déjà poussés'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Récupérer un fichier supprimé',
+                        desc: 'Restaurer un fichier depuis l\'historique',
+                        details: {
+                            explanation: 'Git garde tout l\'historique, vous pouvez récupérer n\'importe quel fichier supprimé.',
+                            syntax: 'git checkout <commit> -- <fichier>',
+                            options: [
+                                { flag: 'HEAD', desc: 'Dernier commit' },
+                                { flag: 'HEAD~1', desc: 'Avant-dernier commit' },
+                                { flag: '<hash>', desc: 'Commit spécifique' }
+                            ],
+                            examples: [
+                                { code: `# Récupérer un fichier supprimé (dernier commit)
+git checkout HEAD -- src/utils.js
+
+# Récupérer depuis un commit spécifique
+git log --oneline  # trouver le hash
+git checkout abc123 -- src/utils.js
+
+# Récupérer un fichier supprimé il y a plusieurs commits
+git log --diff-filter=D --summary  # trouver quand supprimé
+git checkout <commit-avant-suppression> -- fichier.js`, desc: 'Restaurer un fichier' }
+                            ],
+                            tips: [
+                                'git log --diff-filter=D montre les commits de suppression'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Revenir à un état précédent (DANGER)',
+                        desc: 'Reset hard - perte de toutes les modifications',
+                        details: {
+                            explanation: 'Reset --hard supprime TOUTES les modifications non commitées et revient à un état précédent.',
+                            syntax: 'git reset --hard <commit>',
+                            options: [
+                                { flag: 'HEAD', desc: 'Annule toutes les modifications non commitées' },
+                                { flag: 'HEAD~1', desc: 'Revient au commit précédent' },
+                                { flag: '<hash>', desc: 'Revient à un commit spécifique' }
+                            ],
+                            examples: [
+                                { code: `# ⚠️ Annuler TOUTES les modifications non commitées
+git reset --hard HEAD
+
+# ⚠️ Revenir au commit précédent (PERD le dernier commit)
+git reset --hard HEAD~1
+
+# ⚠️ Revenir à un commit spécifique
+git reset --hard abc123`, desc: 'Reset hard (DANGER)' },
+                                { code: `# OUPS ! J'ai fait reset --hard par erreur !
+# Pas de panique, reflog garde tout pendant 90 jours
+
+git reflog  # Voir l'historique des actions
+# abc123 HEAD@{0}: reset: moving to HEAD~1
+# def456 HEAD@{1}: commit: mon commit perdu
+
+# Récupérer le commit perdu
+git checkout def456
+# ou
+git reset --hard def456`, desc: '🚑 Récupérer après reset --hard' }
+                            ],
+                            tips: [
+                                'reflog est votre filet de sécurité (garde 90 jours)',
+                                'Faites git stash avant en cas de doute'
+                            ],
+                            warnings: [
+                                '⚠️ DANGER : toutes les modifications non commitées sont PERDUES',
+                                'Utilisez reflog pour récupérer en cas d\'erreur'
+                            ]
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 5: CONVENTIONS & BONNES PRATIQUES
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'conventions',
+                title: '📚 Conventions & Bonnes Pratiques',
+                icon: 'fa-book',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Nommer ses branches correctement',
+                        desc: 'Conventions de nommage pour les branches',
+                        details: {
+                            explanation: 'Des noms de branches clairs facilitent la collaboration et la compréhension du projet.',
+                            syntax: '<type>/<description-courte>',
+                            options: [
+                                { flag: 'feature/', desc: 'Nouvelle fonctionnalité' },
+                                { flag: 'fix/', desc: 'Correction de bug' },
+                                { flag: 'hotfix/', desc: 'Correction urgente en production' },
+                                { flag: 'docs/', desc: 'Documentation' },
+                                { flag: 'refactor/', desc: 'Refactoring sans changement fonctionnel' },
+                                { flag: 'test/', desc: 'Ajout de tests' },
+                                { flag: 'chore/', desc: 'Maintenance, CI/CD' }
+                            ],
+                            examples: [
+                                { code: `# ✅ BONS exemples
+feature/user-authentication
+feature/shopping-cart-v2
+feature/api-pagination
+fix/login-button-not-working
+fix/mobile-menu-overflow
+hotfix/critical-security-patch
+docs/api-endpoints
+docs/installation-guide
+refactor/simplify-auth-logic
+test/user-service-unit-tests
+chore/update-dependencies
+chore/ci-pipeline`, desc: 'Exemples de bons noms' },
+                                { code: `# ❌ MAUVAIS exemples
+dev           # Trop vague
+test          # Trop vague
+my-branch     # Pas de type
+feature1      # Pas descriptif
+FEATURE/Login # Pas de majuscules
+feature/add_login # Underscore → tiret`, desc: 'À éviter' }
+                            ],
+                            tips: [
+                                'Utilisez des tirets (-) pas des underscores (_)',
+                                'Tout en minuscules',
+                                'Courte mais descriptive',
+                                'En anglais de préférence (équipes internationales)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Écrire de bons messages de commit',
+                        desc: 'Convention Conventional Commits',
+                        details: {
+                            explanation: 'Des messages de commit standardisés permettent de générer des changelogs et de comprendre l\'historique.',
+                            syntax: '<type>[(scope)]: <description>',
+                            options: [
+                                { flag: 'feat:', desc: 'Nouvelle fonctionnalité (MINOR)' },
+                                { flag: 'fix:', desc: 'Correction de bug (PATCH)' },
+                                { flag: 'docs:', desc: 'Documentation uniquement' },
+                                { flag: 'style:', desc: 'Formatage, pas de changement de code' },
+                                { flag: 'refactor:', desc: 'Ni fix ni feat, refactoring' },
+                                { flag: 'test:', desc: 'Ajout/modification de tests' },
+                                { flag: 'chore:', desc: 'Maintenance, dépendances, CI' },
+                                { flag: 'perf:', desc: 'Amélioration de performance' },
+                                { flag: '!', desc: 'Breaking change (après le type)' }
+                            ],
+                            examples: [
+                                { code: `# ✅ BONS messages
+feat: ajoute l'authentification par OAuth
+feat(auth): ajoute la connexion Google
+fix: corrige le crash au démarrage sur iOS
+fix(api): gère les réponses null
+docs: met à jour le guide d'installation
+style: reformate avec Prettier
+refactor: simplifie la logique de validation
+test: ajoute tests pour UserService
+chore: met à jour React vers v18
+perf: optimise le chargement des images`, desc: 'Exemples de bons commits' },
+                                { code: `# Breaking change (modifie l'API)
+feat(api)!: change le format de réponse
+
+BREAKING CHANGE: les réponses sont maintenant
+wrappées dans un objet { data: ... }`, desc: 'Breaking change' },
+                                { code: `# ❌ MAUVAIS messages
+update           # Trop vague
+fix bug          # Quel bug ?
+WIP              # Work in progress n'est pas un commit final
+asdfgh           # ???
+Fixed stuff      # Pas de type, pas descriptif`, desc: 'À éviter' }
+                            ],
+                            tips: [
+                                'Décrivez le QUOI, pas le COMMENT',
+                                'Première lettre en minuscule après le type',
+                                'Pas de point à la fin',
+                                'Limite recommandée : 72 caractères'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Workflow quotidien recommandé',
+                        desc: 'La routine idéale pour travailler avec Git',
+                        details: {
+                            explanation: 'Un workflow simple et efficace pour le développement quotidien.',
+                            syntax: 'pull → branch → work → commit → push → PR',
+                            options: [],
+                            examples: [
+                                { code: `# 🌅 DÉBUT DE JOURNÉE
+# 1. Mettre à jour main
+git checkout main
+git pull origin main
+
+# 2. Créer ou rejoindre une branche
+git checkout -b feature/nouvelle-feature
+# ou
+git checkout feature/feature-en-cours
+git pull`, desc: 'Début de journée' },
+                                { code: `# 💻 PENDANT LE DÉVELOPPEMENT
+# 3. Travailler et commiter régulièrement
+git add .
+git commit -m "feat: ajoute composant Header"
+
+# Continuer à travailler...
+git add .
+git commit -m "feat: ajoute navigation mobile"
+
+# 4. Pousser régulièrement
+git push -u origin feature/ma-feature`, desc: 'Pendant le développement' },
+                                { code: `# 🌙 FIN DE JOURNÉE / FEATURE TERMINÉE
+# 5. S'assurer que tout est poussé
+git status  # Vérifier qu'il n'y a rien en cours
+git push
+
+# 6. Créer une Pull Request sur GitHub
+
+# 7. Après merge, nettoyer
+git checkout main
+git pull origin main
+git branch -d feature/ma-feature`, desc: 'Fin de journée / Feature terminée' }
+                            ],
+                            tips: [
+                                'Commitez souvent : petits commits > gros commits',
+                                'Poussez au moins une fois par jour',
+                                'Synchronisez avec main régulièrement sur les longues features'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Fichiers à ignorer (.gitignore)',
+                        desc: 'Ne pas versionner les fichiers sensibles ou générés',
+                        details: {
+                            explanation: 'Le fichier .gitignore liste les fichiers que Git doit ignorer (dépendances, secrets, fichiers générés).',
+                            syntax: 'Créer un fichier .gitignore à la racine',
+                            options: [
+                                { flag: 'node_modules/', desc: 'Dépendances Node.js' },
+                                { flag: '.env', desc: 'Variables d\'environnement (secrets)' },
+                                { flag: '*.log', desc: 'Fichiers de log' },
+                                { flag: 'dist/', desc: 'Fichiers compilés' },
+                                { flag: '.DS_Store', desc: 'Fichiers macOS' }
+                            ],
+                            examples: [
+                                { code: `# .gitignore pour un projet Node.js
+
+# Dépendances
+node_modules/
+package-lock.json
+
+# Variables d'environnement (SECRETS!)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build
+dist/
+build/
+.next/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db`, desc: 'Exemple Node.js' },
+                                { code: `# .gitignore pour Python
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Variables d'environnement
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/`, desc: 'Exemple Python' }
+                            ],
+                            tips: [
+                                'Créez .gitignore AVANT le premier commit',
+                                'Utilisez gitignore.io pour générer des templates',
+                                'Ne versionnez JAMAIS les fichiers .env avec des secrets'
+                            ],
+                            warnings: [
+                                '⚠️ Un fichier déjà commité ne sera pas ignoré même si ajouté au .gitignore'
+                            ]
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 6: COMMANDES DE RÉFÉRENCE
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'reference',
+                title: '📋 Commandes de Référence',
+                icon: 'fa-terminal',
+                color: 'border-l-4 border-slate-500',
+                commands: [
+                    {
+                        cmd: 'git status',
+                        desc: 'Voir l\'état des fichiers',
+                        details: {
+                            explanation: 'Affiche les fichiers modifiés, stagés et non suivis.',
+                            syntax: 'git status [-s]',
+                            options: [
+                                { flag: '-s', desc: 'Format court' }
+                            ],
+                            examples: [
+                                { code: 'git status', desc: 'Vue complète' },
+                                { code: 'git status -s', desc: 'Vue compacte' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git add',
+                        desc: 'Ajouter au staging',
+                        details: {
+                            explanation: 'Ajoute des fichiers à la zone de staging pour le prochain commit.',
+                            syntax: 'git add <fichier|.|--all>',
+                            options: [
+                                { flag: '.', desc: 'Tous les fichiers du dossier courant' },
+                                { flag: '-A', desc: 'Absolument tout' },
+                                { flag: '-p', desc: 'Mode interactif (par morceaux)' }
+                            ],
+                            examples: [
+                                { code: 'git add fichier.js', desc: 'Un fichier' },
+                                { code: 'git add .', desc: 'Tout le dossier' },
+                                { code: 'git add -A', desc: 'Tout le repo' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git commit',
+                        desc: 'Créer un commit',
+                        details: {
+                            explanation: 'Enregistre les modifications stagées dans l\'historique.',
+                            syntax: 'git commit -m "<message>"',
+                            options: [
+                                { flag: '-m', desc: 'Message inline' },
+                                { flag: '-am', desc: 'Add + commit (fichiers suivis)' },
+                                { flag: '--amend', desc: 'Modifier dernier commit' }
+                            ],
+                            examples: [
+                                { code: 'git commit -m "feat: ajoute login"', desc: 'Commit standard' },
+                                { code: 'git commit -am "fix: corrige bug"', desc: 'Add + commit' },
+                                { code: 'git commit --amend', desc: 'Modifier dernier' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git push',
+                        desc: 'Envoyer vers le distant',
+                        details: {
+                            explanation: 'Envoie les commits locaux vers le dépôt distant.',
+                            syntax: 'git push [-u] [origin] [branche]',
+                            options: [
+                                { flag: '-u', desc: 'Lie la branche locale/distante' },
+                                { flag: '--force-with-lease', desc: 'Force push sécurisé' }
+                            ],
+                            examples: [
+                                { code: 'git push', desc: 'Push branche liée' },
+                                { code: 'git push -u origin feature/x', desc: 'Premier push' },
+                                { code: 'git push --force-with-lease', desc: 'Force sécurisé' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git pull',
+                        desc: 'Récupérer et fusionner',
+                        details: {
+                            explanation: 'Récupère et fusionne les modifications du distant.',
+                            syntax: 'git pull [--rebase] [origin] [branche]',
+                            options: [
+                                { flag: '--rebase', desc: 'Rebase au lieu de merge' }
+                            ],
+                            examples: [
+                                { code: 'git pull', desc: 'Pull branche courante' },
+                                { code: 'git pull origin main', desc: 'Pull main' },
+                                { code: 'git pull --rebase', desc: 'Pull avec rebase' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git fetch',
+                        desc: 'Récupérer sans fusionner',
+                        details: {
+                            explanation: 'Récupère les modifications distantes sans les fusionner.',
+                            syntax: 'git fetch [origin] [branche]',
+                            options: [
+                                { flag: '--all', desc: 'Tous les remotes' },
+                                { flag: '--prune', desc: 'Supprime les branches supprimées' }
+                            ],
+                            examples: [
+                                { code: 'git fetch', desc: 'Fetch origin' },
+                                { code: 'git fetch --all --prune', desc: 'Tout + nettoie' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git branch',
+                        desc: 'Gérer les branches',
+                        details: {
+                            explanation: 'Liste, crée ou supprime des branches.',
+                            syntax: 'git branch [options] [nom]',
+                            options: [
+                                { flag: '-a', desc: 'Toutes (locales + distantes)' },
+                                { flag: '-d', desc: 'Supprimer (mergée)' },
+                                { flag: '-D', desc: 'Forcer suppression' }
+                            ],
+                            examples: [
+                                { code: 'git branch', desc: 'Liste locales' },
+                                { code: 'git branch -a', desc: 'Liste toutes' },
+                                { code: 'git branch -d feature/x', desc: 'Supprimer' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git checkout / switch',
+                        desc: 'Changer de branche',
+                        details: {
+                            explanation: 'Change de branche ou crée une nouvelle branche.',
+                            syntax: 'git checkout [-b] <branche>\ngit switch [-c] <branche>',
+                            options: [
+                                { flag: '-b / -c', desc: 'Créer et basculer' }
+                            ],
+                            examples: [
+                                { code: 'git checkout main', desc: 'Aller sur main' },
+                                { code: 'git checkout -b feature/x', desc: 'Créer + basculer' },
+                                { code: 'git switch -c feature/x', desc: 'Nouvelle syntaxe' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git merge',
+                        desc: 'Fusionner une branche',
+                        details: {
+                            explanation: 'Fusionne une branche dans la branche courante.',
+                            syntax: 'git merge [--no-ff] <branche>',
+                            options: [
+                                { flag: '--no-ff', desc: 'Force commit de merge' },
+                                { flag: '--abort', desc: 'Annuler merge en cours' }
+                            ],
+                            examples: [
+                                { code: 'git merge feature/x', desc: 'Merge simple' },
+                                { code: 'git merge --no-ff feature/x', desc: 'Avec commit merge' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git log',
+                        desc: 'Voir l\'historique',
+                        details: {
+                            explanation: 'Affiche l\'historique des commits.',
+                            syntax: 'git log [options]',
+                            options: [
+                                { flag: '--oneline', desc: 'Format compact' },
+                                { flag: '-n', desc: 'Nombre de commits' },
+                                { flag: '--graph', desc: 'Vue graphique' }
+                            ],
+                            examples: [
+                                { code: 'git log --oneline', desc: 'Compact' },
+                                { code: 'git log --oneline -10', desc: '10 derniers' },
+                                { code: 'git log --oneline --graph', desc: 'Avec graphe' }
+                            ],
+                            tips: [],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'git diff',
+                        desc: 'Voir les différences',
+                        details: {
+                            explanation: 'Montre les modifications entre états.',
+                            syntax: 'git diff [--staged] [fichier]',
+                            options: [
+                                { flag: '--staged', desc: 'Modifications stagées' },
+                                { flag: 'HEAD~1', desc: 'Avec commit précédent' }
+                            ],
+                            examples: [
+                                { code: 'git diff', desc: 'Non stagé' },
+                                { code: 'git diff --staged', desc: 'Stagé' },
+                                { code: 'git diff HEAD~1', desc: 'Vs commit précédent' }
+                            ],
+                            tips: [],
+                            warnings: []
                         }
                     },
                     {
                         cmd: 'git stash',
-                        desc: 'Mettre de côté les changements',
+                        desc: 'Mettre de côté',
                         details: {
-                            explanation: 'Sauvegarde temporairement vos modifications non commitées.',
-                            syntax: 'git stash [commande] [options]',
+                            explanation: 'Sauvegarde temporaire des modifications non commitées.',
+                            syntax: 'git stash [push|pop|list]',
                             options: [
-                                { flag: 'push -m "<msg>"', desc: 'Stash avec un message' },
-                                { flag: 'pop', desc: 'Applique ET supprime le dernier stash' },
-                                { flag: 'list', desc: 'Liste les stashs' }
+                                { flag: 'push -m', desc: 'Stash avec message' },
+                                { flag: 'pop', desc: 'Récupérer + supprimer' },
+                                { flag: 'list', desc: 'Lister les stashs' }
                             ],
                             examples: [
-                                { code: 'git stash', desc: 'Met de côté les modifications' },
-                                { code: 'git stash pop', desc: 'Récupère les modifications' }
+                                { code: 'git stash', desc: 'Mettre de côté' },
+                                { code: 'git stash pop', desc: 'Récupérer' },
+                                { code: 'git stash list', desc: 'Lister' }
                             ],
-                            tips: ['git stash pop = apply + drop'],
-                            warnings: ['Les stashs sont locaux uniquement']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'advanced',
-                title: 'Git Avancé',
-                icon: 'fa-tools',
-                color: 'border-l-4 border-cyan-500',
-                commands: [
-                    {
-                        cmd: 'git rebase <branche>',
-                        desc: 'Réécrire l\'historique sur une branche',
-                        details: {
-                            explanation: 'Rebase déplace vos commits sur le dessus d\'une autre branche, créant un historique linéaire.',
-                            syntax: 'git rebase [options] <branche>',
-                            options: [
-                                { flag: '-i, --interactive', desc: 'Mode interactif (squash, reorder, edit)' },
-                                { flag: '--onto <nouvelle-base>', desc: 'Rebase sur une autre base' },
-                                { flag: '--continue', desc: 'Continuer après résolution de conflit' },
-                                { flag: '--abort', desc: 'Annuler le rebase en cours' }
-                            ],
-                            examples: [
-                                { code: 'git checkout feature\ngit rebase main', desc: 'Rebase feature sur main' },
-                                { code: 'git rebase -i HEAD~3', desc: 'Modifier les 3 derniers commits' },
-                                { code: '# Squash commits\n# Dans l\'éditeur, remplacer "pick" par "squash" ou "s"', desc: 'Fusionner plusieurs commits' }
-                            ],
-                            tips: ['Rebase garde un historique propre et linéaire'],
-                            warnings: ['Ne JAMAIS rebase des commits déjà poussés et partagés!'],
-                            notes: ['En cas de conflit: résoudre, git add, puis git rebase --continue']
+                            tips: [],
+                            warnings: []
                         }
                     },
                     {
-                        cmd: 'git cherry-pick <commit>',
-                        desc: 'Appliquer un commit spécifique',
+                        cmd: 'git reset',
+                        desc: 'Annuler des commits',
                         details: {
-                            explanation: 'Copie un ou plusieurs commits d\'une branche vers la branche courante.',
-                            syntax: 'git cherry-pick [options] <commit(s)>',
+                            explanation: 'Annule des commits ou retire du staging.',
+                            syntax: 'git reset [--soft|--mixed|--hard] <commit>',
                             options: [
-                                { flag: '-n, --no-commit', desc: 'Applique sans commiter' },
-                                { flag: '-e, --edit', desc: 'Modifier le message' },
-                                { flag: '-x', desc: 'Ajoute une référence au commit original' }
+                                { flag: '--soft', desc: 'Garde stagé' },
+                                { flag: '--mixed', desc: 'Garde non stagé (défaut)' },
+                                { flag: '--hard', desc: '⚠️ Supprime tout' }
                             ],
                             examples: [
-                                { code: 'git cherry-pick abc123', desc: 'Appliquer un commit' },
-                                { code: 'git cherry-pick abc123 def456', desc: 'Plusieurs commits' },
-                                { code: 'git cherry-pick abc123..xyz789', desc: 'Plage de commits' }
+                                { code: 'git reset HEAD~1', desc: 'Annuler dernier commit' },
+                                { code: 'git reset --soft HEAD~1', desc: 'Garde stagé' },
+                                { code: 'git reset --hard HEAD~1', desc: '⚠️ Supprime tout' }
                             ],
-                            tips: ['Utile pour porter un hotfix d\'une branche à une autre'],
-                            warnings: ['Crée des commits dupliqués (IDs différents)']
+                            tips: [],
+                            warnings: ['--hard est IRRÉVERSIBLE (sauf reflog)']
                         }
                     },
                     {
-                        cmd: 'git bisect',
-                        desc: 'Trouver le commit qui a introduit un bug',
+                        cmd: 'git remote',
+                        desc: 'Gérer les dépôts distants',
                         details: {
-                            explanation: 'Recherche binaire dans l\'historique pour identifier le commit problématique.',
-                            syntax: 'git bisect start\\ngit bisect bad\\ngit bisect good <commit>',
+                            explanation: 'Configure les connexions aux dépôts distants.',
+                            syntax: 'git remote [-v|add|remove]',
                             options: [
-                                { flag: 'start', desc: 'Démarre la recherche' },
-                                { flag: 'bad', desc: 'Marque le commit courant comme mauvais' },
-                                { flag: 'good <commit>', desc: 'Marque un commit comme bon' },
-                                { flag: 'reset', desc: 'Termine et revient à HEAD' }
+                                { flag: '-v', desc: 'Voir les URLs' },
+                                { flag: 'add', desc: 'Ajouter un remote' },
+                                { flag: 'remove', desc: 'Supprimer un remote' }
                             ],
                             examples: [
-                                { code: 'git bisect start\ngit bisect bad                  # HEAD est cassé\ngit bisect good v1.0.0          # v1.0.0 fonctionnait\n# Git checkout un commit, testez, puis:\ngit bisect good  # ou git bisect bad\n# Répétez jusqu\'à trouver le commit fautif\ngit bisect reset', desc: 'Workflow bisect complet' },
-                                { code: 'git bisect run npm test', desc: 'Bisect automatique avec un script' }
+                                { code: 'git remote -v', desc: 'Voir les remotes' },
+                                { code: 'git remote add origin <url>', desc: 'Ajouter' },
+                                { code: 'git remote add upstream <url>', desc: 'Ajouter upstream' }
                             ],
-                            tips: ['Bisect divise par 2 les commits à chaque étape : très efficace'],
+                            tips: [],
                             warnings: []
                         }
                     },
                     {
                         cmd: 'git reflog',
-                        desc: 'Historique de tous les mouvements de HEAD',
+                        desc: 'Historique des actions (filet de sécurité)',
                         details: {
-                            explanation: 'Affiche l\'historique local de toutes les positions de HEAD, même les commits "perdus".',
-                            syntax: 'git reflog [options]',
-                            options: [
-                                { flag: '-n <nombre>', desc: 'Limiter le nombre d\'entrées' },
-                                { flag: 'expire', desc: 'Nettoyer les anciennes entrées' }
-                            ],
+                            explanation: 'Affiche l\'historique de toutes les actions Git. Permet de récupérer des commits "perdus".',
+                            syntax: 'git reflog',
+                            options: [],
                             examples: [
                                 { code: 'git reflog', desc: 'Voir l\'historique' },
-                                { code: 'git checkout HEAD@{3}', desc: 'Revenir à un état précédent' },
-                                { code: '# Récupérer un commit après un reset --hard\ngit reflog\ngit checkout <commit-perdu>', desc: 'Sauvetage de commits' }
+                                { code: 'git checkout HEAD@{2}', desc: 'Revenir à un état' },
+                                { code: 'git reset --hard HEAD@{3}', desc: 'Récupérer après erreur' }
                             ],
-                            tips: ['Reflog est votre filet de sécurité : il garde tout pendant 90 jours'],
-                            warnings: ['Reflog est local uniquement, pas partagé']
-                        }
-                    },
-                    {
-                        cmd: 'git worktree',
-                        desc: 'Travailler sur plusieurs branches simultanément',
-                        details: {
-                            explanation: 'Crée des répertoires de travail supplémentaires liés au même repo.',
-                            syntax: 'git worktree add <chemin> <branche>',
-                            options: [
-                                { flag: 'add <path> <branch>', desc: 'Créer un worktree' },
-                                { flag: 'list', desc: 'Lister les worktrees' },
-                                { flag: 'remove <path>', desc: 'Supprimer un worktree' }
-                            ],
-                            examples: [
-                                { code: 'git worktree add ../hotfix hotfix/urgent', desc: 'Créer un worktree pour hotfix' },
-                                { code: 'git worktree add -b feature/new ../feature', desc: 'Créer avec nouvelle branche' },
-                                { code: 'git worktree list', desc: 'Lister tous les worktrees' }
-                            ],
-                            tips: ['Parfait pour travailler sur un hotfix sans stash ni commit'],
+                            tips: ['Votre filet de sécurité ! Garde tout pendant 90 jours'],
                             warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'gitflow',
-                title: 'Git Flow & Workflows',
-                icon: 'fa-sitemap',
-                color: 'border-l-4 border-pink-500',
-                commands: [
-                    {
-                        cmd: 'Structure Git Flow',
-                        desc: 'Branches principales et de support',
-                        details: {
-                            explanation: 'Git Flow est un modèle de branching avec des rôles définis pour chaque type de branche.',
-                            syntax: 'main ← develop ← feature/release/hotfix',
-                            options: [
-                                { flag: 'main', desc: 'Production stable (tags de version)' },
-                                { flag: 'develop', desc: 'Intégration des features' },
-                                { flag: 'feature/*', desc: 'Nouvelles fonctionnalités' },
-                                { flag: 'release/*', desc: 'Préparation de release' },
-                                { flag: 'hotfix/*', desc: 'Corrections urgentes production' }
-                            ],
-                            examples: [
-                                { code: '# Installation git-flow\nbrew install git-flow  # macOS\napt install git-flow   # Ubuntu\n\n# Initialisation\ngit flow init', desc: 'Setup git-flow' },
-                                { code: '# Structure\nmain (production)\n  └── develop (intégration)\n        ├── feature/login\n        ├── feature/dashboard\n        └── release/1.0.0', desc: 'Arbre des branches' }
-                            ],
-                            tips: ['Git Flow est idéal pour les releases planifiées'],
-                            warnings: ['Peut être complexe pour les petites équipes ou le déploiement continu']
-                        }
-                    },
-                    {
-                        cmd: 'git flow feature',
-                        desc: 'Développer une nouvelle fonctionnalité',
-                        details: {
-                            explanation: 'Les features sont développées depuis develop et mergées dans develop.',
-                            syntax: 'git flow feature start/finish <nom>',
-                            options: [
-                                { flag: 'start <nom>', desc: 'Créer et basculer vers feature/<nom>' },
-                                { flag: 'finish <nom>', desc: 'Merge dans develop et supprime la branche' },
-                                { flag: 'publish <nom>', desc: 'Push la feature vers origin' }
-                            ],
-                            examples: [
-                                { code: '# Démarrer une feature\ngit flow feature start login\n# ... développement ...\ngit flow feature finish login', desc: 'Cycle complet d\'une feature' },
-                                { code: '# Sans git-flow (manuel)\ngit checkout develop\ngit checkout -b feature/login\n# ... développement ...\ngit checkout develop\ngit merge --no-ff feature/login\ngit branch -d feature/login', desc: 'Version manuelle' }
-                            ],
-                            tips: ['--no-ff préserve l\'historique de la branche feature'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'git flow release',
-                        desc: 'Préparer une release',
-                        details: {
-                            explanation: 'Les releases permettent de préparer une version, corriger des bugs mineurs, et merger dans main ET develop.',
-                            syntax: 'git flow release start/finish <version>',
-                            options: [
-                                { flag: 'start <version>', desc: 'Créer release/<version> depuis develop' },
-                                { flag: 'finish <version>', desc: 'Merge dans main et develop, tag' }
-                            ],
-                            examples: [
-                                { code: 'git flow release start 1.0.0\n# Corrections mineures, bump version...\ngit flow release finish 1.0.0', desc: 'Release complète' },
-                                { code: '# Manuel\ngit checkout develop\ngit checkout -b release/1.0.0\n# ... préparation ...\ngit checkout main\ngit merge --no-ff release/1.0.0\ngit tag -a v1.0.0 -m "Version 1.0.0"\ngit checkout develop\ngit merge --no-ff release/1.0.0', desc: 'Version manuelle' }
-                            ],
-                            tips: ['Seules les corrections mineures dans release, pas de nouvelles features'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'git flow hotfix',
-                        desc: 'Correction urgente en production',
-                        details: {
-                            explanation: 'Les hotfixes partent de main et sont mergés dans main ET develop.',
-                            syntax: 'git flow hotfix start/finish <version>',
-                            options: [
-                                { flag: 'start <version>', desc: 'Créer hotfix/<version> depuis main' },
-                                { flag: 'finish <version>', desc: 'Merge dans main et develop, tag' }
-                            ],
-                            examples: [
-                                { code: 'git flow hotfix start 1.0.1\n# Correction du bug...\ngit flow hotfix finish 1.0.1', desc: 'Hotfix complet' },
-                                { code: '# Manuel\ngit checkout main\ngit checkout -b hotfix/1.0.1\n# ... fix ...\ngit checkout main\ngit merge --no-ff hotfix/1.0.1\ngit tag -a v1.0.1\ngit checkout develop\ngit merge --no-ff hotfix/1.0.1', desc: 'Version manuelle' }
-                            ],
-                            tips: ['Le hotfix incrémente le numéro de patch (1.0.0 → 1.0.1)'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Trunk Based Development',
-                        desc: 'Alternative simple pour CI/CD',
-                        details: {
-                            explanation: 'Tout le monde commit sur main/trunk avec des feature flags. Idéal pour le déploiement continu.',
-                            syntax: 'main + short-lived branches',
-                            options: [
-                                { flag: 'main', desc: 'Branche unique de développement' },
-                                { flag: 'feature branches', desc: 'Courtes durées (< 2 jours)' },
-                                { flag: 'Feature flags', desc: 'Activer/désactiver en prod' }
-                            ],
-                            examples: [
-                                { code: '# Workflow trunk-based\ngit checkout main\ngit pull\ngit checkout -b feature/quick-fix\n# ... quelques commits ...\n# PR review\ngit checkout main\ngit merge feature/quick-fix\ngit push', desc: 'Cycle rapide' },
-                                { code: '# Feature flag\nif (process.env.FEATURE_NEW_UI === "true") {\n  return <NewUI />;\n}\nreturn <OldUI />;', desc: 'Feature flag exemple' }
-                            ],
-                            tips: ['Plus simple que Git Flow, parfait pour le déploiement continu'],
-                            warnings: ['Nécessite une bonne couverture de tests et des feature flags']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'collab',
-                title: 'Collaboration & PR',
-                icon: 'fa-users',
-                color: 'border-l-4 border-teal-500',
-                commands: [
-                    {
-                        cmd: 'git fetch',
-                        desc: 'Récupérer sans fusionner',
-                        details: {
-                            explanation: 'Télécharge les commits distants sans les merger dans votre branche.',
-                            syntax: 'git fetch [remote] [branche]',
-                            options: [
-                                { flag: '--all', desc: 'Tous les remotes' },
-                                { flag: '--prune', desc: 'Supprime les références obsolètes' },
-                                { flag: '--tags', desc: 'Récupère aussi les tags' }
-                            ],
-                            examples: [
-                                { code: 'git fetch origin', desc: 'Fetch depuis origin' },
-                                { code: 'git fetch --all --prune', desc: 'Fetch et nettoyage' },
-                                { code: 'git log HEAD..origin/main', desc: 'Voir les commits distants après fetch' }
-                            ],
-                            tips: ['Fetch est safe : il ne modifie pas votre travail local'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Fork & PR Workflow',
-                        desc: 'Contribuer à un projet open source',
-                        details: {
-                            explanation: 'Le workflow standard pour contribuer : fork, branche, commit, PR.',
-                            syntax: 'Fork → Clone → Branch → Commit → Push → PR',
-                            options: [
-                                { flag: '1. Fork', desc: 'Copie du repo sur votre compte' },
-                                { flag: '2. Clone', desc: 'Télécharger votre fork' },
-                                { flag: '3. Upstream', desc: 'Ajouter le repo original' },
-                                { flag: '4. Branch', desc: 'Créer une branche feature' },
-                                { flag: '5. PR', desc: 'Demander l\'intégration' }
-                            ],
-                            examples: [
-                                { code: '# 1. Fork sur GitHub (bouton)\n\n# 2. Clone votre fork\ngit clone git@github.com:votre-user/projet.git\ncd projet\n\n# 3. Ajouter upstream (repo original)\ngit remote add upstream git@github.com:original/projet.git\n\n# 4. Sync avec upstream\ngit fetch upstream\ngit checkout main\ngit merge upstream/main', desc: 'Setup du fork' },
-                                { code: '# 5. Créer feature branch\ngit checkout -b fix/typo-readme\n\n# 6. Commit et push\ngit commit -am "Fix typo in README"\ngit push origin fix/typo-readme\n\n# 7. Créer PR sur GitHub', desc: 'Contribuer' }
-                            ],
-                            tips: ['Gardez votre fork synchronisé avec upstream régulièrement'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Conventional Commits',
-                        desc: 'Messages de commit standardisés',
-                        details: {
-                            explanation: 'Convention de nommage des commits pour un historique clair et automatisation.',
-                            syntax: '<type>(<scope>): <description>',
-                            options: [
-                                { flag: 'feat:', desc: 'Nouvelle fonctionnalité' },
-                                { flag: 'fix:', desc: 'Correction de bug' },
-                                { flag: 'docs:', desc: 'Documentation' },
-                                { flag: 'style:', desc: 'Formatage (pas de changement de code)' },
-                                { flag: 'refactor:', desc: 'Refactoring' },
-                                { flag: 'test:', desc: 'Ajout/modification de tests' },
-                                { flag: 'chore:', desc: 'Maintenance, dépendances' }
-                            ],
-                            examples: [
-                                { code: 'feat(auth): add JWT token refresh\nfix(api): handle null response\ndocs(readme): update installation steps\nrefactor(utils): simplify date formatting\nchore(deps): upgrade React to v18', desc: 'Exemples de messages' },
-                                { code: '# Breaking change\nfeat(api)!: change response format\n\nBREAKING CHANGE: response is now wrapped in data object', desc: 'Breaking change' }
-                            ],
-                            tips: ['Permet de générer automatiquement le CHANGELOG'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Code Review Tips',
-                        desc: 'Bonnes pratiques de revue de code',
-                        details: {
-                            explanation: 'Conseils pour des PR efficaces et des revues constructives.',
-                            syntax: 'PR petites + Description claire + Tests',
-                            options: [
-                                { flag: 'PR atomiques', desc: 'Une PR = une fonctionnalité/fix' },
-                                { flag: 'Description', desc: 'Expliquer le pourquoi, pas le quoi' },
-                                { flag: 'Screenshots', desc: 'Pour les changements UI' },
-                                { flag: 'Tests', desc: 'Couvrir les nouveaux cas' }
-                            ],
-                            examples: [
-                                { code: '## Description\nFixes #123 - Users couldn\'t reset password\n\n## Changes\n- Add password reset endpoint\n- Send email with reset link\n- Add rate limiting\n\n## Testing\n- [x] Unit tests added\n- [x] Tested manually\n\n## Screenshots\n(before/after if UI change)', desc: 'Template de PR' },
-                                { code: '# Commandes GitHub CLI utiles\ngh pr create --fill\ngh pr view\ngh pr checkout 123\ngh pr review --approve', desc: 'GitHub CLI pour PR' }
-                            ],
-                            tips: ['PR de moins de 400 lignes sont plus faciles à reviewer'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'git blame',
-                        desc: 'Voir qui a modifié chaque ligne',
-                        details: {
-                            explanation: 'Affiche l\'auteur et le commit de chaque ligne d\'un fichier.',
-                            syntax: 'git blame [options] <fichier>',
-                            options: [
-                                { flag: '-L <start>,<end>', desc: 'Limiter aux lignes spécifiées' },
-                                { flag: '-w', desc: 'Ignorer les changements de whitespace' },
-                                { flag: '-C', desc: 'Détecter les lignes déplacées/copiées' }
-                            ],
-                            examples: [
-                                { code: 'git blame src/app.js', desc: 'Blame complet' },
-                                { code: 'git blame -L 10,20 src/app.js', desc: 'Lignes 10 à 20' },
-                                { code: 'git blame -w -C src/app.js', desc: 'Ignorer whitespace, détecter copies' }
-                            ],
-                            tips: ['git show <commit> pour voir le contexte complet du changement'],
-                            warnings: ['Blame pour comprendre, pas pour accuser!']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'project-git',
-                title: '🔧 Projet: Workflow Équipe',
-                icon: 'fa-project-diagram',
-                color: 'border-l-4 border-amber-500',
-                commands: [
-                    {
-                        cmd: 'Étape 1: Initialisation du repo',
-                        desc: 'Setup initial du projet',
-                        details: {
-                            explanation: 'Créez le repository avec les fichiers essentiels et la protection des branches.',
-                            syntax: 'git init + fichiers de config',
-                            options: [],
-                            examples: [
-                                { code: '# Créer le repo\ngit init mon-projet\ncd mon-projet\n\n# Branche principale\ngit checkout -b main\n\n# Fichiers essentiels\ntouch README.md .gitignore\necho "node_modules/" >> .gitignore\necho ".env" >> .gitignore', desc: 'Initialisation' },
-                                { code: '# Premier commit\ngit add .\ngit commit -m "chore: initial commit"\n\n# Créer le repo sur GitHub et pusher\ngh repo create mon-projet --public --source=. --push', desc: 'Premier push' }
-                            ],
-                            tips: ['Utilisez gh repo create pour créer depuis la CLI'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 2: Configuration des branches',
-                        desc: 'Protéger main et créer develop',
-                        details: {
-                            explanation: 'Configurez la protection des branches pour forcer les PR et les reviews.',
-                            syntax: 'Branch protection rules',
-                            options: [],
-                            examples: [
-                                { code: '# Créer la branche develop\ngit checkout -b develop\ngit push -u origin develop', desc: 'Créer develop' },
-                                { code: '# Protection via GitHub CLI\ngh api repos/{owner}/{repo}/branches/main/protection -X PUT -f required_status_checks=null -f enforce_admins=false -f required_pull_request_reviews[required_approving_review_count]=1', desc: 'Protection programmatique' },
-                                { code: '# Sur GitHub UI:\n# Settings → Branches → Add rule\n# - Require pull request reviews\n# - Require status checks\n# - Include administrators', desc: 'Protection via UI' }
-                            ],
-                            tips: ['Protégez main ET develop pour les grandes équipes'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 3: Hooks pre-commit',
-                        desc: 'Validation automatique avant commit',
-                        details: {
-                            explanation: 'Installez des hooks pour vérifier le code avant chaque commit.',
-                            syntax: 'husky + lint-staged (Node.js)',
-                            options: [],
-                            examples: [
-                                { code: '# Installation\nnpm install -D husky lint-staged\nnpx husky init\n\n# Hook pre-commit\necho "npx lint-staged" > .husky/pre-commit', desc: 'Setup husky' },
-                                { code: '// package.json\n{\n  "lint-staged": {\n    "*.{js,ts}": ["eslint --fix", "prettier --write"],\n    "*.{json,md}": "prettier --write"\n  }\n}', desc: 'Configuration lint-staged' },
-                                { code: '# Hook commit-msg pour conventional commits\nnpm install -D @commitlint/cli @commitlint/config-conventional\necho "npx commitlint --edit \\$1" > .husky/commit-msg\n\n# commitlint.config.js\nmodule.exports = { extends: ["@commitlint/config-conventional"] };', desc: 'Validation des messages' }
-                            ],
-                            tips: ['lint-staged ne lint que les fichiers modifiés'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 4: Workflow quotidien',
-                        desc: 'Routine de développement',
-                        details: {
-                            explanation: 'Le workflow journalier pour développer une feature.',
-                            syntax: 'sync → branch → commit → push → PR',
-                            options: [],
-                            examples: [
-                                { code: '# 1. Synchroniser develop\ngit checkout develop\ngit pull origin develop\n\n# 2. Créer une feature branch\ngit checkout -b feature/user-profile\n\n# 3. Développer avec commits atomiques\ngit add src/profile.js\ngit commit -m "feat(profile): add user avatar upload"\n\ngit add src/api/profile.js\ngit commit -m "feat(api): add profile update endpoint"', desc: 'Développement' },
-                                { code: '# 4. Push et créer PR\ngit push -u origin feature/user-profile\n\n# 5. Créer la PR\ngh pr create --base develop --title "feat: User profile management" --body "Adds profile editing and avatar upload"', desc: 'Push et PR' }
-                            ],
-                            tips: ['Commits atomiques = un changement logique par commit'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 5: Review et merge',
-                        desc: 'Processus de code review',
-                        details: {
-                            explanation: 'Comment gérer les reviews et merger proprement.',
-                            syntax: 'Review → Approve → Squash merge',
-                            options: [],
-                            examples: [
-                                { code: '# Reviewer: checkout la PR localement\ngh pr checkout 42\n\n# Tester localement\nnpm test\nnpm run build\n\n# Approuver\ngh pr review 42 --approve -b "LGTM!"', desc: 'Review process' },
-                                { code: '# Si des changements sont demandés\ngit checkout feature/user-profile\n# ... corrections ...\ngit add .\ngit commit -m "fix: address review comments"\ngit push', desc: 'Répondre aux commentaires' },
-                                { code: '# Merge (préférer squash pour historique propre)\ngh pr merge 42 --squash --delete-branch\n\n# Ou via UI: "Squash and merge"', desc: 'Merge final' }
-                            ],
-                            tips: ['Squash merge combine tous les commits en un seul'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 6: Release process',
-                        desc: 'Préparer et publier une version',
-                        details: {
-                            explanation: 'Processus de création d\'une release avec changelog.',
-                            syntax: 'develop → release → main + tag',
-                            options: [],
-                            examples: [
-                                { code: '# 1. Créer branche release depuis develop\ngit checkout develop\ngit pull\ngit checkout -b release/1.2.0\n\n# 2. Bump version\nnpm version 1.2.0 --no-git-tag-version\ngit commit -am "chore: bump version to 1.2.0"', desc: 'Préparer release' },
-                                { code: '# 3. Générer changelog (si conventional commits)\nnpx conventional-changelog -p angular -i CHANGELOG.md -s\ngit commit -am "docs: update changelog for 1.2.0"', desc: 'Changelog' },
-                                { code: '# 4. Merger dans main et develop\ngit checkout main\ngit merge --no-ff release/1.2.0\ngit tag -a v1.2.0 -m "Release 1.2.0"\ngit push origin main --tags\n\ngit checkout develop\ngit merge --no-ff release/1.2.0\ngit push origin develop\n\n# 5. Créer release GitHub\ngh release create v1.2.0 --title "v1.2.0" --notes-file CHANGELOG.md', desc: 'Finaliser release' }
-                            ],
-                            tips: ['Automatisez avec semantic-release pour les projets matures'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 7: Hotfix process',
-                        desc: 'Correction urgente en production',
-                        details: {
-                            explanation: 'Workflow pour corriger un bug critique en production.',
-                            syntax: 'main → hotfix → main + develop',
-                            options: [],
-                            examples: [
-                                { code: '# 1. Créer hotfix depuis main\ngit checkout main\ngit pull\ngit checkout -b hotfix/1.2.1\n\n# 2. Corriger le bug\ngit commit -am "fix(auth): prevent session hijacking"\n\n# 3. Bump patch version\nnpm version patch --no-git-tag-version\ngit commit -am "chore: bump to 1.2.1"', desc: 'Créer hotfix' },
-                                { code: '# 4. Merger dans main\ngit checkout main\ngit merge --no-ff hotfix/1.2.1\ngit tag -a v1.2.1 -m "Hotfix 1.2.1"\ngit push origin main --tags\n\n# 5. Backport dans develop\ngit checkout develop\ngit merge --no-ff hotfix/1.2.1\ngit push origin develop\n\n# 6. Nettoyer\ngit branch -d hotfix/1.2.1', desc: 'Déployer hotfix' }
-                            ],
-                            tips: ['Les hotfixes doivent être mergés dans main ET develop'],
-                            warnings: ['Testez le hotfix avant de merger, même sous pression']
                         }
                     }
                 ]

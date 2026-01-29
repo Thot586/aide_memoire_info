@@ -2,7 +2,20 @@
   "permissions": {
     "allow": [
       "mcp__chrome-devtools__list_pages",
-      "mcp__chrome-devtools__list_console_messages"
+      "mcp__chrome-devtools__list_console_messages",
+      "Bash(powershell -Command \"Get-Content ''f:/Informatique/Mes_aide_memoires/sheets/django.html'' | Select-Object -Last 10\")",
+      "Bash(powershell -Command:*)",
+      "Bash(node -e:*)",
+      "Bash(python:*)",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__get_console_message",
+      "Bash(node -c:*)",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__press_key",
+      "mcp__chrome-devtools__select_page"
     ]
   }
 }

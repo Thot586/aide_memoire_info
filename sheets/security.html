@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire Sécurité Linux : permissions, SSH, chiffrement, audit et hardening.">
+    <meta name="description" content="Aide-mémoire Sécurité Linux : workflows pratiques pour les permissions, SSH, chiffrement, audit et hardening.">
     <title>Sécurité Linux - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,14 @@
                     <i class="fas fa-lock text-3xl text-red-400"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">Sécurité Linux</h1>
-                <p class="text-slate-400">Permissions, SSH, chiffrement et hardening système</p>
+                <p class="text-slate-400">Workflows pratiques pour sécuriser vos systèmes</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -47,20 +47,20 @@
     </div>
 
     <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
-        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
     </footer>
 
     <script>
         const cheatsheetData = [
             {
-                id: 'permissions',
-                title: 'Permissions & Ownership',
-                icon: 'fa-user-shield',
+                id: 'control-file-access',
+                title: '📁 Contrôler les Accès aux Fichiers',
+                icon: 'fa-folder-open',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'chmod',
-                        desc: 'Modifier les permissions',
+                        cmd: 'Modifier les permissions (chmod)',
+                        desc: 'Définir qui peut lire, écrire, exécuter',
                         details: {
                             explanation: 'Change les permissions de lecture (r), écriture (w) et exécution (x) sur les fichiers et dossiers.',
                             syntax: 'chmod [options] mode fichier\nchmod [ugoa][+-=][rwx] fichier',
@@ -85,8 +85,8 @@
                         }
                     },
                     {
-                        cmd: 'chown',
-                        desc: 'Changer le propriétaire',
+                        cmd: 'Changer le propriétaire (chown)',
+                        desc: 'Modifier le propriétaire et le groupe',
                         details: {
                             explanation: 'Modifie le propriétaire et/ou le groupe d\'un fichier ou dossier.',
                             syntax: 'chown [options] user[:group] fichier',
@@ -106,8 +106,8 @@
                         }
                     },
                     {
-                        cmd: 'umask',
-                        desc: 'Permissions par défaut',
+                        cmd: 'Définir les permissions par défaut (umask)',
+                        desc: 'Contrôler les permissions des nouveaux fichiers',
                         details: {
                             explanation: 'Définit les permissions par défaut pour les nouveaux fichiers et dossiers.',
                             syntax: 'umask [mask]',
@@ -124,18 +124,41 @@
                             tips: ['Le umask est soustrait de 777 (dossiers) ou 666 (fichiers)'],
                             warnings: []
                         }
+                    },
+                    {
+                        cmd: 'Utiliser les ACL étendues',
+                        desc: 'Permissions fines par utilisateur/groupe',
+                        details: {
+                            explanation: 'Les ACL permettent des permissions plus granulaires que les permissions Unix standard.',
+                            syntax: 'setfacl [options] acl fichier\ngetfacl fichier',
+                            options: [
+                                { flag: '-m u:user:rwx', desc: 'Ajouter permissions pour un utilisateur' },
+                                { flag: '-m g:group:rx', desc: 'Ajouter permissions pour un groupe' },
+                                { flag: '-x u:user', desc: 'Supprimer ACL pour un utilisateur' },
+                                { flag: '-R', desc: 'Récursif' },
+                                { flag: '-b', desc: 'Supprimer toutes les ACL' }
+                            ],
+                            examples: [
+                                { code: 'getfacl fichier.txt', desc: 'Voir les ACL' },
+                                { code: 'setfacl -m u:john:rw fichier.txt', desc: 'Donner accès à john' },
+                                { code: 'setfacl -m g:devs:rx /projet', desc: 'Accès au groupe devs' },
+                                { code: 'setfacl -b fichier.txt', desc: 'Supprimer toutes les ACL' }
+                            ],
+                            tips: ['Les ACL sont indiquées par un + dans ls -l'],
+                            warnings: ['Tous les systèmes de fichiers ne supportent pas les ACL']
+                        }
                     }
                 ]
             },
             {
-                id: 'ssh',
-                title: 'SSH & Clés',
+                id: 'secure-ssh',
+                title: '🔑 Sécuriser les Connexions SSH',
                 icon: 'fa-key',
                 color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'ssh-keygen',
-                        desc: 'Générer une paire de clés',
+                        cmd: 'Générer une paire de clés',
+                        desc: 'Créer une authentification sans mot de passe',
                         details: {
                             explanation: 'Crée une paire de clés SSH (publique et privée) pour l\'authentification sans mot de passe.',
                             syntax: 'ssh-keygen [options]',
@@ -156,8 +179,8 @@
                         }
                     },
                     {
-                        cmd: 'ssh-copy-id',
-                        desc: 'Copier la clé sur un serveur',
+                        cmd: 'Déployer une clé sur un serveur',
+                        desc: 'Copier la clé publique sur un serveur distant',
                         details: {
                             explanation: 'Copie votre clé publique dans authorized_keys du serveur distant.',
                             syntax: 'ssh-copy-id [options] user@host',
@@ -175,8 +198,29 @@
                         }
                     },
                     {
-                        cmd: 'Hardening SSH',
-                        desc: 'Sécuriser sshd_config',
+                        cmd: 'Configurer l\'agent SSH',
+                        desc: 'Gérer les clés en mémoire',
+                        details: {
+                            explanation: 'L\'agent SSH garde vos clés déchiffrées en mémoire pour éviter de retaper la passphrase.',
+                            syntax: 'ssh-agent / ssh-add',
+                            options: [
+                                { flag: 'ssh-add', desc: 'Ajouter la clé par défaut' },
+                                { flag: 'ssh-add -l', desc: 'Lister les clés chargées' },
+                                { flag: 'ssh-add -D', desc: 'Supprimer toutes les clés' },
+                                { flag: 'ssh-add -t 3600', desc: 'Ajouter avec timeout (1h)' }
+                            ],
+                            examples: [
+                                { code: 'eval $(ssh-agent)', desc: 'Démarrer l\'agent' },
+                                { code: 'ssh-add ~/.ssh/id_ed25519', desc: 'Ajouter une clé' },
+                                { code: 'ssh-add -l', desc: 'Voir les clés chargées' }
+                            ],
+                            tips: ['Ajoutez eval $(ssh-agent) à votre .bashrc pour un démarrage automatique'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Durcir la configuration sshd_config',
+                        desc: 'Sécuriser le serveur SSH',
                         details: {
                             explanation: 'Paramètres recommandés pour sécuriser le serveur SSH.',
                             syntax: 'Éditer /etc/ssh/sshd_config',
@@ -198,14 +242,14 @@
                 ]
             },
             {
-                id: 'crypto',
-                title: 'Chiffrement',
-                icon: 'fa-shield-alt',
+                id: 'encrypt-data',
+                title: '🔐 Chiffrer les Données',
+                icon: 'fa-lock',
                 color: 'border-l-4 border-purple-500',
                 commands: [
                     {
-                        cmd: 'gpg',
-                        desc: 'Chiffrement GPG/PGP',
+                        cmd: 'Chiffrer des fichiers avec GPG',
+                        desc: 'Chiffrement symétrique ou asymétrique',
                         details: {
                             explanation: 'GNU Privacy Guard pour le chiffrement, la signature et la gestion de clés.',
                             syntax: 'gpg [options] fichier',
@@ -228,7 +272,7 @@
                         }
                     },
                     {
-                        cmd: 'openssl',
+                        cmd: 'Générer des clés et certificats (openssl)',
                         desc: 'Boîte à outils SSL/TLS',
                         details: {
                             explanation: 'Outil polyvalent pour le chiffrement, les certificats et les connexions SSL.',
@@ -243,16 +287,16 @@
                             examples: [
                                 { code: 'openssl enc -aes-256-cbc -salt -in file.txt -out file.enc', desc: 'Chiffrer un fichier' },
                                 { code: 'openssl enc -d -aes-256-cbc -in file.enc -out file.txt', desc: 'Déchiffrer' },
-                                { code: 'openssl s_client -connect google.com:443', desc: 'Tester SSL d\'un site' },
-                                { code: 'openssl rand -base64 32', desc: 'Générer un mot de passe' }
+                                { code: 'openssl rand -base64 32', desc: 'Générer un mot de passe' },
+                                { code: 'openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365', desc: 'Certificat auto-signé' }
                             ],
                             tips: ['openssl rand est parfait pour générer des tokens/mots de passe'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'LUKS / cryptsetup',
-                        desc: 'Chiffrement de disque',
+                        cmd: 'Chiffrer un disque/partition (LUKS)',
+                        desc: 'Chiffrement complet de volume',
                         details: {
                             explanation: 'Chiffrement de partitions et disques sous Linux.',
                             syntax: 'cryptsetup [action] [options] device',
@@ -271,18 +315,134 @@
                             tips: ['Après luksOpen, le volume apparaît dans /dev/mapper/'],
                             warnings: ['LUKS efface toutes les données lors du formatage!']
                         }
+                    },
+                    {
+                        cmd: 'Créer des mots de passe sécurisés',
+                        desc: 'Génération de secrets aléatoires',
+                        details: {
+                            explanation: 'Générer des mots de passe et tokens sécurisés.',
+                            syntax: 'openssl rand / pwgen / /dev/urandom',
+                            options: [
+                                { flag: 'openssl rand -base64 N', desc: 'N octets en base64' },
+                                { flag: 'pwgen -s N', desc: 'Mot de passe de N caractères' },
+                                { flag: '/dev/urandom', desc: 'Source d\'entropie système' }
+                            ],
+                            examples: [
+                                { code: 'openssl rand -base64 32', desc: '32 octets en base64' },
+                                { code: 'openssl rand -hex 16', desc: '16 octets en hexadécimal' },
+                                { code: 'pwgen -s 20 1', desc: 'Un mot de passe de 20 caractères' },
+                                { code: 'head -c 32 /dev/urandom | base64', desc: 'Via /dev/urandom' }
+                            ],
+                            tips: ['Préférez openssl rand ou /dev/urandom aux générateurs simples'],
+                            warnings: ['N\'utilisez jamais de générateurs prédictibles pour la sécurité']
+                        }
                     }
                 ]
             },
             {
-                id: 'audit',
-                title: 'Audit & Logs',
+                id: 'manage-users',
+                title: '👥 Gérer les Utilisateurs',
+                icon: 'fa-users',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Créer et supprimer des utilisateurs',
+                        desc: 'Gestion des comptes utilisateurs',
+                        details: {
+                            explanation: 'Créer, modifier et supprimer des comptes utilisateurs.',
+                            syntax: 'useradd [options] username\nuserdel [options] username',
+                            options: [
+                                { flag: '-m', desc: 'Créer le home directory' },
+                                { flag: '-s /bin/bash', desc: 'Shell par défaut' },
+                                { flag: '-G groups', desc: 'Groupes supplémentaires' },
+                                { flag: 'userdel -r', desc: 'Supprimer avec home directory' }
+                            ],
+                            examples: [
+                                { code: 'sudo useradd -m -s /bin/bash john', desc: 'Créer un utilisateur' },
+                                { code: 'sudo useradd -m -s /bin/bash -G sudo,docker dev', desc: 'Avec groupes' },
+                                { code: 'sudo userdel -r olduser', desc: 'Supprimer avec données' }
+                            ],
+                            tips: ['N\'oubliez pas -m pour créer le home directory'],
+                            warnings: ['userdel -r supprime toutes les données de l\'utilisateur!']
+                        }
+                    },
+                    {
+                        cmd: 'Gérer les mots de passe (passwd)',
+                        desc: 'Modifier et contrôler les mots de passe',
+                        details: {
+                            explanation: 'Modifie le mot de passe d\'un utilisateur et gère les politiques.',
+                            syntax: 'passwd [options] [user]',
+                            options: [
+                                { flag: 'passwd', desc: 'Changer son propre mot de passe' },
+                                { flag: 'passwd user', desc: 'Changer le mot de passe d\'un user (root)' },
+                                { flag: '-l user', desc: 'Verrouiller le compte' },
+                                { flag: '-u user', desc: 'Déverrouiller le compte' },
+                                { flag: '-e user', desc: 'Forcer le changement au prochain login' }
+                            ],
+                            examples: [
+                                { code: 'passwd', desc: 'Changer son mot de passe' },
+                                { code: 'sudo passwd john', desc: 'Changer le mdp de john' },
+                                { code: 'sudo passwd -l hacker', desc: 'Verrouiller un compte' },
+                                { code: 'sudo passwd -e newuser', desc: 'Forcer changement mdp' }
+                            ],
+                            tips: ['passwd -l est préférable à supprimer un compte pour garder les traces'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Configurer les groupes (usermod)',
+                        desc: 'Ajouter des utilisateurs aux groupes',
+                        details: {
+                            explanation: 'Modifie les propriétés d\'un compte utilisateur.',
+                            syntax: 'usermod [options] user\ngroups [user]',
+                            options: [
+                                { flag: '-aG group', desc: 'Ajouter à un groupe (sans retirer des autres)' },
+                                { flag: '-L', desc: 'Verrouiller le compte' },
+                                { flag: '-U', desc: 'Déverrouiller' },
+                                { flag: '-s /bin/bash', desc: 'Changer le shell' }
+                            ],
+                            examples: [
+                                { code: 'groups', desc: 'Voir ses groupes' },
+                                { code: 'sudo usermod -aG sudo john', desc: 'Ajouter john aux sudoers' },
+                                { code: 'sudo usermod -aG docker $USER', desc: 'Ajouter au groupe docker' },
+                                { code: 'sudo usermod -s /usr/sbin/nologin serviceuser', desc: 'Désactiver le login' }
+                            ],
+                            tips: ['-aG est important : sans -a, l\'utilisateur est retiré des autres groupes'],
+                            warnings: ['Déconnexion/reconnexion nécessaire pour que les groupes soient pris en compte']
+                        }
+                    },
+                    {
+                        cmd: 'Définir les droits sudo (visudo)',
+                        desc: 'Configurer les privilèges administrateur',
+                        details: {
+                            explanation: 'Configure qui peut exécuter quelles commandes en tant que root.',
+                            syntax: 'visudo\n/etc/sudoers.d/',
+                            options: [
+                                { flag: 'user ALL=(ALL) ALL', desc: 'Tous les droits sudo' },
+                                { flag: 'user ALL=(ALL) NOPASSWD: ALL', desc: 'Sans mot de passe' },
+                                { flag: '%group ALL=(ALL) ALL', desc: 'Pour un groupe' }
+                            ],
+                            examples: [
+                                { code: 'sudo visudo', desc: 'Éditer sudoers (vérifie syntaxe)' },
+                                { code: 'john ALL=(ALL) ALL', desc: 'Tous les droits pour john' },
+                                { code: 'deploy ALL=(ALL) NOPASSWD: /usr/bin/systemctl', desc: 'Commande spécifique sans mdp' },
+                                { code: 'sudo -l', desc: 'Voir ses droits sudo' }
+                            ],
+                            tips: ['Utilisez visudo pour éditer /etc/sudoers (vérifie la syntaxe)'],
+                            warnings: ['Ne donnez pas de droits sudo sans nécessité']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'audit-system',
+                title: '🔍 Auditer le Système',
                 icon: 'fa-search',
                 color: 'border-l-4 border-orange-500',
                 commands: [
                     {
-                        cmd: 'journalctl',
-                        desc: 'Logs systemd',
+                        cmd: 'Consulter les logs systemd (journalctl)',
+                        desc: 'Analyser les logs du système',
                         details: {
                             explanation: 'Consulter les logs du système avec systemd.',
                             syntax: 'journalctl [options]',
@@ -304,8 +464,8 @@
                         }
                     },
                     {
-                        cmd: 'last / lastlog',
-                        desc: 'Historique des connexions',
+                        cmd: 'Analyser l\'historique des connexions',
+                        desc: 'Voir qui s\'est connecté',
                         details: {
                             explanation: 'Affiche l\'historique des connexions utilisateurs.',
                             syntax: 'last [options]\nlastlog [options]',
@@ -326,8 +486,58 @@
                         }
                     },
                     {
-                        cmd: 'fail2ban',
-                        desc: 'Bloquer les attaques brute force',
+                        cmd: 'Détecter les tentatives échouées',
+                        desc: 'Surveiller les échecs d\'authentification',
+                        details: {
+                            explanation: 'Identifier les tentatives de connexion échouées et les attaques.',
+                            syntax: 'grep / journalctl / lastb',
+                            options: [
+                                { flag: 'lastb', desc: 'Fichier btmp des échecs' },
+                                { flag: '/var/log/auth.log', desc: 'Logs d\'authentification (Debian)' },
+                                { flag: '/var/log/secure', desc: 'Logs d\'authentification (RHEL)' }
+                            ],
+                            examples: [
+                                { code: 'sudo lastb | head -20', desc: 'Derniers échecs de connexion' },
+                                { code: 'grep "Failed password" /var/log/auth.log | tail -20', desc: 'Échecs SSH récents' },
+                                { code: 'journalctl -u sshd | grep "Failed"', desc: 'Échecs via journalctl' },
+                                { code: 'sudo lastb | awk \'{print $3}\' | sort | uniq -c | sort -rn | head', desc: 'Top IPs attaquantes' }
+                            ],
+                            tips: ['Surveillez régulièrement les logs pour détecter les attaques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Configurer la rotation des logs',
+                        desc: 'Gérer l\'espace disque des logs',
+                        details: {
+                            explanation: 'Configure logrotate pour archiver et compresser les logs.',
+                            syntax: '/etc/logrotate.conf\n/etc/logrotate.d/',
+                            options: [
+                                { flag: 'daily/weekly/monthly', desc: 'Fréquence de rotation' },
+                                { flag: 'rotate N', desc: 'Garder N versions' },
+                                { flag: 'compress', desc: 'Compresser les anciens logs' },
+                                { flag: 'maxsize SIZE', desc: 'Rotation si taille dépassée' }
+                            ],
+                            examples: [
+                                { code: 'cat /etc/logrotate.conf', desc: 'Config globale' },
+                                { code: 'sudo logrotate -f /etc/logrotate.conf', desc: 'Forcer la rotation' },
+                                { code: '# /etc/logrotate.d/myapp\n/var/log/myapp/*.log {\n  daily\n  rotate 7\n  compress\n  missingok\n}', desc: 'Config personnalisée' }
+                            ],
+                            tips: ['Testez avec logrotate -d (dry-run) avant d\'appliquer'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'block-attacks',
+                title: '🚫 Bloquer les Attaques',
+                icon: 'fa-ban',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Configurer fail2ban',
+                        desc: 'Bannir automatiquement les IPs malveillantes',
                         details: {
                             explanation: 'Surveille les logs et bannit les IPs malveillantes automatiquement.',
                             syntax: 'fail2ban-client [command]',
@@ -339,100 +549,86 @@
                             ],
                             examples: [
                                 { code: 'sudo apt install fail2ban', desc: 'Installation' },
+                                { code: 'sudo systemctl enable --now fail2ban', desc: 'Activer fail2ban' },
                                 { code: 'sudo fail2ban-client status', desc: 'Voir les jails actifs' },
-                                { code: 'sudo fail2ban-client status sshd', desc: 'IPs bannies pour SSH' },
-                                { code: 'sudo fail2ban-client set sshd unbanip 1.2.3.4', desc: 'Débannir' }
+                                { code: 'sudo fail2ban-client status sshd', desc: 'IPs bannies pour SSH' }
                             ],
                             tips: ['Configurez /etc/fail2ban/jail.local pour personnaliser'],
                             warnings: ['Attention à ne pas vous bannir vous-même!']
                         }
-                    }
-                ]
-            },
-            {
-                id: 'users',
-                title: 'Gestion Utilisateurs',
-                icon: 'fa-users',
-                color: 'border-l-4 border-cyan-500',
-                commands: [
-                    {
-                        cmd: 'sudo',
-                        desc: 'Exécuter en tant que root',
-                        details: {
-                            explanation: 'Exécute une commande avec les privilèges d\'un autre utilisateur (root par défaut).',
-                            syntax: 'sudo [options] commande',
-                            options: [
-                                { flag: 'sudo command', desc: 'Exécuter en tant que root' },
-                                { flag: 'sudo -u user cmd', desc: 'Exécuter en tant qu\'un autre user' },
-                                { flag: 'sudo -i', desc: 'Shell root interactif' },
-                                { flag: 'sudo -l', desc: 'Lister ses permissions sudo' }
-                            ],
-                            examples: [
-                                { code: 'sudo apt update', desc: 'Commande admin' },
-                                { code: 'sudo -u www-data php script.php', desc: 'En tant que www-data' },
-                                { code: 'sudo visudo', desc: 'Éditer la config sudo' },
-                                { code: 'sudo -l', desc: 'Voir ses droits sudo' }
-                            ],
-                            tips: ['Utilisez visudo pour éditer /etc/sudoers (vérifie la syntaxe)'],
-                            warnings: ['Ne donnez pas de droits sudo sans nécessité']
-                        }
                     },
                     {
-                        cmd: 'passwd',
-                        desc: 'Gérer les mots de passe',
+                        cmd: 'Gérer les IPs bannies',
+                        desc: 'Débannir et lister les blocages',
                         details: {
-                            explanation: 'Modifie le mot de passe d\'un utilisateur et gère les politiques de mot de passe.',
-                            syntax: 'passwd [options] [user]',
+                            explanation: 'Gérer manuellement les IPs bloquées par fail2ban.',
+                            syntax: 'fail2ban-client [get|set] jail [action]',
                             options: [
-                                { flag: 'passwd', desc: 'Changer son propre mot de passe' },
-                                { flag: 'passwd user', desc: 'Changer le mot de passe d\'un user (root)' },
-                                { flag: '-l user', desc: 'Verrouiller le compte' },
-                                { flag: '-u user', desc: 'Déverrouiller le compte' },
-                                { flag: '-e user', desc: 'Forcer le changement au prochain login' }
+                                { flag: 'get sshd banip', desc: 'Liste des IPs bannies' },
+                                { flag: 'set sshd unbanip IP', desc: 'Débannir une IP' },
+                                { flag: 'set sshd banip IP', desc: 'Bannir une IP' }
                             ],
                             examples: [
-                                { code: 'passwd', desc: 'Changer son mot de passe' },
-                                { code: 'sudo passwd john', desc: 'Changer le mdp de john' },
-                                { code: 'sudo passwd -l hacker', desc: 'Verrouiller un compte' },
-                                { code: 'sudo passwd -e newuser', desc: 'Forcer changement mdp' }
+                                { code: 'sudo fail2ban-client set sshd unbanip 1.2.3.4', desc: 'Débannir une IP' },
+                                { code: 'sudo fail2ban-client set sshd banip 5.6.7.8', desc: 'Bannir manuellement' },
+                                { code: 'sudo fail2ban-client get sshd banip', desc: 'Lister les IPs bannies' },
+                                { code: 'sudo zgrep "Ban" /var/log/fail2ban.log*', desc: 'Historique des bans' }
                             ],
-                            tips: ['passwd -l est préférable à supprimer un compte pour garder les traces'],
+                            tips: ['Vérifiez les logs fail2ban pour comprendre pourquoi une IP a été bannie'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'usermod / groups',
-                        desc: 'Modifier les utilisateurs',
+                        cmd: 'Personnaliser les règles de détection',
+                        desc: 'Créer des filtres personnalisés',
                         details: {
-                            explanation: 'Modifie les propriétés d\'un compte utilisateur.',
-                            syntax: 'usermod [options] user\ngroups [user]',
+                            explanation: 'Créer des jails personnalisés pour protéger d\'autres services.',
+                            syntax: '/etc/fail2ban/jail.local\n/etc/fail2ban/filter.d/',
                             options: [
-                                { flag: '-aG group', desc: 'Ajouter à un groupe (sans retirer des autres)' },
-                                { flag: '-L', desc: 'Verrouiller le compte' },
-                                { flag: '-U', desc: 'Déverrouiller' },
-                                { flag: '-s /bin/bash', desc: 'Changer le shell' }
+                                { flag: 'maxretry', desc: 'Nombre de tentatives avant ban' },
+                                { flag: 'bantime', desc: 'Durée du ban' },
+                                { flag: 'findtime', desc: 'Fenêtre de temps pour les tentatives' },
+                                { flag: 'ignoreip', desc: 'IPs à ne jamais bannir' }
                             ],
                             examples: [
-                                { code: 'groups', desc: 'Voir ses groupes' },
-                                { code: 'sudo usermod -aG sudo john', desc: 'Ajouter john aux sudoers' },
-                                { code: 'sudo usermod -aG docker $USER', desc: 'Ajouter au groupe docker' },
-                                { code: 'sudo usermod -s /usr/sbin/nologin serviceuser', desc: 'Désactiver le login' }
+                                { code: '# /etc/fail2ban/jail.local\n[sshd]\nenabled = true\nmaxretry = 3\nbantime = 1h\nfindtime = 10m\nignoreip = 127.0.0.1/8 192.168.1.0/24', desc: 'Config SSH personnalisée' },
+                                { code: '# Jail pour nginx\n[nginx-http-auth]\nenabled = true\nport = http,https\nlogpath = /var/log/nginx/error.log', desc: 'Protéger nginx' }
                             ],
-                            tips: ['-aG est important : sans -a, l\'utilisateur est retiré des autres groupes'],
-                            warnings: ['Déconnexion/reconnexion nécessaire pour que les groupes soient pris en compte']
+                            tips: ['Testez vos regex avec fail2ban-regex avant de les activer'],
+                            warnings: ['Un findtime trop court peut ne pas détecter les attaques lentes']
+                        }
+                    },
+                    {
+                        cmd: 'Intégrer avec le firewall',
+                        desc: 'Actions de blocage personnalisées',
+                        details: {
+                            explanation: 'Configurer comment fail2ban bloque les IPs (iptables, nftables, ufw).',
+                            syntax: '/etc/fail2ban/action.d/',
+                            options: [
+                                { flag: 'banaction = iptables-multiport', desc: 'Action par défaut' },
+                                { flag: 'banaction = ufw', desc: 'Utiliser ufw' },
+                                { flag: 'banaction = nftables', desc: 'Utiliser nftables' }
+                            ],
+                            examples: [
+                                { code: '# Utiliser ufw comme action\n[DEFAULT]\nbanaction = ufw', desc: 'Config pour ufw' },
+                                { code: 'sudo iptables -L -n | grep fail2ban', desc: 'Voir les règles fail2ban' },
+                                { code: 'sudo ufw status', desc: 'Vérifier les blocages ufw' }
+                            ],
+                            tips: ['ufw est plus simple à gérer que iptables directement'],
+                            warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'hardening',
-                title: 'Hardening Système',
+                id: 'harden-system',
+                title: '🛡️ Durcir le Système',
                 icon: 'fa-shield-virus',
-                color: 'border-l-4 border-red-500',
+                color: 'border-l-4 border-amber-500',
                 commands: [
                     {
-                        cmd: 'Mises à jour automatiques',
-                        desc: 'unattended-upgrades',
+                        cmd: 'Activer les mises à jour automatiques',
+                        desc: 'Installer les correctifs de sécurité',
                         details: {
                             explanation: 'Configure les mises à jour de sécurité automatiques sur Debian/Ubuntu.',
                             syntax: 'apt install unattended-upgrades',
@@ -443,37 +639,60 @@
                             examples: [
                                 { code: 'sudo apt install unattended-upgrades apt-listchanges', desc: 'Installation' },
                                 { code: 'sudo dpkg-reconfigure unattended-upgrades', desc: 'Configuration interactive' },
-                                { code: 'cat /etc/apt/apt.conf.d/50unattended-upgrades', desc: 'Voir la configuration' }
+                                { code: 'cat /etc/apt/apt.conf.d/50unattended-upgrades', desc: 'Voir la configuration' },
+                                { code: 'sudo unattended-upgrade --dry-run', desc: 'Simuler une mise à jour' }
                             ],
                             tips: ['Activez les notifications email pour être informé des mises à jour'],
                             warnings: ['Testez en staging avant d\'activer sur des serveurs critiques']
                         }
                     },
                     {
-                        cmd: 'AppArmor / SELinux',
-                        desc: 'Contrôle d\'accès obligatoire',
+                        cmd: 'Configurer AppArmor',
+                        desc: 'Contrôle d\'accès obligatoire (Ubuntu)',
                         details: {
-                            explanation: 'Systèmes de sécurité MAC (Mandatory Access Control) pour restreindre les applications.',
-                            syntax: 'aa-status (AppArmor)\ngetenforce (SELinux)',
+                            explanation: 'Système de sécurité MAC pour restreindre les applications.',
+                            syntax: 'aa-status / aa-enforce / aa-complain',
                             options: [
-                                { flag: 'AppArmor', desc: 'Ubuntu/Debian par défaut' },
-                                { flag: 'SELinux', desc: 'RHEL/CentOS par défaut' },
                                 { flag: 'aa-status', desc: 'État AppArmor' },
-                                { flag: 'getenforce', desc: 'Mode SELinux (Enforcing/Permissive)' }
+                                { flag: 'aa-enforce', desc: 'Activer un profil en mode enforce' },
+                                { flag: 'aa-complain', desc: 'Mode apprentissage (log only)' },
+                                { flag: 'aa-disable', desc: 'Désactiver un profil' }
                             ],
                             examples: [
                                 { code: 'sudo aa-status', desc: 'État AppArmor' },
                                 { code: 'sudo aa-enforce /etc/apparmor.d/usr.bin.firefox', desc: 'Activer un profil' },
-                                { code: 'getenforce', desc: 'Mode SELinux' },
-                                { code: 'sudo setenforce 1', desc: 'Activer SELinux (temporaire)' }
+                                { code: 'sudo aa-complain /etc/apparmor.d/usr.sbin.nginx', desc: 'Mode apprentissage' },
+                                { code: 'sudo systemctl reload apparmor', desc: 'Recharger les profils' }
                             ],
-                            tips: ['Ne désactivez pas ces systèmes - apprenez à les utiliser'],
+                            tips: ['Utilisez aa-complain pour déboguer avant aa-enforce'],
+                            warnings: ['Ne désactivez pas AppArmor sans bonne raison']
+                        }
+                    },
+                    {
+                        cmd: 'Configurer SELinux',
+                        desc: 'Contrôle d\'accès obligatoire (RHEL)',
+                        details: {
+                            explanation: 'Système de sécurité MAC pour RHEL/CentOS/Fedora.',
+                            syntax: 'getenforce / setenforce / sestatus',
+                            options: [
+                                { flag: 'getenforce', desc: 'Mode actuel (Enforcing/Permissive/Disabled)' },
+                                { flag: 'setenforce 1', desc: 'Activer temporairement' },
+                                { flag: 'setenforce 0', desc: 'Mode permissif temporaire' },
+                                { flag: '/etc/selinux/config', desc: 'Configuration permanente' }
+                            ],
+                            examples: [
+                                { code: 'getenforce', desc: 'Mode SELinux' },
+                                { code: 'sudo setenforce 1', desc: 'Activer SELinux (temporaire)' },
+                                { code: 'sestatus', desc: 'État détaillé' },
+                                { code: 'sudo ausearch -m avc -ts recent', desc: 'Voir les blocages récents' }
+                            ],
+                            tips: ['Utilisez audit2allow pour créer des politiques à partir des logs'],
                             warnings: ['Modifier les politiques SELinux nécessite une expertise']
                         }
                     },
                     {
-                        cmd: 'Checklist Sécurité',
-                        desc: 'Points essentiels',
+                        cmd: 'Appliquer les bonnes pratiques',
+                        desc: 'Checklist de sécurité essentielle',
                         details: {
                             explanation: 'Liste des points de sécurité essentiels pour un serveur Linux.',
                             syntax: 'Vérifications manuelles et automatiques',
@@ -491,6 +710,297 @@
                             ],
                             tips: ['Automatisez les audits avec des outils comme Lynis'],
                             warnings: ['La sécurité est un processus continu, pas une configuration unique']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'scan-vulnerabilities',
+                title: '🔬 Scanner les Vulnérabilités',
+                icon: 'fa-search-plus',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Scanner les ports ouverts (nmap)',
+                        desc: 'Découvrir les services exposés',
+                        details: {
+                            explanation: 'Outil de découverte réseau et d\'audit de sécurité.',
+                            syntax: 'nmap [options] target',
+                            options: [
+                                { flag: '-sT', desc: 'TCP connect scan' },
+                                { flag: '-sV', desc: 'Détection des versions' },
+                                { flag: '-A', desc: 'Scan agressif (OS, versions, scripts)' },
+                                { flag: '-p-', desc: 'Tous les ports' },
+                                { flag: '--script vuln', desc: 'Scripts de vulnérabilité' }
+                            ],
+                            examples: [
+                                { code: 'nmap -sT localhost', desc: 'Ports ouverts localement' },
+                                { code: 'nmap -sV -p 22,80,443 server.com', desc: 'Versions des services' },
+                                { code: 'nmap -A server.com', desc: 'Scan complet' },
+                                { code: 'nmap --script vuln server.com', desc: 'Recherche de vulnérabilités' }
+                            ],
+                            tips: ['Scannez votre propre serveur régulièrement pour détecter les services exposés'],
+                            warnings: ['Ne scannez JAMAIS des systèmes sans autorisation']
+                        }
+                    },
+                    {
+                        cmd: 'Auditer la configuration (Lynis)',
+                        desc: 'Audit de sécurité complet',
+                        details: {
+                            explanation: 'Outil d\'audit de sécurité pour Linux, macOS et Unix.',
+                            syntax: 'lynis audit system',
+                            options: [
+                                { flag: 'audit system', desc: 'Audit complet du système' },
+                                { flag: '--quick', desc: 'Audit rapide' },
+                                { flag: '--pentest', desc: 'Mode pentest' },
+                                { flag: '--report-file', desc: 'Sauvegarder le rapport' }
+                            ],
+                            examples: [
+                                { code: 'sudo apt install lynis', desc: 'Installation' },
+                                { code: 'sudo lynis audit system', desc: 'Audit complet' },
+                                { code: 'sudo lynis audit system --quick', desc: 'Audit rapide' },
+                                { code: 'cat /var/log/lynis.log', desc: 'Voir le rapport' }
+                            ],
+                            tips: ['Lynis donne un score de durcissement et des recommandations précises'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Vérifier les packages vulnérables',
+                        desc: 'Détecter les CVE dans les packages',
+                        details: {
+                            explanation: 'Identifier les packages avec des vulnérabilités connues.',
+                            syntax: 'apt / unattended-upgrades',
+                            options: [
+                                { flag: 'apt list --upgradable', desc: 'Packages à mettre à jour' },
+                                { flag: 'apt-get upgrade -s', desc: 'Simulation de mise à jour' }
+                            ],
+                            examples: [
+                                { code: 'apt list --upgradable', desc: 'Voir les mises à jour disponibles' },
+                                { code: 'sudo apt-get upgrade -s', desc: 'Simuler les mises à jour' },
+                                { code: 'apt-cache policy package-name', desc: 'Versions disponibles' },
+                                { code: 'dpkg -l | grep -i security', desc: 'Packages de sécurité' }
+                            ],
+                            tips: ['Abonnez-vous aux listes de sécurité de votre distribution'],
+                            warnings: ['Testez les mises à jour en staging avant production']
+                        }
+                    },
+                    {
+                        cmd: 'Analyser les permissions sensibles',
+                        desc: 'Trouver les fichiers à risque',
+                        details: {
+                            explanation: 'Identifier les fichiers avec des permissions dangereuses.',
+                            syntax: 'find / -perm ...',
+                            options: [
+                                { flag: '-perm -4000', desc: 'Fichiers SUID' },
+                                { flag: '-perm -2000', desc: 'Fichiers SGID' },
+                                { flag: '-perm -0002', desc: 'Écriture world-writable' }
+                            ],
+                            examples: [
+                                { code: 'find / -perm -4000 -type f 2>/dev/null', desc: 'Trouver les fichiers SUID' },
+                                { code: 'find / -perm -0002 -type f 2>/dev/null', desc: 'Fichiers world-writable' },
+                                { code: 'find /home -name ".*history" 2>/dev/null', desc: 'Fichiers historique' },
+                                { code: 'find / -nouser -o -nogroup 2>/dev/null', desc: 'Fichiers orphelins' }
+                            ],
+                            tips: ['Vérifiez régulièrement les nouveaux fichiers SUID'],
+                            warnings: ['Les fichiers SUID peuvent être exploités pour l\'élévation de privilèges']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'backup-restore',
+                title: '💾 Sauvegarder et Restaurer',
+                icon: 'fa-database',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Créer des sauvegardes chiffrées',
+                        desc: 'Backup sécurisé avec tar et gpg',
+                        details: {
+                            explanation: 'Créer des archives compressées et chiffrées.',
+                            syntax: 'tar + gpg / rsync + encryption',
+                            options: [
+                                { flag: 'tar czf', desc: 'Créer archive gzip' },
+                                { flag: 'gpg -c', desc: 'Chiffrer avec mot de passe' },
+                                { flag: 'gpg -e -r', desc: 'Chiffrer pour un destinataire' }
+                            ],
+                            examples: [
+                                { code: 'tar czf - /data | gpg -c -o backup.tar.gz.gpg', desc: 'Backup chiffré en une commande' },
+                                { code: 'gpg -d backup.tar.gz.gpg | tar xzf -', desc: 'Restaurer le backup' },
+                                { code: 'tar czf /backup/home-$(date +%Y%m%d).tar.gz /home', desc: 'Backup daté' }
+                            ],
+                            tips: ['Stockez la passphrase de façon sécurisée et séparée'],
+                            warnings: ['Testez régulièrement la restauration de vos backups']
+                        }
+                    },
+                    {
+                        cmd: 'Automatiser les backups (rsync + cron)',
+                        desc: 'Sauvegardes incrémentales planifiées',
+                        details: {
+                            explanation: 'Configurer des sauvegardes automatiques avec rsync et cron.',
+                            syntax: 'rsync + crontab',
+                            options: [
+                                { flag: '-a', desc: 'Mode archive (préserve tout)' },
+                                { flag: '-v', desc: 'Verbose' },
+                                { flag: '--delete', desc: 'Miroir exact' },
+                                { flag: '--backup', desc: 'Garder les anciennes versions' }
+                            ],
+                            examples: [
+                                { code: '#!/bin/bash\n# /usr/local/bin/backup.sh\nrsync -avz --delete /data/ /backup/data/\nrsync -avz /etc/ /backup/etc/', desc: 'Script de backup' },
+                                { code: 'crontab -e\n# Backup quotidien à 2h\n0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1', desc: 'Cron job' },
+                                { code: 'rsync -avz -e ssh /data/ user@backup-server:/backup/', desc: 'Backup vers serveur distant' }
+                            ],
+                            tips: ['Utilisez rsync avec --dry-run pour tester avant d\'exécuter'],
+                            warnings: ['--delete supprime les fichiers sur la destination!']
+                        }
+                    },
+                    {
+                        cmd: 'Vérifier l\'intégrité des sauvegardes',
+                        desc: 'Valider que les backups sont exploitables',
+                        details: {
+                            explanation: 'Vérifier que les sauvegardes peuvent être restaurées.',
+                            syntax: 'md5sum / sha256sum / tar tvf',
+                            options: [
+                                { flag: 'sha256sum', desc: 'Calculer le hash SHA256' },
+                                { flag: 'tar tvf', desc: 'Lister le contenu d\'une archive' },
+                                { flag: 'gpg -d', desc: 'Tester le déchiffrement' }
+                            ],
+                            examples: [
+                                { code: 'sha256sum backup.tar.gz > backup.sha256', desc: 'Créer checksum' },
+                                { code: 'sha256sum -c backup.sha256', desc: 'Vérifier checksum' },
+                                { code: 'tar tvf backup.tar.gz | head', desc: 'Lister le contenu' },
+                                { code: 'gpg -d backup.tar.gz.gpg > /dev/null && echo "OK"', desc: 'Tester déchiffrement' }
+                            ],
+                            tips: ['Gardez les checksums avec les backups pour vérification'],
+                            warnings: ['Un backup non testé n\'est pas un backup!']
+                        }
+                    },
+                    {
+                        cmd: 'Restaurer en cas d\'incident',
+                        desc: 'Procédure de récupération',
+                        details: {
+                            explanation: 'Restaurer les données depuis une sauvegarde.',
+                            syntax: 'tar / rsync / gpg',
+                            options: [
+                                { flag: 'tar xzf', desc: 'Extraire archive gzip' },
+                                { flag: 'rsync -av', desc: 'Restaurer depuis backup' },
+                                { flag: '-C /path', desc: 'Destination d\'extraction' }
+                            ],
+                            examples: [
+                                { code: 'gpg -d backup.tar.gz.gpg | tar xzf - -C /restore/', desc: 'Restaurer backup chiffré' },
+                                { code: 'rsync -av /backup/data/ /data/', desc: 'Restaurer depuis miroir' },
+                                { code: 'tar xzf backup.tar.gz -C /tmp/test/', desc: 'Restaurer dans un dossier test' },
+                                { code: 'diff -r /tmp/test/data /data', desc: 'Comparer avec les données actuelles' }
+                            ],
+                            tips: ['Restaurez d\'abord dans un dossier temporaire pour vérifier'],
+                            warnings: ['Attention à ne pas écraser des données plus récentes']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-security',
+                title: '🎯 Projet: Sécuriser un Serveur',
+                icon: 'fa-wrench',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Audit initial',
+                        desc: 'Évaluer l\'état actuel',
+                        details: {
+                            explanation: 'Commencer par un audit complet du système.',
+                            syntax: 'Vérifications système',
+                            options: [],
+                            examples: [
+                                { code: '#!/bin/bash\n# security-audit.sh\necho "=== AUDIT SÉCURITÉ ==="\necho "Date: $(date)"\necho\n\necho "--- Utilisateurs avec shell ---"\ngrep -v "nologin\\|false" /etc/passwd\necho\n\necho "--- Ports ouverts ---"\nss -tulnp | grep LISTEN\necho\n\necho "--- Services actifs ---"\nsystemctl list-units --type=service --state=running\necho\n\necho "--- Fichiers SUID ---"\nfind /usr -perm -4000 -type f 2>/dev/null', desc: 'Script d\'audit initial' }
+                            ],
+                            tips: ['Documentez l\'état initial avant toute modification'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: Configuration SSH sécurisée',
+                        desc: 'Durcir l\'accès SSH',
+                        details: {
+                            explanation: 'Configurer SSH avec authentification par clé uniquement.',
+                            syntax: '/etc/ssh/sshd_config',
+                            options: [],
+                            examples: [
+                                { code: '# 1. Générer et déployer la clé\nssh-keygen -t ed25519\nssh-copy-id user@server\n\n# 2. Tester la connexion par clé\nssh user@server\n\n# 3. Durcir sshd_config\nsudo tee -a /etc/ssh/sshd_config.d/hardening.conf << EOF\nPermitRootLogin no\nPasswordAuthentication no\nPubkeyAuthentication yes\nAllowUsers admin deploy\nMaxAuthTries 3\nEOF\n\n# 4. Redémarrer SSH\nsudo systemctl restart sshd', desc: 'Configuration SSH sécurisée' }
+                            ],
+                            tips: ['Gardez une session ouverte pendant les tests'],
+                            warnings: ['Testez l\'accès par clé AVANT de désactiver les mots de passe']
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Mise en place du firewall',
+                        desc: 'Configurer ufw/iptables',
+                        details: {
+                            explanation: 'Configurer le pare-feu pour n\'autoriser que le nécessaire.',
+                            syntax: 'ufw',
+                            options: [],
+                            examples: [
+                                { code: '# Configurer ufw\nsudo ufw default deny incoming\nsudo ufw default allow outgoing\n\n# Autoriser SSH (important!)\nsudo ufw allow ssh\n\n# Autoriser HTTP/HTTPS si serveur web\nsudo ufw allow http\nsudo ufw allow https\n\n# Activer le firewall\nsudo ufw enable\n\n# Vérifier\nsudo ufw status verbose', desc: 'Configuration firewall' }
+                            ],
+                            tips: ['Toujours autoriser SSH avant d\'activer le firewall'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Installation fail2ban',
+                        desc: 'Protection contre brute force',
+                        details: {
+                            explanation: 'Installer et configurer fail2ban pour bloquer les attaques.',
+                            syntax: 'fail2ban',
+                            options: [],
+                            examples: [
+                                { code: '# Installation\nsudo apt install fail2ban\n\n# Configuration\nsudo tee /etc/fail2ban/jail.local << EOF\n[DEFAULT]\nbantime = 1h\nfindtime = 10m\nmaxretry = 5\nignoreip = 127.0.0.1/8\n\n[sshd]\nenabled = true\nport = ssh\nmaxretry = 3\nEOF\n\n# Activer\nsudo systemctl enable --now fail2ban\nsudo fail2ban-client status', desc: 'Configuration fail2ban' }
+                            ],
+                            tips: ['Ajoutez votre IP à ignoreip pour ne pas vous bannir'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Mises à jour automatiques',
+                        desc: 'Installer les correctifs de sécurité',
+                        details: {
+                            explanation: 'Configurer les mises à jour de sécurité automatiques.',
+                            syntax: 'unattended-upgrades',
+                            options: [],
+                            examples: [
+                                { code: '# Installation\nsudo apt install unattended-upgrades apt-listchanges\n\n# Configuration\nsudo dpkg-reconfigure -plow unattended-upgrades\n\n# Vérifier\ncat /etc/apt/apt.conf.d/20auto-upgrades\n\n# Test\nsudo unattended-upgrade --dry-run', desc: 'Mises à jour automatiques' }
+                            ],
+                            tips: ['Configurez les notifications email pour être alerté'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Configuration de la surveillance',
+                        desc: 'Logs et monitoring',
+                        details: {
+                            explanation: 'Mettre en place la surveillance des logs.',
+                            syntax: 'journalctl / logwatch',
+                            options: [],
+                            examples: [
+                                { code: '# Installer logwatch (résumé quotidien par email)\nsudo apt install logwatch\n\n# Configuration\nsudo tee /etc/logwatch/conf/logwatch.conf << EOF\nMailTo = admin@example.com\nMailFrom = logwatch@server.com\nDetail = Med\nEOF\n\n# Alias pour surveillance rapide\nalias logs="journalctl -f"\nalias auth="journalctl -u sshd -f"', desc: 'Surveillance des logs' }
+                            ],
+                            tips: ['Vérifiez les logs régulièrement pour détecter les anomalies'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Vérification finale',
+                        desc: 'Checklist de validation',
+                        details: {
+                            explanation: 'Vérifier que toutes les mesures sont en place.',
+                            syntax: 'Script de vérification',
+                            options: [],
+                            examples: [
+                                { code: '#!/bin/bash\n# security-check.sh\necho "=== VÉRIFICATION SÉCURITÉ ==="\nERRORS=0\n\n# SSH\ngrep -q "PasswordAuthentication no" /etc/ssh/sshd_config* 2>/dev/null && echo "✓ SSH: Passwords disabled" || { echo "✗ SSH: Passwords enabled"; ((ERRORS++)); }\n\n# Firewall\nsudo ufw status | grep -q "Status: active" && echo "✓ UFW: Active" || { echo "✗ UFW: Inactive"; ((ERRORS++)); }\n\n# Fail2ban\nsystemctl is-active --quiet fail2ban && echo "✓ Fail2ban: Running" || { echo "✗ Fail2ban: Not running"; ((ERRORS++)); }\n\n# Updates\ntest -f /etc/apt/apt.conf.d/20auto-upgrades && echo "✓ Auto-updates: Configured" || { echo "✗ Auto-updates: Not configured"; ((ERRORS++)); }\n\necho\n[ $ERRORS -eq 0 ] && echo "Sécurité: OK" || echo "Sécurité: $ERRORS problème(s)"', desc: 'Script de vérification' }
+                            ],
+                            tips: ['Exécutez ce script régulièrement pour valider la configuration'],
+                            warnings: ['La sécurité est un processus continu']
                         }
                     }
                 ]

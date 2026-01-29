@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire Réseau : commandes Linux, diagnostic, configuration IP, DNS et firewall.">
+    <meta name="description" content="Aide-mémoire Réseau : workflows pratiques pour le diagnostic, la configuration et l'administration réseau Linux.">
     <title>Réseau Linux - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,14 @@
                     <i class="fas fa-network-wired text-3xl text-blue-400"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">Réseau Linux</h1>
-                <p class="text-slate-400">Diagnostic, configuration et administration réseau</p>
+                <p class="text-slate-400">Workflows pratiques pour l'administration réseau</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -47,20 +47,20 @@
     </div>
 
     <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
-        <p>© 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
     </footer>
 
     <script>
         const cheatsheetData = [
             {
-                id: 'diagnosis',
-                title: 'Diagnostic Réseau',
+                id: 'diagnose-network',
+                title: '🩺 Diagnostiquer le Réseau',
                 icon: 'fa-stethoscope',
                 color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'ping',
-                        desc: 'Tester la connectivité',
+                        cmd: 'Tester la connectivité (ping)',
+                        desc: 'Vérifier si un hôte est accessible',
                         details: {
                             explanation: 'Envoie des paquets ICMP pour vérifier si un hôte est accessible et mesurer la latence.',
                             syntax: 'ping [options] destination',
@@ -80,8 +80,8 @@
                         }
                     },
                     {
-                        cmd: 'traceroute / tracepath',
-                        desc: 'Tracer le chemin réseau',
+                        cmd: 'Tracer le chemin réseau (traceroute)',
+                        desc: 'Afficher le chemin vers une destination',
                         details: {
                             explanation: 'Affiche le chemin emprunté par les paquets pour atteindre une destination.',
                             syntax: 'traceroute destination\ntracepath destination',
@@ -100,107 +100,117 @@
                         }
                     },
                     {
-                        cmd: 'netstat / ss',
-                        desc: 'Connexions et ports',
+                        cmd: 'Analyser la latence en temps réel (mtr)',
+                        desc: 'Combine ping et traceroute en continu',
                         details: {
-                            explanation: 'Affiche les connexions réseau, ports en écoute et tables de routage. ss est le remplaçant moderne de netstat.',
+                            explanation: 'Combine ping et traceroute pour un diagnostic réseau continu.',
+                            syntax: 'mtr [options] hostname',
+                            options: [
+                                { flag: '-r', desc: 'Mode rapport (non interactif)' },
+                                { flag: '-c N', desc: 'Nombre de pings' },
+                                { flag: '-n', desc: 'Pas de résolution DNS' },
+                                { flag: '-T', desc: 'Utiliser TCP au lieu d\'ICMP' },
+                                { flag: '-P port', desc: 'Port TCP (avec -T)' }
+                            ],
+                            examples: [
+                                { code: 'mtr google.com', desc: 'Diagnostic interactif' },
+                                { code: 'mtr -r -c 100 google.com', desc: 'Rapport après 100 pings' },
+                                { code: 'mtr -T -P 443 example.com', desc: 'Via TCP port 443' }
+                            ],
+                            tips: ['mtr est idéal pour détecter la perte de paquets sur le chemin'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Vérifier les connexions actives (ss)',
+                        desc: 'Afficher les ports et connexions réseau',
+                        details: {
+                            explanation: 'Affiche les connexions réseau, ports en écoute et statistiques. ss est le remplaçant moderne de netstat.',
                             syntax: 'ss [options]\nnetstat [options]',
                             options: [
                                 { flag: '-t', desc: 'Connexions TCP' },
                                 { flag: '-u', desc: 'Connexions UDP' },
                                 { flag: '-l', desc: 'Ports en écoute (listening)' },
-                                { flag: '-n', desc: 'Affiche les numéros de port (pas les noms)' },
+                                { flag: '-n', desc: 'Affiche les numéros de port' },
                                 { flag: '-p', desc: 'Affiche le processus (nécessite root)' },
                                 { flag: '-a', desc: 'Toutes les connexions' }
                             ],
                             examples: [
                                 { code: 'ss -tulnp', desc: 'Ports TCP/UDP en écoute avec processus' },
                                 { code: 'ss -t state established', desc: 'Connexions TCP établies' },
-                                { code: 'netstat -rn', desc: 'Table de routage' },
                                 { code: 'ss -s', desc: 'Statistiques résumées' }
                             ],
                             tips: ['ss est plus rapide et moderne que netstat'],
                             warnings: ['-p nécessite sudo pour voir les processus des autres utilisateurs']
                         }
-                    },
-                    {
-                        cmd: 'nmap',
-                        desc: 'Scanner de ports',
-                        details: {
-                            explanation: 'Outil de découverte réseau et d\'audit de sécurité.',
-                            syntax: 'nmap [options] target',
-                            options: [
-                                { flag: '-sP', desc: 'Ping scan (découverte d\'hôtes)' },
-                                { flag: '-sT', desc: 'TCP connect scan' },
-                                { flag: '-sV', desc: 'Détection des versions de services' },
-                                { flag: '-p 1-1000', desc: 'Scanner les ports 1 à 1000' },
-                                { flag: '-A', desc: 'Scan agressif (OS, versions, scripts)' },
-                                { flag: '-O', desc: 'Détection du système d\'exploitation' }
-                            ],
-                            examples: [
-                                { code: 'nmap 192.168.1.0/24', desc: 'Scanner un sous-réseau' },
-                                { code: 'nmap -sV -p 22,80,443 server.com', desc: 'Ports spécifiques avec versions' },
-                                { code: 'nmap -sP 192.168.1.0/24', desc: 'Découvrir les hôtes actifs' }
-                            ],
-                            tips: ['Utilisez -v pour plus de verbosité'],
-                            warnings: ['Ne scannez JAMAIS des systèmes sans autorisation']
-                        }
                     }
                 ]
             },
             {
-                id: 'config',
-                title: 'Configuration IP',
+                id: 'configure-interfaces',
+                title: '🔧 Configurer les Interfaces',
                 icon: 'fa-sliders-h',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'ip addr / ifconfig',
-                        desc: 'Voir et configurer les interfaces',
+                        cmd: 'Afficher les interfaces réseau',
+                        desc: 'Voir la configuration IP actuelle',
                         details: {
-                            explanation: 'ip addr est la commande moderne pour gérer les adresses IP. ifconfig est déprécié mais encore présent.',
-                            syntax: 'ip addr [show|add|del] [dev interface]\nifconfig [interface] [options]',
+                            explanation: 'ip addr est la commande moderne pour afficher les adresses IP des interfaces.',
+                            syntax: 'ip addr [show] [dev interface]',
                             options: [
                                 { flag: 'ip addr show', desc: 'Affiche toutes les interfaces' },
-                                { flag: 'ip addr add', desc: 'Ajoute une adresse IP' },
-                                { flag: 'ip addr del', desc: 'Supprime une adresse IP' },
-                                { flag: 'ip link set up/down', desc: 'Active/désactive une interface' }
+                                { flag: 'ip -br addr', desc: 'Format bref (brief)' },
+                                { flag: 'ip link show', desc: 'État des interfaces (up/down)' }
                             ],
                             examples: [
                                 { code: 'ip addr show', desc: 'Voir toutes les interfaces' },
                                 { code: 'ip addr show eth0', desc: 'Voir une interface spécifique' },
-                                { code: 'sudo ip addr add 192.168.1.100/24 dev eth0', desc: 'Ajouter une IP' },
-                                { code: 'sudo ip link set eth0 up', desc: 'Activer l\'interface' }
+                                { code: 'ip -br addr', desc: 'Format condensé' }
                             ],
                             tips: ['ip a est un raccourci pour ip addr'],
-                            warnings: ['Les changements avec ip sont temporaires (perdus au reboot)']
-                        }
-                    },
-                    {
-                        cmd: 'ip route',
-                        desc: 'Gérer les routes',
-                        details: {
-                            explanation: 'Affiche et modifie la table de routage.',
-                            syntax: 'ip route [show|add|del|replace]',
-                            options: [
-                                { flag: 'ip route show', desc: 'Affiche la table de routage' },
-                                { flag: 'ip route add', desc: 'Ajoute une route' },
-                                { flag: 'ip route del', desc: 'Supprime une route' },
-                                { flag: 'ip route get', desc: 'Montre la route vers une destination' }
-                            ],
-                            examples: [
-                                { code: 'ip route show', desc: 'Voir la table de routage' },
-                                { code: 'ip route get 8.8.8.8', desc: 'Route vers Google DNS' },
-                                { code: 'sudo ip route add 10.0.0.0/8 via 192.168.1.1', desc: 'Ajouter une route statique' },
-                                { code: 'sudo ip route add default via 192.168.1.1', desc: 'Définir la passerelle par défaut' }
-                            ],
-                            tips: ['ip r est un raccourci pour ip route'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'nmcli',
-                        desc: 'NetworkManager CLI',
+                        cmd: 'Configurer une adresse IP',
+                        desc: 'Ajouter ou modifier une adresse IP',
+                        details: {
+                            explanation: 'Ajoute ou supprime des adresses IP sur une interface réseau.',
+                            syntax: 'ip addr add|del IP/MASK dev INTERFACE',
+                            options: [
+                                { flag: 'ip addr add', desc: 'Ajoute une adresse IP' },
+                                { flag: 'ip addr del', desc: 'Supprime une adresse IP' }
+                            ],
+                            examples: [
+                                { code: 'sudo ip addr add 192.168.1.100/24 dev eth0', desc: 'Ajouter une IP' },
+                                { code: 'sudo ip addr del 192.168.1.100/24 dev eth0', desc: 'Supprimer une IP' }
+                            ],
+                            tips: ['Vous pouvez avoir plusieurs IPs sur une même interface'],
+                            warnings: ['Les changements avec ip sont temporaires (perdus au reboot)']
+                        }
+                    },
+                    {
+                        cmd: 'Activer/désactiver une interface',
+                        desc: 'Mettre une interface up ou down',
+                        details: {
+                            explanation: 'Active ou désactive une interface réseau.',
+                            syntax: 'ip link set INTERFACE up|down',
+                            options: [
+                                { flag: 'up', desc: 'Active l\'interface' },
+                                { flag: 'down', desc: 'Désactive l\'interface' }
+                            ],
+                            examples: [
+                                { code: 'sudo ip link set eth0 up', desc: 'Activer l\'interface' },
+                                { code: 'sudo ip link set eth0 down', desc: 'Désactiver l\'interface' }
+                            ],
+                            tips: [],
+                            warnings: ['Désactiver l\'interface principale vous déconnectera']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser NetworkManager (nmcli)',
+                        desc: 'Gestion réseau permanente',
                         details: {
                             explanation: 'Interface ligne de commande pour NetworkManager (gestion réseau moderne).',
                             syntax: 'nmcli [general|device|connection] [options]',
@@ -223,14 +233,94 @@
                 ]
             },
             {
-                id: 'dns',
-                title: 'DNS',
+                id: 'manage-routing',
+                title: '🛤️ Gérer le Routage',
+                icon: 'fa-route',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Afficher la table de routage',
+                        desc: 'Voir les routes configurées',
+                        details: {
+                            explanation: 'Affiche la table de routage du système.',
+                            syntax: 'ip route [show]',
+                            options: [
+                                { flag: 'ip route show', desc: 'Affiche toutes les routes' },
+                                { flag: 'ip route get IP', desc: 'Montre la route vers une destination' }
+                            ],
+                            examples: [
+                                { code: 'ip route show', desc: 'Voir la table de routage' },
+                                { code: 'ip route get 8.8.8.8', desc: 'Route vers Google DNS' },
+                                { code: 'ip r', desc: 'Raccourci' }
+                            ],
+                            tips: ['ip r est un raccourci pour ip route'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Ajouter une route statique',
+                        desc: 'Définir un chemin vers un réseau',
+                        details: {
+                            explanation: 'Ajoute une route statique vers un réseau via une passerelle.',
+                            syntax: 'ip route add NETWORK via GATEWAY [dev INTERFACE]',
+                            options: [
+                                { flag: 'via GATEWAY', desc: 'Passerelle à utiliser' },
+                                { flag: 'dev INTERFACE', desc: 'Interface de sortie' }
+                            ],
+                            examples: [
+                                { code: 'sudo ip route add 10.0.0.0/8 via 192.168.1.1', desc: 'Route vers réseau 10.x' },
+                                { code: 'sudo ip route add 172.16.0.0/12 via 192.168.1.254 dev eth0', desc: 'Via interface spécifique' }
+                            ],
+                            tips: ['Utilisez Netplan ou NetworkManager pour des routes permanentes'],
+                            warnings: ['Les routes ajoutées avec ip sont temporaires']
+                        }
+                    },
+                    {
+                        cmd: 'Définir la passerelle par défaut',
+                        desc: 'Configurer le routeur de sortie',
+                        details: {
+                            explanation: 'Définit la passerelle par défaut pour le trafic Internet.',
+                            syntax: 'ip route add|del default via GATEWAY',
+                            options: [
+                                { flag: 'add default', desc: 'Ajoute la route par défaut' },
+                                { flag: 'del default', desc: 'Supprime la route par défaut' },
+                                { flag: 'replace default', desc: 'Remplace la route par défaut' }
+                            ],
+                            examples: [
+                                { code: 'sudo ip route add default via 192.168.1.1', desc: 'Définir la passerelle' },
+                                { code: 'sudo ip route replace default via 192.168.1.254', desc: 'Changer la passerelle' },
+                                { code: 'sudo ip route del default', desc: 'Supprimer la route par défaut' }
+                            ],
+                            tips: [],
+                            warnings: ['Supprimer la route par défaut coupe l\'accès Internet']
+                        }
+                    },
+                    {
+                        cmd: 'Supprimer une route',
+                        desc: 'Retirer une route de la table',
+                        details: {
+                            explanation: 'Supprime une route de la table de routage.',
+                            syntax: 'ip route del NETWORK',
+                            options: [],
+                            examples: [
+                                { code: 'sudo ip route del 10.0.0.0/8', desc: 'Supprimer une route' },
+                                { code: 'sudo ip route flush table main', desc: 'Vider la table de routage (danger!)' }
+                            ],
+                            tips: [],
+                            warnings: ['flush table main supprime TOUTES les routes!']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'resolve-dns',
+                title: '🌐 Résoudre les Noms DNS',
                 icon: 'fa-globe',
                 color: 'border-l-4 border-purple-500',
                 commands: [
                     {
-                        cmd: 'dig',
-                        desc: 'Requêtes DNS avancées',
+                        cmd: 'Effectuer des requêtes DNS (dig)',
+                        desc: 'Interroger les serveurs DNS',
                         details: {
                             explanation: 'Outil puissant pour interroger les serveurs DNS.',
                             syntax: 'dig [@server] name [type]',
@@ -254,8 +344,8 @@
                         }
                     },
                     {
-                        cmd: 'nslookup',
-                        desc: 'Résolution DNS simple',
+                        cmd: 'Résoudre un nom simplement (nslookup)',
+                        desc: 'Résolution DNS basique',
                         details: {
                             explanation: 'Outil classique de résolution DNS, plus simple que dig.',
                             syntax: 'nslookup name [server]',
@@ -274,8 +364,8 @@
                         }
                     },
                     {
-                        cmd: '/etc/resolv.conf',
-                        desc: 'Configuration DNS',
+                        cmd: 'Configurer les serveurs DNS',
+                        desc: 'Modifier /etc/resolv.conf',
                         details: {
                             explanation: 'Fichier de configuration des serveurs DNS utilisés par le système.',
                             syntax: 'nameserver IP\nsearch domain',
@@ -292,18 +382,41 @@
                             tips: ['Sur les systèmes avec NetworkManager, ce fichier est souvent généré automatiquement'],
                             warnings: ['Les modifications manuelles peuvent être écrasées par le système']
                         }
+                    },
+                    {
+                        cmd: 'Vérifier les enregistrements DNS',
+                        desc: 'Consulter MX, TXT, NS, etc.',
+                        details: {
+                            explanation: 'Vérifie différents types d\'enregistrements DNS.',
+                            syntax: 'dig domain TYPE',
+                            options: [
+                                { flag: 'MX', desc: 'Serveurs de messagerie' },
+                                { flag: 'TXT', desc: 'Enregistrements texte (SPF, DKIM)' },
+                                { flag: 'NS', desc: 'Serveurs de noms autoritaires' },
+                                { flag: 'SOA', desc: 'Start of Authority' },
+                                { flag: 'ANY', desc: 'Tous les enregistrements' }
+                            ],
+                            examples: [
+                                { code: 'dig gmail.com MX +short', desc: 'Serveurs mail' },
+                                { code: 'dig google.com TXT +short', desc: 'Enregistrements TXT' },
+                                { code: 'dig google.com NS +short', desc: 'Serveurs DNS' },
+                                { code: 'dig google.com SOA', desc: 'Information de zone' }
+                            ],
+                            tips: ['Les enregistrements TXT contiennent souvent SPF et DKIM'],
+                            warnings: []
+                        }
                     }
                 ]
             },
             {
-                id: 'transfer',
-                title: 'Transfert de Données',
+                id: 'transfer-data',
+                title: '📥 Transférer des Données',
                 icon: 'fa-exchange-alt',
-                color: 'border-l-4 border-orange-500',
+                color: 'border-l-4 border-cyan-500',
                 commands: [
                     {
-                        cmd: 'curl',
-                        desc: 'Transfert de données URL',
+                        cmd: 'Appeler une API REST (curl)',
+                        desc: 'Requêtes HTTP depuis le terminal',
                         details: {
                             explanation: 'Outil polyvalent pour transférer des données via URL (HTTP, FTP, etc.).',
                             syntax: 'curl [options] URL',
@@ -327,8 +440,8 @@
                         }
                     },
                     {
-                        cmd: 'wget',
-                        desc: 'Téléchargement de fichiers',
+                        cmd: 'Télécharger des fichiers (wget)',
+                        desc: 'Téléchargement simple et robuste',
                         details: {
                             explanation: 'Téléchargeur non-interactif pour HTTP/HTTPS/FTP.',
                             syntax: 'wget [options] URL',
@@ -342,31 +455,49 @@
                             examples: [
                                 { code: 'wget https://example.com/file.zip', desc: 'Télécharger un fichier' },
                                 { code: 'wget -c https://example.com/large.iso', desc: 'Reprendre un téléchargement' },
-                                { code: 'wget -O custom_name.zip https://example.com/file.zip', desc: 'Nom personnalisé' },
-                                { code: 'wget -r -l 2 https://example.com/', desc: 'Télécharger récursivement (2 niveaux)' }
+                                { code: 'wget -O custom_name.zip https://example.com/file.zip', desc: 'Nom personnalisé' }
                             ],
                             tips: ['wget -c est très utile pour les gros fichiers'],
                             warnings: ['-r peut télécharger beaucoup de données - utilisez -l pour limiter']
                         }
                     },
                     {
-                        cmd: 'scp / rsync',
-                        desc: 'Copie sécurisée entre machines',
+                        cmd: 'Copier des fichiers entre machines (scp)',
+                        desc: 'Transfert sécurisé via SSH',
                         details: {
-                            explanation: 'scp copie des fichiers via SSH. rsync est plus efficace pour la synchronisation.',
-                            syntax: 'scp source user@host:dest\nrsync [options] source dest',
+                            explanation: 'Copie des fichiers de façon sécurisée via SSH.',
+                            syntax: 'scp [options] source destination',
                             options: [
-                                { flag: 'scp -r', desc: 'Copie récursive (dossiers)' },
-                                { flag: 'rsync -av', desc: 'Archive + verbose' },
-                                { flag: 'rsync -z', desc: 'Compression pendant le transfert' },
-                                { flag: 'rsync --delete', desc: 'Supprime les fichiers absents de la source' },
-                                { flag: 'rsync -n', desc: 'Dry-run (simulation)' }
+                                { flag: '-r', desc: 'Copie récursive (dossiers)' },
+                                { flag: '-P port', desc: 'Port SSH personnalisé' },
+                                { flag: '-i key', desc: 'Clé SSH à utiliser' }
                             ],
                             examples: [
-                                { code: 'scp file.txt user@server:/home/user/', desc: 'Copier un fichier' },
-                                { code: 'scp -r folder/ user@server:/backup/', desc: 'Copier un dossier' },
+                                { code: 'scp file.txt user@server:/home/user/', desc: 'Copier un fichier vers serveur' },
+                                { code: 'scp user@server:/path/file.txt .', desc: 'Copier depuis serveur' },
+                                { code: 'scp -r folder/ user@server:/backup/', desc: 'Copier un dossier' }
+                            ],
+                            tips: ['Utilisez rsync pour des transferts plus efficaces'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Synchroniser des répertoires (rsync)',
+                        desc: 'Synchronisation incrémentale',
+                        details: {
+                            explanation: 'rsync ne transfère que les différences, idéal pour les sauvegardes.',
+                            syntax: 'rsync [options] source destination',
+                            options: [
+                                { flag: '-a', desc: 'Mode archive (préserve permissions)' },
+                                { flag: '-v', desc: 'Verbose' },
+                                { flag: '-z', desc: 'Compression pendant le transfert' },
+                                { flag: '--delete', desc: 'Supprime les fichiers absents de la source' },
+                                { flag: '-n', desc: 'Dry-run (simulation)' }
+                            ],
+                            examples: [
                                 { code: 'rsync -avz /data/ user@server:/backup/', desc: 'Sync avec compression' },
-                                { code: 'rsync -avz --delete /data/ /backup/', desc: 'Miroir exact' }
+                                { code: 'rsync -avz --delete /data/ /backup/', desc: 'Miroir exact' },
+                                { code: 'rsync -avzn /data/ /backup/', desc: 'Simulation (dry-run)' }
                             ],
                             tips: ['rsync ne transfère que les différences = plus rapide'],
                             warnings: ['--delete supprime les fichiers de la destination!']
@@ -375,14 +506,14 @@
                 ]
             },
             {
-                id: 'firewall',
-                title: 'Firewall (iptables/nft)',
+                id: 'configure-firewall',
+                title: '🛡️ Configurer le Pare-feu',
                 icon: 'fa-shield-alt',
                 color: 'border-l-4 border-red-500',
                 commands: [
                     {
-                        cmd: 'ufw',
-                        desc: 'Firewall simplifié Ubuntu',
+                        cmd: 'Configurer le firewall simplifié (ufw)',
+                        desc: 'Gestion facile du pare-feu Ubuntu',
                         details: {
                             explanation: 'Interface simplifiée pour iptables, facile à utiliser.',
                             syntax: 'ufw [enable|disable|status|allow|deny]',
@@ -406,8 +537,8 @@
                         }
                     },
                     {
-                        cmd: 'iptables',
-                        desc: 'Firewall classique Linux',
+                        cmd: 'Gérer les règles iptables',
+                        desc: 'Firewall classique puissant',
                         details: {
                             explanation: 'Outil de filtrage de paquets puissant mais complexe.',
                             syntax: 'iptables -[A|I|D] chain -p protocol [options] -j target',
@@ -430,8 +561,8 @@
                         }
                     },
                     {
-                        cmd: 'firewalld',
-                        desc: 'Firewall dynamique (RHEL/Fedora)',
+                        cmd: 'Utiliser firewalld (RHEL/Fedora)',
+                        desc: 'Gestionnaire de zones dynamiques',
                         details: {
                             explanation: 'Gestionnaire de firewall basé sur les zones, utilisé sur RHEL/CentOS/Fedora.',
                             syntax: 'firewall-cmd [options]',
@@ -452,18 +583,40 @@
                             tips: ['N\'oubliez pas --permanent et --reload pour persister les changements'],
                             warnings: []
                         }
+                    },
+                    {
+                        cmd: 'Autoriser/bloquer des services',
+                        desc: 'Règles pour services courants',
+                        details: {
+                            explanation: 'Configurer le pare-feu pour les services web, mail, etc.',
+                            syntax: 'ufw allow SERVICE',
+                            options: [
+                                { flag: 'ssh', desc: 'Port 22' },
+                                { flag: 'http', desc: 'Port 80' },
+                                { flag: 'https', desc: 'Port 443' },
+                                { flag: 'ftp', desc: 'Port 21' }
+                            ],
+                            examples: [
+                                { code: 'sudo ufw allow ssh', desc: 'Autoriser SSH' },
+                                { code: 'sudo ufw allow http\nsudo ufw allow https', desc: 'Autoriser web' },
+                                { code: 'sudo ufw deny 3306', desc: 'Bloquer MySQL' },
+                                { code: 'sudo ufw delete allow http', desc: 'Supprimer règle HTTP' }
+                            ],
+                            tips: ['Utilisez les noms de services plutôt que les numéros de port'],
+                            warnings: []
+                        }
                     }
                 ]
             },
             {
-                id: 'monitoring',
-                title: 'Monitoring Réseau',
+                id: 'monitor-traffic',
+                title: '📊 Surveiller le Trafic',
                 icon: 'fa-chart-line',
-                color: 'border-l-4 border-cyan-500',
+                color: 'border-l-4 border-amber-500',
                 commands: [
                     {
-                        cmd: 'tcpdump',
-                        desc: 'Capture de paquets',
+                        cmd: 'Capturer des paquets (tcpdump)',
+                        desc: 'Analyse de trafic bas niveau',
                         details: {
                             explanation: 'Analyseur de paquets en ligne de commande pour le debugging réseau.',
                             syntax: 'tcpdump [options] [expression]',
@@ -487,28 +640,46 @@
                         }
                     },
                     {
-                        cmd: 'nethogs / iftop',
-                        desc: 'Bande passante par processus',
+                        cmd: 'Analyser la bande passante par processus',
+                        desc: 'Voir quel processus consomme le réseau',
                         details: {
-                            explanation: 'Outils de monitoring en temps réel de la bande passante.',
-                            syntax: 'nethogs [interface]\niftop -i interface',
+                            explanation: 'nethogs montre la consommation réseau par processus.',
+                            syntax: 'nethogs [interface]',
                             options: [
                                 { flag: 'nethogs', desc: 'Bande passante par processus' },
-                                { flag: 'iftop', desc: 'Bande passante par connexion' },
-                                { flag: '-i interface', desc: 'Interface à surveiller' }
+                                { flag: '-d seconds', desc: 'Intervalle de rafraîchissement' }
                             ],
                             examples: [
                                 { code: 'sudo nethogs eth0', desc: 'Trafic par processus sur eth0' },
-                                { code: 'sudo iftop -i eth0', desc: 'Trafic par connexion' },
-                                { code: 'sudo iftop -n', desc: 'Sans résolution DNS (plus rapide)' }
+                                { code: 'sudo nethogs', desc: 'Sur toutes les interfaces' }
                             ],
                             tips: ['nethogs montre quel processus consomme la bande passante'],
-                            warnings: ['Ces outils peuvent nécessiter une installation (apt install nethogs iftop)']
+                            warnings: ['Nécessite installation: apt install nethogs']
                         }
                     },
                     {
-                        cmd: 'vnstat',
-                        desc: 'Statistiques réseau',
+                        cmd: 'Surveiller les connexions en temps réel',
+                        desc: 'Voir le trafic par connexion',
+                        details: {
+                            explanation: 'iftop affiche la bande passante par connexion en temps réel.',
+                            syntax: 'iftop -i interface',
+                            options: [
+                                { flag: '-i interface', desc: 'Interface à surveiller' },
+                                { flag: '-n', desc: 'Pas de résolution DNS' },
+                                { flag: '-P', desc: 'Afficher les ports' }
+                            ],
+                            examples: [
+                                { code: 'sudo iftop -i eth0', desc: 'Trafic par connexion' },
+                                { code: 'sudo iftop -n', desc: 'Sans résolution DNS (plus rapide)' },
+                                { code: 'sudo iftop -nP', desc: 'Avec ports et sans DNS' }
+                            ],
+                            tips: ['Appuyez sur h pour l\'aide interactive'],
+                            warnings: ['Nécessite installation: apt install iftop']
+                        }
+                    },
+                    {
+                        cmd: 'Suivre les statistiques réseau (vnstat)',
+                        desc: 'Historique de consommation',
                         details: {
                             explanation: 'Moniteur de trafic réseau avec historique (jour, mois, année).',
                             syntax: 'vnstat [options]',
@@ -531,14 +702,14 @@
                 ]
             },
             {
-                id: 'vpn-tunneling',
-                title: 'VPN & Tunneling',
+                id: 'create-tunnels',
+                title: '🔒 Créer des Tunnels Sécurisés',
                 icon: 'fa-user-secret',
                 color: 'border-l-4 border-indigo-500',
                 commands: [
                     {
-                        cmd: 'SSH Tunneling',
-                        desc: 'Tunnels SSH (port forwarding)',
+                        cmd: 'Créer un tunnel SSH (port forwarding)',
+                        desc: 'Accéder à des services distants',
                         details: {
                             explanation: 'Utilise SSH pour créer des tunnels sécurisés et du port forwarding.',
                             syntax: 'ssh -L/-R/-D [bind_address:]port:host:hostport user@server',
@@ -552,7 +723,6 @@
                             examples: [
                                 { code: 'ssh -L 8080:localhost:80 user@server', desc: 'Accéder au port 80 distant via localhost:8080' },
                                 { code: 'ssh -L 5432:db.internal:5432 user@bastion', desc: 'Tunnel vers une DB via bastion' },
-                                { code: 'ssh -R 8080:localhost:3000 user@server', desc: 'Exposer le port local 3000 sur le serveur' },
                                 { code: 'ssh -D 1080 -N -f user@server', desc: 'Proxy SOCKS en arrière-plan' }
                             ],
                             tips: ['Le proxy SOCKS (-D) permet de router tout le trafic via le serveur'],
@@ -560,7 +730,7 @@
                         }
                     },
                     {
-                        cmd: 'WireGuard',
+                        cmd: 'Configurer un VPN WireGuard',
                         desc: 'VPN moderne et performant',
                         details: {
                             explanation: 'VPN simple, rapide et sécurisé basé sur la cryptographie moderne.',
@@ -572,9 +742,8 @@
                                 { flag: 'wg-quick up/down', desc: 'Activer/désactiver l\'interface' }
                             ],
                             examples: [
-                                { code: '# Installation\nsudo apt install wireguard\n\n# Générer les clés (serveur)\nwg genkey | tee privatekey | wg pubkey > publickey', desc: 'Installation et clés' },
-                                { code: '# /etc/wireguard/wg0.conf (serveur)\n[Interface]\nAddress = 10.0.0.1/24\nListenPort = 51820\nPrivateKey = <server_private_key>\nPostUp = iptables -A FORWARD -i wg0 -j ACCEPT\nPostDown = iptables -D FORWARD -i wg0 -j ACCEPT\n\n[Peer]\nPublicKey = <client_public_key>\nAllowedIPs = 10.0.0.2/32', desc: 'Config serveur' },
-                                { code: '# /etc/wireguard/wg0.conf (client)\n[Interface]\nAddress = 10.0.0.2/24\nPrivateKey = <client_private_key>\nDNS = 1.1.1.1\n\n[Peer]\nPublicKey = <server_public_key>\nEndpoint = server.com:51820\nAllowedIPs = 0.0.0.0/0\nPersistentKeepalive = 25', desc: 'Config client' },
+                                { code: 'sudo apt install wireguard\nwg genkey | tee privatekey | wg pubkey > publickey', desc: 'Installation et génération des clés' },
+                                { code: '# /etc/wireguard/wg0.conf (serveur)\n[Interface]\nAddress = 10.0.0.1/24\nListenPort = 51820\nPrivateKey = <server_private_key>\n\n[Peer]\nPublicKey = <client_public_key>\nAllowedIPs = 10.0.0.2/32', desc: 'Config serveur' },
                                 { code: 'sudo wg-quick up wg0\nsudo systemctl enable wg-quick@wg0', desc: 'Activer le VPN' }
                             ],
                             tips: ['WireGuard est plus simple et rapide qu\'OpenVPN'],
@@ -582,7 +751,7 @@
                         }
                     },
                     {
-                        cmd: 'OpenVPN',
+                        cmd: 'Déployer OpenVPN',
                         desc: 'VPN traditionnel et flexible',
                         details: {
                             explanation: 'Solution VPN mature supportant de nombreuses configurations.',
@@ -593,55 +762,51 @@
                                 { flag: '--auth-user-pass', desc: 'Authentification user/pass' }
                             ],
                             examples: [
-                                { code: '# Installation serveur\nsudo apt install openvpn easy-rsa\nmake-cadir ~/openvpn-ca\ncd ~/openvpn-ca\n./easyrsa init-pki\n./easyrsa build-ca', desc: 'Setup CA' },
-                                { code: '# Générer certificats\n./easyrsa gen-req server nopass\n./easyrsa sign-req server server\n./easyrsa gen-dh\nopenvpn --genkey secret ta.key', desc: 'Certificats serveur' },
-                                { code: '# Client\nsudo openvpn --config client.ovpn', desc: 'Connexion client' },
-                                { code: '# Vérifier la connexion\nip addr show tun0\ncurl ifconfig.me', desc: 'Vérifier le tunnel' }
+                                { code: 'sudo apt install openvpn easy-rsa\nmake-cadir ~/openvpn-ca', desc: 'Installation' },
+                                { code: 'sudo openvpn --config client.ovpn', desc: 'Connexion client' },
+                                { code: 'ip addr show tun0\ncurl ifconfig.me', desc: 'Vérifier le tunnel' }
                             ],
                             tips: ['Utilisez easy-rsa pour gérer les certificats'],
                             warnings: ['La configuration OpenVPN est plus complexe que WireGuard']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser un proxy SOCKS',
+                        desc: 'Router le trafic via SSH',
+                        details: {
+                            explanation: 'Crée un proxy SOCKS5 pour router le trafic réseau via un serveur SSH.',
+                            syntax: 'ssh -D port user@server',
+                            options: [
+                                { flag: '-D port', desc: 'Port local du proxy SOCKS' },
+                                { flag: '-N', desc: 'Pas de shell distant' },
+                                { flag: '-f', desc: 'Passer en arrière-plan' },
+                                { flag: '-C', desc: 'Compression' }
+                            ],
+                            examples: [
+                                { code: 'ssh -D 1080 -N -f user@server', desc: 'Proxy SOCKS sur port 1080' },
+                                { code: 'curl --socks5-hostname localhost:1080 https://example.com', desc: 'Utiliser avec curl' },
+                                { code: 'export http_proxy=socks5://127.0.0.1:1080', desc: 'Variable d\'environnement' }
+                            ],
+                            tips: ['Configurez Firefox ou Chrome pour utiliser le proxy SOCKS'],
+                            warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'troubleshooting',
-                title: 'Dépannage Avancé',
+                id: 'troubleshoot-advanced',
+                title: '🐛 Dépanner les Problèmes Avancés',
                 icon: 'fa-bug',
-                color: 'border-l-4 border-amber-500',
+                color: 'border-l-4 border-pink-500',
                 commands: [
                     {
-                        cmd: 'mtr',
-                        desc: 'Traceroute en temps réel',
-                        details: {
-                            explanation: 'Combine ping et traceroute pour un diagnostic réseau continu.',
-                            syntax: 'mtr [options] hostname',
-                            options: [
-                                { flag: '-r', desc: 'Mode rapport (non interactif)' },
-                                { flag: '-c N', desc: 'Nombre de pings' },
-                                { flag: '-n', desc: 'Pas de résolution DNS' },
-                                { flag: '-T', desc: 'Utiliser TCP au lieu d\'ICMP' },
-                                { flag: '-P port', desc: 'Port TCP (avec -T)' }
-                            ],
-                            examples: [
-                                { code: 'mtr google.com', desc: 'Diagnostic interactif' },
-                                { code: 'mtr -r -c 100 google.com', desc: 'Rapport après 100 pings' },
-                                { code: 'mtr -T -P 443 example.com', desc: 'Via TCP port 443' },
-                                { code: 'mtr -n -r -c 50 8.8.8.8 > mtr_report.txt', desc: 'Rapport sans DNS' }
-                            ],
-                            tips: ['mtr est idéal pour détecter la perte de paquets sur le chemin'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'nc (netcat)',
-                        desc: 'Couteau suisse réseau',
+                        cmd: 'Tester un port ouvert (netcat)',
+                        desc: 'Vérifier si un service écoute',
                         details: {
                             explanation: 'Outil polyvalent pour les connexions TCP/UDP, debugging et transfert.',
                             syntax: 'nc [options] host port',
                             options: [
                                 { flag: '-l', desc: 'Mode écoute (serveur)' },
-                                { flag: '-p port', desc: 'Port source' },
                                 { flag: '-v', desc: 'Mode verbeux' },
                                 { flag: '-z', desc: 'Scan de port (sans données)' },
                                 { flag: '-u', desc: 'Mode UDP' },
@@ -650,28 +815,23 @@
                             examples: [
                                 { code: 'nc -vz host.com 80', desc: 'Tester si port 80 ouvert' },
                                 { code: 'nc -vz host.com 20-100', desc: 'Scanner les ports 20-100' },
-                                { code: 'nc -l -p 8080', desc: 'Écouter sur le port 8080' },
-                                { code: 'echo "test" | nc host.com 80', desc: 'Envoyer des données' },
-                                { code: 'nc -l -p 9000 > fichier.txt  # serveur\nnc host 9000 < fichier.txt    # client', desc: 'Transfert de fichier' }
+                                { code: 'nc -l -p 8080', desc: 'Écouter sur le port 8080' }
                             ],
                             tips: ['nc -vz est parfait pour tester rapidement si un port est ouvert'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'telnet / openssl',
-                        desc: 'Test de connexion manuel',
+                        cmd: 'Vérifier les certificats SSL',
+                        desc: 'Diagnostiquer les problèmes TLS',
                         details: {
-                            explanation: 'Tester manuellement des connexions HTTP, SMTP, et SSL/TLS.',
-                            syntax: 'telnet host port\nopenssl s_client -connect host:port',
+                            explanation: 'Tester manuellement des connexions SSL/TLS et vérifier les certificats.',
+                            syntax: 'openssl s_client -connect host:port',
                             options: [
-                                { flag: 'telnet', desc: 'Connexion TCP simple' },
-                                { flag: 'openssl s_client', desc: 'Connexion SSL/TLS' },
                                 { flag: '-servername', desc: 'SNI (Server Name Indication)' },
                                 { flag: '-showcerts', desc: 'Afficher la chaîne de certificats' }
                             ],
                             examples: [
-                                { code: 'telnet smtp.gmail.com 25', desc: 'Test SMTP' },
                                 { code: 'openssl s_client -connect google.com:443 -servername google.com', desc: 'Test HTTPS avec SNI' },
                                 { code: 'echo | openssl s_client -connect host:443 2>/dev/null | openssl x509 -noout -dates', desc: 'Vérifier expiration certificat' },
                                 { code: 'openssl s_client -connect host:443 -showcerts', desc: 'Voir la chaîne complète' }
@@ -681,101 +841,50 @@
                         }
                     },
                     {
-                        cmd: 'arp / ip neigh',
-                        desc: 'Table ARP et voisins',
+                        cmd: 'Diagnostiquer les problèmes ARP',
+                        desc: 'Table ARP et voisins réseau',
                         details: {
                             explanation: 'Gère la table ARP qui mappe les adresses IP aux adresses MAC.',
-                            syntax: 'arp -a\nip neigh show',
+                            syntax: 'ip neigh show',
                             options: [
-                                { flag: 'arp -a', desc: 'Afficher la table ARP' },
-                                { flag: 'arp -d IP', desc: 'Supprimer une entrée' },
+                                { flag: 'arp -a', desc: 'Afficher la table ARP (ancien)' },
                                 { flag: 'ip neigh show', desc: 'Afficher les voisins (moderne)' },
                                 { flag: 'ip neigh flush all', desc: 'Vider le cache ARP' }
                             ],
                             examples: [
-                                { code: 'arp -a', desc: 'Voir la table ARP' },
-                                { code: 'ip neigh show', desc: 'Équivalent moderne' },
+                                { code: 'ip neigh show', desc: 'Voir la table ARP' },
                                 { code: 'sudo ip neigh flush all', desc: 'Vider le cache' },
                                 { code: 'arping -I eth0 192.168.1.1', desc: 'Ping ARP' }
                             ],
                             tips: ['Utile pour diagnostiquer les conflits d\'IP ou problèmes de commutation'],
                             warnings: []
                         }
-                    }
-                ]
-            },
-            {
-                id: 'advanced-config',
-                title: 'Configuration Avancée',
-                icon: 'fa-cogs',
-                color: 'border-l-4 border-violet-500',
-                commands: [
+                    },
                     {
-                        cmd: 'VLAN Tagging',
-                        desc: 'Configuration VLAN sous Linux',
+                        cmd: 'Configurer VLAN et bonding',
+                        desc: 'Configuration réseau avancée',
                         details: {
-                            explanation: 'Créer et gérer des interfaces VLAN (802.1Q) sous Linux.',
+                            explanation: 'Créer des VLANs et agréger des liens réseau.',
                             syntax: 'ip link add link eth0 name eth0.100 type vlan id 100',
                             options: [
                                 { flag: 'vlan id N', desc: 'Identifiant VLAN (1-4094)' },
-                                { flag: 'link parent', desc: 'Interface parente' }
+                                { flag: 'mode 802.3ad', desc: 'LACP bonding' },
+                                { flag: 'mode active-backup', desc: 'Failover bonding' }
                             ],
                             examples: [
-                                { code: '# Créer une interface VLAN\nsudo ip link add link eth0 name eth0.100 type vlan id 100\nsudo ip addr add 192.168.100.10/24 dev eth0.100\nsudo ip link set eth0.100 up', desc: 'VLAN 100 sur eth0' },
-                                { code: '# Netplan (permanent)\nnetwork:\n  ethernets:\n    eth0: {}\n  vlans:\n    eth0.100:\n      id: 100\n      link: eth0\n      addresses: [192.168.100.10/24]', desc: 'Config Netplan' },
-                                { code: 'cat /proc/net/vlan/config', desc: 'Voir les VLANs' }
-                            ],
-                            tips: ['Le switch doit être configuré en mode trunk'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Network Bonding',
-                        desc: 'Agrégation de liens',
-                        details: {
-                            explanation: 'Combine plusieurs interfaces réseau pour la redondance ou la performance.',
-                            syntax: 'modprobe bonding mode=N',
-                            options: [
-                                { flag: 'mode=0 (balance-rr)', desc: 'Round-robin' },
-                                { flag: 'mode=1 (active-backup)', desc: 'Failover actif/passif' },
-                                { flag: 'mode=4 (802.3ad)', desc: 'LACP (agrégation dynamique)' },
-                                { flag: 'mode=6 (balance-alb)', desc: 'Équilibrage adaptatif' }
-                            ],
-                            examples: [
-                                { code: '# Netplan bonding\nnetwork:\n  bonds:\n    bond0:\n      interfaces: [eth0, eth1]\n      parameters:\n        mode: 802.3ad\n        lacp-rate: fast\n        mii-monitor-interval: 100\n      addresses: [192.168.1.10/24]', desc: 'LACP bonding' },
+                                { code: 'sudo ip link add link eth0 name eth0.100 type vlan id 100\nsudo ip addr add 192.168.100.10/24 dev eth0.100\nsudo ip link set eth0.100 up', desc: 'Créer VLAN 100' },
+                                { code: 'cat /proc/net/vlan/config', desc: 'Voir les VLANs' },
                                 { code: 'cat /proc/net/bonding/bond0', desc: 'État du bonding' }
                             ],
-                            tips: ['LACP (mode 4) nécessite un switch compatible'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Traffic Shaping',
-                        desc: 'QoS et limitation de bande passante',
-                        details: {
-                            explanation: 'Contrôler et prioriser le trafic réseau avec tc (traffic control).',
-                            syntax: 'tc qdisc add dev eth0 root ...',
-                            options: [
-                                { flag: 'qdisc', desc: 'Queuing discipline' },
-                                { flag: 'class', desc: 'Classes de trafic' },
-                                { flag: 'filter', desc: 'Règles de classification' },
-                                { flag: 'htb', desc: 'Hierarchical Token Bucket' }
-                            ],
-                            examples: [
-                                { code: '# Limiter la bande passante à 1Mbit/s\nsudo tc qdisc add dev eth0 root tbf rate 1mbit burst 32kbit latency 400ms', desc: 'Limite simple' },
-                                { code: '# QoS avec HTB\nsudo tc qdisc add dev eth0 root handle 1: htb default 30\nsudo tc class add dev eth0 parent 1: classid 1:1 htb rate 100mbit\nsudo tc class add dev eth0 parent 1:1 classid 1:10 htb rate 50mbit ceil 80mbit\nsudo tc class add dev eth0 parent 1:1 classid 1:30 htb rate 30mbit ceil 100mbit', desc: 'Classes HTB' },
-                                { code: '# Simuler latence et perte (test)\nsudo tc qdisc add dev eth0 root netem delay 100ms 20ms loss 1%', desc: 'Simulation réseau dégradé' },
-                                { code: 'tc -s qdisc show dev eth0', desc: 'Voir la config' }
-                            ],
-                            tips: ['Utilisez netem pour simuler des conditions réseau lors des tests'],
-                            warnings: ['tc peut facilement bloquer le réseau si mal configuré']
+                            tips: ['Le switch doit être configuré en mode trunk pour les VLANs'],
+                            warnings: ['LACP nécessite un switch compatible']
                         }
                     }
                 ]
             },
             {
                 id: 'project-network',
-                title: '🔧 Projet: Diagnostic Réseau Complet',
+                title: '🎯 Projet: Diagnostic Réseau Complet',
                 icon: 'fa-wrench',
                 color: 'border-l-4 border-emerald-500',
                 commands: [
@@ -787,7 +896,7 @@
                             syntax: 'ping / ip addr / ip route',
                             options: [],
                             examples: [
-                                { code: '#!/bin/bash\n# network-diag.sh - Diagnostic réseau complet\nset -e\n\necho "=== DIAGNOSTIC RÉSEAU ===" \necho "Date: $(date)"\necho "Host: $(hostname)"\necho\n\n# 1. Configuration interfaces\necho "--- Interfaces réseau ---"\nip -br addr show\necho\n\n# 2. Table de routage\necho "--- Table de routage ---"\nip route show\necho\n\n# 3. DNS configuré\necho "--- Configuration DNS ---"\ncat /etc/resolv.conf | grep -v "^#"\necho', desc: 'Diagnostic de base' }
+                                { code: '#!/bin/bash\n# network-diag.sh - Diagnostic réseau complet\necho "=== DIAGNOSTIC RÉSEAU ==="\necho "Date: $(date)"\necho\n\n# 1. Configuration interfaces\necho "--- Interfaces réseau ---"\nip -br addr show\necho\n\n# 2. Table de routage\necho "--- Table de routage ---"\nip route show\necho\n\n# 3. DNS configuré\necho "--- Configuration DNS ---"\ncat /etc/resolv.conf | grep -v "^#"', desc: 'Script diagnostic de base' }
                             ],
                             tips: ['Commencez toujours par vérifier la configuration locale'],
                             warnings: []
@@ -795,13 +904,13 @@
                     },
                     {
                         cmd: 'Étape 2: Tests de connectivité',
-                        desc: 'Ping, DNS, passerelle',
+                        desc: 'Ping passerelle, DNS, Internet',
                         details: {
                             explanation: 'Tester la connectivité à différents niveaux.',
                             syntax: 'ping gateway / ping DNS / ping internet',
                             options: [],
                             examples: [
-                                { code: '# 4. Test passerelle\nGATEWAY=$(ip route | grep default | awk \'{print $3}\')\necho "--- Test passerelle ($GATEWAY) ---"\nping -c 3 -W 2 $GATEWAY && echo "OK" || echo "ÉCHEC"\necho\n\n# 5. Test DNS\necho "--- Test résolution DNS ---"\nfor domain in google.com cloudflare.com; do\n  if dig +short $domain >/dev/null 2>&1; then\n    echo "$domain: OK ($(dig +short $domain | head -1))"\n  else\n    echo "$domain: ÉCHEC"\n  fi\ndone\necho\n\n# 6. Test connectivité Internet\necho "--- Test Internet ---"\nfor ip in 8.8.8.8 1.1.1.1; do\n  ping -c 2 -W 2 $ip >/dev/null 2>&1 && echo "$ip: OK" || echo "$ip: ÉCHEC"\ndone', desc: 'Tests de connectivité' }
+                                { code: '# Test passerelle\nGATEWAY=$(ip route | grep default | awk \'{print $3}\')\nping -c 3 -W 2 $GATEWAY && echo "Passerelle: OK" || echo "Passerelle: ÉCHEC"\n\n# Test DNS\nfor ip in 8.8.8.8 1.1.1.1; do\n  ping -c 2 -W 2 $ip && echo "$ip: OK" || echo "$ip: ÉCHEC"\ndone\n\n# Test résolution DNS\ndig +short google.com && echo "DNS: OK" || echo "DNS: ÉCHEC"', desc: 'Tests de connectivité' }
                             ],
                             tips: ['Testez par étapes: interface → passerelle → DNS → Internet'],
                             warnings: []
@@ -815,7 +924,7 @@
                             syntax: 'mtr / traceroute',
                             options: [],
                             examples: [
-                                { code: '# 7. Traceroute vers un service\nTARGET="${1:-google.com}"\necho "--- Traceroute vers $TARGET ---"\nif command -v mtr >/dev/null; then\n  mtr -r -c 10 -n $TARGET\nelse\n  traceroute -n $TARGET\nfi\necho\n\n# 8. Analyse de latence\necho "--- Statistiques de latence ---"\nfor host in $GATEWAY 8.8.8.8 $TARGET; do\n  RESULT=$(ping -c 10 -q $host 2>/dev/null | tail -1)\n  echo "$host: $RESULT"\ndone', desc: 'Analyse du chemin' }
+                                { code: '# Traceroute avec rapport\nif command -v mtr >/dev/null; then\n  mtr -r -c 10 -n google.com\nelse\n  traceroute -n google.com\nfi', desc: 'Analyse du chemin' }
                             ],
                             tips: ['Une perte de paquets à un saut indique souvent le problème'],
                             warnings: []
@@ -829,7 +938,7 @@
                             syntax: 'nc / ss / nmap',
                             options: [],
                             examples: [
-                                { code: '# 9. Ports locaux en écoute\necho "--- Ports en écoute ---"\nss -tulnp | grep LISTEN\necho\n\n# 10. Test ports distants\nTEST_HOSTS=("google.com:80" "google.com:443" "smtp.gmail.com:587")\necho "--- Test ports distants ---"\nfor entry in "${TEST_HOSTS[@]}"; do\n  host="${entry%:*}"\n  port="${entry#*:}"\n  if nc -zw2 $host $port 2>/dev/null; then\n    echo "$host:$port: OUVERT"\n  else\n    echo "$host:$port: FERMÉ/FILTRÉ"\n  fi\ndone', desc: 'Vérification des ports' }
+                                { code: '# Ports locaux en écoute\necho "--- Ports en écoute ---"\nss -tulnp | grep LISTEN\n\n# Test ports distants\nfor port in 80 443 22; do\n  nc -zw2 google.com $port && echo "Port $port: OUVERT" || echo "Port $port: FERMÉ"\ndone', desc: 'Vérification des ports' }
                             ],
                             tips: ['Un port filtré peut indiquer un firewall'],
                             warnings: []
@@ -843,7 +952,7 @@
                             syntax: 'openssl s_client',
                             options: [],
                             examples: [
-                                { code: '# 11. Vérification SSL\nSSL_HOST="${2:-google.com}"\necho "--- Certificat SSL $SSL_HOST ---"\necho | openssl s_client -connect $SSL_HOST:443 -servername $SSL_HOST 2>/dev/null | openssl x509 -noout -subject -dates -issuer\necho\n\n# 12. Chaîne de certification\necho "--- Chaîne de certificats ---"\necho | openssl s_client -connect $SSL_HOST:443 -showcerts 2>/dev/null | grep -E "^(s:|i:)"', desc: 'Analyse SSL' }
+                                { code: '# Vérification certificat\nHOST="google.com"\necho | openssl s_client -connect $HOST:443 -servername $HOST 2>/dev/null | openssl x509 -noout -subject -dates -issuer', desc: 'Analyse SSL' }
                             ],
                             tips: ['Vérifiez toujours la date d\'expiration des certificats'],
                             warnings: []
@@ -857,7 +966,7 @@
                             syntax: 'tcpdump -i interface -w capture.pcap',
                             options: [],
                             examples: [
-                                { code: '# 13. Capture ciblée\nCAPTURE_FILE="/tmp/capture_$(date +%Y%m%d_%H%M%S).pcap"\necho "--- Capture trafic HTTP(S) pendant 30s ---"\necho "Fichier: $CAPTURE_FILE"\nsudo timeout 30 tcpdump -i any -w $CAPTURE_FILE port 80 or port 443 2>/dev/null &\nPID=$!\necho "Capture en cours (PID: $PID)..."\nwait $PID 2>/dev/null\necho "Capture terminée: $(ls -lh $CAPTURE_FILE | awk \'{print $5}\')"\necho\n\n# 14. Analyse rapide\necho "--- Top IPs contactées ---"\nsudo tcpdump -r $CAPTURE_FILE -n 2>/dev/null | awk \'{print $3}\' | cut -d. -f1-4 | sort | uniq -c | sort -rn | head -5', desc: 'Capture et analyse' }
+                                { code: '# Capture 30 secondes de trafic HTTP(S)\nCAPTURE="/tmp/capture_$(date +%Y%m%d_%H%M%S).pcap"\nsudo timeout 30 tcpdump -i any -w $CAPTURE port 80 or port 443\necho "Capture: $CAPTURE"', desc: 'Capture de trafic' }
                             ],
                             tips: ['Ouvrez le fichier .pcap dans Wireshark pour une analyse détaillée'],
                             warnings: []
@@ -871,8 +980,7 @@
                             syntax: './network-diag.sh > report.txt',
                             options: [],
                             examples: [
-                                { code: '# 15. Résumé et recommandations\necho "=== RÉSUMÉ ===" \necho\n\n# Vérifications auto\nERRORS=0\n\n# Interface UP?\nif ip link show | grep -q "state UP"; then\n  echo "✓ Interfaces réseau: OK"\nelse\n  echo "✗ Interfaces réseau: PROBLÈME"\n  ((ERRORS++))\nfi\n\n# Passerelle accessible?\nif ping -c 1 -W 2 $GATEWAY >/dev/null 2>&1; then\n  echo "✓ Passerelle: Accessible"\nelse\n  echo "✗ Passerelle: Inaccessible"\n  ((ERRORS++))\nfi\n\n# DNS fonctionne?\nif dig +short google.com >/dev/null 2>&1; then\n  echo "✓ DNS: Fonctionnel"\nelse\n  echo "✗ DNS: Problème de résolution"\n  ((ERRORS++))\nfi\n\n# Internet accessible?\nif ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then\n  echo "✓ Internet: Accessible"\nelse\n  echo "✗ Internet: Inaccessible"\n  ((ERRORS++))\nfi\n\necho\nif [ $ERRORS -eq 0 ]; then\n  echo "Diagnostic: AUCUN PROBLÈME DÉTECTÉ"\nelse\n  echo "Diagnostic: $ERRORS PROBLÈME(S) DÉTECTÉ(S)"\nfi', desc: 'Rapport automatisé' },
-                                { code: '# Exécution complète\nchmod +x network-diag.sh\n./network-diag.sh google.com > ~/network_report_$(date +%Y%m%d).txt 2>&1\necho "Rapport généré: ~/network_report_$(date +%Y%m%d).txt"', desc: 'Générer le rapport' }
+                                { code: '# Résumé automatisé\necho "=== RÉSUMÉ ==="\nERRORS=0\n\n# Interface UP?\nip link show | grep -q "state UP" && echo "✓ Interfaces: OK" || { echo "✗ Interfaces: PROBLÈME"; ((ERRORS++)); }\n\n# Passerelle accessible?\nGW=$(ip route | grep default | awk \'{print $3}\')\nping -c 1 -W 2 $GW >/dev/null 2>&1 && echo "✓ Passerelle: OK" || { echo "✗ Passerelle: ÉCHEC"; ((ERRORS++)); }\n\n# DNS fonctionne?\ndig +short google.com >/dev/null 2>&1 && echo "✓ DNS: OK" || { echo "✗ DNS: ÉCHEC"; ((ERRORS++)); }\n\n# Internet accessible?\nping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1 && echo "✓ Internet: OK" || { echo "✗ Internet: ÉCHEC"; ((ERRORS++)); }\n\necho\n[ $ERRORS -eq 0 ] && echo "Diagnostic: AUCUN PROBLÈME" || echo "Diagnostic: $ERRORS PROBLÈME(S)"', desc: 'Rapport automatisé' }
                             ],
                             tips: ['Gardez les rapports pour comparer avant/après les changements'],
                             warnings: []

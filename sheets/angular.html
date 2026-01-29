@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire Angular : CLI, composants, services, routing, formulaires et observables RxJS.">
+    <meta name="description" content="Aide-mémoire Angular : workflows pratiques pour créer des composants, gérer l'état, appeler des API et sécuriser votre application.">
     <title>Angular - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,14 @@
                     <i class="fab fa-angular text-3xl text-red-400"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">Angular</h1>
-                <p class="text-slate-400">CLI, composants, services, routing et RxJS</p>
+                <p class="text-slate-400">Workflows pratiques pour développer avec Angular</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -53,80 +53,40 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'cli',
-                title: 'Angular CLI',
-                icon: 'fa-terminal',
+                id: 'start-project',
+                title: '🚀 Démarrer un Projet Angular',
+                icon: 'fa-rocket',
                 color: 'border-l-4 border-red-500',
                 commands: [
                     {
-                        cmd: 'ng new project-name',
-                        desc: 'Créer un nouveau projet',
+                        cmd: 'Créer un nouveau projet',
+                        desc: 'Initialiser une application Angular',
                         details: {
-                            explanation: 'Génère un nouveau projet Angular avec toute la structure de base.',
-                            syntax: 'ng new <name> [options]',
+                            explanation: 'La commande ng new génère un projet Angular complet avec toute la structure de base.',
+                            syntax: 'ng new <project-name> [options]',
                             options: [
+                                { flag: '--standalone', desc: 'Projet avec composants standalone (recommandé v17+)' },
                                 { flag: '--routing', desc: 'Ajoute le module de routing' },
                                 { flag: '--style=scss', desc: 'Utilise SCSS au lieu de CSS' },
-                                { flag: '--standalone', desc: 'Projet avec composants standalone (Angular 17+)' },
                                 { flag: '--skip-tests', desc: 'Sans fichiers de tests' }
                             ],
                             examples: [
-                                { code: 'ng new my-app --routing --style=scss', desc: 'Avec routing et SCSS' },
-                                { code: 'ng new my-app --standalone', desc: 'Projet standalone moderne' }
+                                { code: 'ng new my-app --standalone --routing --style=scss', desc: 'Projet standalone moderne' },
+                                { code: 'ng new my-app --routing --style=scss', desc: 'Avec routing et SCSS' }
                             ],
-                            tips: ['Utilisez --standalone pour les nouveaux projets Angular 17+'],
+                            tips: ['Utilisez --standalone pour tous les nouveaux projets Angular 17+'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'ng generate component',
-                        desc: 'Générer un composant',
+                        cmd: 'Lancer le serveur de développement',
+                        desc: 'Démarrer l\'application en mode dev',
                         details: {
-                            explanation: 'Crée un nouveau composant avec ses fichiers (ts, html, css, spec).',
-                            syntax: 'ng g c <name> [options]',
-                            options: [
-                                { flag: 'ng g c', desc: 'Raccourci pour ng generate component' },
-                                { flag: '--standalone', desc: 'Composant standalone (sans module)' },
-                                { flag: '--skip-tests', desc: 'Sans fichier .spec.ts' },
-                                { flag: '--flat', desc: 'Sans créer de dossier' },
-                                { flag: '--inline-style', desc: 'CSS inline dans le .ts' }
-                            ],
-                            examples: [
-                                { code: 'ng g c header', desc: 'Composant header' },
-                                { code: 'ng g c features/user-profile --standalone', desc: 'Dans un sous-dossier, standalone' },
-                                { code: 'ng g c shared/button --skip-tests', desc: 'Sans tests' }
-                            ],
-                            tips: ['Organisez vos composants dans des dossiers features/'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'ng generate service',
-                        desc: 'Générer un service',
-                        details: {
-                            explanation: 'Crée un service injectable pour la logique métier et les appels HTTP.',
-                            syntax: 'ng g s <name> [options]',
-                            options: [
-                                { flag: 'ng g s', desc: 'Raccourci pour ng generate service' },
-                                { flag: '--skip-tests', desc: 'Sans fichier de test' }
-                            ],
-                            examples: [
-                                { code: 'ng g s services/user', desc: 'Service utilisateur' },
-                                { code: 'ng g s core/auth', desc: 'Service d\'authentification' }
-                            ],
-                            tips: ['Placez les services dans un dossier services/ ou core/'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'ng serve',
-                        desc: 'Lancer le serveur de dev',
-                        details: {
-                            explanation: 'Compile l\'application et lance un serveur de développement avec hot-reload.',
+                            explanation: 'Compile l\'application et lance un serveur local avec hot-reload automatique.',
                             syntax: 'ng serve [options]',
                             options: [
                                 { flag: '-o, --open', desc: 'Ouvre le navigateur automatiquement' },
-                                { flag: '--port', desc: 'Port personnalisé (défaut: 4200)' },
+                                { flag: '--port 3000', desc: 'Port personnalisé (défaut: 4200)' },
                                 { flag: '--proxy-config', desc: 'Configuration proxy pour les API' }
                             ],
                             examples: [
@@ -138,21 +98,39 @@
                         }
                     },
                     {
-                        cmd: 'ng build',
-                        desc: 'Build de production',
+                        cmd: 'Builder pour la production',
+                        desc: 'Compiler l\'application optimisée',
                         details: {
-                            explanation: 'Compile l\'application pour la production avec optimisations.',
+                            explanation: 'Génère une version optimisée de l\'application pour le déploiement.',
                             syntax: 'ng build [options]',
                             options: [
                                 { flag: '--configuration=production', desc: 'Config prod (par défaut)' },
                                 { flag: '--output-path', desc: 'Dossier de sortie personnalisé' },
-                                { flag: '--base-href', desc: 'URL de base pour le déploiement' }
+                                { flag: '--base-href /app/', desc: 'URL de base pour le déploiement' }
                             ],
                             examples: [
                                 { code: 'ng build', desc: 'Build production' },
-                                { code: 'ng build --base-href /app/', desc: 'Pour déploiement dans /app/' }
+                                { code: 'ng build --base-href /my-app/', desc: 'Pour déploiement dans /my-app/' }
                             ],
                             tips: ['Les fichiers générés sont dans dist/'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Configurer le projet (app.config.ts)',
+                        desc: 'Configuration standalone Angular 17+',
+                        details: {
+                            explanation: 'Le fichier app.config.ts centralise la configuration de l\'application standalone.',
+                            syntax: 'export const appConfig: ApplicationConfig = { providers: [...] }',
+                            options: [
+                                { flag: 'provideRouter', desc: 'Configuration du routing' },
+                                { flag: 'provideHttpClient', desc: 'Client HTTP avec interceptors' },
+                                { flag: 'withInterceptors', desc: 'Ajouter des interceptors HTTP' }
+                            ],
+                            examples: [
+                                { code: '// app.config.ts\nimport { ApplicationConfig } from "@angular/core"\nimport { provideRouter } from "@angular/router"\nimport { provideHttpClient, withInterceptors } from "@angular/common/http"\nimport { routes } from "./app.routes"\nimport { authInterceptor } from "./core/interceptors/auth.interceptor"\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideRouter(routes),\n    provideHttpClient(withInterceptors([authInterceptor]))\n  ]\n}', desc: 'Configuration complète' }
+                            ],
+                            tips: ['app.config.ts remplace AppModule dans les projets standalone'],
                             warnings: []
                         }
                     }
@@ -160,109 +138,60 @@
             },
             {
                 id: 'components',
-                title: 'Composants',
+                title: '🧩 Créer des Composants',
                 icon: 'fa-cubes',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: '@Component({ })',
-                        desc: 'Déclaration d\'un composant',
+                        cmd: 'Générer un composant',
+                        desc: 'Créer un nouveau composant avec CLI',
                         details: {
-                            explanation: 'Le décorateur @Component définit les métadonnées d\'un composant Angular.',
-                            syntax: '@Component({\n  selector: "app-name",\n  templateUrl: "./name.component.html",\n  styleUrls: ["./name.component.scss"]\n})',
+                            explanation: 'La CLI génère automatiquement tous les fichiers nécessaires pour un composant.',
+                            syntax: 'ng generate component <name> [options]',
                             options: [
-                                { flag: 'selector', desc: 'Tag HTML pour utiliser le composant' },
-                                { flag: 'templateUrl', desc: 'Chemin vers le template HTML' },
-                                { flag: 'template', desc: 'Template inline (alternatif)' },
-                                { flag: 'styleUrls', desc: 'Fichiers de styles' },
-                                { flag: 'standalone: true', desc: 'Composant standalone (Angular 17+)' }
+                                { flag: 'ng g c', desc: 'Raccourci pour ng generate component' },
+                                { flag: '--standalone', desc: 'Composant standalone (sans module)' },
+                                { flag: '--skip-tests', desc: 'Sans fichier .spec.ts' },
+                                { flag: '--flat', desc: 'Sans créer de dossier' }
                             ],
                             examples: [
-                                { code: '@Component({\n  selector: "app-header",\n  standalone: true,\n  imports: [CommonModule],\n  templateUrl: "./header.component.html"\n})\nexport class HeaderComponent { }', desc: 'Composant standalone' },
-                                { code: '@Component({\n  selector: "app-btn",\n  template: `<button><ng-content></ng-content></button>`,\n  styles: [`button { padding: 10px }`]\n})', desc: 'Template et styles inline' }
+                                { code: 'ng g c header --standalone', desc: 'Composant header standalone' },
+                                { code: 'ng g c features/user-profile --standalone', desc: 'Dans un sous-dossier' },
+                                { code: 'ng g c shared/button --skip-tests', desc: 'Sans tests' }
+                            ],
+                            tips: ['Organisez vos composants dans des dossiers features/, shared/, core/'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Déclarer un composant standalone',
+                        desc: 'Structure d\'un composant moderne',
+                        details: {
+                            explanation: 'Les composants standalone importent directement leurs dépendances sans module.',
+                            syntax: '@Component({ standalone: true, imports: [...] })',
+                            options: [
+                                { flag: 'selector', desc: 'Tag HTML pour utiliser le composant' },
+                                { flag: 'standalone: true', desc: 'Composant standalone' },
+                                { flag: 'imports', desc: 'Dépendances (CommonModule, autres composants)' },
+                                { flag: 'templateUrl', desc: 'Chemin vers le template HTML' }
+                            ],
+                            examples: [
+                                { code: '@Component({\n  selector: "app-header",\n  standalone: true,\n  imports: [CommonModule, RouterLink],\n  templateUrl: "./header.component.html",\n  styleUrls: ["./header.component.scss"]\n})\nexport class HeaderComponent { }', desc: 'Composant standalone complet' },
+                                { code: '@Component({\n  selector: "app-btn",\n  standalone: true,\n  template: `<button><ng-content></ng-content></button>`,\n  styles: [`button { padding: 10px }`]\n})\nexport class ButtonComponent { }', desc: 'Template et styles inline' }
                             ],
                             tips: ['Les composants standalone simplifient la gestion des dépendances'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: '@Input() / @Output()',
-                        desc: 'Communication parent-enfant',
+                        cmd: 'Utiliser les nouvelles directives @if/@for',
+                        desc: 'Syntaxe de contrôle Angular 17+',
                         details: {
-                            explanation: '@Input() reçoit des données du parent, @Output() émet des événements vers le parent.',
-                            syntax: '@Input() name: string\n@Output() event = new EventEmitter<T>()',
-                            options: [
-                                { flag: '@Input()', desc: 'Propriété d\'entrée (parent → enfant)' },
-                                { flag: '@Input({ required: true })', desc: 'Input obligatoire (v17+)' },
-                                { flag: '@Output()', desc: 'Événement de sortie (enfant → parent)' }
-                            ],
-                            examples: [
-                                { code: '// Enfant\n@Input() title: string = ""\n@Output() clicked = new EventEmitter<void>()\n\nonClick() {\n  this.clicked.emit()\n}', desc: 'Définition dans l\'enfant' },
-                                { code: '<!-- Parent -->\n<app-child \n  [title]="myTitle" \n  (clicked)="handleClick()"\n></app-child>', desc: 'Utilisation dans le parent' }
-                            ],
-                            tips: ['Utilisez [property] pour les inputs et (event) pour les outputs'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Lifecycle Hooks',
-                        desc: 'Cycle de vie du composant',
-                        details: {
-                            explanation: 'Méthodes appelées à différentes étapes du cycle de vie d\'un composant.',
-                            syntax: 'ngOnInit()\nngOnDestroy()\nngOnChanges(changes)',
-                            options: [
-                                { flag: 'ngOnInit', desc: 'Après création, pour initialisation' },
-                                { flag: 'ngOnChanges', desc: 'Quand un @Input change' },
-                                { flag: 'ngOnDestroy', desc: 'Avant destruction (cleanup)' },
-                                { flag: 'ngAfterViewInit', desc: 'Après initialisation de la vue' }
-                            ],
-                            examples: [
-                                { code: 'export class UserComponent implements OnInit, OnDestroy {\n  ngOnInit() {\n    this.loadData()\n  }\n  ngOnDestroy() {\n    this.subscription.unsubscribe()\n  }\n}', desc: 'Init et cleanup' },
-                                { code: 'ngOnChanges(changes: SimpleChanges) {\n  if (changes["userId"]) {\n    this.reloadUser()\n  }\n}', desc: 'Réagir aux changements' }
-                            ],
-                            tips: ['Implémentez l\'interface correspondante (OnInit, OnDestroy, etc.)'],
-                            warnings: ['N\'oubliez pas de cleanup dans ngOnDestroy (subscriptions, timers)']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'templates',
-                title: 'Templates',
-                icon: 'fa-file-code',
-                color: 'border-l-4 border-green-500',
-                commands: [
-                    {
-                        cmd: '*ngIf / *ngFor',
-                        desc: 'Directives structurelles',
-                        details: {
-                            explanation: 'Contrôlent la structure du DOM en ajoutant/supprimant des éléments.',
-                            syntax: '*ngIf="condition"\n*ngFor="let item of items"',
-                            options: [
-                                { flag: '*ngIf="expr"', desc: 'Affiche si vrai' },
-                                { flag: '*ngIf="expr; else tpl"', desc: 'Avec template alternatif' },
-                                { flag: '*ngFor="let x of arr"', desc: 'Boucle sur un tableau' },
-                                { flag: 'trackBy', desc: 'Optimise le rendu des listes' }
-                            ],
-                            examples: [
-                                { code: '<div *ngIf="isLoggedIn">Bienvenue!</div>', desc: 'Condition simple' },
-                                { code: '<div *ngIf="user; else loading">\n  {{ user.name }}\n</div>\n<ng-template #loading>Chargement...</ng-template>', desc: 'Avec else' },
-                                { code: '<li *ngFor="let item of items; let i = index; trackBy: trackByFn">\n  {{ i }}: {{ item.name }}\n</li>', desc: 'Boucle avec index et trackBy' }
-                            ],
-                            tips: ['Utilisez @if/@for dans Angular 17+ (nouvelle syntaxe de contrôle)'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: '@if / @for (v17+)',
-                        desc: 'Nouvelle syntaxe de contrôle',
-                        details: {
-                            explanation: 'Syntaxe moderne Angular 17+ pour le contrôle de flux, plus lisible.',
+                            explanation: 'Nouvelle syntaxe de contrôle plus lisible que *ngIf/*ngFor.',
                             syntax: '@if (condition) { } @else { }\n@for (item of items; track item.id) { }',
                             options: [
                                 { flag: '@if', desc: 'Condition' },
-                                { flag: '@else if', desc: 'Condition alternative' },
-                                { flag: '@else', desc: 'Bloc else' },
+                                { flag: '@else if / @else', desc: 'Alternatives' },
                                 { flag: '@for ... track', desc: 'Boucle avec tracking obligatoire' },
                                 { flag: '@empty', desc: 'Si la liste est vide' }
                             ],
@@ -275,22 +204,22 @@
                         }
                     },
                     {
-                        cmd: 'Property & Event Binding',
-                        desc: 'Liaison de données',
+                        cmd: 'Utiliser le data binding',
+                        desc: 'Lier données et événements',
                         details: {
-                            explanation: 'Syntaxe pour lier des propriétés et des événements dans les templates.',
+                            explanation: 'Syntaxe pour connecter le template au code TypeScript.',
                             syntax: '[property]="expr"\n(event)="handler($event)"\n[(ngModel)]="var"',
                             options: [
+                                { flag: '{{ expr }}', desc: 'Interpolation (texte)' },
                                 { flag: '[prop]', desc: 'Property binding (vers le DOM)' },
                                 { flag: '(event)', desc: 'Event binding (depuis le DOM)' },
-                                { flag: '[(ngModel)]', desc: 'Two-way binding (bidirectionnel)' },
-                                { flag: '{{ expr }}', desc: 'Interpolation (texte)' }
+                                { flag: '[(ngModel)]', desc: 'Two-way binding' }
                             ],
                             examples: [
+                                { code: '<p>Bonjour {{ username | uppercase }}</p>', desc: 'Interpolation avec pipe' },
                                 { code: '<img [src]="imageUrl" [alt]="imageAlt">', desc: 'Property binding' },
                                 { code: '<button (click)="handleClick($event)">Click</button>', desc: 'Event binding' },
-                                { code: '<input [(ngModel)]="username">', desc: 'Two-way binding' },
-                                { code: '<p>Bonjour {{ username | uppercase }}</p>', desc: 'Interpolation avec pipe' }
+                                { code: '<input [(ngModel)]="username">', desc: 'Two-way binding' }
                             ],
                             tips: ['[(ngModel)] nécessite FormsModule'],
                             warnings: []
@@ -299,111 +228,211 @@
                 ]
             },
             {
-                id: 'services',
-                title: 'Services & DI',
-                icon: 'fa-cogs',
-                color: 'border-l-4 border-purple-500',
+                id: 'state-data',
+                title: '🔄 Gérer l\'État et les Données',
+                icon: 'fa-database',
+                color: 'border-l-4 border-emerald-500',
                 commands: [
                     {
-                        cmd: '@Injectable()',
-                        desc: 'Créer un service injectable',
+                        cmd: 'Créer un signal réactif',
+                        desc: 'Nouvelle primitive d\'état Angular 17+',
                         details: {
-                            explanation: 'Décorateur qui permet à un service d\'être injecté via le système de DI.',
-                            syntax: '@Injectable({ providedIn: "root" })\nexport class MyService { }',
+                            explanation: 'Les Signals sont une nouvelle façon de gérer l\'état réactif sans Zone.js.',
+                            syntax: 'const mySignal = signal(initialValue)',
                             options: [
-                                { flag: 'providedIn: "root"', desc: 'Singleton global (recommandé)' },
-                                { flag: 'providedIn: "any"', desc: 'Instance par module lazy-loaded' }
+                                { flag: 'signal(value)', desc: 'Crée un signal' },
+                                { flag: 'signal()', desc: 'Lecture de la valeur' },
+                                { flag: 'set(value)', desc: 'Remplace la valeur' },
+                                { flag: 'update(fn)', desc: 'Met à jour basé sur la valeur précédente' }
                             ],
                             examples: [
-                                { code: '@Injectable({ providedIn: "root" })\nexport class UserService {\n  private apiUrl = "/api/users"\n  \n  constructor(private http: HttpClient) { }\n  \n  getUsers() {\n    return this.http.get<User[]>(this.apiUrl)\n  }\n}', desc: 'Service HTTP' }
+                                { code: '// Déclaration\ncount = signal(0)\nuser = signal<User | null>(null)\n\n// Template\n<p>Count: {{ count() }}</p>', desc: 'Créer et lire un signal' },
+                                { code: '// Modification\nthis.count.set(10)          // Remplace\nthis.count.update(c => c + 1)  // Incrémente', desc: 'Modifier un signal' },
+                                { code: '// Signal en lecture seule\nprivate _count = signal(0)\ncount = this._count.asReadonly()', desc: 'Signal readonly' }
                             ],
-                            tips: ['providedIn: "root" est la méthode recommandée pour les services'],
+                            tips: ['Les signals sont plus performants que les observables pour l\'état local'],
+                            warnings: ['N\'oubliez pas les parenthèses () pour lire la valeur']
+                        }
+                    },
+                    {
+                        cmd: 'Créer une valeur dérivée (computed)',
+                        desc: 'Valeur calculée automatiquement',
+                        details: {
+                            explanation: 'computed() crée un signal dérivé qui se recalcule quand ses dépendances changent.',
+                            syntax: 'const derived = computed(() => expression)',
+                            options: [],
+                            examples: [
+                                { code: 'firstName = signal("John")\nlastName = signal("Doe")\n\nfullName = computed(() => \n  `${this.firstName()} ${this.lastName()}`\n)', desc: 'Computed basique' },
+                                { code: 'items = signal<Item[]>([])\nfilter = signal("")\n\nfilteredItems = computed(() => {\n  const term = this.filter().toLowerCase()\n  return this.items().filter(i => \n    i.name.toLowerCase().includes(term)\n  )\n})', desc: 'Filtrage réactif' }
+                            ],
+                            tips: ['computed() est mémorisé - ne recalcule que si les dépendances changent'],
+                            warnings: ['computed() est en lecture seule']
+                        }
+                    },
+                    {
+                        cmd: 'Passer des données parent → enfant',
+                        desc: 'Communication avec Input',
+                        details: {
+                            explanation: '@Input() ou input() permettent de recevoir des données du composant parent.',
+                            syntax: '@Input() name: string\n// ou (v17+)\ntitle = input.required<string>()',
+                            options: [
+                                { flag: '@Input()', desc: 'Input classique' },
+                                { flag: 'input()', desc: 'Input signal (v17+)' },
+                                { flag: 'input.required()', desc: 'Input obligatoire' }
+                            ],
+                            examples: [
+                                { code: '// Style classique\n@Input() title: string = ""\n@Input({ required: true }) userId!: string', desc: '@Input classique' },
+                                { code: '// Style signal (v17+)\ntitle = input.required<string>()\nsubtitle = input("")\ntheme = input<"light" | "dark">("light")', desc: 'Input signals' },
+                                { code: '<!-- Parent -->\n<app-card [title]="myTitle" [userId]="user.id" />', desc: 'Utilisation dans le parent' }
+                            ],
+                            tips: ['Les input() signals permettent d\'utiliser computed()'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'inject()',
-                        desc: 'Injection de dépendances moderne',
+                        cmd: 'Émettre des événements enfant → parent',
+                        desc: 'Communication avec Output',
                         details: {
-                            explanation: 'Fonction inject() pour injecter des dépendances (alternative au constructeur).',
-                            syntax: 'private service = inject(MyService)',
+                            explanation: '@Output() ou output() permettent d\'envoyer des événements au composant parent.',
+                            syntax: '@Output() event = new EventEmitter<T>()\n// ou (v17+)\nclicked = output<void>()',
                             options: [
-                                { flag: 'inject(Token)', desc: 'Injecte un service ou token' },
-                                { flag: 'inject(Token, { optional: true })', desc: 'Injection optionnelle' }
+                                { flag: '@Output()', desc: 'Output classique avec EventEmitter' },
+                                { flag: 'output()', desc: 'Output signal (v17+)' }
                             ],
                             examples: [
-                                { code: '@Component({ ... })\nexport class MyComponent {\n  private userService = inject(UserService)\n  private router = inject(Router)\n}', desc: 'Injection dans un composant' },
-                                { code: 'export function authGuard() {\n  const auth = inject(AuthService)\n  const router = inject(Router)\n  return auth.isAuthenticated() || router.navigate(["/login"])\n}', desc: 'Dans un guard fonctionnel' }
+                                { code: '// Style classique\n@Output() clicked = new EventEmitter<void>()\n@Output() selected = new EventEmitter<Item>()\n\nonClick() {\n  this.clicked.emit()\n}', desc: '@Output classique' },
+                                { code: '// Style signal (v17+)\nclosed = output<void>()\nselected = output<Item>()\n\nonClose() {\n  this.closed.emit()\n}', desc: 'Output signals' },
+                                { code: '<!-- Parent -->\n<app-card \n  (clicked)="handleClick()"\n  (selected)="handleSelect($event)"\n/>', desc: 'Écouter dans le parent' }
                             ],
-                            tips: ['inject() peut être utilisé dans les fonctions (guards, resolvers)'],
-                            warnings: ['inject() doit être appelé dans un contexte d\'injection']
+                            tips: ['Utilisez $event dans le template pour accéder à la valeur émise'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'api-calls',
+                title: '📡 Appeler une API',
+                icon: 'fa-cloud',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Créer un service HTTP',
+                        desc: 'Service injectable pour les appels API',
+                        details: {
+                            explanation: 'Les services encapsulent la logique d\'appel API avec HttpClient.',
+                            syntax: '@Injectable({ providedIn: "root" })',
+                            options: [
+                                { flag: 'providedIn: "root"', desc: 'Singleton global (recommandé)' },
+                                { flag: 'HttpClient', desc: 'Service d\'appels HTTP' }
+                            ],
+                            examples: [
+                                { code: 'ng g s services/user', desc: 'Générer un service' },
+                                { code: '@Injectable({ providedIn: "root" })\nexport class UserService {\n  private http = inject(HttpClient)\n  private apiUrl = "/api/users"\n  \n  getUsers(): Observable<User[]> {\n    return this.http.get<User[]>(this.apiUrl)\n  }\n  \n  getUser(id: string): Observable<User> {\n    return this.http.get<User>(`${this.apiUrl}/${id}`)\n  }\n  \n  createUser(user: Omit<User, "id">): Observable<User> {\n    return this.http.post<User>(this.apiUrl, user)\n  }\n  \n  updateUser(id: string, data: Partial<User>): Observable<User> {\n    return this.http.patch<User>(`${this.apiUrl}/${id}`, data)\n  }\n  \n  deleteUser(id: string): Observable<void> {\n    return this.http.delete<void>(`${this.apiUrl}/${id}`)\n  }\n}', desc: 'Service CRUD complet' }
+                            ],
+                            tips: ['Utilisez inject() au lieu du constructeur pour l\'injection'],
+                            warnings: []
                         }
                     },
                     {
-                        cmd: 'HttpClient',
-                        desc: 'Requêtes HTTP',
+                        cmd: 'Effectuer des requêtes HTTP',
+                        desc: 'GET, POST, PUT, DELETE',
                         details: {
-                            explanation: 'Service pour effectuer des requêtes HTTP avec gestion des observables.',
-                            syntax: 'this.http.get<T>(url)\nthis.http.post<T>(url, body)',
+                            explanation: 'HttpClient fournit des méthodes typées pour chaque type de requête.',
+                            syntax: 'this.http.get<T>(url, options)',
                             options: [
                                 { flag: 'get<T>(url)', desc: 'Requête GET' },
                                 { flag: 'post<T>(url, body)', desc: 'Requête POST' },
                                 { flag: 'put<T>(url, body)', desc: 'Requête PUT' },
+                                { flag: 'patch<T>(url, body)', desc: 'Requête PATCH' },
                                 { flag: 'delete<T>(url)', desc: 'Requête DELETE' }
                             ],
                             examples: [
                                 { code: 'getUsers(): Observable<User[]> {\n  return this.http.get<User[]>("/api/users")\n}', desc: 'GET typé' },
                                 { code: 'createUser(user: User): Observable<User> {\n  return this.http.post<User>("/api/users", user)\n}', desc: 'POST avec body' },
-                                { code: '// Avec options\nthis.http.get("/api/data", {\n  headers: new HttpHeaders({ "Authorization": "Bearer token" }),\n  params: new HttpParams().set("page", "1")\n})', desc: 'Avec headers et params' }
+                                { code: '// Avec options (headers, params)\nthis.http.get("/api/data", {\n  headers: new HttpHeaders({ "Authorization": "Bearer token" }),\n  params: new HttpParams().set("page", "1")\n})', desc: 'Avec headers et params' }
                             ],
-                            tips: ['Utilisez provideHttpClient() dans app.config.ts (v17+)'],
+                            tips: ['Typez toujours vos réponses avec <T>'],
                             warnings: ['N\'oubliez pas de subscribe() ou d\'utiliser le pipe async']
+                        }
+                    },
+                    {
+                        cmd: 'Créer un intercepteur HTTP',
+                        desc: 'Modifier toutes les requêtes/réponses',
+                        details: {
+                            explanation: 'Les intercepteurs modifient automatiquement les requêtes (auth) ou gèrent les erreurs globalement.',
+                            syntax: 'export const myInterceptor: HttpInterceptorFn = (req, next) => {...}',
+                            options: [
+                                { flag: 'req.clone()', desc: 'Cloner et modifier la requête' },
+                                { flag: 'next(req)', desc: 'Passer au handler suivant' },
+                                { flag: 'catchError', desc: 'Gérer les erreurs' }
+                            ],
+                            examples: [
+                                { code: '// auth.interceptor.ts\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const auth = inject(AuthService)\n  const token = auth.getToken()\n  \n  if (token) {\n    req = req.clone({\n      setHeaders: { Authorization: `Bearer ${token}` }\n    })\n  }\n  return next(req)\n}', desc: 'Intercepteur d\'authentification' },
+                                { code: '// error.interceptor.ts\nexport const errorInterceptor: HttpInterceptorFn = (req, next) => {\n  return next(req).pipe(\n    catchError((error: HttpErrorResponse) => {\n      if (error.status === 401) {\n        inject(Router).navigate(["/login"])\n      }\n      return throwError(() => error)\n    })\n  )\n}', desc: 'Intercepteur d\'erreurs' },
+                                { code: '// app.config.ts\nprovideHttpClient(\n  withInterceptors([authInterceptor, errorInterceptor])\n)', desc: 'Enregistrer les intercepteurs' }
+                            ],
+                            tips: ['L\'ordre des interceptors compte (premier = premier exécuté)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Gérer le loading et les erreurs',
+                        desc: 'Pattern de chargement avec signals',
+                        details: {
+                            explanation: 'Pattern pour gérer les états loading/error avec les signals.',
+                            syntax: 'loading = signal(false)\nerror = signal<string | null>(null)',
+                            options: [],
+                            examples: [
+                                { code: '@Component({ ... })\nexport class UsersComponent {\n  private userService = inject(UserService)\n  \n  users = signal<User[]>([])\n  loading = signal(true)\n  error = signal<string | null>(null)\n  \n  constructor() {\n    this.loadUsers()\n  }\n  \n  loadUsers() {\n    this.loading.set(true)\n    this.error.set(null)\n    \n    this.userService.getUsers().subscribe({\n      next: users => {\n        this.users.set(users)\n        this.loading.set(false)\n      },\n      error: err => {\n        this.error.set(err.message)\n        this.loading.set(false)\n      }\n    })\n  }\n}', desc: 'Pattern loading/error' },
+                                { code: '<!-- Template -->\n@if (loading()) {\n  <app-spinner />\n} @else if (error()) {\n  <p class="error">{{ error() }}</p>\n} @else {\n  @for (user of users(); track user.id) {\n    <app-user-card [user]="user" />\n  }\n}', desc: 'Template avec états' }
+                            ],
+                            tips: ['Utilisez takeUntilDestroyed() pour éviter les fuites mémoire'],
+                            warnings: []
                         }
                     }
                 ]
             },
             {
                 id: 'routing',
-                title: 'Routing',
+                title: '🧭 Naviguer entre les Pages',
                 icon: 'fa-route',
                 color: 'border-l-4 border-orange-500',
                 commands: [
                     {
-                        cmd: 'Routes Configuration',
-                        desc: 'Définir les routes',
+                        cmd: 'Configurer les routes',
+                        desc: 'Définir les chemins de l\'application',
                         details: {
-                            explanation: 'Configuration des routes de l\'application avec leurs composants associés.',
-                            syntax: 'const routes: Routes = [\n  { path: "", component: HomeComponent }\n]',
+                            explanation: 'Le fichier app.routes.ts définit toutes les routes de l\'application.',
+                            syntax: 'export const routes: Routes = [...]',
                             options: [
                                 { flag: 'path', desc: 'Chemin URL' },
                                 { flag: 'component', desc: 'Composant à afficher' },
-                                { flag: 'redirectTo', desc: 'Redirection vers une autre route' },
-                                { flag: 'loadComponent', desc: 'Lazy loading d\'un composant' },
-                                { flag: 'children', desc: 'Routes enfants' },
-                                { flag: 'canActivate', desc: 'Guards de protection' }
+                                { flag: 'loadComponent', desc: 'Lazy loading' },
+                                { flag: 'redirectTo', desc: 'Redirection' },
+                                { flag: 'children', desc: 'Routes enfants' }
                             ],
                             examples: [
-                                { code: 'export const routes: Routes = [\n  { path: "", component: HomeComponent },\n  { path: "users", component: UsersComponent },\n  { path: "users/:id", component: UserDetailComponent },\n  { path: "**", redirectTo: "" }\n]', desc: 'Configuration basique' },
-                                { code: '{\n  path: "admin",\n  loadComponent: () => import("./admin/admin.component")\n    .then(m => m.AdminComponent),\n  canActivate: [authGuard]\n}', desc: 'Lazy loading avec guard' }
+                                { code: '// app.routes.ts\nexport const routes: Routes = [\n  { path: "", component: HomeComponent },\n  { path: "users", component: UsersComponent },\n  { path: "users/:id", component: UserDetailComponent },\n  { path: "**", redirectTo: "" }\n]', desc: 'Configuration basique' },
+                                { code: '// Lazy loading (recommandé)\n{\n  path: "admin",\n  loadComponent: () => import("./admin/admin.component")\n    .then(m => m.AdminComponent)\n}', desc: 'Lazy loading' }
                             ],
                             tips: ['path: "**" capture toutes les routes non définies (404)'],
                             warnings: ['L\'ordre des routes est important - du plus spécifique au plus général']
                         }
                     },
                     {
-                        cmd: 'Router Navigation',
-                        desc: 'Navigation programmatique',
+                        cmd: 'Naviguer par programmation',
+                        desc: 'Navigation depuis le code TypeScript',
                         details: {
-                            explanation: 'Naviguer entre les pages depuis le code TypeScript.',
-                            syntax: 'this.router.navigate(["/path"])\nthis.router.navigateByUrl("/path")',
+                            explanation: 'Le service Router permet de naviguer depuis le code.',
+                            syntax: 'this.router.navigate(["/path"])',
                             options: [
-                                { flag: 'navigate(["/path"])', desc: 'Navigation par segments' },
-                                { flag: 'navigateByUrl("/path")', desc: 'Navigation par URL complète' },
-                                { flag: '{ relativeTo: route }', desc: 'Navigation relative' },
-                                { flag: '{ queryParams: {} }', desc: 'Avec query params' }
+                                { flag: 'navigate([...])', desc: 'Navigation par segments' },
+                                { flag: 'navigateByUrl("/path")', desc: 'Navigation par URL' },
+                                { flag: 'queryParams', desc: 'Paramètres de query string' }
                             ],
                             examples: [
-                                { code: 'this.router.navigate(["/users", userId])', desc: 'Vers /users/123' },
+                                { code: 'private router = inject(Router)\n\ngoToUser(id: string) {\n  this.router.navigate(["/users", id])\n}', desc: 'Navigation simple' },
                                 { code: 'this.router.navigate(["/search"], {\n  queryParams: { q: "angular", page: 1 }\n})', desc: 'Avec query params' },
                                 { code: 'this.router.navigate(["edit"], {\n  relativeTo: this.route\n})', desc: 'Navigation relative' }
                             ],
@@ -412,23 +441,130 @@
                         }
                     },
                     {
-                        cmd: 'ActivatedRoute',
-                        desc: 'Lire les paramètres de route',
+                        cmd: 'Lire les paramètres de route',
+                        desc: 'Accéder aux params et query params',
                         details: {
-                            explanation: 'Service pour accéder aux informations de la route active (params, query, data).',
-                            syntax: 'this.route.params\nthis.route.queryParams\nthis.route.snapshot',
+                            explanation: 'ActivatedRoute donne accès aux informations de la route active.',
+                            syntax: 'this.route.params.subscribe(...)\nthis.route.snapshot.params["id"]',
                             options: [
-                                { flag: 'params', desc: 'Observable des paramètres de route' },
+                                { flag: 'params', desc: 'Observable des paramètres' },
                                 { flag: 'queryParams', desc: 'Observable des query params' },
-                                { flag: 'snapshot.params', desc: 'Paramètres actuels (non réactif)' },
-                                { flag: 'data', desc: 'Données de la route (resolve, data)' }
+                                { flag: 'snapshot', desc: 'Valeur actuelle (non réactive)' }
                             ],
                             examples: [
-                                { code: '// Dans le constructeur ou ngOnInit\nthis.route.params.subscribe(params => {\n  this.userId = params["id"]\n  this.loadUser()\n})', desc: 'Params réactifs' },
-                                { code: '// Snapshot (valeur unique)\nconst id = this.route.snapshot.params["id"]\nconst query = this.route.snapshot.queryParams["search"]', desc: 'Snapshot' },
-                                { code: '// Nouvelle API (v16+)\nconst id = input<string>() // Input signal depuis route', desc: 'Input signal' }
+                                { code: 'private route = inject(ActivatedRoute)\n\n// Réactif (recommandé si le composant peut être réutilisé)\nthis.route.params.subscribe(params => {\n  this.userId = params["id"]\n  this.loadUser()\n})', desc: 'Params réactifs' },
+                                { code: '// Snapshot (valeur unique)\nconst id = this.route.snapshot.params["id"]\nconst search = this.route.snapshot.queryParams["q"]', desc: 'Snapshot' }
                             ],
                             tips: ['Utilisez snapshot si le composant n\'est pas réutilisé sur la même route'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser routerLink dans les templates',
+                        desc: 'Liens de navigation déclaratifs',
+                        details: {
+                            explanation: 'Directive routerLink pour créer des liens de navigation dans les templates.',
+                            syntax: 'routerLink="/path"\n[routerLink]="["/path", param]"',
+                            options: [
+                                { flag: 'routerLink', desc: 'Chemin de navigation' },
+                                { flag: 'routerLinkActive', desc: 'Classe CSS si route active' },
+                                { flag: 'queryParams', desc: 'Query parameters' }
+                            ],
+                            examples: [
+                                { code: '<a routerLink="/">Accueil</a>\n<a [routerLink]="[\'/users\', user.id]">Voir profil</a>', desc: 'Liens simples' },
+                                { code: '<a routerLink="/users" routerLinkActive="active">Users</a>', desc: 'Avec classe active' },
+                                { code: '<a [routerLink]="[\'/search\']" \n   [queryParams]="{ q: searchTerm }">\n  Rechercher\n</a>', desc: 'Avec query params' }
+                            ],
+                            tips: ['Importez RouterLink dans les composants standalone'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'forms',
+                title: '📝 Créer des Formulaires',
+                icon: 'fa-wpforms',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Créer un formulaire réactif',
+                        desc: 'Formulaire avec FormBuilder',
+                        details: {
+                            explanation: 'Les Reactive Forms offrent un contrôle total sur la validation et la logique.',
+                            syntax: 'FormGroup, FormControl, FormBuilder',
+                            options: [
+                                { flag: 'FormGroup', desc: 'Groupe de contrôles' },
+                                { flag: 'FormControl', desc: 'Contrôle individuel' },
+                                { flag: 'FormBuilder', desc: 'Helper pour créer les formulaires' }
+                            ],
+                            examples: [
+                                { code: 'private fb = inject(FormBuilder)\n\nuserForm = this.fb.group({\n  name: ["", [Validators.required, Validators.minLength(2)]],\n  email: ["", [Validators.required, Validators.email]],\n  age: [18, [Validators.min(0), Validators.max(120)]]\n})', desc: 'Création avec FormBuilder' },
+                                { code: '<!-- Template -->\n<form [formGroup]="userForm" (ngSubmit)="onSubmit()">\n  <input formControlName="name">\n  @if (userForm.get("name")?.errors?.["required"]) {\n    <span class="error">Nom requis</span>\n  }\n  <button [disabled]="userForm.invalid">Envoyer</button>\n</form>', desc: 'Template binding' }
+                            ],
+                            tips: ['Importez ReactiveFormsModule dans les composants standalone'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Ajouter de la validation',
+                        desc: 'Validateurs intégrés et personnalisés',
+                        details: {
+                            explanation: 'Angular fournit des validateurs intégrés et permet de créer des validateurs custom.',
+                            syntax: 'Validators.required, Validators.email, ...',
+                            options: [
+                                { flag: 'required', desc: 'Champ obligatoire' },
+                                { flag: 'email', desc: 'Format email valide' },
+                                { flag: 'minLength(n)', desc: 'Longueur minimale' },
+                                { flag: 'min(n) / max(n)', desc: 'Valeur min/max (nombres)' },
+                                { flag: 'pattern(regex)', desc: 'Pattern regex' }
+                            ],
+                            examples: [
+                                { code: 'password: ["", [\n  Validators.required,\n  Validators.minLength(8),\n  Validators.pattern(/^(?=.*[A-Z])(?=.*\\d).+$/)\n]]', desc: 'Plusieurs validateurs' },
+                                { code: '// Validateur personnalisé\nfunction noSpaces(control: AbstractControl): ValidationErrors | null {\n  return control.value?.includes(" ") \n    ? { noSpaces: true } \n    : null\n}\n\nusername: ["", [Validators.required, noSpaces]]', desc: 'Custom validator' }
+                            ],
+                            tips: ['Les validateurs async sont dans le 3ème argument du FormControl'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Gérer des champs dynamiques',
+                        desc: 'FormArray pour listes variables',
+                        details: {
+                            explanation: 'FormArray gère des listes de contrôles de longueur variable.',
+                            syntax: 'FormArray avec push(), removeAt(), at()',
+                            options: [
+                                { flag: 'push()', desc: 'Ajoute un contrôle' },
+                                { flag: 'removeAt(i)', desc: 'Supprime à l\'index' },
+                                { flag: 'at(i)', desc: 'Accède à l\'index' }
+                            ],
+                            examples: [
+                                { code: 'form = this.fb.group({\n  name: [""],\n  phones: this.fb.array([\n    this.fb.control("")\n  ])\n})\n\nget phones() {\n  return this.form.get("phones") as FormArray\n}\n\naddPhone() {\n  this.phones.push(this.fb.control(""))\n}\n\nremovePhone(index: number) {\n  this.phones.removeAt(index)\n}', desc: 'FormArray de téléphones' },
+                                { code: '<!-- Template -->\n<div formArrayName="phones">\n  @for (phone of phones.controls; track $index) {\n    <div>\n      <input [formControlName]="$index">\n      <button (click)="removePhone($index)">X</button>\n    </div>\n  }\n</div>\n<button (click)="addPhone()">Ajouter</button>', desc: 'Template FormArray' }
+                            ],
+                            tips: ['Créez un getter pour accéder facilement au FormArray typé'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Manipuler les valeurs du formulaire',
+                        desc: 'Lire, modifier, réinitialiser',
+                        details: {
+                            explanation: 'Méthodes pour interagir avec les valeurs du formulaire.',
+                            syntax: 'patchValue(), setValue(), reset()',
+                            options: [
+                                { flag: 'value', desc: 'Obtenir toutes les valeurs' },
+                                { flag: 'patchValue()', desc: 'Mise à jour partielle' },
+                                { flag: 'setValue()', desc: 'Mise à jour complète' },
+                                { flag: 'reset()', desc: 'Réinitialiser' }
+                            ],
+                            examples: [
+                                { code: '// Lire les valeurs\nconst name = this.userForm.get("name")?.value\nconst allValues = this.userForm.value', desc: 'Lire les valeurs' },
+                                { code: '// Mettre à jour\nthis.userForm.patchValue({ name: "Alice" })  // Partiel\nthis.userForm.setValue({ name: "Alice", email: "a@b.com", age: 25 })  // Complet', desc: 'Modifier' },
+                                { code: '// Pré-remplir en mode édition\nloadUser(user: User) {\n  this.userForm.patchValue(user)\n}', desc: 'Pré-remplir' },
+                                { code: 'this.userForm.reset()\nthis.userForm.reset({ name: "Default" })', desc: 'Réinitialiser' }
+                            ],
+                            tips: ['Utilisez patchValue pour mise à jour partielle, setValue pour complète'],
                             warnings: []
                         }
                     }
@@ -436,39 +572,39 @@
             },
             {
                 id: 'rxjs',
-                title: 'RxJS Essentials',
+                title: '♻️ Travailler avec RxJS',
                 icon: 'fa-stream',
                 color: 'border-l-4 border-cyan-500',
                 commands: [
                     {
-                        cmd: 'Observable / subscribe',
-                        desc: 'Observer un flux de données',
+                        cmd: 'S\'abonner à un Observable',
+                        desc: 'Recevoir les données d\'un flux',
                         details: {
                             explanation: 'Les Observables sont des flux de données asynchrones auxquels on s\'abonne.',
-                            syntax: 'observable$.subscribe({\n  next: (value) => {},\n  error: (err) => {},\n  complete: () => {}\n})',
+                            syntax: 'observable$.subscribe({ next, error, complete })',
                             options: [
-                                { flag: 'next', desc: 'Callback pour chaque valeur émise' },
+                                { flag: 'next', desc: 'Callback pour chaque valeur' },
                                 { flag: 'error', desc: 'Callback en cas d\'erreur' },
                                 { flag: 'complete', desc: 'Callback quand le flux se termine' }
                             ],
                             examples: [
-                                { code: 'this.userService.getUsers().subscribe({\n  next: users => this.users = users,\n  error: err => console.error(err)\n})', desc: 'Subscribe avec gestion d\'erreur' },
-                                { code: '// Avec pipe async (recommandé)\nusers$ = this.userService.getUsers()\n// Template: *ngFor="let u of users$ | async"', desc: 'Pipe async' }
+                                { code: 'this.userService.getUsers().subscribe({\n  next: users => this.users.set(users),\n  error: err => console.error(err)\n})', desc: 'Subscribe avec gestion d\'erreur' },
+                                { code: '// Avec pipe async (recommandé)\nusers$ = this.userService.getUsers()\n\n// Template\n@for (user of users$ | async; track user.id) {\n  <p>{{ user.name }}</p>\n}', desc: 'Pipe async' }
                             ],
                             tips: ['Préférez le pipe async pour éviter les fuites mémoire'],
                             warnings: ['N\'oubliez pas de unsubscribe ou utilisez takeUntilDestroyed()']
                         }
                     },
                     {
-                        cmd: 'pipe() operators',
-                        desc: 'Transformer les flux',
+                        cmd: 'Transformer les données avec pipe()',
+                        desc: 'Opérateurs de transformation',
                         details: {
                             explanation: 'Les opérateurs RxJS transforment les données dans un flux.',
-                            syntax: 'source$.pipe(\n  map(x => transform(x)),\n  filter(x => condition(x))\n)',
+                            syntax: 'source$.pipe(operator1(), operator2())',
                             options: [
                                 { flag: 'map', desc: 'Transforme chaque valeur' },
                                 { flag: 'filter', desc: 'Filtre les valeurs' },
-                                { flag: 'tap', desc: 'Effet secondaire (debug, log)' },
+                                { flag: 'tap', desc: 'Effet secondaire (debug)' },
                                 { flag: 'switchMap', desc: 'Map + switch vers nouvel observable' },
                                 { flag: 'catchError', desc: 'Gère les erreurs' }
                             ],
@@ -481,298 +617,84 @@
                         }
                     },
                     {
-                        cmd: 'takeUntilDestroyed()',
-                        desc: 'Auto-unsubscribe',
+                        cmd: 'Gérer automatiquement le unsubscribe',
+                        desc: 'takeUntilDestroyed() pour le cleanup',
                         details: {
-                            explanation: 'Opérateur Angular qui gère automatiquement le unsubscribe à la destruction du composant.',
-                            syntax: 'source$.pipe(\n  takeUntilDestroyed()\n).subscribe(...)',
+                            explanation: 'takeUntilDestroyed() gère automatiquement le unsubscribe à la destruction du composant.',
+                            syntax: 'source$.pipe(takeUntilDestroyed()).subscribe(...)',
                             options: [
-                                { flag: 'takeUntilDestroyed()', desc: 'Dans un contexte d\'injection' },
+                                { flag: 'takeUntilDestroyed()', desc: 'Dans le constructeur' },
                                 { flag: 'takeUntilDestroyed(destroyRef)', desc: 'Avec DestroyRef explicite' }
                             ],
                             examples: [
-                                { code: 'export class MyComponent {\n  constructor() {\n    this.dataService.getData().pipe(\n      takeUntilDestroyed()\n    ).subscribe(data => this.data = data)\n  }\n}', desc: 'Auto-cleanup' },
+                                { code: 'export class MyComponent {\n  constructor() {\n    this.dataService.getData().pipe(\n      takeUntilDestroyed()\n    ).subscribe(data => this.data.set(data))\n  }\n}', desc: 'Auto-cleanup dans constructeur' },
                                 { code: '// Alternative: DestroyRef\nprivate destroyRef = inject(DestroyRef)\n\nngOnInit() {\n  source$.pipe(\n    takeUntilDestroyed(this.destroyRef)\n  ).subscribe()', desc: 'Avec DestroyRef' }
                             ],
                             tips: ['Disponible depuis Angular 16, remplace le pattern Subject + takeUntil'],
                             warnings: ['Doit être appelé dans un contexte d\'injection (constructeur)']
                         }
-                    }
-                ]
-            },
-            {
-                id: 'forms',
-                title: 'Formulaires',
-                icon: 'fa-wpforms',
-                color: 'border-l-4 border-pink-500',
-                commands: [
-                    {
-                        cmd: 'Reactive Forms',
-                        desc: 'Formulaires réactifs',
-                        details: {
-                            explanation: 'Approche programmatique pour créer des formulaires avec validation côté TypeScript.',
-                            syntax: 'FormGroup, FormControl, FormArray',
-                            options: [
-                                { flag: 'FormGroup', desc: 'Groupe de contrôles' },
-                                { flag: 'FormControl', desc: 'Contrôle individuel' },
-                                { flag: 'FormArray', desc: 'Tableau de contrôles' },
-                                { flag: 'FormBuilder', desc: 'Helper pour créer les formulaires' }
-                            ],
-                            examples: [
-                                { code: '// Avec FormBuilder (recommandé)\nprivate fb = inject(FormBuilder)\n\nuserForm = this.fb.group({\n  name: ["", [Validators.required, Validators.minLength(2)]],\n  email: ["", [Validators.required, Validators.email]],\n  age: [18, [Validators.min(0), Validators.max(120)]]\n})', desc: 'FormBuilder' },
-                                { code: '// Dans le template\n<form [formGroup]="userForm" (ngSubmit)="onSubmit()">\n  <input formControlName="name">\n  <span *ngIf="userForm.get(\'name\')?.errors?.[\'required\']">\n    Nom requis\n  </span>\n  <button [disabled]="userForm.invalid">Envoyer</button>\n</form>', desc: 'Template binding' },
-                                { code: '// Accéder aux valeurs\nconst name = this.userForm.get("name")?.value\nconst allValues = this.userForm.value\n\n// Mettre à jour\nthis.userForm.patchValue({ name: "Alice" })\nthis.userForm.reset()', desc: 'Manipulation' }
-                            ],
-                            tips: ['Utilisez patchValue pour mise à jour partielle, setValue pour complète'],
-                            warnings: ['Importez ReactiveFormsModule ou provideHttpClient()']
-                        }
                     },
                     {
-                        cmd: 'Validators',
-                        desc: 'Validation des champs',
+                        cmd: 'Réagir aux changements avec effect()',
+                        desc: 'Effets secondaires avec signals',
                         details: {
-                            explanation: 'Validateurs intégrés et personnalisés pour les formulaires réactifs.',
-                            syntax: 'Validators.required, Validators.email, ...',
-                            options: [
-                                { flag: 'required', desc: 'Champ obligatoire' },
-                                { flag: 'email', desc: 'Format email valide' },
-                                { flag: 'minLength(n)', desc: 'Longueur minimale' },
-                                { flag: 'maxLength(n)', desc: 'Longueur maximale' },
-                                { flag: 'min(n) / max(n)', desc: 'Valeur min/max (nombres)' },
-                                { flag: 'pattern(regex)', desc: 'Pattern regex' }
-                            ],
-                            examples: [
-                                { code: '// Validateurs multiples\npassword: ["", [\n  Validators.required,\n  Validators.minLength(8),\n  Validators.pattern(/^(?=.*[A-Z])(?=.*\\d).+$/)\n]]', desc: 'Plusieurs validateurs' },
-                                { code: '// Validateur personnalisé\nfunction noSpaces(control: AbstractControl): ValidationErrors | null {\n  return control.value?.includes(" ") \n    ? { noSpaces: true } \n    : null\n}\n\nusername: ["", [Validators.required, noSpaces]]', desc: 'Custom validator' },
-                                { code: '// Validateur asynchrone\nasync function uniqueEmail(control: AbstractControl) {\n  const exists = await checkEmailExists(control.value)\n  return exists ? { emailTaken: true } : null\n}\n\nemail: ["", [Validators.email], [uniqueEmail]]', desc: 'Async validator' }
-                            ],
-                            tips: ['Les validateurs async sont dans le 3ème argument du FormControl'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'FormArray',
-                        desc: 'Champs dynamiques',
-                        details: {
-                            explanation: 'Gère des listes de contrôles de formulaire de longueur variable.',
-                            syntax: 'FormArray pour les champs répétables',
-                            options: [
-                                { flag: 'push()', desc: 'Ajoute un contrôle' },
-                                { flag: 'removeAt(i)', desc: 'Supprime à l\'index' },
-                                { flag: 'at(i)', desc: 'Accède à l\'index' },
-                                { flag: 'controls', desc: 'Liste des contrôles' }
-                            ],
-                            examples: [
-                                { code: 'form = this.fb.group({\n  name: [""],\n  phones: this.fb.array([\n    this.fb.control("")\n  ])\n})\n\nget phones() {\n  return this.form.get("phones") as FormArray\n}\n\naddPhone() {\n  this.phones.push(this.fb.control(""))\n}\n\nremovePhone(index: number) {\n  this.phones.removeAt(index)\n}', desc: 'FormArray de téléphones' },
-                                { code: '<!-- Template -->\n<div formArrayName="phones">\n  @for (phone of phones.controls; track $index) {\n    <div>\n      <input [formControlName]="$index">\n      <button (click)="removePhone($index)">X</button>\n    </div>\n  }\n</div>\n<button (click)="addPhone()">Ajouter téléphone</button>', desc: 'Template FormArray' }
-                            ],
-                            tips: ['Créez un getter pour accéder facilement au FormArray typé'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'guards',
-                title: 'Guards & Interceptors',
-                icon: 'fa-shield-alt',
-                color: 'border-l-4 border-amber-500',
-                commands: [
-                    {
-                        cmd: 'Route Guards',
-                        desc: 'Protéger les routes',
-                        details: {
-                            explanation: 'Les guards contrôlent l\'accès aux routes (authentification, permissions).',
-                            syntax: 'canActivate, canDeactivate, resolve',
-                            options: [
-                                { flag: 'canActivate', desc: 'Avant d\'entrer dans la route' },
-                                { flag: 'canDeactivate', desc: 'Avant de quitter la route' },
-                                { flag: 'canMatch', desc: 'Avant le matching de route' },
-                                { flag: 'resolve', desc: 'Charger des données avant navigation' }
-                            ],
-                            examples: [
-                                { code: '// Guard fonctionnel (recommandé v17+)\nexport const authGuard: CanActivateFn = (route, state) => {\n  const auth = inject(AuthService)\n  const router = inject(Router)\n  \n  if (auth.isAuthenticated()) {\n    return true\n  }\n  return router.createUrlTree(["/login"], {\n    queryParams: { returnUrl: state.url }\n  })\n}', desc: 'Auth guard fonctionnel' },
-                                { code: '// Dans les routes\n{\n  path: "admin",\n  component: AdminComponent,\n  canActivate: [authGuard]\n}', desc: 'Utilisation dans routes' },
-                                { code: '// Guard de confirmation (quitter page)\nexport const unsavedChangesGuard: CanDeactivateFn<any> = (component) => {\n  if (component.hasUnsavedChanges?.()) {\n    return confirm("Quitter sans sauvegarder?")\n  }\n  return true\n}', desc: 'CanDeactivate' }
-                            ],
-                            tips: ['Les guards fonctionnels remplacent les classes depuis Angular 15+'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'HTTP Interceptors',
-                        desc: 'Intercepter les requêtes HTTP',
-                        details: {
-                            explanation: 'Intercepteurs pour modifier les requêtes/réponses HTTP (auth, logging, errors).',
-                            syntax: 'HttpInterceptorFn pour intercepter les requêtes',
-                            options: [
-                                { flag: 'request', desc: 'Modifier la requête sortante' },
-                                { flag: 'next()', desc: 'Passer au handler suivant' },
-                                { flag: 'clone()', desc: 'Cloner et modifier la requête' }
-                            ],
-                            examples: [
-                                { code: '// Intercepteur d\'authentification\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const auth = inject(AuthService)\n  const token = auth.getToken()\n  \n  if (token) {\n    req = req.clone({\n      setHeaders: { Authorization: `Bearer ${token}` }\n    })\n  }\n  return next(req)\n}', desc: 'Auth interceptor' },
-                                { code: '// Intercepteur d\'erreurs\nexport const errorInterceptor: HttpInterceptorFn = (req, next) => {\n  return next(req).pipe(\n    catchError((error: HttpErrorResponse) => {\n      if (error.status === 401) {\n        inject(Router).navigate(["/login"])\n      }\n      return throwError(() => error)\n    })\n  )\n}', desc: 'Error interceptor' },
-                                { code: '// Configuration dans app.config.ts\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHttpClient(\n      withInterceptors([authInterceptor, errorInterceptor])\n    )\n  ]\n}', desc: 'Enregistrer les interceptors' }
-                            ],
-                            tips: ['L\'ordre des interceptors est important (premier ajouté = premier exécuté)'],
-                            warnings: ['Utilisez withInterceptors() avec provideHttpClient() en standalone']
-                        }
-                    },
-                    {
-                        cmd: 'Resolvers',
-                        desc: 'Pré-charger des données',
-                        details: {
-                            explanation: 'Les resolvers chargent les données nécessaires avant d\'afficher une route.',
-                            syntax: 'ResolveFn pour charger des données',
-                            options: [
-                                { flag: 'resolve', desc: 'Propriété dans la config de route' },
-                                { flag: 'route.data', desc: 'Accès aux données résolues' }
-                            ],
-                            examples: [
-                                { code: '// Resolver fonctionnel\nexport const userResolver: ResolveFn<User> = (route) => {\n  const userService = inject(UserService)\n  const userId = route.params["id"]\n  return userService.getUser(userId)\n}', desc: 'User resolver' },
-                                { code: '// Dans les routes\n{\n  path: "user/:id",\n  component: UserComponent,\n  resolve: { user: userResolver }\n}', desc: 'Config route' },
-                                { code: '// Dans le composant\nexport class UserComponent {\n  private route = inject(ActivatedRoute)\n  user = toSignal(this.route.data.pipe(\n    map(data => data["user"])\n  ))\n}', desc: 'Accéder aux données' }
-                            ],
-                            tips: ['Les resolvers bloquent la navigation jusqu\'à résolution - utilisez avec parcimonie'],
-                            warnings: ['Évitez les resolvers longs, préférez le chargement dans le composant avec skeleton']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'signals',
-                title: 'Signals (v17+)',
-                icon: 'fa-broadcast-tower',
-                color: 'border-l-4 border-emerald-500',
-                commands: [
-                    {
-                        cmd: 'signal()',
-                        desc: 'Créer un signal réactif',
-                        details: {
-                            explanation: 'Les Signals sont une nouvelle primitive réactive pour gérer l\'état sans Zone.js.',
-                            syntax: 'const mySignal = signal(initialValue)',
-                            options: [
-                                { flag: 'signal(value)', desc: 'Crée un signal avec valeur initiale' },
-                                { flag: 'signal()', desc: 'Lecture de la valeur' },
-                                { flag: 'set(value)', desc: 'Remplace la valeur' },
-                                { flag: 'update(fn)', desc: 'Met à jour basé sur la valeur précédente' }
-                            ],
-                            examples: [
-                                { code: '// Déclaration\ncount = signal(0)\nuser = signal<User | null>(null)\n\n// Lecture (dans template ou code)\n<p>Count: {{ count() }}</p>\nconsole.log(this.count())', desc: 'Créer et lire' },
-                                { code: '// Modification\nthis.count.set(10) // Remplace\nthis.count.update(c => c + 1) // Incrémente\n\n// Objets\nthis.user.update(u => ({ ...u, name: "New" }))', desc: 'Modifier un signal' },
-                                { code: '// Signal en lecture seule\nprivate _count = signal(0)\ncount = this._count.asReadonly()', desc: 'Signal readonly' }
-                            ],
-                            tips: ['Les signals sont plus performants que les observables pour l\'état local'],
-                            warnings: ['N\'oubliez pas les parenthèses () pour lire la valeur']
-                        }
-                    },
-                    {
-                        cmd: 'computed()',
-                        desc: 'Valeur dérivée réactive',
-                        details: {
-                            explanation: 'Crée un signal dérivé qui se recalcule automatiquement quand ses dépendances changent.',
-                            syntax: 'const derived = computed(() => expression)',
-                            options: [
-                                { flag: 'computed(fn)', desc: 'Fonction de calcul' }
-                            ],
-                            examples: [
-                                { code: 'firstName = signal("John")\nlastName = signal("Doe")\n\nfullName = computed(() => \n  `${this.firstName()} ${this.lastName()}`\n)\n\n// fullName() se met à jour automatiquement', desc: 'Computed basique' },
-                                { code: 'items = signal<Item[]>([])\nfilter = signal("")\n\nfilteredItems = computed(() => {\n  const term = this.filter().toLowerCase()\n  return this.items().filter(i => \n    i.name.toLowerCase().includes(term)\n  )\n})', desc: 'Filtrage réactif' },
-                                { code: 'count = signal(0)\ndoubleCount = computed(() => this.count() * 2)\n\n// Template\n<p>Double: {{ doubleCount() }}</p>', desc: 'Dans le template' }
-                            ],
-                            tips: ['computed() est mémorisé - ne recalcule que si les dépendances changent'],
-                            warnings: ['computed() est en lecture seule, pas de set/update']
-                        }
-                    },
-                    {
-                        cmd: 'effect()',
-                        desc: 'Réagir aux changements',
-                        details: {
-                            explanation: 'Exécute du code à chaque changement des signals lus dans la fonction.',
+                            explanation: 'effect() exécute du code à chaque changement des signals lus.',
                             syntax: 'effect(() => { /* side effects */ })',
-                            options: [
-                                { flag: 'effect(fn)', desc: 'Fonction avec effets secondaires' },
-                                { flag: 'allowSignalWrites', desc: 'Permettre l\'écriture de signals' }
-                            ],
+                            options: [],
                             examples: [
-                                { code: '// Logger les changements\nconstructor() {\n  effect(() => {\n    console.log("Count changed:", this.count())\n  })\n}', desc: 'Logging réactif' },
-                                { code: '// Synchroniser avec localStorage\nconstructor() {\n  effect(() => {\n    localStorage.setItem("user", \n      JSON.stringify(this.user())\n    )\n  })\n}', desc: 'Persistence automatique' },
-                                { code: '// Avec cleanup\nconstructor() {\n  effect((onCleanup) => {\n    const timer = setInterval(() => ..., 1000)\n    onCleanup(() => clearInterval(timer))\n  })\n}', desc: 'Avec nettoyage' }
+                                { code: 'constructor() {\n  effect(() => {\n    console.log("Count changed:", this.count())\n  })\n}', desc: 'Logging réactif' },
+                                { code: '// Synchroniser avec localStorage\nconstructor() {\n  effect(() => {\n    localStorage.setItem("user", \n      JSON.stringify(this.user())\n    )\n  })\n}', desc: 'Persistence automatique' }
                             ],
                             tips: ['effect() doit être appelé dans un contexte d\'injection'],
                             warnings: ['Évitez de modifier des signals dans effect() sans allowSignalWrites']
-                        }
-                    },
-                    {
-                        cmd: 'input() / output()',
-                        desc: 'Signals pour les I/O composants',
-                        details: {
-                            explanation: 'Nouvelle syntaxe Angular 17+ pour @Input et @Output avec signals.',
-                            syntax: 'title = input<string>()\nclicked = output<void>()',
-                            options: [
-                                { flag: 'input()', desc: 'Input optionnel' },
-                                { flag: 'input.required()', desc: 'Input obligatoire' },
-                                { flag: 'input(default)', desc: 'Input avec valeur par défaut' },
-                                { flag: 'output()', desc: 'Output (remplace EventEmitter)' }
-                            ],
-                            examples: [
-                                { code: '// Nouveau style (v17+)\nexport class CardComponent {\n  title = input.required<string>()\n  subtitle = input("")\n  theme = input<"light" | "dark">("light")\n  \n  closed = output<void>()\n  selected = output<Item>()\n  \n  onClose() {\n    this.closed.emit()\n  }\n}', desc: 'Inputs et outputs signals' },
-                                { code: '<!-- Utilisation -->\n<app-card \n  [title]="myTitle" \n  [subtitle]="mySubtitle"\n  (closed)="handleClose()"\n  (selected)="handleSelect($event)"\n/>', desc: 'Template usage' },
-                                { code: '// Computed basé sur input\nuppercaseTitle = computed(() => \n  this.title().toUpperCase()\n)', desc: 'Computed avec input' }
-                            ],
-                            tips: ['input() retourne un signal - lecture avec ()'],
-                            warnings: ['Disponible depuis Angular 17.1']
                         }
                     }
                 ]
             },
             {
                 id: 'pipes',
-                title: 'Pipes',
+                title: '🎨 Transformer les Données',
                 icon: 'fa-filter',
                 color: 'border-l-4 border-violet-500',
                 commands: [
                     {
-                        cmd: 'Pipes intégrés',
+                        cmd: 'Utiliser les pipes intégrés',
                         desc: 'Transformations courantes',
                         details: {
-                            explanation: 'Pipes fournis par Angular pour transformer les données dans les templates.',
+                            explanation: 'Angular fournit des pipes pour formater les données dans les templates.',
                             syntax: '{{ value | pipeName:arg1:arg2 }}',
                             options: [
                                 { flag: 'date', desc: 'Formatage de date' },
                                 { flag: 'currency', desc: 'Formatage monétaire' },
                                 { flag: 'number', desc: 'Formatage numérique' },
                                 { flag: 'uppercase/lowercase', desc: 'Casse du texte' },
-                                { flag: 'json', desc: 'Debug JSON' },
                                 { flag: 'async', desc: 'Unwrap Observable/Promise' }
                             ],
                             examples: [
                                 { code: '{{ birthday | date:"dd/MM/yyyy" }}\n{{ birthday | date:"fullDate":"":"fr" }}', desc: 'Formatage date' },
-                                { code: '{{ price | currency:"EUR":"symbol":"1.2-2" }}\n// 1 234,50 €', desc: 'Formatage monnaie' },
-                                { code: '{{ 0.256 | percent:"1.0-2" }} // 25.6%\n{{ 1234.5 | number:"1.2-2" }} // 1 234.50', desc: 'Nombres et pourcentages' },
-                                { code: '{{ user.name | uppercase }}\n{{ data | json }} <!-- Debug -->', desc: 'Texte et debug' },
-                                { code: '{{ users$ | async }}\n@for (user of users$ | async; track user.id) { }', desc: 'Pipe async' }
+                                { code: '{{ price | currency:"EUR":"symbol":"1.2-2" }}', desc: 'Formatage monnaie (1 234,50 €)' },
+                                { code: '{{ 0.256 | percent:"1.0-2" }}  <!-- 25.6% -->\n{{ 1234.5 | number:"1.2-2" }}  <!-- 1 234.50 -->', desc: 'Nombres et pourcentages' },
+                                { code: '{{ user.name | uppercase }}\n{{ data | json }}  <!-- Debug -->', desc: 'Texte et debug' }
                             ],
                             tips: ['Le pipe async gère automatiquement subscribe/unsubscribe'],
-                            warnings: ['Importez CommonModule ou les pipes individuellement en standalone']
+                            warnings: []
                         }
                     },
                     {
-                        cmd: 'Pipe personnalisé',
-                        desc: 'Créer ses propres pipes',
+                        cmd: 'Créer un pipe personnalisé',
+                        desc: 'Transformations métier custom',
                         details: {
-                            explanation: 'Créez des pipes custom pour des transformations métier spécifiques.',
-                            syntax: '@Pipe({ name: "myPipe" })\nexport class MyPipe implements PipeTransform',
+                            explanation: 'Créez des pipes custom pour des transformations spécifiques.',
+                            syntax: '@Pipe({ name: "myPipe", standalone: true })',
                             options: [
                                 { flag: 'name', desc: 'Nom utilisé dans le template' },
                                 { flag: 'standalone: true', desc: 'Pipe standalone' },
                                 { flag: 'pure: false', desc: 'Pipe impure (recalcul à chaque change detection)' }
                             ],
                             examples: [
+                                { code: 'ng g pipe shared/pipes/truncate --standalone', desc: 'Générer avec CLI' },
                                 { code: '@Pipe({\n  name: "truncate",\n  standalone: true\n})\nexport class TruncatePipe implements PipeTransform {\n  transform(value: string, limit = 50, trail = "..."): string {\n    if (!value || value.length <= limit) return value\n    return value.substring(0, limit) + trail\n  }\n}\n\n// Usage: {{ text | truncate:30:"..." }}', desc: 'Pipe de troncature' },
-                                { code: '@Pipe({ name: "timeAgo", standalone: true })\nexport class TimeAgoPipe implements PipeTransform {\n  transform(date: Date | string): string {\n    const seconds = Math.floor(\n      (Date.now() - new Date(date).getTime()) / 1000\n    )\n    if (seconds < 60) return "À l\'instant"\n    if (seconds < 3600) return `Il y a ${Math.floor(seconds/60)} min`\n    if (seconds < 86400) return `Il y a ${Math.floor(seconds/3600)} h`\n    return `Il y a ${Math.floor(seconds/86400)} j`\n  }\n}', desc: 'Pipe "il y a"' },
-                                { code: '// Générer avec CLI\nng g pipe shared/pipes/truncate --standalone', desc: 'Génération CLI' }
+                                { code: '@Pipe({ name: "timeAgo", standalone: true })\nexport class TimeAgoPipe implements PipeTransform {\n  transform(date: Date | string): string {\n    const seconds = Math.floor(\n      (Date.now() - new Date(date).getTime()) / 1000\n    )\n    if (seconds < 60) return "À l\'instant"\n    if (seconds < 3600) return `Il y a ${Math.floor(seconds/60)} min`\n    if (seconds < 86400) return `Il y a ${Math.floor(seconds/3600)} h`\n    return `Il y a ${Math.floor(seconds/86400)} j`\n  }\n}', desc: 'Pipe "il y a"' }
                             ],
                             tips: ['Les pipes purs sont plus performants (mémorisés)'],
                             warnings: ['Évitez les pipes impurs pour les grandes listes']
@@ -781,35 +703,107 @@
                 ]
             },
             {
+                id: 'security',
+                title: '🔒 Sécuriser l\'Application',
+                icon: 'fa-shield-alt',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Protéger les routes avec un Guard',
+                        desc: 'Contrôler l\'accès aux pages',
+                        details: {
+                            explanation: 'Les guards vérifient les conditions d\'accès avant d\'activer une route.',
+                            syntax: 'export const authGuard: CanActivateFn = (route, state) => {...}',
+                            options: [
+                                { flag: 'canActivate', desc: 'Avant d\'entrer dans la route' },
+                                { flag: 'canDeactivate', desc: 'Avant de quitter la route' },
+                                { flag: 'canMatch', desc: 'Avant le matching de route' }
+                            ],
+                            examples: [
+                                { code: '// auth.guard.ts\nexport const authGuard: CanActivateFn = (route, state) => {\n  const auth = inject(AuthService)\n  const router = inject(Router)\n  \n  if (auth.isAuthenticated()) {\n    return true\n  }\n  return router.createUrlTree(["/login"], {\n    queryParams: { returnUrl: state.url }\n  })\n}', desc: 'Auth guard fonctionnel' },
+                                { code: '// Dans les routes\n{\n  path: "admin",\n  component: AdminComponent,\n  canActivate: [authGuard]\n}', desc: 'Appliquer le guard' },
+                                { code: '// Guard de confirmation\nexport const unsavedChangesGuard: CanDeactivateFn<any> = (component) => {\n  if (component.hasUnsavedChanges?.()) {\n    return confirm("Quitter sans sauvegarder?")\n  }\n  return true\n}', desc: 'CanDeactivate' }
+                            ],
+                            tips: ['Les guards fonctionnels remplacent les classes depuis Angular 15+'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Ajouter un token aux requêtes',
+                        desc: 'Intercepteur d\'authentification',
+                        details: {
+                            explanation: 'L\'intercepteur ajoute automatiquement le token JWT à toutes les requêtes.',
+                            syntax: 'req.clone({ setHeaders: { Authorization: ... } })',
+                            options: [],
+                            examples: [
+                                { code: 'export const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const auth = inject(AuthService)\n  const token = auth.getToken()\n  \n  // Ne pas ajouter le token pour les requêtes d\'auth\n  if (req.url.includes("/auth/")) {\n    return next(req)\n  }\n  \n  if (token) {\n    req = req.clone({\n      setHeaders: {\n        Authorization: `Bearer ${token}`\n      }\n    })\n  }\n  return next(req)\n}', desc: 'Intercepteur avec exclusions' }
+                            ],
+                            tips: ['Excluez les routes d\'authentification de l\'intercepteur'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Gérer la déconnexion automatique',
+                        desc: 'Redirection sur erreur 401',
+                        details: {
+                            explanation: 'L\'intercepteur d\'erreur gère les sessions expirées.',
+                            syntax: 'catchError + redirect /login',
+                            options: [],
+                            examples: [
+                                { code: 'export const errorInterceptor: HttpInterceptorFn = (req, next) => {\n  const auth = inject(AuthService)\n  const router = inject(Router)\n  \n  return next(req).pipe(\n    catchError((error: HttpErrorResponse) => {\n      if (error.status === 401) {\n        auth.logout()\n        router.navigate(["/login"], {\n          queryParams: { \n            sessionExpired: true,\n            returnUrl: router.url\n          }\n        })\n      }\n      return throwError(() => error)\n    })\n  )\n}', desc: 'Gestion session expirée' }
+                            ],
+                            tips: ['Passez returnUrl pour rediriger après reconnexion'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Pré-charger des données',
+                        desc: 'Resolver pour charger avant navigation',
+                        details: {
+                            explanation: 'Les resolvers chargent les données avant d\'afficher la route.',
+                            syntax: 'export const userResolver: ResolveFn<User> = (route) => {...}',
+                            options: [],
+                            examples: [
+                                { code: '// user.resolver.ts\nexport const userResolver: ResolveFn<User> = (route) => {\n  const userService = inject(UserService)\n  const userId = route.params["id"]\n  return userService.getUser(userId)\n}', desc: 'User resolver' },
+                                { code: '// Dans les routes\n{\n  path: "user/:id",\n  component: UserComponent,\n  resolve: { user: userResolver }\n}', desc: 'Config route' },
+                                { code: '// Dans le composant\nexport class UserComponent {\n  private route = inject(ActivatedRoute)\n  user = toSignal(this.route.data.pipe(\n    map(data => data["user"])\n  ))\n}', desc: 'Accéder aux données' }
+                            ],
+                            tips: ['Les resolvers bloquent la navigation - utilisez avec parcimonie'],
+                            warnings: ['Préférez le chargement dans le composant avec skeleton pour une meilleure UX']
+                        }
+                    }
+                ]
+            },
+            {
                 id: 'project',
-                title: '🚀 Projet: App CRUD',
+                title: '🎯 Projet: Application CRUD',
                 icon: 'fa-rocket',
                 color: 'border-l-4 border-gradient-to-r from-red-500 to-orange-500',
                 commands: [
                     {
-                        cmd: 'Étape 1: Setup Projet',
-                        desc: 'Créer et configurer le projet',
+                        cmd: 'Étape 1: Créer le projet',
+                        desc: 'Setup et structure',
                         details: {
-                            explanation: 'Initialisation d\'un projet Angular 17+ standalone avec routing.',
-                            syntax: 'Configuration initiale du projet',
+                            explanation: 'Initialisation d\'un projet Angular 17+ standalone.',
+                            syntax: 'ng new + structure recommandée',
                             options: [],
                             examples: [
-                                { code: '# Créer le projet\nng new task-manager --standalone --routing --style=scss\ncd task-manager\n\n# Structure recommandée\nsrc/\n  app/\n    core/           # Services singleton\n    shared/         # Composants/pipes partagés\n    features/       # Modules fonctionnels\n      tasks/\n        components/\n        services/\n        models/', desc: 'Structure projet' },
-                                { code: '// app.config.ts\nimport { provideRouter } from "@angular/router"\nimport { provideHttpClient, withInterceptors } from "@angular/common/http"\nimport { routes } from "./app.routes"\nimport { authInterceptor } from "./core/interceptors/auth.interceptor"\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideRouter(routes),\n    provideHttpClient(withInterceptors([authInterceptor]))\n  ]\n}', desc: 'Configuration app' }
+                                { code: 'ng new task-manager --standalone --routing --style=scss\ncd task-manager\n\n# Structure recommandée\nsrc/app/\n  core/           # Services singleton, guards\n  shared/         # Composants/pipes partagés\n  features/       # Modules fonctionnels\n    tasks/\n      components/\n      services/\n      models/', desc: 'Structure projet' },
+                                { code: '// app.config.ts\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideRouter(routes),\n    provideHttpClient(withInterceptors([authInterceptor]))\n  ]\n}', desc: 'Configuration' }
                             ],
                             tips: ['Utilisez le flag --standalone pour les nouveaux projets'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 2: Modèle & Service',
-                        desc: 'Définir le modèle et le service',
+                        cmd: 'Étape 2: Modèle et Service',
+                        desc: 'Interface et service CRUD',
                         details: {
-                            explanation: 'Création de l\'interface Task et du service CRUD.',
-                            syntax: 'Modèle de données et service HTTP',
+                            explanation: 'Création de l\'interface Task et du service HTTP.',
+                            syntax: 'Interface + @Injectable',
                             options: [],
                             examples: [
-                                { code: '// models/task.model.ts\nexport interface Task {\n  id: string\n  title: string\n  description: string\n  completed: boolean\n  priority: "low" | "medium" | "high"\n  createdAt: Date\n  dueDate?: Date\n}', desc: 'Interface Task' },
+                                { code: '// models/task.model.ts\nexport interface Task {\n  id: string\n  title: string\n  description: string\n  completed: boolean\n  priority: "low" | "medium" | "high"\n  createdAt: Date\n}', desc: 'Interface Task' },
                                 { code: '// services/task.service.ts\n@Injectable({ providedIn: "root" })\nexport class TaskService {\n  private http = inject(HttpClient)\n  private apiUrl = "/api/tasks"\n  \n  getTasks(): Observable<Task[]> {\n    return this.http.get<Task[]>(this.apiUrl)\n  }\n  \n  getTask(id: string): Observable<Task> {\n    return this.http.get<Task>(`${this.apiUrl}/${id}`)\n  }\n  \n  createTask(task: Omit<Task, "id" | "createdAt">): Observable<Task> {\n    return this.http.post<Task>(this.apiUrl, task)\n  }\n  \n  updateTask(id: string, task: Partial<Task>): Observable<Task> {\n    return this.http.patch<Task>(`${this.apiUrl}/${id}`, task)\n  }\n  \n  deleteTask(id: string): Observable<void> {\n    return this.http.delete<void>(`${this.apiUrl}/${id}`)\n  }\n}', desc: 'TaskService complet' }
                             ],
                             tips: ['Utilisez Omit et Partial pour typer les payloads'],
@@ -818,13 +812,13 @@
                     },
                     {
                         cmd: 'Étape 3: Liste avec Signals',
-                        desc: 'Composant liste avec état réactif',
+                        desc: 'Composant liste réactif',
                         details: {
-                            explanation: 'Création d\'un composant liste utilisant les Signals pour l\'état.',
-                            syntax: 'Composant avec signals et async pipe',
+                            explanation: 'Composant liste utilisant les Signals pour l\'état.',
+                            syntax: 'signal() + computed() + subscribe',
                             options: [],
                             examples: [
-                                { code: '// task-list.component.ts\n@Component({\n  selector: "app-task-list",\n  standalone: true,\n  imports: [CommonModule, RouterLink],\n  templateUrl: "./task-list.component.html"\n})\nexport class TaskListComponent {\n  private taskService = inject(TaskService)\n  \n  tasks = signal<Task[]>([])\n  loading = signal(true)\n  filter = signal<"all" | "active" | "completed">("all")\n  \n  filteredTasks = computed(() => {\n    const f = this.filter()\n    return this.tasks().filter(t => \n      f === "all" ? true : \n      f === "completed" ? t.completed : !t.completed\n    )\n  })\n  \n  constructor() {\n    this.loadTasks()\n  }\n  \n  loadTasks() {\n    this.loading.set(true)\n    this.taskService.getTasks().subscribe({\n      next: tasks => {\n        this.tasks.set(tasks)\n        this.loading.set(false)\n      },\n      error: () => this.loading.set(false)\n    })\n  }\n  \n  toggleComplete(task: Task) {\n    this.taskService.updateTask(task.id, { \n      completed: !task.completed \n    }).subscribe(() => this.loadTasks())\n  }\n}', desc: 'Composant avec signals' }
+                                { code: '@Component({\n  selector: "app-task-list",\n  standalone: true,\n  imports: [CommonModule, RouterLink],\n  templateUrl: "./task-list.component.html"\n})\nexport class TaskListComponent {\n  private taskService = inject(TaskService)\n  \n  tasks = signal<Task[]>([])\n  loading = signal(true)\n  filter = signal<"all" | "active" | "completed">("all")\n  \n  filteredTasks = computed(() => {\n    const f = this.filter()\n    return this.tasks().filter(t => \n      f === "all" ? true : \n      f === "completed" ? t.completed : !t.completed\n    )\n  })\n  \n  constructor() {\n    this.loadTasks()\n  }\n  \n  loadTasks() {\n    this.loading.set(true)\n    this.taskService.getTasks().pipe(\n      takeUntilDestroyed()\n    ).subscribe({\n      next: tasks => {\n        this.tasks.set(tasks)\n        this.loading.set(false)\n      },\n      error: () => this.loading.set(false)\n    })\n  }\n  \n  toggleComplete(task: Task) {\n    this.taskService.updateTask(task.id, { \n      completed: !task.completed \n    }).subscribe(() => this.loadTasks())\n  }\n}', desc: 'TaskListComponent' }
                             ],
                             tips: ['computed() pour les filtres évite les recalculs inutiles'],
                             warnings: []
@@ -832,42 +826,41 @@
                     },
                     {
                         cmd: 'Étape 4: Formulaire Réactif',
-                        desc: 'Créer/éditer avec Reactive Forms',
+                        desc: 'Créer/éditer avec validation',
                         details: {
                             explanation: 'Formulaire pour créer et modifier des tâches.',
-                            syntax: 'Reactive Form avec validation',
+                            syntax: 'FormBuilder + Validators',
                             options: [],
                             examples: [
-                                { code: '// task-form.component.ts\n@Component({\n  selector: "app-task-form",\n  standalone: true,\n  imports: [ReactiveFormsModule, CommonModule],\n  templateUrl: "./task-form.component.html"\n})\nexport class TaskFormComponent {\n  private fb = inject(FormBuilder)\n  private taskService = inject(TaskService)\n  private router = inject(Router)\n  private route = inject(ActivatedRoute)\n  \n  isEdit = signal(false)\n  taskId = signal<string | null>(null)\n  \n  form = this.fb.group({\n    title: ["", [Validators.required, Validators.minLength(3)]],\n    description: [""],\n    priority: ["medium" as Task["priority"]],\n    dueDate: [null as Date | null]\n  })\n  \n  constructor() {\n    const id = this.route.snapshot.params["id"]\n    if (id) {\n      this.isEdit.set(true)\n      this.taskId.set(id)\n      this.loadTask(id)\n    }\n  }\n  \n  loadTask(id: string) {\n    this.taskService.getTask(id).subscribe(task => {\n      this.form.patchValue(task)\n    })\n  }\n  \n  onSubmit() {\n    if (this.form.invalid) return\n    \n    const data = this.form.value as Omit<Task, "id" | "createdAt">\n    const request = this.isEdit()\n      ? this.taskService.updateTask(this.taskId()!, data)\n      : this.taskService.createTask(data)\n    \n    request.subscribe(() => {\n      this.router.navigate(["/tasks"])\n    })\n  }\n}', desc: 'TaskFormComponent' }
+                                { code: '@Component({\n  selector: "app-task-form",\n  standalone: true,\n  imports: [ReactiveFormsModule],\n  templateUrl: "./task-form.component.html"\n})\nexport class TaskFormComponent {\n  private fb = inject(FormBuilder)\n  private taskService = inject(TaskService)\n  private router = inject(Router)\n  private route = inject(ActivatedRoute)\n  \n  isEdit = signal(false)\n  taskId = signal<string | null>(null)\n  \n  form = this.fb.group({\n    title: ["", [Validators.required, Validators.minLength(3)]],\n    description: [""],\n    priority: ["medium" as Task["priority"]]\n  })\n  \n  constructor() {\n    const id = this.route.snapshot.params["id"]\n    if (id) {\n      this.isEdit.set(true)\n      this.taskId.set(id)\n      this.loadTask(id)\n    }\n  }\n  \n  loadTask(id: string) {\n    this.taskService.getTask(id).subscribe(task => {\n      this.form.patchValue(task)\n    })\n  }\n  \n  onSubmit() {\n    if (this.form.invalid) return\n    \n    const data = this.form.value as Omit<Task, "id" | "createdAt">\n    const request = this.isEdit()\n      ? this.taskService.updateTask(this.taskId()!, data)\n      : this.taskService.createTask(data)\n    \n    request.subscribe(() => {\n      this.router.navigate(["/tasks"])\n    })\n  }\n}', desc: 'TaskFormComponent' }
                             ],
-                            tips: ['Utilisez patchValue pour pré-remplir le formulaire en mode édition'],
+                            tips: ['patchValue pour pré-remplir en mode édition'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 5: Routing & Guards',
-                        desc: 'Configurer les routes avec protection',
+                        cmd: 'Étape 5: Routing avec Guards',
+                        desc: 'Configuration des routes',
                         details: {
-                            explanation: 'Configuration du routing avec guards et resolvers.',
-                            syntax: 'Routes avec lazy loading et guards',
+                            explanation: 'Routes avec lazy loading et protection.',
+                            syntax: 'Routes + canActivate + canDeactivate',
                             options: [],
                             examples: [
-                                { code: '// app.routes.ts\nexport const routes: Routes = [\n  { path: "", redirectTo: "tasks", pathMatch: "full" },\n  {\n    path: "tasks",\n    loadComponent: () => import("./features/tasks/task-list.component")\n      .then(m => m.TaskListComponent)\n  },\n  {\n    path: "tasks/new",\n    loadComponent: () => import("./features/tasks/task-form.component")\n      .then(m => m.TaskFormComponent),\n    canActivate: [authGuard]\n  },\n  {\n    path: "tasks/:id/edit",\n    loadComponent: () => import("./features/tasks/task-form.component")\n      .then(m => m.TaskFormComponent),\n    canActivate: [authGuard],\n    canDeactivate: [unsavedChangesGuard]\n  },\n  { path: "**", redirectTo: "tasks" }\n]', desc: 'Configuration routes' },
-                                { code: '// guards/unsaved-changes.guard.ts\nexport const unsavedChangesGuard: CanDeactivateFn<TaskFormComponent> = \n  (component) => {\n    if (component.form.dirty && !component.form.pristine) {\n      return confirm("Vous avez des modifications non sauvegardées. Quitter?")\n    }\n    return true\n  }', desc: 'Guard modifications non sauvées' }
+                                { code: '// app.routes.ts\nexport const routes: Routes = [\n  { path: "", redirectTo: "tasks", pathMatch: "full" },\n  {\n    path: "tasks",\n    loadComponent: () => import("./features/tasks/task-list.component")\n      .then(m => m.TaskListComponent)\n  },\n  {\n    path: "tasks/new",\n    loadComponent: () => import("./features/tasks/task-form.component")\n      .then(m => m.TaskFormComponent),\n    canActivate: [authGuard]\n  },\n  {\n    path: "tasks/:id/edit",\n    loadComponent: () => import("./features/tasks/task-form.component")\n      .then(m => m.TaskFormComponent),\n    canActivate: [authGuard],\n    canDeactivate: [unsavedChangesGuard]\n  },\n  { path: "**", redirectTo: "tasks" }\n]', desc: 'Configuration routes' }
                             ],
-                            tips: ['Utilisez loadComponent pour le lazy loading des composants standalone'],
+                            tips: ['loadComponent pour le lazy loading des composants standalone'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 6: Template & Styles',
-                        desc: 'Finaliser l\'interface utilisateur',
+                        cmd: 'Étape 6: Template Final',
+                        desc: 'Interface utilisateur',
                         details: {
-                            explanation: 'Templates avec la nouvelle syntaxe de contrôle Angular 17+.',
-                            syntax: 'Templates avec @if, @for et signals',
+                            explanation: 'Templates avec la nouvelle syntaxe Angular 17+.',
+                            syntax: '@if, @for, signals dans templates',
                             options: [],
                             examples: [
-                                { code: '<!-- task-list.component.html -->\n<div class="task-list">\n  <header>\n    <h1>Mes Tâches</h1>\n    <a routerLink="/tasks/new" class="btn-primary">+ Nouvelle tâche</a>\n  </header>\n  \n  <nav class="filters">\n    <button [class.active]="filter() === \'all\'" (click)="filter.set(\'all\')">Toutes</button>\n    <button [class.active]="filter() === \'active\'" (click)="filter.set(\'active\')">Actives</button>\n    <button [class.active]="filter() === \'completed\'" (click)="filter.set(\'completed\')">Terminées</button>\n  </nav>\n  \n  @if (loading()) {\n    <div class="loading">Chargement...</div>\n  } @else {\n    @for (task of filteredTasks(); track task.id) {\n      <article class="task-card" [class.completed]="task.completed">\n        <input type="checkbox" [checked]="task.completed" (change)="toggleComplete(task)">\n        <div class="task-content">\n          <h3>{{ task.title }}</h3>\n          <p>{{ task.description | truncate:100 }}</p>\n          <span class="priority" [class]="task.priority">{{ task.priority }}</span>\n        </div>\n        <a [routerLink]="[\'/tasks\', task.id, \'edit\']">Modifier</a>\n      </article>\n    } @empty {\n      <p class="empty">Aucune tâche trouvée</p>\n    }\n  }\n</div>', desc: 'Template liste' }
+                                { code: '<!-- task-list.component.html -->\n<div class="task-list">\n  <header>\n    <h1>Mes Tâches</h1>\n    <a routerLink="/tasks/new" class="btn-primary">+ Nouvelle</a>\n  </header>\n  \n  <nav class="filters">\n    <button [class.active]="filter() === \'all\'" \n            (click)="filter.set(\'all\')">Toutes</button>\n    <button [class.active]="filter() === \'active\'" \n            (click)="filter.set(\'active\')">Actives</button>\n    <button [class.active]="filter() === \'completed\'" \n            (click)="filter.set(\'completed\')">Terminées</button>\n  </nav>\n  \n  @if (loading()) {\n    <div class="loading">Chargement...</div>\n  } @else {\n    @for (task of filteredTasks(); track task.id) {\n      <article class="task-card" [class.completed]="task.completed">\n        <input type="checkbox" \n               [checked]="task.completed" \n               (change)="toggleComplete(task)">\n        <div class="content">\n          <h3>{{ task.title }}</h3>\n          <p>{{ task.description | truncate:100 }}</p>\n          <span class="priority" [class]="task.priority">\n            {{ task.priority }}\n          </span>\n        </div>\n        <a [routerLink]="[\'/tasks\', task.id, \'edit\']">Modifier</a>\n      </article>\n    } @empty {\n      <p class="empty">Aucune tâche</p>\n    }\n  }\n</div>', desc: 'Template liste' }
                             ],
                             tips: ['@for avec track améliore les performances de rendu'],
                             warnings: []

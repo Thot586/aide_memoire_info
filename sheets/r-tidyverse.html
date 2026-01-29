@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire R Tidyverse : dplyr, tidyr et manipulation de données avec la grammaire tidy.">
-    <title>R Tidyverse - IT Cheatsheets</title>
+    <meta name="description" content="Aide-mémoire R Statistiques & Machine Learning : GLM, GLMnet, Random Forest, XGBoost, LCA et évaluation de modèles.">
+    <title>R Stats & ML - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
@@ -25,8 +25,8 @@
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-500/20 mb-4 icon-glow">
                     <i class="fab fa-r-project text-3xl text-blue-400"></i>
                 </div>
-                <h1 class="text-3xl font-bold mb-2 gradient-text">R Tidyverse</h1>
-                <p class="text-slate-400">Grammaire de manipulation des données avec dplyr & tidyr</p>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">R Stats & Machine Learning</h1>
+                <p class="text-slate-400">Statistiques, GLM, GLMnet, Random Forest, XGBoost, LCA - Modèles qui généralisent</p>
             </div>
         </div>
     </header>
@@ -53,967 +53,3073 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'select',
-                title: 'Sélection (dplyr)',
-                icon: 'fa-hand-pointer',
+                id: 'setup',
+                title: '📦 Installation & Configuration',
+                icon: 'fa-download',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'select(df, col1, col2)',
-                        desc: 'Sélectionner des colonnes',
+                        cmd: 'Installer les packages statistiques essentiels',
+                        desc: 'tidyverse, caret, et packages de base',
                         details: {
-                            explanation: 'Extrait des colonnes spécifiques d\'un data frame. Équivalent de SELECT en SQL.',
-                            syntax: 'select(data, colonnes)',
+                            explanation: 'Installation des packages fondamentaux pour la statistique et le ML en R.',
+                            syntax: 'install.packages(c("tidyverse", "caret", "broom"))',
                             options: [
-                                { flag: 'starts_with("x")', desc: 'Colonnes commençant par "x"' },
-                                { flag: 'ends_with("y")', desc: 'Colonnes finissant par "y"' },
-                                { flag: 'contains("z")', desc: 'Colonnes contenant "z"' },
-                                { flag: 'matches("regex")', desc: 'Colonnes correspondant à un regex' },
-                                { flag: 'num_range("x", 1:3)', desc: 'Colonnes x1, x2, x3' },
-                                { flag: 'everything()', desc: 'Toutes les colonnes restantes' },
-                                { flag: '-col', desc: 'Exclure une colonne' }
+                                { flag: 'tidyverse', desc: 'Manipulation de données (dplyr, ggplot2, tidyr)' },
+                                { flag: 'caret', desc: 'Framework ML unifié (train, cross-validation)' },
+                                { flag: 'broom', desc: 'Nettoyer les sorties de modèles en tibbles' },
+                                { flag: 'skimr', desc: 'Statistiques descriptives rapides' }
                             ],
                             examples: [
-                                { code: 'library(tidyverse)', desc: 'Charger le tidyverse' },
-                                { code: 'df %>% select(nom, age)', desc: 'Garder nom et age' },
-                                { code: 'df %>% select(-id, -created_at)', desc: 'Tout sauf id et created_at' },
-                                { code: 'df %>% select(starts_with("date"))', desc: 'Colonnes date_*' },
-                                { code: 'df %>% select(nom, everything())', desc: 'nom en premier, puis le reste' }
+                                { code: `# Installation des packages essentiels
+install.packages(c(
+  "tidyverse",    # Manipulation et visualisation
+  "caret",        # Machine Learning unifié
+  "broom",        # Tidy model outputs
+  "skimr",        # Stats descriptives
+  "corrplot",     # Matrices de corrélation
+  "performance"   # Évaluation des modèles
+))
+
+# Charger les packages
+library(tidyverse)
+library(caret)
+library(broom)`, desc: 'Installation de base' }
                             ],
-                            tips: ['Utilisez le pipe %>% (Ctrl+Shift+M) pour enchaîner', 'R 4.1+ supporte aussi |> (pipe natif)'],
-                            warnings: []
+                            tips: ['caret unifie l\'interface de nombreux modèles ML', 'tidymodels est l\'alternative moderne à caret'],
+                            warnings: ['Certains packages nécessitent Rtools sur Windows']
                         }
                     },
                     {
-                        cmd: 'filter(df, condition)',
-                        desc: 'Filtrer les lignes',
+                        cmd: 'Installer les packages ML avancés',
+                        desc: 'glmnet, randomForest, xgboost',
                         details: {
-                            explanation: 'Garde uniquement les lignes qui satisfont une condition. Équivalent de WHERE en SQL.',
-                            syntax: 'filter(data, condition)',
+                            explanation: 'Installation des algorithmes de machine learning pour la modélisation prédictive.',
+                            syntax: 'install.packages(c("glmnet", "randomForest", "xgboost"))',
                             options: [
-                                { flag: '==', desc: 'Égalité' },
-                                { flag: '!=', desc: 'Différent' },
-                                { flag: '<, >, <=, >=', desc: 'Comparaisons' },
-                                { flag: '%in%', desc: 'Dans un vecteur' },
-                                { flag: 'between(col, a, b)', desc: 'Entre deux valeurs' },
-                                { flag: 'is.na() / !is.na()', desc: 'Valeurs NA ou non-NA' }
+                                { flag: 'glmnet', desc: 'Régression régularisée (LASSO, Ridge, Elastic Net)' },
+                                { flag: 'randomForest', desc: 'Forêts aléatoires' },
+                                { flag: 'ranger', desc: 'Random Forest plus rapide' },
+                                { flag: 'xgboost', desc: 'Gradient Boosting optimisé' }
                             ],
                             examples: [
-                                { code: 'df %>% filter(age > 18)', desc: 'Personnes majeures' },
-                                { code: 'df %>% filter(ville == "Paris" & age > 25)', desc: 'Parisiens > 25 ans' },
-                                { code: 'df %>% filter(ville %in% c("Paris", "Lyon"))', desc: 'Paris ou Lyon' },
-                                { code: 'df %>% filter(between(age, 20, 30))', desc: 'Âge entre 20 et 30' },
-                                { code: 'df %>% filter(!is.na(email))', desc: 'Avec email renseigné' }
+                                { code: `# Packages ML
+install.packages(c(
+  "glmnet",       # Régularisation LASSO/Ridge/Elastic Net
+  "randomForest", # Forêts aléatoires classique
+  "ranger",       # Random Forest rapide
+  "xgboost",      # Gradient Boosting
+  "e1071"         # SVM, Naive Bayes
+))
+
+# Pour la multinomiale
+install.packages("nnet")  # Régression multinomiale
+
+# Charger
+library(glmnet)
+library(randomForest)
+library(xgboost)`, desc: 'Packages ML avancés' }
                             ],
-                            tips: ['& = ET, | = OU', 'Plusieurs conditions séparées par virgule = ET'],
-                            warnings: ['Utilisez == pour l\'égalité, pas =']
+                            tips: ['ranger est 10x plus rapide que randomForest', 'xgboost supporte le GPU avec xgboost::xgb.train(..., gpu_id = 0)'],
+                            warnings: ['xgboost peut nécessiter une compilation spéciale pour GPU']
                         }
                     },
                     {
-                        cmd: 'slice(df, rows)',
-                        desc: 'Sélectionner par position',
+                        cmd: 'Installer les packages pour LCA',
+                        desc: 'poLCA et mclust pour l\'analyse en classes latentes',
                         details: {
-                            explanation: 'Sélectionne des lignes par leur position (numéro de ligne).',
-                            syntax: 'slice(data, positions)',
+                            explanation: 'Latent Class Analysis (LCA) identifie des sous-groupes cachés dans les données catégorielles.',
+                            syntax: 'install.packages(c("poLCA", "mclust"))',
                             options: [
-                                { flag: 'slice_head(n=)', desc: 'Premières n lignes' },
-                                { flag: 'slice_tail(n=)', desc: 'Dernières n lignes' },
-                                { flag: 'slice_sample(n=)', desc: 'n lignes aléatoires' },
-                                { flag: 'slice_min(col, n=)', desc: 'n lignes avec plus petites valeurs' },
-                                { flag: 'slice_max(col, n=)', desc: 'n lignes avec plus grandes valeurs' }
+                                { flag: 'poLCA', desc: 'LCA pour variables catégorielles' },
+                                { flag: 'mclust', desc: 'Clustering basé sur modèles (Gaussian Mixture)' },
+                                { flag: 'tidyLPA', desc: 'Interface tidy pour Latent Profile Analysis' },
+                                { flag: 'lcmm', desc: 'Modèles à classes latentes longitudinaux' }
                             ],
                             examples: [
-                                { code: 'df %>% slice(1:10)', desc: 'Lignes 1 à 10' },
-                                { code: 'df %>% slice_head(n = 5)', desc: '5 premières lignes' },
-                                { code: 'df %>% slice_sample(n = 100)', desc: '100 lignes aléatoires' },
-                                { code: 'df %>% slice_max(salaire, n = 10)', desc: 'Top 10 salaires' },
-                                { code: 'df %>% group_by(dept) %>% slice_max(salaire, n = 1)', desc: 'Top salaire par département' }
+                                { code: `# Packages LCA
+install.packages(c(
+  "poLCA",    # Latent Class Analysis (catégoriel)
+  "mclust",   # Gaussian Mixture Models
+  "tidyLPA", # Interface tidy pour LPA
+  "lcmm"      # Modèles longitudinaux
+))
+
+library(poLCA)
+library(mclust)`, desc: 'Installation LCA' }
                             ],
-                            tips: ['slice_min/max avec by_group=TRUE pour chaque groupe'],
-                            warnings: []
+                            tips: ['poLCA pour variables catégorielles, mclust pour continues'],
+                            warnings: ['LCA nécessite suffisamment d\'observations par classe']
                         }
                     },
                     {
-                        cmd: 'distinct(df, col)',
-                        desc: 'Valeurs uniques',
+                        cmd: 'Configurer la reproductibilité',
+                        desc: 'Seed et options pour résultats reproductibles',
                         details: {
-                            explanation: 'Garde les lignes avec des combinaisons uniques de valeurs.',
-                            syntax: 'distinct(data, colonnes, .keep_all = FALSE)',
+                            explanation: 'Fixer le seed garantit des résultats identiques à chaque exécution.',
+                            syntax: 'set.seed(123)',
                             options: [
-                                { flag: '.keep_all', desc: 'Garder toutes les colonnes (pas seulement celles spécifiées)' }
+                                { flag: 'set.seed(n)', desc: 'Fixer le générateur aléatoire' },
+                                { flag: 'RNGkind()', desc: 'Type de générateur aléatoire' }
                             ],
                             examples: [
-                                { code: 'df %>% distinct(ville)', desc: 'Villes uniques' },
-                                { code: 'df %>% distinct(ville, pays)', desc: 'Combinaisons ville-pays uniques' },
-                                { code: 'df %>% distinct(ville, .keep_all = TRUE)', desc: 'Première ligne de chaque ville' }
+                                { code: `# Reproductibilité
+set.seed(42)  # Fixer le seed
+
+# Configuration globale
+options(
+  scipen = 999,           # Éviter notation scientifique
+  digits = 4,             # 4 décimales
+  warn = 1                # Afficher warnings immédiatement
+)
+
+# Pour caret - reproductibilité parallèle
+library(doParallel)
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl)
+
+# Configuration trainControl reproductible
+ctrl <- trainControl(
+  method = "cv",
+  number = 10,
+  seeds = lapply(1:11, function(x) sample.int(1000, 10))
+)`, desc: 'Configuration reproductible' }
                             ],
-                            tips: ['.keep_all = TRUE pour garder les autres colonnes'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'rename(df, new = old)',
-                        desc: 'Renommer des colonnes',
-                        details: {
-                            explanation: 'Change le nom d\'une ou plusieurs colonnes.',
-                            syntax: 'rename(data, nouveau_nom = ancien_nom)',
-                            options: [
-                                { flag: 'rename_with()', desc: 'Renommer avec une fonction' }
-                            ],
-                            examples: [
-                                { code: 'df %>% rename(prenom = first_name)', desc: 'Renommer une colonne' },
-                                { code: 'df %>% rename(nom = name, age = years)', desc: 'Plusieurs colonnes' },
-                                { code: 'df %>% rename_with(toupper)', desc: 'Tout en majuscules' },
-                                { code: 'df %>% rename_with(~ str_replace(., "_", "."), everything())', desc: 'Remplacer _ par .' }
-                            ],
-                            tips: ['Syntaxe: nouveau_nom = ancien_nom (inverse de mutate)'],
-                            warnings: []
+                            tips: ['Toujours documenter le seed utilisé', 'seeds dans trainControl pour parallélisation reproductible'],
+                            warnings: ['Le seed doit être fixé AVANT chaque opération aléatoire']
                         }
                     }
                 ]
             },
             {
-                id: 'transform',
-                title: 'Transformation',
-                icon: 'fa-random',
-                color: 'border-l-4 border-green-500',
+                id: 'descriptive',
+                title: '📊 Statistique Descriptive',
+                icon: 'fa-chart-pie',
+                color: 'border-l-4 border-emerald-500',
                 commands: [
                     {
-                        cmd: 'mutate(df, new_col = expr)',
-                        desc: 'Créer/modifier des colonnes',
+                        cmd: 'Résumer un dataset rapidement',
+                        desc: 'Vue d\'ensemble avec summary, skim, glimpse',
                         details: {
-                            explanation: 'Ajoute de nouvelles colonnes ou modifie des colonnes existantes.',
-                            syntax: 'mutate(data, nouvelle_col = expression)',
-                            options: [],
-                            examples: [
-                                { code: 'df %>% mutate(age_mois = age * 12)', desc: 'Âge en mois' },
-                                { code: 'df %>% mutate(nom = toupper(nom))', desc: 'Nom en majuscules' },
-                                { code: 'df %>% mutate(\n  total = prix * quantite,\n  tva = total * 0.2,\n  ttc = total + tva\n)', desc: 'Plusieurs colonnes (peuvent se référencer)' },
-                                { code: 'df %>% transmute(total = prix * quantite)', desc: 'Garder seulement la nouvelle colonne' }
+                            explanation: 'Obtenir rapidement les statistiques descriptives d\'un jeu de données.',
+                            syntax: 'summary(df) / skimr::skim(df) / glimpse(df)',
+                            options: [
+                                { flag: 'summary()', desc: 'Résumé R base (min, max, mean, quartiles)' },
+                                { flag: 'skim()', desc: 'Résumé complet avec histogrammes' },
+                                { flag: 'glimpse()', desc: 'Structure et premiers valeurs' },
+                                { flag: 'describe()', desc: 'psych::describe pour stats détaillées' }
                             ],
-                            tips: ['transmute() = mutate + select (garde seulement les nouvelles colonnes)'],
+                            examples: [
+                                { code: `library(tidyverse)
+library(skimr)
+
+# Données exemple
+data(mtcars)
+df <- mtcars
+
+# Vue rapide de la structure
+glimpse(df)
+
+# Résumé statistique basique
+summary(df)
+
+# Résumé complet avec skimr
+skim(df)
+
+# Stats détaillées avec psych
+# install.packages("psych")
+psych::describe(df)`, desc: 'Résumés statistiques' }
+                            ],
+                            tips: ['skim() affiche des mini-histogrammes en console', 'glimpse() montre les types de colonnes'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'mutate(across(...))',
-                        desc: 'Appliquer sur plusieurs colonnes',
+                        cmd: 'Calculer des statistiques par groupe',
+                        desc: 'Moyenne, écart-type, médiane par catégorie',
                         details: {
-                            explanation: 'Applique une fonction à plusieurs colonnes à la fois.',
-                            syntax: 'mutate(across(colonnes, fonction))',
+                            explanation: 'Statistiques descriptives ventilées par groupe avec dplyr.',
+                            syntax: 'df %>% group_by(var) %>% summarize(...)',
                             options: [
-                                { flag: 'where(is.numeric)', desc: 'Toutes les colonnes numériques' },
-                                { flag: 'where(is.character)', desc: 'Toutes les colonnes texte' },
-                                { flag: 'starts_with("x")', desc: 'Colonnes commençant par x' }
+                                { flag: 'mean()', desc: 'Moyenne' },
+                                { flag: 'sd()', desc: 'Écart-type' },
+                                { flag: 'median()', desc: 'Médiane' },
+                                { flag: 'IQR()', desc: 'Écart interquartile' },
+                                { flag: 'n()', desc: 'Effectif' }
                             ],
                             examples: [
-                                { code: 'df %>% mutate(across(where(is.numeric), round, 2))', desc: 'Arrondir tous les numériques' },
-                                { code: 'df %>% mutate(across(c(col1, col2), ~ .x * 100))', desc: 'Multiplier col1 et col2 par 100' },
-                                { code: 'df %>% mutate(across(where(is.character), toupper))', desc: 'Majuscules sur texte' },
-                                { code: 'df %>% mutate(across(starts_with("prix"), ~ replace_na(.x, 0)))', desc: 'Remplacer NA par 0' }
+                                { code: `library(tidyverse)
+
+df <- mtcars %>%
+  mutate(cyl = factor(cyl))
+
+# Stats par groupe
+df %>%
+  group_by(cyl) %>%
+  summarize(
+    n = n(),
+    mean_mpg = mean(mpg),
+    sd_mpg = sd(mpg),
+    median_mpg = median(mpg),
+    q1 = quantile(mpg, 0.25),
+    q3 = quantile(mpg, 0.75),
+    min_mpg = min(mpg),
+    max_mpg = max(mpg)
+  )
+
+# Plusieurs variables à la fois
+df %>%
+  group_by(cyl) %>%
+  summarize(across(
+    c(mpg, hp, wt),
+    list(mean = mean, sd = sd),
+    .names = "{.col}_{.fn}"
+  ))`, desc: 'Stats par groupe' }
                             ],
-                            tips: ['~ .x est la syntaxe pour une fonction anonyme', '.x représente la valeur de la colonne'],
+                            tips: ['across() pour appliquer à plusieurs colonnes', 'na.rm = TRUE pour ignorer les NA'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'case_when()',
-                        desc: 'Conditions multiples (if-else)',
+                        cmd: 'Créer une matrice de corrélation',
+                        desc: 'Corrélations entre variables numériques',
                         details: {
-                            explanation: 'Équivalent de CASE WHEN en SQL ou de plusieurs if-else imbriqués.',
-                            syntax: 'case_when(condition1 ~ resultat1, condition2 ~ resultat2, TRUE ~ default)',
-                            options: [],
-                            examples: [
-                                { code: 'df %>% mutate(\n  categorie = case_when(\n    age < 18 ~ "Mineur",\n    age < 65 ~ "Adulte",\n    TRUE ~ "Senior"\n  )\n)', desc: 'Catégoriser par âge' },
-                                { code: 'df %>% mutate(\n  note = case_when(\n    score >= 90 ~ "A",\n    score >= 80 ~ "B",\n    score >= 70 ~ "C",\n    score >= 60 ~ "D",\n    TRUE ~ "F"\n  )\n)', desc: 'Convertir score en note' }
-                            ],
-                            tips: ['TRUE ~ valeur est le cas par défaut (ELSE)', 'Les conditions sont évaluées dans l\'ordre'],
-                            warnings: ['Oubliez pas le cas TRUE ~ pour éviter les NA']
-                        }
-                    },
-                    {
-                        cmd: 'if_else() / coalesce()',
-                        desc: 'Conditions simples et NA',
-                        details: {
-                            explanation: 'if_else pour une condition simple, coalesce pour la première valeur non-NA.',
-                            syntax: 'if_else(condition, vrai, faux, missing)',
-                            options: [],
-                            examples: [
-                                { code: 'df %>% mutate(type = if_else(age >= 18, "Adulte", "Mineur"))', desc: 'If-else simple' },
-                                { code: 'df %>% mutate(score = if_else(is.na(score), 0, score))', desc: 'Remplacer NA' },
-                                { code: 'df %>% mutate(contact = coalesce(tel, email, "N/A"))', desc: 'Premier non-NA' },
-                                { code: 'df %>% mutate(prix = coalesce(prix_promo, prix_normal))', desc: 'Prix promo sinon normal' }
-                            ],
-                            tips: ['coalesce() = premier non-NA parmi les arguments'],
-                            warnings: ['if_else plus strict que ifelse (types doivent correspondre)']
-                        }
-                    },
-                    {
-                        cmd: 'arrange(df, col)',
-                        desc: 'Trier les données',
-                        details: {
-                            explanation: 'Trie les lignes selon une ou plusieurs colonnes.',
-                            syntax: 'arrange(data, col1, col2)',
+                            explanation: 'Calculer et visualiser les corrélations entre variables.',
+                            syntax: 'cor(df) / corrplot(cor(df))',
                             options: [
-                                { flag: 'desc(col)', desc: 'Tri décroissant' }
+                                { flag: 'pearson', desc: 'Corrélation linéaire (défaut)' },
+                                { flag: 'spearman', desc: 'Corrélation de rang (robuste)' },
+                                { flag: 'kendall', desc: 'Tau de Kendall' }
                             ],
                             examples: [
-                                { code: 'df %>% arrange(age)', desc: 'Tri croissant par âge' },
-                                { code: 'df %>% arrange(desc(salaire))', desc: 'Plus gros salaires en premier' },
-                                { code: 'df %>% arrange(ville, desc(age))', desc: 'Par ville, puis âge décroissant' },
-                                { code: 'df %>% group_by(dept) %>% arrange(desc(salaire), .by_group = TRUE)', desc: 'Trier dans chaque groupe' }
+                                { code: `library(tidyverse)
+library(corrplot)
+
+# Sélectionner variables numériques
+df_num <- mtcars %>% select(where(is.numeric))
+
+# Matrice de corrélation
+cor_matrix <- cor(df_num, use = "complete.obs")
+
+# Visualisation basique
+corrplot(cor_matrix, method = "circle")
+
+# Visualisation améliorée
+corrplot(cor_matrix,
+         method = "color",
+         type = "upper",
+         order = "hclust",
+         addCoef.col = "black",
+         tl.col = "black",
+         tl.srt = 45,
+         diag = FALSE)
+
+# Test de significativité
+library(Hmisc)
+cor_test <- rcorr(as.matrix(df_num))
+cor_test$r  # Corrélations
+cor_test$P  # P-values`, desc: 'Matrice de corrélation' }
                             ],
-                            tips: ['Par défaut croissant (ASC)', '.by_group = TRUE pour respecter les groupes'],
-                            warnings: ['Les NA sont toujours à la fin']
+                            tips: ['use = "complete.obs" pour ignorer les NA', 'Spearman est robuste aux outliers'],
+                            warnings: ['Corrélation ≠ causalité']
+                        }
+                    },
+                    {
+                        cmd: 'Détecter les valeurs aberrantes',
+                        desc: 'Identifier les outliers avec IQR ou z-score',
+                        details: {
+                            explanation: 'Les outliers peuvent biaiser les modèles. Plusieurs méthodes de détection existent.',
+                            syntax: 'IQR method: Q1 - 1.5*IQR, Q3 + 1.5*IQR',
+                            options: [
+                                { flag: 'IQR', desc: 'Méthode des quartiles (robuste)' },
+                                { flag: 'z-score', desc: '|z| > 3 (sensible aux extrêmes)' },
+                                { flag: 'MAD', desc: 'Median Absolute Deviation (très robuste)' }
+                            ],
+                            examples: [
+                                { code: `library(tidyverse)
+
+# Méthode IQR
+detect_outliers_iqr <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  x < (q1 - 1.5 * iqr) | x > (q3 + 1.5 * iqr)
+}
+
+# Appliquer
+df <- mtcars %>%
+  mutate(outlier_mpg = detect_outliers_iqr(mpg))
+
+# Méthode Z-score
+detect_outliers_z <- function(x, threshold = 3) {
+  z <- abs(scale(x))
+  z > threshold
+}
+
+# Méthode MAD (robuste)
+detect_outliers_mad <- function(x, threshold = 3) {
+  med <- median(x, na.rm = TRUE)
+  mad <- mad(x, na.rm = TRUE)
+  abs(x - med) / mad > threshold
+}
+
+# Visualiser les outliers
+ggplot(mtcars, aes(x = "", y = mpg)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.5)`, desc: 'Détection d\'outliers' }
+                            ],
+                            tips: ['MAD est plus robuste que le z-score', 'Toujours visualiser avant de supprimer'],
+                            warnings: ['Ne pas supprimer automatiquement les outliers sans analyse']
+                        }
+                    },
+                    {
+                        cmd: 'Visualiser les distributions',
+                        desc: 'Histogrammes, densités, boxplots avec ggplot2',
+                        details: {
+                            explanation: 'Visualiser la forme des distributions est essentiel avant la modélisation.',
+                            syntax: 'ggplot(df, aes(x)) + geom_histogram()',
+                            options: [
+                                { flag: 'geom_histogram()', desc: 'Histogramme' },
+                                { flag: 'geom_density()', desc: 'Courbe de densité' },
+                                { flag: 'geom_boxplot()', desc: 'Boîte à moustaches' },
+                                { flag: 'geom_qq()', desc: 'Q-Q plot (normalité)' }
+                            ],
+                            examples: [
+                                { code: `library(tidyverse)
+
+# Histogramme avec densité
+ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 15, fill = "steelblue", alpha = 0.7) +
+  geom_density(color = "red", linewidth = 1) +
+  labs(title = "Distribution de MPG")
+
+# Boxplot par groupe
+ggplot(mtcars, aes(x = factor(cyl), y = mpg, fill = factor(cyl))) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  labs(x = "Cylindres", y = "MPG")
+
+# Q-Q plot pour vérifier normalité
+ggplot(mtcars, aes(sample = mpg)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  labs(title = "Q-Q Plot - Normalité de MPG")
+
+# Toutes les variables numériques
+mtcars %>%
+  pivot_longer(everything()) %>%
+  ggplot(aes(x = value)) +
+  geom_histogram(bins = 20) +
+  facet_wrap(~name, scales = "free")`, desc: 'Visualisation des distributions' }
+                            ],
+                            tips: ['Le Q-Q plot montre si la distribution est normale', 'facet_wrap pour voir toutes les variables'],
+                            warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'aggregate',
-                title: 'Agrégation',
-                icon: 'fa-calculator',
+                id: 'inferential',
+                title: '📈 Statistique Inférentielle',
+                icon: 'fa-scale-balanced',
                 color: 'border-l-4 border-purple-500',
                 commands: [
                     {
-                        cmd: 'group_by(df, col)',
-                        desc: 'Grouper les données',
+                        cmd: 'Test t de Student',
+                        desc: 'Comparer deux moyennes',
                         details: {
-                            explanation: 'Groupe les données par une ou plusieurs colonnes pour appliquer des calculs par groupe.',
-                            syntax: 'group_by(data, col1, col2)',
+                            explanation: 'Le test t compare les moyennes de deux groupes. Hypothèse: distributions normales.',
+                            syntax: 't.test(x, y) ou t.test(x ~ group, data)',
                             options: [
-                                { flag: '.add', desc: 'Ajouter au groupement existant' },
-                                { flag: '.drop', desc: 'Supprimer les groupes vides (facteurs)' }
+                                { flag: 'paired = TRUE', desc: 'Test apparié (mêmes sujets)' },
+                                { flag: 'var.equal = TRUE', desc: 'Variances égales (Student)' },
+                                { flag: 'alternative', desc: '"two.sided", "less", "greater"' }
                             ],
                             examples: [
-                                { code: 'df %>% group_by(ville)', desc: 'Grouper par ville' },
-                                { code: 'df %>% group_by(annee, mois)', desc: 'Par année et mois' },
-                                { code: 'df %>% group_by(dept) %>% mutate(rang = row_number())', desc: 'Numéroter dans chaque groupe' }
+                                { code: `# Test t indépendant
+# H0: les moyennes sont égales
+t_result <- t.test(mpg ~ am, data = mtcars)
+print(t_result)
+
+# Extraire les résultats proprement
+library(broom)
+tidy(t_result)
+
+# Test apparié (avant/après)
+avant <- c(5.2, 4.8, 6.1, 5.5, 4.9)
+apres <- c(5.8, 5.2, 6.5, 5.9, 5.3)
+t.test(avant, apres, paired = TRUE)
+
+# Test unilatéral
+t.test(mpg ~ am, data = mtcars, alternative = "greater")
+
+# Vérifier les hypothèses
+# 1. Normalité (Shapiro-Wilk)
+shapiro.test(mtcars$mpg[mtcars$am == 0])
+shapiro.test(mtcars$mpg[mtcars$am == 1])
+
+# 2. Homogénéité des variances (Levene)
+car::leveneTest(mpg ~ factor(am), data = mtcars)`, desc: 'Test t de Student' }
                             ],
-                            tips: ['ungroup() pour retirer le groupement', 'group_by affecte mutate, filter, summarize...'],
-                            warnings: ['N\'oubliez pas ungroup() après les opérations']
+                            tips: ['Welch t-test (défaut) ne suppose pas variances égales', 'Taille d\'effet: cohen.d() du package effsize'],
+                            warnings: ['Vérifier la normalité avec Shapiro-Wilk si n < 30']
                         }
                     },
                     {
-                        cmd: 'summarize(df, stat = func())',
-                        desc: 'Calculer des statistiques',
+                        cmd: 'ANOVA',
+                        desc: 'Comparer plus de deux groupes',
                         details: {
-                            explanation: 'Calcule des statistiques résumées, souvent après un group_by().',
-                            syntax: 'summarize(data, nom = fonction(col))',
+                            explanation: 'L\'ANOVA teste si au moins un groupe diffère des autres. Hypothèse: normalité et homoscédasticité.',
+                            syntax: 'aov(y ~ group, data) puis summary()',
                             options: [
-                                { flag: 'n()', desc: 'Nombre de lignes' },
-                                { flag: 'n_distinct(col)', desc: 'Nombre de valeurs uniques' },
-                                { flag: 'mean() / median()', desc: 'Moyenne / Médiane' },
-                                { flag: 'sum()', desc: 'Somme' },
-                                { flag: 'min() / max()', desc: 'Min / Max' },
-                                { flag: 'sd() / var()', desc: 'Écart-type / Variance' },
-                                { flag: 'first() / last() / nth()', desc: 'Première / Dernière / Nième valeur' }
+                                { flag: 'aov()', desc: 'ANOVA classique' },
+                                { flag: 'oneway.test()', desc: 'Welch ANOVA (variances inégales)' },
+                                { flag: 'kruskal.test()', desc: 'Alternative non-paramétrique' }
                             ],
                             examples: [
-                                { code: 'df %>% \n  group_by(ville) %>% \n  summarize(\n    n = n(),\n    moy_age = mean(age, na.rm = TRUE),\n    max_salaire = max(salaire)\n  )', desc: 'Stats par ville' },
-                                { code: 'df %>% summarize(across(where(is.numeric), mean, na.rm = TRUE))', desc: 'Moyenne de toutes les colonnes numériques' },
-                                { code: 'df %>% \n  group_by(dept) %>%\n  summarize(\n    n = n(),\n    n_uniq = n_distinct(poste),\n    .groups = "drop"\n  )', desc: 'Avec drop du groupement' }
+                                { code: `# ANOVA à un facteur
+anova_result <- aov(mpg ~ factor(cyl), data = mtcars)
+summary(anova_result)
+
+# Résultats tidy
+library(broom)
+tidy(anova_result)
+
+# Tests post-hoc (comparaisons multiples)
+TukeyHSD(anova_result)
+
+# Visualiser les comparaisons
+plot(TukeyHSD(anova_result))
+
+# Welch ANOVA (variances inégales)
+oneway.test(mpg ~ factor(cyl), data = mtcars)
+
+# Alternative non-paramétrique: Kruskal-Wallis
+kruskal.test(mpg ~ factor(cyl), data = mtcars)
+
+# Post-hoc non-paramétrique
+pairwise.wilcox.test(mtcars$mpg, mtcars$cyl,
+                     p.adjust.method = "bonferroni")
+
+# Vérifier homogénéité des variances
+bartlett.test(mpg ~ factor(cyl), data = mtcars)`, desc: 'ANOVA et post-hoc' }
                             ],
-                            tips: ['na.rm = TRUE pour ignorer les NA', '.groups = "drop" pour ungrouper automatiquement'],
-                            warnings: ['summarize réduit à une ligne par groupe']
+                            tips: ['Tukey HSD corrige pour comparaisons multiples', 'Kruskal-Wallis si non-normalité'],
+                            warnings: ['ANOVA dit SI différence, pas OÙ - utiliser post-hoc']
                         }
                     },
                     {
-                        cmd: 'count(df, col)',
-                        desc: 'Compter rapidement',
+                        cmd: 'Test du Chi-deux',
+                        desc: 'Association entre variables catégorielles',
                         details: {
-                            explanation: 'Raccourci pour group_by + summarize(n = n()). Compte les occurrences.',
-                            syntax: 'count(data, colonnes, sort = FALSE, name = "n")',
+                            explanation: 'Le test du Chi-deux évalue l\'indépendance entre deux variables catégorielles.',
+                            syntax: 'chisq.test(table(x, y))',
                             options: [
-                                { flag: 'sort', desc: 'Trier par fréquence décroissante' },
-                                { flag: 'wt', desc: 'Pondération (somme au lieu de comptage)' },
-                                { flag: 'name', desc: 'Nom de la colonne de comptage' }
+                                { flag: 'chisq.test()', desc: 'Test du Chi-deux de Pearson' },
+                                { flag: 'fisher.test()', desc: 'Test exact de Fisher (petits effectifs)' },
+                                { flag: 'correct = FALSE', desc: 'Sans correction de Yates' }
                             ],
                             examples: [
-                                { code: 'df %>% count(ville)', desc: 'Nombre par ville' },
-                                { code: 'df %>% count(ville, sort = TRUE)', desc: 'Trié par fréquence' },
-                                { code: 'df %>% count(dept, poste)', desc: 'Par département et poste' },
-                                { code: 'df %>% count(dept, wt = salaire, name = "total_salaires")', desc: 'Somme des salaires' },
-                                { code: 'df %>% add_count(ville, name = "n_ville")', desc: 'Ajouter le compte sans réduire' }
+                                { code: `# Tableau de contingence
+tab <- table(mtcars$cyl, mtcars$am)
+print(tab)
+
+# Test du Chi-deux
+chi_result <- chisq.test(tab)
+print(chi_result)
+
+# Résidus standardisés (contribution à chi²)
+chi_result$residuals
+
+# Test exact de Fisher (petits effectifs)
+fisher.test(tab)
+
+# Taille d'effet: V de Cramér
+library(vcd)
+assocstats(tab)
+
+# Visualisation
+library(ggplot2)
+mtcars %>%
+  count(cyl, am) %>%
+  ggplot(aes(x = factor(cyl), y = n, fill = factor(am))) +
+  geom_col(position = "dodge") +
+  labs(x = "Cylindres", fill = "Transmission")
+
+# Mosaic plot
+mosaicplot(tab, color = TRUE, main = "Cyl vs AM")`, desc: 'Test du Chi-deux' }
                             ],
-                            tips: ['add_count() ajoute une colonne sans réduire', 'tally() compte le groupe actuel'],
-                            warnings: []
+                            tips: ['Fisher exact si effectifs attendus < 5', 'V de Cramér mesure la force d\'association'],
+                            warnings: ['Chi-deux invalide si effectifs attendus < 5']
+                        }
+                    },
+                    {
+                        cmd: 'Corrélation et test',
+                        desc: 'Tester la significativité d\'une corrélation',
+                        details: {
+                            explanation: 'Tester si une corrélation est significativement différente de zéro.',
+                            syntax: 'cor.test(x, y, method = "pearson")',
+                            options: [
+                                { flag: 'pearson', desc: 'Corrélation linéaire (défaut)' },
+                                { flag: 'spearman', desc: 'Corrélation de rang' },
+                                { flag: 'kendall', desc: 'Tau de Kendall' }
+                            ],
+                            examples: [
+                                { code: `# Test de corrélation
+cor_result <- cor.test(mtcars$mpg, mtcars$wt)
+print(cor_result)
+
+# Résultat tidy
+library(broom)
+tidy(cor_result)
+
+# Corrélation de Spearman (robuste)
+cor.test(mtcars$mpg, mtcars$wt, method = "spearman")
+
+# Matrice de corrélation avec p-values
+library(Hmisc)
+cor_matrix <- rcorr(as.matrix(mtcars[, c("mpg", "hp", "wt", "qsec")]))
+cor_matrix$r  # Corrélations
+cor_matrix$P  # P-values
+
+# Visualiser avec significativité
+library(corrplot)
+corrplot(cor_matrix$r,
+         p.mat = cor_matrix$P,
+         sig.level = 0.05,
+         insig = "blank",
+         method = "color",
+         type = "upper")`, desc: 'Test de corrélation' }
+                            ],
+                            tips: ['Spearman pour relations monotones non-linéaires', 'Intervalle de confiance inclus dans cor.test()'],
+                            warnings: ['Corrélation significative ≠ corrélation importante']
+                        }
+                    },
+                    {
+                        cmd: 'Tests non-paramétriques',
+                        desc: 'Alternatives quand les hypothèses ne sont pas respectées',
+                        details: {
+                            explanation: 'Tests qui ne supposent pas de distribution particulière des données.',
+                            syntax: 'wilcox.test(x, y) / kruskal.test()',
+                            options: [
+                                { flag: 'wilcox.test()', desc: 'Mann-Whitney U (2 groupes)' },
+                                { flag: 'kruskal.test()', desc: 'Kruskal-Wallis (>2 groupes)' },
+                                { flag: 'friedman.test()', desc: 'Mesures répétées' }
+                            ],
+                            examples: [
+                                { code: `# Mann-Whitney U (équivalent t-test)
+wilcox.test(mpg ~ am, data = mtcars)
+
+# Test apparié: Wilcoxon signed-rank
+avant <- c(5.2, 4.8, 6.1, 5.5, 4.9)
+apres <- c(5.8, 5.2, 6.5, 5.9, 5.3)
+wilcox.test(avant, apres, paired = TRUE)
+
+# Kruskal-Wallis (équivalent ANOVA)
+kruskal.test(mpg ~ factor(cyl), data = mtcars)
+
+# Post-hoc: Dunn test
+library(dunn.test)
+dunn.test(mtcars$mpg, mtcars$cyl, method = "bonferroni")
+
+# Friedman test (mesures répétées)
+# Données en format matrice
+data_matrix <- matrix(c(
+  5, 4, 7,  # Sujet 1
+  6, 5, 8,  # Sujet 2
+  4, 3, 6   # Sujet 3
+), nrow = 3, byrow = TRUE)
+friedman.test(data_matrix)`, desc: 'Tests non-paramétriques' }
+                            ],
+                            tips: ['Utilisez non-paramétrique si n < 30 et non-normalité', 'Plus robustes aux outliers'],
+                            warnings: ['Moins de puissance statistique que les tests paramétriques']
                         }
                     }
                 ]
             },
             {
-                id: 'join',
-                title: 'Jointures',
-                icon: 'fa-link',
+                id: 'glm',
+                title: '📉 GLM - Régression',
+                icon: 'fa-chart-line',
                 color: 'border-l-4 border-cyan-500',
                 commands: [
                     {
-                        cmd: 'left_join(x, y)',
-                        desc: 'Jointure gauche',
+                        cmd: 'Régression linéaire simple',
+                        desc: 'Prédire une variable continue',
                         details: {
-                            explanation: 'Garde toutes les lignes de x, ajoute les colonnes de y. NA si pas de correspondance.',
-                            syntax: 'left_join(x, y, by = "col")',
+                            explanation: 'La régression linéaire modélise la relation entre une variable dépendante continue et des prédicteurs.',
+                            syntax: 'lm(y ~ x1 + x2, data)',
                             options: [
-                                { flag: 'by', desc: 'Colonne(s) de jointure' },
-                                { flag: 'suffix', desc: 'Suffixes pour colonnes dupliquées' },
-                                { flag: 'keep', desc: 'Garder les colonnes de jointure des deux tables' }
+                                { flag: '+ x', desc: 'Ajouter un prédicteur' },
+                                { flag: '* x', desc: 'Interaction (+ effets principaux)' },
+                                { flag: ': x', desc: 'Interaction seulement' },
+                                { flag: 'I(x^2)', desc: 'Terme polynomial' }
                             ],
                             examples: [
-                                { code: 'clients %>% left_join(commandes, by = "client_id")', desc: 'Clients avec leurs commandes' },
-                                { code: 'df1 %>% left_join(df2, by = c("id" = "client_id"))', desc: 'Noms de colonnes différents' },
-                                { code: 'df1 %>% left_join(df2, by = c("annee", "mois"))', desc: 'Jointure sur plusieurs colonnes' }
+                                { code: `# Régression linéaire simple
+model <- lm(mpg ~ wt, data = mtcars)
+summary(model)
+
+# Résultats tidy
+library(broom)
+tidy(model)      # Coefficients
+glance(model)    # R², AIC, etc.
+augment(model)   # Prédictions, résidus
+
+# Régression multiple
+model_mult <- lm(mpg ~ wt + hp + qsec, data = mtcars)
+summary(model_mult)
+
+# Avec interaction
+model_inter <- lm(mpg ~ wt * am, data = mtcars)
+summary(model_inter)
+
+# Intervalles de confiance
+confint(model, level = 0.95)
+
+# Prédiction
+new_data <- data.frame(wt = c(2.5, 3.0, 3.5))
+predict(model, new_data, interval = "confidence")
+predict(model, new_data, interval = "prediction")`, desc: 'Régression linéaire' }
                             ],
-                            tips: ['Équivalent SQL: LEFT JOIN', 'by = c("x_col" = "y_col") si noms différents'],
-                            warnings: []
+                            tips: ['R² ajusté pénalise les variables inutiles', 'AIC/BIC pour comparer des modèles'],
+                            warnings: ['Vérifier les hypothèses avec les diagnostics']
                         }
                     },
                     {
-                        cmd: 'inner_join(x, y)',
-                        desc: 'Jointure interne',
+                        cmd: 'Diagnostics de régression',
+                        desc: 'Vérifier les hypothèses du modèle',
                         details: {
-                            explanation: 'Garde uniquement les lignes avec correspondance dans les deux tables.',
-                            syntax: 'inner_join(x, y, by = "col")',
-                            options: [],
-                            examples: [
-                                { code: 'clients %>% inner_join(commandes, by = "client_id")', desc: 'Clients ayant commandé' },
-                                { code: 'df1 %>% inner_join(df2, by = c("a" = "b"))', desc: 'Correspondance a = b' }
+                            explanation: 'Vérifier linéarité, normalité des résidus, homoscédasticité et indépendance.',
+                            syntax: 'plot(model) / performance::check_model()',
+                            options: [
+                                { flag: 'Residuals vs Fitted', desc: 'Linéarité et homoscédasticité' },
+                                { flag: 'Q-Q', desc: 'Normalité des résidus' },
+                                { flag: 'Scale-Location', desc: 'Homoscédasticité' },
+                                { flag: 'Cook\'s distance', desc: 'Points influents' }
                             ],
-                            tips: ['Équivalent SQL: INNER JOIN', 'Perd les lignes sans correspondance'],
-                            warnings: ['Attention: réduit le nombre de lignes']
+                            examples: [
+                                { code: `model <- lm(mpg ~ wt + hp, data = mtcars)
+
+# Diagnostics R base (4 plots)
+par(mfrow = c(2, 2))
+plot(model)
+par(mfrow = c(1, 1))
+
+# Package performance (plus complet)
+library(performance)
+check_model(model)
+
+# Tests formels
+# 1. Normalité des résidus
+shapiro.test(residuals(model))
+
+# 2. Homoscédasticité (Breusch-Pagan)
+library(lmtest)
+bptest(model)
+
+# 3. Multicolinéarité (VIF)
+library(car)
+vif(model)  # VIF > 5-10 = problème
+
+# 4. Autocorrélation (Durbin-Watson)
+library(lmtest)
+dwtest(model)
+
+# Points influents
+plot(cooks.distance(model), type = "h")
+abline(h = 4/nrow(mtcars), col = "red")`, desc: 'Diagnostics du modèle' }
+                            ],
+                            tips: ['VIF > 10 indique une forte multicolinéarité', 'Cook\'s distance > 4/n = point influent'],
+                            warnings: ['Ne pas ignorer les violations d\'hypothèses']
                         }
                     },
                     {
-                        cmd: 'right_join(x, y)',
-                        desc: 'Jointure droite',
+                        cmd: 'Régression logistique binaire',
+                        desc: 'Prédire une variable binaire (0/1)',
                         details: {
-                            explanation: 'Garde toutes les lignes de y, ajoute les colonnes de x.',
-                            syntax: 'right_join(x, y, by = "col")',
-                            options: [],
-                            examples: [
-                                { code: 'clients %>% right_join(commandes, by = "client_id")', desc: 'Toutes les commandes' }
+                            explanation: 'La régression logistique modélise la probabilité d\'un événement binaire.',
+                            syntax: 'glm(y ~ x, family = binomial, data)',
+                            options: [
+                                { flag: 'family = binomial', desc: 'Logistique (défaut link = logit)' },
+                                { flag: 'link = "probit"', desc: 'Alternative au logit' }
                             ],
-                            tips: ['Peut toujours être réécrit en left_join en inversant x et y'],
-                            warnings: []
+                            examples: [
+                                { code: `# Régression logistique
+model <- glm(am ~ wt + hp,
+             family = binomial,
+             data = mtcars)
+summary(model)
+
+# Odds ratios (exponentielle des coefficients)
+exp(coef(model))
+exp(confint(model))
+
+# Résultats tidy
+library(broom)
+tidy(model, exponentiate = TRUE)
+
+# Prédiction de probabilités
+mtcars$pred_prob <- predict(model, type = "response")
+
+# Classification avec seuil 0.5
+mtcars$pred_class <- ifelse(mtcars$pred_prob > 0.5, 1, 0)
+
+# Matrice de confusion
+table(Predicted = mtcars$pred_class,
+      Actual = mtcars$am)
+
+# Courbe ROC et AUC
+library(pROC)
+roc_obj <- roc(mtcars$am, mtcars$pred_prob)
+plot(roc_obj, main = paste("AUC =", round(auc(roc_obj), 3)))
+
+# Pseudo R²
+library(pscl)
+pR2(model)`, desc: 'Régression logistique' }
+                            ],
+                            tips: ['Odds ratio > 1 = effet positif', 'AUC > 0.7 = discrimination acceptable'],
+                            warnings: ['Interpréter les coefficients comme log-odds, pas probabilités']
                         }
                     },
                     {
-                        cmd: 'full_join(x, y)',
-                        desc: 'Jointure complète',
+                        cmd: 'Régression multinomiale',
+                        desc: 'Prédire une variable catégorielle à plus de 2 classes',
                         details: {
-                            explanation: 'Garde toutes les lignes des deux tables. NA si pas de correspondance.',
-                            syntax: 'full_join(x, y, by = "col")',
-                            options: [],
-                            examples: [
-                                { code: 'df1 %>% full_join(df2, by = "id")', desc: 'Union complète' },
-                                { code: 'budget %>% full_join(depenses, by = c("annee", "mois"))', desc: 'Budget et dépenses complets' }
+                            explanation: 'Extension de la logistique pour des outcomes avec plus de 2 catégories non ordonnées.',
+                            syntax: 'nnet::multinom(y ~ x, data)',
+                            options: [
+                                { flag: 'nnet::multinom()', desc: 'Régression multinomiale' },
+                                { flag: 'MASS::polr()', desc: 'Régression ordinale' }
                             ],
-                            tips: ['Équivalent SQL: FULL OUTER JOIN', 'Utile pour comparer deux tables'],
-                            warnings: []
+                            examples: [
+                                { code: `library(nnet)
+
+# Transformer en facteur
+mtcars$cyl_f <- factor(mtcars$cyl)
+
+# Régression multinomiale
+model <- multinom(cyl_f ~ wt + hp, data = mtcars)
+summary(model)
+
+# Coefficients et odds ratios
+coef(model)
+exp(coef(model))  # Relative Risk Ratios
+
+# Z-scores et p-values
+z <- summary(model)$coefficients / summary(model)$standard.errors
+p <- (1 - pnorm(abs(z))) * 2
+print(p)
+
+# Prédiction
+pred_class <- predict(model, type = "class")
+pred_prob <- predict(model, type = "probs")
+
+# Matrice de confusion
+table(Predicted = pred_class, Actual = mtcars$cyl_f)
+
+# Régression ordinale (si catégories ordonnées)
+library(MASS)
+model_ord <- polr(factor(gear) ~ wt + hp, data = mtcars)
+summary(model_ord)`, desc: 'Régression multinomiale' }
+                            ],
+                            tips: ['La première catégorie est la référence', 'polr() pour variables ordinales'],
+                            warnings: ['Nécessite suffisamment d\'observations par catégorie']
                         }
                     },
                     {
-                        cmd: 'semi_join(x, y)',
-                        desc: 'Filtrer par existence',
+                        cmd: 'GLM avec autres distributions',
+                        desc: 'Poisson, Gamma, binomiale négative',
                         details: {
-                            explanation: 'Garde les lignes de x qui ont une correspondance dans y (sans ajouter de colonnes).',
-                            syntax: 'semi_join(x, y, by = "col")',
-                            options: [],
-                            examples: [
-                                { code: 'clients %>% semi_join(commandes, by = "client_id")', desc: 'Clients ayant commandé' },
-                                { code: 'produits %>% semi_join(ventes_2024, by = "produit_id")', desc: 'Produits vendus en 2024' }
+                            explanation: 'GLM permet de modéliser différents types de données avec des distributions appropriées.',
+                            syntax: 'glm(y ~ x, family = poisson/Gamma/...)',
+                            options: [
+                                { flag: 'poisson', desc: 'Données de comptage' },
+                                { flag: 'Gamma', desc: 'Données positives continues' },
+                                { flag: 'MASS::glm.nb()', desc: 'Binomiale négative (surdispersion)' }
                             ],
-                            tips: ['Équivalent SQL: WHERE EXISTS', 'Filtre sans dupliquer les lignes'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'anti_join(x, y)',
-                        desc: 'Filtrer par non-existence',
-                        details: {
-                            explanation: 'Garde les lignes de x qui N\'ONT PAS de correspondance dans y.',
-                            syntax: 'anti_join(x, y, by = "col")',
-                            options: [],
                             examples: [
-                                { code: 'clients %>% anti_join(commandes, by = "client_id")', desc: 'Clients n\'ayant jamais commandé' },
-                                { code: 'produits %>% anti_join(ventes, by = "produit_id")', desc: 'Produits jamais vendus' }
+                                { code: `# Régression de Poisson (comptage)
+# Simuler des données de comptage
+set.seed(42)
+df <- data.frame(
+  x = rnorm(100),
+  count = rpois(100, lambda = exp(1 + 0.5 * rnorm(100)))
+)
+
+model_pois <- glm(count ~ x, family = poisson, data = df)
+summary(model_pois)
+
+# Vérifier surdispersion
+# Deviance/df >> 1 = surdispersion
+model_pois$deviance / model_pois$df.residual
+
+# Binomiale négative si surdispersion
+library(MASS)
+model_nb <- glm.nb(count ~ x, data = df)
+summary(model_nb)
+
+# Régression Gamma (temps, coûts)
+df$positive <- abs(rnorm(100, 10, 2))
+model_gamma <- glm(positive ~ x,
+                   family = Gamma(link = "log"),
+                   data = df)
+summary(model_gamma)
+
+# Comparer les modèles avec AIC
+AIC(model_pois, model_nb)`, desc: 'GLM avec différentes familles' }
                             ],
-                            tips: ['Équivalent SQL: WHERE NOT EXISTS', 'Très utile pour trouver les "orphelins"'],
-                            warnings: []
+                            tips: ['Poisson suppose moyenne = variance', 'Binomiale négative pour surdispersion'],
+                            warnings: ['Vérifier l\'adéquation de la distribution']
                         }
                     }
                 ]
             },
             {
-                id: 'reshape',
-                title: 'Restructuration (tidyr)',
-                icon: 'fa-th',
+                id: 'glmnet',
+                title: '🔀 GLMnet - Régularisation',
+                icon: 'fa-compress-arrows-alt',
                 color: 'border-l-4 border-orange-500',
                 commands: [
                     {
-                        cmd: 'pivot_longer()',
-                        desc: 'Format large → long',
+                        cmd: 'LASSO avec validation croisée',
+                        desc: 'Sélection de variables et régularisation L1',
                         details: {
-                            explanation: 'Transforme plusieurs colonnes en paires clé-valeur (format "tidy"). L\'inverse de pivot_wider.',
-                            syntax: 'pivot_longer(data, cols, names_to, values_to)',
+                            explanation: 'LASSO (L1) pénalise la somme des valeurs absolues des coefficients, forçant certains à zéro.',
+                            syntax: 'cv.glmnet(x, y, alpha = 1)',
                             options: [
-                                { flag: 'cols', desc: 'Colonnes à pivoter' },
-                                { flag: 'names_to', desc: 'Nom de la nouvelle colonne (noms)' },
-                                { flag: 'values_to', desc: 'Nom de la nouvelle colonne (valeurs)' },
-                                { flag: 'values_drop_na', desc: 'Supprimer les lignes avec NA' },
-                                { flag: 'names_prefix', desc: 'Préfixe à retirer des noms' }
+                                { flag: 'alpha = 1', desc: 'LASSO (L1)' },
+                                { flag: 'alpha = 0', desc: 'Ridge (L2)' },
+                                { flag: 'alpha = 0.5', desc: 'Elastic Net' },
+                                { flag: 'lambda.min', desc: 'Lambda minimisant l\'erreur' },
+                                { flag: 'lambda.1se', desc: 'Lambda à 1 SE (plus parcimonieux)' }
                             ],
                             examples: [
-                                { code: 'df %>% pivot_longer(\n  cols = c(jan, fev, mar),\n  names_to = "mois",\n  values_to = "ventes"\n)', desc: 'Mois en lignes' },
-                                { code: 'df %>% pivot_longer(\n  cols = starts_with("annee_"),\n  names_to = "annee",\n  names_prefix = "annee_",\n  values_to = "valeur"\n)', desc: 'Retirer le préfixe "annee_"' },
-                                { code: 'df %>% pivot_longer(\n  cols = -c(id, nom),\n  names_to = "variable",\n  values_to = "valeur"\n)', desc: 'Tout sauf id et nom' }
+                                { code: `library(glmnet)
+set.seed(42)
+
+# Préparer les données (glmnet veut des matrices)
+x <- as.matrix(mtcars[, c("wt", "hp", "drat", "qsec")])
+y <- mtcars$mpg
+
+# LASSO avec validation croisée (10-fold)
+cv_lasso <- cv.glmnet(x, y, alpha = 1, nfolds = 10)
+
+# Visualiser le chemin de régularisation
+plot(cv_lasso)
+
+# Meilleurs lambdas
+cv_lasso$lambda.min   # Minimum CV error
+cv_lasso$lambda.1se   # 1 SE rule (plus simple)
+
+# Coefficients au lambda optimal
+coef(cv_lasso, s = "lambda.min")
+coef(cv_lasso, s = "lambda.1se")  # Plus parcimonieux
+
+# Prédiction
+pred <- predict(cv_lasso, newx = x, s = "lambda.1se")
+
+# Performance
+sqrt(mean((y - pred)^2))  # RMSE`, desc: 'LASSO régression' }
                             ],
-                            tips: ['Anciennement gather()', 'cols = -id pour tout sauf id'],
-                            warnings: []
+                            tips: ['lambda.1se donne un modèle plus simple et généralisable', 'LASSO fait de la sélection de variables automatique'],
+                            warnings: ['Standardiser les prédicteurs (fait par défaut)']
                         }
                     },
                     {
-                        cmd: 'pivot_wider()',
-                        desc: 'Format long → large',
+                        cmd: 'Ridge regression',
+                        desc: 'Régularisation L2 sans sélection',
                         details: {
-                            explanation: 'Transforme des paires clé-valeur en colonnes séparées. L\'inverse de pivot_longer.',
-                            syntax: 'pivot_wider(data, names_from, values_from)',
+                            explanation: 'Ridge (L2) pénalise la somme des carrés des coefficients, les réduisant mais sans les annuler.',
+                            syntax: 'cv.glmnet(x, y, alpha = 0)',
                             options: [
-                                { flag: 'names_from', desc: 'Colonne pour les noms' },
-                                { flag: 'values_from', desc: 'Colonne pour les valeurs' },
-                                { flag: 'values_fill', desc: 'Valeur pour les NA' },
-                                { flag: 'names_prefix', desc: 'Préfixe pour les noms de colonnes' }
+                                { flag: 'alpha = 0', desc: 'Ridge (L2)' }
                             ],
                             examples: [
-                                { code: 'df %>% pivot_wider(\n  names_from = mois,\n  values_from = ventes\n)', desc: 'Mois en colonnes' },
-                                { code: 'df %>% pivot_wider(\n  names_from = produit,\n  values_from = ventes,\n  values_fill = 0\n)', desc: 'Remplacer NA par 0' },
-                                { code: 'df %>% pivot_wider(\n  names_from = c(annee, mois),\n  values_from = ventes\n)', desc: 'Combinaison année_mois' }
+                                { code: `library(glmnet)
+set.seed(42)
+
+x <- as.matrix(mtcars[, c("wt", "hp", "drat", "qsec")])
+y <- mtcars$mpg
+
+# Ridge avec validation croisée
+cv_ridge <- cv.glmnet(x, y, alpha = 0, nfolds = 10)
+
+plot(cv_ridge)
+
+# Coefficients (jamais exactement 0)
+coef(cv_ridge, s = "lambda.min")
+
+# Comparer LASSO vs Ridge
+cv_lasso <- cv.glmnet(x, y, alpha = 1)
+
+# MSE au lambda optimal
+min(cv_lasso$cvm)  # LASSO
+min(cv_ridge$cvm)  # Ridge
+
+# Visualiser les chemins de régularisation
+par(mfrow = c(1, 2))
+plot(glmnet(x, y, alpha = 1), main = "LASSO")
+plot(glmnet(x, y, alpha = 0), main = "Ridge")
+par(mfrow = c(1, 1))`, desc: 'Ridge regression' }
                             ],
-                            tips: ['Anciennement spread()', 'values_fill pour éviter les NA'],
-                            warnings: []
+                            tips: ['Ridge garde toutes les variables', 'Meilleur que LASSO si beaucoup de prédicteurs corrélés'],
+                            warnings: ['Ridge ne fait pas de sélection de variables']
                         }
                     },
                     {
-                        cmd: 'separate()',
-                        desc: 'Séparer une colonne',
+                        cmd: 'Elastic Net',
+                        desc: 'Combinaison LASSO + Ridge',
                         details: {
-                            explanation: 'Divise une colonne en plusieurs colonnes selon un séparateur.',
-                            syntax: 'separate(data, col, into, sep)',
+                            explanation: 'Elastic Net combine les pénalités L1 et L2 pour bénéficier des avantages des deux.',
+                            syntax: 'cv.glmnet(x, y, alpha = 0.5)',
                             options: [
-                                { flag: 'into', desc: 'Noms des nouvelles colonnes' },
-                                { flag: 'sep', desc: 'Séparateur (regex ou position)' },
-                                { flag: 'remove', desc: 'Supprimer la colonne originale' },
-                                { flag: 'convert', desc: 'Convertir automatiquement les types' }
+                                { flag: 'alpha', desc: 'Ratio L1/(L1+L2), entre 0 et 1' }
                             ],
                             examples: [
-                                { code: 'df %>% separate(date, into = c("annee", "mois", "jour"), sep = "-")', desc: '2024-01-15 → 3 colonnes' },
-                                { code: 'df %>% separate(nom_complet, into = c("prenom", "nom"), sep = " ")', desc: 'Séparer prénom et nom' },
-                                { code: 'df %>% separate_wider_delim(col, delim = "_", names = c("a", "b"))', desc: 'Version moderne (tidyr 1.3+)' }
+                                { code: `library(glmnet)
+set.seed(42)
+
+x <- as.matrix(mtcars[, c("wt", "hp", "drat", "qsec")])
+y <- mtcars$mpg
+
+# Tester différents alpha avec caret
+library(caret)
+
+# Grid search sur alpha et lambda
+tune_grid <- expand.grid(
+  alpha = seq(0, 1, by = 0.1),
+  lambda = 10^seq(-3, 1, length = 50)
+)
+
+ctrl <- trainControl(
+  method = "cv",
+  number = 10,
+  verboseIter = FALSE
+)
+
+elastic_model <- train(
+  mpg ~ wt + hp + drat + qsec,
+  data = mtcars,
+  method = "glmnet",
+  tuneGrid = tune_grid,
+  trControl = ctrl
+)
+
+# Meilleurs hyperparamètres
+elastic_model$bestTune
+
+# Visualiser
+plot(elastic_model)
+
+# Modèle final
+coef(elastic_model$finalModel, elastic_model$bestTune$lambda)`, desc: 'Elastic Net avec tuning' }
                             ],
-                            tips: ['convert = TRUE pour conversion automatique en numeric/integer'],
-                            warnings: ['sep peut être un regex']
+                            tips: ['alpha = 0.5 est un bon point de départ', 'Elastic Net gère mieux les variables corrélées que LASSO'],
+                            warnings: ['Tuner à la fois alpha et lambda']
                         }
                     },
                     {
-                        cmd: 'unite()',
-                        desc: 'Combiner des colonnes',
+                        cmd: 'GLMnet multinomial',
+                        desc: 'Classification multi-classes régularisée',
                         details: {
-                            explanation: 'Fusionne plusieurs colonnes en une seule. L\'inverse de separate.',
-                            syntax: 'unite(data, col, colonnes, sep)',
+                            explanation: 'glmnet supporte la classification multinomiale avec régularisation LASSO/Ridge.',
+                            syntax: 'cv.glmnet(x, y, family = "multinomial")',
                             options: [
-                                { flag: 'col', desc: 'Nom de la nouvelle colonne' },
-                                { flag: 'sep', desc: 'Séparateur (défaut: "_")' },
-                                { flag: 'remove', desc: 'Supprimer les colonnes sources' },
-                                { flag: 'na.rm', desc: 'Ignorer les NA' }
+                                { flag: 'family = "multinomial"', desc: 'Classification multi-classes' },
+                                { flag: 'type.multinomial = "grouped"', desc: 'Même lambda pour toutes les classes' }
                             ],
                             examples: [
-                                { code: 'df %>% unite(date, annee, mois, jour, sep = "-")', desc: 'Créer une date' },
-                                { code: 'df %>% unite(nom_complet, prenom, nom, sep = " ", remove = FALSE)', desc: 'Garder les colonnes originales' }
+                                { code: `library(glmnet)
+set.seed(42)
+
+# Préparer les données
+x <- as.matrix(mtcars[, c("wt", "hp", "drat", "qsec")])
+y <- factor(mtcars$cyl)  # 3 classes: 4, 6, 8
+
+# Régression multinomiale régularisée
+cv_multi <- cv.glmnet(x, y,
+                      family = "multinomial",
+                      alpha = 0.5,  # Elastic Net
+                      type.multinomial = "grouped",
+                      nfolds = 10)
+
+plot(cv_multi)
+
+# Coefficients par classe
+coef(cv_multi, s = "lambda.1se")
+
+# Prédiction des classes
+pred_class <- predict(cv_multi, newx = x,
+                      s = "lambda.1se",
+                      type = "class")
+
+# Prédiction des probabilités
+pred_prob <- predict(cv_multi, newx = x,
+                     s = "lambda.1se",
+                     type = "response")
+
+# Matrice de confusion
+table(Predicted = pred_class, Actual = y)
+
+# Accuracy
+mean(pred_class == y)
+
+# Avec caret pour plus de contrôle
+library(caret)
+ctrl <- trainControl(method = "cv", number = 10)
+
+model <- train(
+  x = mtcars[, c("wt", "hp", "drat", "qsec")],
+  y = factor(mtcars$cyl),
+  method = "glmnet",
+  family = "multinomial",
+  trControl = ctrl,
+  tuneLength = 10
+)
+
+confusionMatrix(predict(model), factor(mtcars$cyl))`, desc: 'GLMnet multinomial' }
                             ],
-                            tips: ['Opposé de separate()'],
-                            warnings: []
+                            tips: ['type.multinomial = "grouped" pour sélection de variables consistante', 'Utiliser caret pour un workflow plus simple'],
+                            warnings: ['Nécessite suffisamment d\'observations par classe']
                         }
                     },
                     {
-                        cmd: 'complete() / fill()',
-                        desc: 'Compléter les données manquantes',
+                        cmd: 'GLMnet logistique avec poids',
+                        desc: 'Gérer les classes déséquilibrées',
                         details: {
-                            explanation: 'complete() crée toutes les combinaisons. fill() propage les valeurs pour remplir les NA.',
-                            syntax: 'complete(data, colonnes, fill = list()) / fill(data, colonnes, .direction)',
+                            explanation: 'Pondérer les observations pour compenser le déséquilibre des classes.',
+                            syntax: 'glmnet(..., weights = w)',
                             options: [
-                                { flag: 'fill', desc: 'Valeurs par défaut pour complete()' },
-                                { flag: '.direction', desc: '"down", "up", "downup", "updown" pour fill()' }
+                                { flag: 'weights', desc: 'Vecteur de poids par observation' }
                             ],
                             examples: [
-                                { code: 'df %>% complete(annee, mois, fill = list(ventes = 0))', desc: 'Toutes combinaisons année × mois' },
-                                { code: 'df %>% fill(region, .direction = "down")', desc: 'Propager vers le bas' },
-                                { code: 'df %>% \n  group_by(client) %>%\n  complete(date = seq(min(date), max(date), by = "day"))', desc: 'Toutes les dates par client' }
+                                { code: `library(glmnet)
+set.seed(42)
+
+# Données déséquilibrées
+x <- as.matrix(mtcars[, c("wt", "hp", "drat", "qsec")])
+y <- factor(mtcars$am)  # 0: 19, 1: 13
+
+# Calculer les poids inverses
+class_weights <- ifelse(y == "1",
+                        sum(y == "0") / sum(y == "1"),
+                        1)
+class_weights <- class_weights / sum(class_weights) * length(y)
+
+# Modèle avec poids
+cv_weighted <- cv.glmnet(x, y,
+                         family = "binomial",
+                         alpha = 1,
+                         weights = class_weights,
+                         nfolds = 10)
+
+# Prédiction
+pred <- predict(cv_weighted, newx = x,
+                s = "lambda.1se", type = "class")
+
+# Matrice de confusion
+table(Predicted = pred, Actual = y)
+
+# Avec caret (plus simple)
+library(caret)
+
+ctrl <- trainControl(
+  method = "cv",
+  number = 10,
+  classProbs = TRUE,
+  summaryFunction = twoClassSummary,
+  sampling = "up"  # ou "down", "smote"
+)
+
+# Renommer les niveaux pour caret
+mtcars$am_f <- factor(mtcars$am, labels = c("auto", "manual"))
+
+model <- train(
+  am_f ~ wt + hp + drat + qsec,
+  data = mtcars,
+  method = "glmnet",
+  family = "binomial",
+  trControl = ctrl,
+  metric = "ROC"
+)
+
+confusionMatrix(predict(model), mtcars$am_f)`, desc: 'Classes déséquilibrées' }
                             ],
-                            tips: ['complete() génère les combinaisons manquantes', 'fill() propage les valeurs existantes'],
-                            warnings: []
+                            tips: ['sampling = "smote" crée des observations synthétiques', 'Utiliser ROC comme métrique plutôt qu\'accuracy'],
+                            warnings: ['Le suréchantillonnage peut mener à l\'overfitting']
                         }
                     }
                 ]
             },
             {
-                id: 'dates',
-                title: 'Dates (lubridate)',
-                icon: 'fa-calendar',
-                color: 'border-l-4 border-pink-500',
+                id: 'randomforest',
+                title: '🌲 Random Forest',
+                icon: 'fa-tree',
+                color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'ymd() / dmy() / mdy()',
-                        desc: 'Parser des dates',
+                        cmd: 'Random Forest pour classification',
+                        desc: 'Classifier avec un ensemble d\'arbres',
                         details: {
-                            explanation: 'Convertit des chaînes de caractères en dates. Le nom de la fonction indique l\'ordre: y=year, m=month, d=day.',
-                            syntax: 'ymd("2024-01-15") / dmy("15/01/2024") / mdy("01-15-2024")',
+                            explanation: 'Random Forest construit de nombreux arbres sur des sous-échantillons et vote pour la classe finale.',
+                            syntax: 'randomForest(y ~ ., data, ntree, mtry)',
                             options: [
-                                { flag: 'ymd()', desc: 'Année-Mois-Jour' },
-                                { flag: 'dmy()', desc: 'Jour-Mois-Année' },
-                                { flag: 'mdy()', desc: 'Mois-Jour-Année (US)' },
-                                { flag: 'ymd_hms()', desc: 'Avec heure:min:sec' }
+                                { flag: 'ntree', desc: 'Nombre d\'arbres (défaut: 500)' },
+                                { flag: 'mtry', desc: 'Variables par split (sqrt(p) pour classif)' },
+                                { flag: 'importance = TRUE', desc: 'Calculer l\'importance des variables' }
                             ],
                             examples: [
-                                { code: 'library(lubridate)', desc: 'Charger lubridate' },
-                                { code: 'ymd("2024-01-15")', desc: '2024-01-15' },
-                                { code: 'dmy("15/01/2024")', desc: 'Format français' },
-                                { code: 'ymd_hms("2024-01-15 14:30:00")', desc: 'Avec heure' },
-                                { code: 'df %>% mutate(date = ymd(date_string))', desc: 'Convertir une colonne' }
+                                { code: `library(randomForest)
+set.seed(42)
+
+# Classification
+mtcars$cyl_f <- factor(mtcars$cyl)
+
+rf_model <- randomForest(
+  cyl_f ~ mpg + hp + wt + drat + qsec,
+  data = mtcars,
+  ntree = 500,
+  mtry = 2,  # sqrt(5) ≈ 2
+  importance = TRUE
+)
+
+print(rf_model)
+
+# Erreur OOB par nombre d'arbres
+plot(rf_model, main = "Erreur OOB")
+
+# Importance des variables
+importance(rf_model)
+varImpPlot(rf_model)
+
+# Prédiction
+pred <- predict(rf_model, type = "class")
+table(Predicted = pred, Actual = mtcars$cyl_f)
+
+# Probabilités
+pred_prob <- predict(rf_model, type = "prob")
+
+# Avec ranger (plus rapide)
+library(ranger)
+rf_ranger <- ranger(
+  cyl_f ~ mpg + hp + wt + drat + qsec,
+  data = mtcars,
+  num.trees = 500,
+  importance = "permutation"
+)
+
+rf_ranger$confusion.matrix`, desc: 'Random Forest classification' }
                             ],
-                            tips: ['Intelligent: ymd("2024/01/15") et ymd("20240115") marchent aussi', 'Retourne NA si format invalide'],
-                            warnings: []
+                            tips: ['OOB error est une estimation honnête de l\'erreur', 'ranger est 10x plus rapide'],
+                            warnings: ['mtry par défaut: sqrt(p) pour classif, p/3 pour régression']
                         }
                     },
                     {
-                        cmd: 'today() / now()',
-                        desc: 'Date et heure actuelles',
+                        cmd: 'Random Forest pour régression',
+                        desc: 'Prédire une variable continue',
                         details: {
-                            explanation: 'Retourne la date ou l\'heure actuelle.',
-                            syntax: 'today() / now(tzone = "UTC")',
+                            explanation: 'Pour la régression, RF moyenne les prédictions des arbres.',
+                            syntax: 'randomForest(y ~ ., data)',
                             options: [
-                                { flag: 'tzone', desc: 'Fuseau horaire' }
+                                { flag: 'mtry', desc: 'p/3 par défaut pour régression' }
                             ],
                             examples: [
-                                { code: 'today()', desc: 'Date actuelle' },
-                                { code: 'now()', desc: 'Date et heure actuelles' },
-                                { code: 'now("Europe/Paris")', desc: 'Heure de Paris' },
-                                { code: 'df %>% filter(date >= today() - days(30))', desc: '30 derniers jours' }
+                                { code: `library(randomForest)
+set.seed(42)
+
+# Régression
+rf_reg <- randomForest(
+  mpg ~ hp + wt + drat + qsec,
+  data = mtcars,
+  ntree = 500,
+  mtry = 2,
+  importance = TRUE
+)
+
+print(rf_reg)
+
+# % Variance expliquée
+rf_reg$rsq[500]
+
+# Importance
+varImpPlot(rf_reg)
+
+# Prédiction
+pred <- predict(rf_reg)
+sqrt(mean((mtcars$mpg - pred)^2))  # RMSE
+
+# Partial dependence plots
+partialPlot(rf_reg, mtcars, x.var = "wt")
+
+# Avec caret et CV
+library(caret)
+ctrl <- trainControl(method = "cv", number = 10)
+
+rf_caret <- train(
+  mpg ~ hp + wt + drat + qsec,
+  data = mtcars,
+  method = "rf",
+  trControl = ctrl,
+  tuneGrid = expand.grid(mtry = 1:4),
+  importance = TRUE
+)
+
+print(rf_caret)
+plot(rf_caret)`, desc: 'Random Forest régression' }
                             ],
-                            tips: ['Sys.Date() et Sys.time() en R base'],
-                            warnings: []
+                            tips: ['Partial plots montrent l\'effet marginal d\'une variable', 'CV avec caret pour sélectionner mtry optimal'],
+                            warnings: ['RF ne donne pas de coefficients interprétables']
                         }
                     },
                     {
-                        cmd: 'year() / month() / day()',
-                        desc: 'Extraire des composantes',
+                        cmd: 'Tuning des hyperparamètres RF',
+                        desc: 'Optimiser ntree, mtry avec caret',
                         details: {
-                            explanation: 'Extrait une partie de la date (année, mois, jour, etc.).',
-                            syntax: 'year(date) / month(date) / day(date)',
+                            explanation: 'Utiliser la validation croisée pour trouver les meilleurs hyperparamètres.',
+                            syntax: 'train(method = "rf", tuneGrid = ...)',
                             options: [
-                                { flag: 'year()', desc: 'Année' },
-                                { flag: 'month()', desc: 'Mois (1-12)' },
-                                { flag: 'day()', desc: 'Jour du mois (1-31)' },
-                                { flag: 'wday()', desc: 'Jour de la semaine (1=dim, 7=sam)' },
-                                { flag: 'hour() / minute() / second()', desc: 'Heure, minute, seconde' },
-                                { flag: 'week() / quarter()', desc: 'Semaine, trimestre' }
+                                { flag: 'ntree', desc: 'Plus d\'arbres = plus stable mais plus lent' },
+                                { flag: 'mtry', desc: 'Paramètre le plus important à tuner' },
+                                { flag: 'nodesize', desc: 'Taille minimale des feuilles' }
                             ],
                             examples: [
-                                { code: 'df %>% mutate(\n  annee = year(date),\n  mois = month(date),\n  jour_semaine = wday(date, label = TRUE)\n)', desc: 'Extraire année, mois, jour semaine' },
-                                { code: 'df %>% filter(month(date) == 12)', desc: 'Seulement décembre' },
-                                { code: 'df %>% filter(wday(date) %in% c(1, 7))', desc: 'Week-ends seulement' },
-                                { code: 'month(date, label = TRUE, abbr = FALSE)', desc: '"janvier" au lieu de 1' }
+                                { code: `library(caret)
+library(randomForest)
+set.seed(42)
+
+# Validation croisée
+ctrl <- trainControl(
+  method = "repeatedcv",
+  number = 10,
+  repeats = 3,
+  verboseIter = TRUE
+)
+
+# Grid search sur mtry
+tune_grid <- expand.grid(mtry = 1:5)
+
+rf_tuned <- train(
+  factor(cyl) ~ mpg + hp + wt + drat + qsec,
+  data = mtcars,
+  method = "rf",
+  trControl = ctrl,
+  tuneGrid = tune_grid,
+  ntree = 500,
+  importance = TRUE
+)
+
+# Meilleur mtry
+print(rf_tuned)
+plot(rf_tuned)
+
+# Avec ranger pour plus d'options
+library(ranger)
+
+ctrl_ranger <- trainControl(method = "cv", number = 10)
+
+tune_grid_ranger <- expand.grid(
+  mtry = 1:5,
+  splitrule = c("gini", "extratrees"),
+  min.node.size = c(1, 5, 10)
+)
+
+rf_ranger_tuned <- train(
+  factor(cyl) ~ mpg + hp + wt + drat + qsec,
+  data = mtcars,
+  method = "ranger",
+  trControl = ctrl_ranger,
+  tuneGrid = tune_grid_ranger,
+  importance = "permutation"
+)
+
+print(rf_ranger_tuned)`, desc: 'Tuning Random Forest' }
                             ],
-                            tips: ['label = TRUE pour noms au lieu de nombres', 'wday: 1=dimanche en anglais!'],
-                            warnings: ['wday commence à dimanche=1 par défaut (week_start=1 pour lundi)']
+                            tips: ['500-1000 arbres suffisent généralement', 'mtry optimal souvent proche de sqrt(p)'],
+                            warnings: ['Trop d\'arbres = plus lent sans gain']
                         }
                     },
                     {
-                        cmd: 'days() / months() / years()',
-                        desc: 'Arithmétique de dates',
+                        cmd: 'Importance des variables',
+                        desc: 'Identifier les prédicteurs les plus importants',
                         details: {
-                            explanation: 'Périodes pour ajouter ou soustraire du temps aux dates.',
-                            syntax: 'date + days(n) / date - months(n)',
+                            explanation: 'Deux mesures: Mean Decrease Accuracy (permutation) et Mean Decrease Gini (impureté).',
+                            syntax: 'importance(rf_model) / varImpPlot(rf_model)',
                             options: [
-                                { flag: 'days()', desc: 'n jours' },
-                                { flag: 'weeks()', desc: 'n semaines' },
-                                { flag: 'months()', desc: 'n mois' },
-                                { flag: 'years()', desc: 'n années' },
-                                { flag: 'hours() / minutes() / seconds()', desc: 'Durées courtes' }
+                                { flag: 'MeanDecreaseAccuracy', desc: 'Perte d\'accuracy si variable permutée' },
+                                { flag: 'MeanDecreaseGini', desc: 'Diminution de l\'impureté Gini' }
                             ],
                             examples: [
-                                { code: 'today() + days(30)', desc: 'Dans 30 jours' },
-                                { code: 'today() - years(1)', desc: 'Il y a un an' },
-                                { code: 'df %>% filter(date >= today() - months(3))', desc: '3 derniers mois' },
-                                { code: 'interval(start, end) / days(1)', desc: 'Nombre de jours entre deux dates' }
+                                { code: `library(randomForest)
+set.seed(42)
+
+rf_model <- randomForest(
+  factor(cyl) ~ mpg + hp + wt + drat + qsec,
+  data = mtcars,
+  importance = TRUE
+)
+
+# Importance brute
+importance(rf_model)
+
+# Visualisation
+varImpPlot(rf_model, main = "Importance des variables")
+
+# Importance par classe
+importance(rf_model, type = 1)  # Accuracy
+importance(rf_model, type = 2)  # Gini
+
+# Extraire et trier
+imp <- importance(rf_model)
+imp_df <- data.frame(
+  variable = rownames(imp),
+  importance = imp[, "MeanDecreaseAccuracy"]
+) %>%
+  arrange(desc(importance))
+
+# ggplot
+library(ggplot2)
+ggplot(imp_df, aes(x = reorder(variable, importance), y = importance)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(x = "Variable", y = "Mean Decrease Accuracy")
+
+# SHAP values (plus précis)
+# install.packages("iml")
+library(iml)
+predictor <- Predictor$new(rf_model, data = mtcars, type = "prob")
+shapley <- Shapley$new(predictor, x.interest = mtcars[1, ])
+plot(shapley)`, desc: 'Importance des variables' }
                             ],
-                            tips: ['Utilisez %--% pour créer un intervalle: start %--% end'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'floor_date() / ceiling_date()',
-                        desc: 'Arrondir des dates',
-                        details: {
-                            explanation: 'Arrondit une date au début ou à la fin d\'une période.',
-                            syntax: 'floor_date(date, unit) / ceiling_date(date, unit)',
-                            options: [
-                                { flag: 'unit', desc: '"day", "week", "month", "quarter", "year"' }
-                            ],
-                            examples: [
-                                { code: 'floor_date(today(), "month")', desc: 'Premier jour du mois' },
-                                { code: 'ceiling_date(today(), "year")', desc: 'Premier jour de l\'année suivante' },
-                                { code: 'df %>% mutate(mois = floor_date(date, "month"))', desc: 'Grouper par mois' },
-                                { code: 'df %>%\n  mutate(semaine = floor_date(date, "week")) %>%\n  group_by(semaine) %>%\n  summarize(total = sum(ventes))', desc: 'Ventes par semaine' }
-                            ],
-                            tips: ['Très utile pour agréger par période', 'round_date() pour l\'arrondi au plus proche'],
-                            warnings: []
+                            tips: ['MeanDecreaseAccuracy est plus fiable', 'SHAP values pour interprétation locale'],
+                            warnings: ['Gini est biaisé vers les variables à beaucoup de catégories']
                         }
                     }
                 ]
             },
             {
-                id: 'strings',
-                title: 'Texte (stringr)',
-                icon: 'fa-font',
+                id: 'xgboost',
+                title: '⚡ XGBoost',
+                icon: 'fa-bolt',
                 color: 'border-l-4 border-yellow-500',
                 commands: [
                     {
-                        cmd: 'str_detect()',
-                        desc: 'Détecter un motif',
+                        cmd: 'XGBoost pour classification',
+                        desc: 'Gradient Boosting optimisé',
                         details: {
-                            explanation: 'Retourne TRUE si le motif est présent dans la chaîne.',
-                            syntax: 'str_detect(string, pattern)',
+                            explanation: 'XGBoost construit des arbres séquentiellement, chacun corrigeant les erreurs du précédent.',
+                            syntax: 'xgboost(data = dtrain, nrounds, objective)',
                             options: [
-                                { flag: 'negate', desc: 'Inverser (TRUE si pas trouvé)' }
+                                { flag: 'nrounds', desc: 'Nombre d\'itérations (arbres)' },
+                                { flag: 'max_depth', desc: 'Profondeur max des arbres (3-10)' },
+                                { flag: 'eta', desc: 'Learning rate (0.01-0.3)' },
+                                { flag: 'objective', desc: '"binary:logistic", "multi:softmax"' }
                             ],
                             examples: [
-                                { code: 'str_detect("hello world", "world")', desc: 'TRUE' },
-                                { code: 'df %>% filter(str_detect(email, "@gmail\\\\.com"))', desc: 'Filtrer les Gmail' },
-                                { code: 'df %>% filter(str_detect(nom, "(?i)jean"))', desc: 'Insensible à la casse' },
-                                { code: 'str_detect(nom, "^A")', desc: 'Commence par A' }
+                                { code: `library(xgboost)
+set.seed(42)
+
+# Préparer les données
+x <- as.matrix(mtcars[, c("mpg", "hp", "wt", "drat", "qsec")])
+y <- as.numeric(factor(mtcars$cyl)) - 1  # 0, 1, 2
+
+# Créer DMatrix
+dtrain <- xgb.DMatrix(data = x, label = y)
+
+# Paramètres
+params <- list(
+  objective = "multi:softmax",
+  num_class = 3,
+  max_depth = 3,
+  eta = 0.1,
+  subsample = 0.8,
+  colsample_bytree = 0.8
+)
+
+# Entraînement avec CV
+cv_result <- xgb.cv(
+  params = params,
+  data = dtrain,
+  nrounds = 100,
+  nfold = 5,
+  early_stopping_rounds = 10,
+  verbose = TRUE
+)
+
+# Meilleur nombre d'itérations
+best_nrounds <- cv_result$best_iteration
+
+# Modèle final
+xgb_model <- xgboost(
+  data = dtrain,
+  params = params,
+  nrounds = best_nrounds,
+  verbose = 0
+)
+
+# Prédiction
+pred <- predict(xgb_model, x)
+table(Predicted = pred, Actual = y)
+
+# Importance des variables
+importance <- xgb.importance(model = xgb_model)
+xgb.plot.importance(importance)`, desc: 'XGBoost classification' }
                             ],
-                            tips: ['(?i) pour case-insensitive', 'Utilise des regex par défaut'],
-                            warnings: ['Échapper les caractères spéciaux regex avec \\\\']
+                            tips: ['early_stopping évite l\'overfitting', 'eta faible + plus de rounds = meilleur'],
+                            warnings: ['XGBoost est sensible aux hyperparamètres']
                         }
                     },
                     {
-                        cmd: 'str_replace() / str_replace_all()',
-                        desc: 'Remplacer du texte',
+                        cmd: 'XGBoost pour régression',
+                        desc: 'Prédire une variable continue',
                         details: {
-                            explanation: 'Remplace la première occurrence (str_replace) ou toutes (str_replace_all).',
-                            syntax: 'str_replace(string, pattern, replacement)',
-                            options: [],
-                            examples: [
-                                { code: 'str_replace("hello world", "world", "R")', desc: '"hello R"' },
-                                { code: 'df %>% mutate(tel = str_replace_all(tel, " ", ""))', desc: 'Supprimer les espaces' },
-                                { code: 'str_replace_all(text, "\\\\d+", "X")', desc: 'Remplacer nombres par X' },
-                                { code: 'str_replace(nom, "^(.).*", "\\\\1.")', desc: 'Initiale seulement' }
-                            ],
-                            tips: ['\\\\1 pour référencer un groupe capturé', 'str_remove(s, pattern) = str_replace(s, pattern, "")'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'str_extract() / str_extract_all()',
-                        desc: 'Extraire un motif',
-                        details: {
-                            explanation: 'Extrait la partie de la chaîne correspondant au motif.',
-                            syntax: 'str_extract(string, pattern)',
-                            options: [],
-                            examples: [
-                                { code: 'str_extract("Prix: 99.99€", "\\\\d+\\\\.\\\\d+")', desc: '"99.99"' },
-                                { code: 'df %>% mutate(code_postal = str_extract(adresse, "\\\\d{5}"))', desc: 'Extraire code postal' },
-                                { code: 'str_extract_all("a1b2c3", "\\\\d")', desc: 'Liste: c("1", "2", "3")' },
-                                { code: 'str_match(email, "(.+)@(.+)")', desc: 'Matrice avec groupes capturés' }
-                            ],
-                            tips: ['str_extract_all retourne une liste', 'str_match pour extraire les groupes'],
-                            warnings: ['Retourne NA si pas de correspondance']
-                        }
-                    },
-                    {
-                        cmd: 'str_c() / str_glue()',
-                        desc: 'Concaténer du texte',
-                        details: {
-                            explanation: 'str_c pour concaténation simple, str_glue pour interpolation de variables.',
-                            syntax: 'str_c(s1, s2, sep = " ") / str_glue("{var1} {var2}")',
+                            explanation: 'XGBoost peut aussi faire de la régression avec objective = "reg:squarederror".',
+                            syntax: 'xgboost(objective = "reg:squarederror")',
                             options: [
-                                { flag: 'sep', desc: 'Séparateur entre éléments' },
-                                { flag: 'collapse', desc: 'Fusionner un vecteur en une chaîne' }
+                                { flag: 'reg:squarederror', desc: 'Erreur quadratique (MSE)' },
+                                { flag: 'reg:absoluteerror', desc: 'Erreur absolue (MAE)' }
                             ],
                             examples: [
-                                { code: 'str_c("Hello", "World", sep = " ")', desc: '"Hello World"' },
-                                { code: 'str_c(c("a", "b", "c"), collapse = ", ")', desc: '"a, b, c"' },
-                                { code: 'nom <- "Alice"\nstr_glue("Bonjour {nom}!")', desc: '"Bonjour Alice!"' },
-                                { code: 'df %>% mutate(full = str_glue("{prenom} {nom}"))', desc: 'Créer nom complet' }
+                                { code: `library(xgboost)
+set.seed(42)
+
+x <- as.matrix(mtcars[, c("hp", "wt", "drat", "qsec")])
+y <- mtcars$mpg
+
+dtrain <- xgb.DMatrix(data = x, label = y)
+
+params <- list(
+  objective = "reg:squarederror",
+  max_depth = 4,
+  eta = 0.1,
+  subsample = 0.8,
+  colsample_bytree = 0.8
+)
+
+# CV pour trouver nrounds optimal
+cv_result <- xgb.cv(
+  params = params,
+  data = dtrain,
+  nrounds = 200,
+  nfold = 10,
+  metrics = "rmse",
+  early_stopping_rounds = 20,
+  verbose = FALSE
+)
+
+# Entraîner le modèle final
+xgb_reg <- xgboost(
+  data = dtrain,
+  params = params,
+  nrounds = cv_result$best_iteration,
+  verbose = 0
+)
+
+# Prédiction et RMSE
+pred <- predict(xgb_reg, x)
+sqrt(mean((y - pred)^2))
+
+# Partial dependence
+# install.packages("pdp")
+library(pdp)
+partial(xgb_reg, pred.var = "wt",
+        train = x,
+        plot = TRUE)`, desc: 'XGBoost régression' }
                             ],
-                            tips: ['str_glue = équivalent de f-strings Python', 'paste() et paste0() en R base'],
-                            warnings: []
+                            tips: ['RMSE dans cv_result pour suivre la performance', 'pdp pour interpréter les effets'],
+                            warnings: ['Attention à l\'overfitting avec max_depth élevé']
                         }
                     },
                     {
-                        cmd: 'str_to_lower/upper/title()',
-                        desc: 'Changer la casse',
+                        cmd: 'Tuning XGBoost avec caret',
+                        desc: 'Grid search des hyperparamètres',
                         details: {
-                            explanation: 'Convertit en minuscules, majuscules ou titre.',
-                            syntax: 'str_to_lower(string) / str_to_upper(string) / str_to_title(string)',
-                            options: [],
-                            examples: [
-                                { code: 'str_to_lower("HELLO")', desc: '"hello"' },
-                                { code: 'str_to_upper("hello")', desc: '"HELLO"' },
-                                { code: 'str_to_title("hello world")', desc: '"Hello World"' },
-                                { code: 'df %>% mutate(nom = str_to_upper(nom))', desc: 'Noms en majuscules' }
-                            ],
-                            tips: ['str_to_sentence() pour majuscule seulement au début'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'str_trim() / str_squish()',
-                        desc: 'Nettoyer les espaces',
-                        details: {
-                            explanation: 'str_trim enlève les espaces aux extrémités, str_squish réduit aussi les espaces internes.',
-                            syntax: 'str_trim(string) / str_squish(string)',
+                            explanation: 'caret simplifie le tuning de XGBoost avec validation croisée.',
+                            syntax: 'train(method = "xgbTree", tuneGrid = ...)',
                             options: [
-                                { flag: 'side', desc: '"both", "left", "right" pour str_trim' }
+                                { flag: 'nrounds', desc: 'Nombre de boosting rounds' },
+                                { flag: 'max_depth', desc: 'Profondeur (3-10)' },
+                                { flag: 'eta', desc: 'Learning rate (0.01-0.3)' },
+                                { flag: 'gamma', desc: 'Régularisation (0+)' },
+                                { flag: 'subsample', desc: 'Ratio échantillons (0.5-1)' },
+                                { flag: 'colsample_bytree', desc: 'Ratio features (0.5-1)' }
                             ],
                             examples: [
-                                { code: 'str_trim("  hello  ")', desc: '"hello"' },
-                                { code: 'str_squish("  hello    world  ")', desc: '"hello world"' },
-                                { code: 'df %>% mutate(nom = str_squish(nom))', desc: 'Nettoyer les noms' },
-                                { code: 'str_pad("42", width = 5, pad = "0")', desc: '"00042"' }
+                                { code: `library(caret)
+library(xgboost)
+set.seed(42)
+
+# Contrôle de la CV
+ctrl <- trainControl(
+  method = "cv",
+  number = 5,
+  verboseIter = TRUE,
+  allowParallel = TRUE
+)
+
+# Grille d'hyperparamètres
+tune_grid <- expand.grid(
+  nrounds = c(50, 100, 150),
+  max_depth = c(3, 4, 5),
+  eta = c(0.05, 0.1, 0.2),
+  gamma = 0,
+  colsample_bytree = 0.8,
+  min_child_weight = 1,
+  subsample = 0.8
+)
+
+# Entraînement
+xgb_tuned <- train(
+  mpg ~ hp + wt + drat + qsec,
+  data = mtcars,
+  method = "xgbTree",
+  trControl = ctrl,
+  tuneGrid = tune_grid,
+  verbose = FALSE
+)
+
+# Meilleurs paramètres
+print(xgb_tuned$bestTune)
+plot(xgb_tuned)
+
+# Importance des variables
+varImp(xgb_tuned)
+plot(varImp(xgb_tuned))`, desc: 'Tuning XGBoost' }
                             ],
-                            tips: ['str_squish = trim + remplacer espaces multiples par un seul'],
-                            warnings: []
+                            tips: ['Commencer avec peu de combinaisons puis affiner', 'Paralléliser avec doParallel'],
+                            warnings: ['Grid search peut être très long']
+                        }
+                    },
+                    {
+                        cmd: 'XGBoost avec classes déséquilibrées',
+                        desc: 'scale_pos_weight pour déséquilibre',
+                        details: {
+                            explanation: 'scale_pos_weight compense le déséquilibre en pondérant la classe minoritaire.',
+                            syntax: 'scale_pos_weight = sum(negative) / sum(positive)',
+                            options: [
+                                { flag: 'scale_pos_weight', desc: 'Ratio neg/pos' }
+                            ],
+                            examples: [
+                                { code: `library(xgboost)
+set.seed(42)
+
+# Données binaires déséquilibrées
+x <- as.matrix(mtcars[, c("mpg", "hp", "wt", "drat")])
+y <- mtcars$am  # 19 automatic (0), 13 manual (1)
+
+# Calculer le poids
+scale_weight <- sum(y == 0) / sum(y == 1)
+
+params <- list(
+  objective = "binary:logistic",
+  max_depth = 3,
+  eta = 0.1,
+  scale_pos_weight = scale_weight,
+  eval_metric = "auc"  # AUC plutôt qu'accuracy
+)
+
+dtrain <- xgb.DMatrix(data = x, label = y)
+
+# CV
+cv_result <- xgb.cv(
+  params = params,
+  data = dtrain,
+  nrounds = 100,
+  nfold = 5,
+  early_stopping_rounds = 10,
+  verbose = FALSE
+)
+
+# Modèle final
+xgb_model <- xgboost(
+  data = dtrain,
+  params = params,
+  nrounds = cv_result$best_iteration,
+  verbose = 0
+)
+
+# Prédiction de probabilités
+pred_prob <- predict(xgb_model, x)
+
+# Trouver le seuil optimal (F1 ou autre)
+library(pROC)
+roc_obj <- roc(y, pred_prob)
+plot(roc_obj, main = paste("AUC =", round(auc(roc_obj), 3)))
+
+# Seuil optimal (Youden)
+coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))`, desc: 'Classes déséquilibrées' }
+                            ],
+                            tips: ['Utiliser AUC ou F1 comme métrique', 'Optimiser le seuil de classification'],
+                            warnings: ['Ne pas se fier à l\'accuracy avec des classes déséquilibrées']
                         }
                     }
                 ]
             },
             {
-                id: 'ggplot',
-                title: 'Visualisation (ggplot2)',
-                icon: 'fa-chart-bar',
+                id: 'lca',
+                title: '🔬 LCA - Classes Latentes',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'LCA avec poLCA',
+                        desc: 'Identifier des sous-groupes cachés',
+                        details: {
+                            explanation: 'Latent Class Analysis identifie des groupes non observés à partir de patterns de réponses.',
+                            syntax: 'poLCA(formula, data, nclass)',
+                            options: [
+                                { flag: 'nclass', desc: 'Nombre de classes latentes' },
+                                { flag: 'maxiter', desc: 'Itérations max (défaut 1000)' },
+                                { flag: 'nrep', desc: 'Répétitions avec starts différents' },
+                                { flag: 'graphs', desc: 'Afficher les graphiques' }
+                            ],
+                            examples: [
+                                { code: `library(poLCA)
+set.seed(42)
+
+# Exemple avec données simulées
+# Les variables doivent être des entiers 1, 2, 3...
+data(values)  # Dataset inclus dans poLCA
+
+# Formule: toutes les variables manifestes
+f <- cbind(A, B, C, D) ~ 1
+
+# LCA avec 2 classes
+lca_2 <- poLCA(f, data = values, nclass = 2,
+               maxiter = 1000, nrep = 10, verbose = FALSE)
+
+# Résultats
+print(lca_2)
+
+# Probabilités conditionnelles par classe
+lca_2$probs
+
+# Taille des classes
+lca_2$P
+
+# Classification des individus
+lca_2$predclass
+
+# Probabilités d'appartenance
+lca_2$posterior
+
+# Comparer différents nombres de classes
+results <- data.frame(
+  nclass = 2:5,
+  AIC = NA,
+  BIC = NA,
+  loglik = NA
+)
+
+for (i in 2:5) {
+  lca <- poLCA(f, data = values, nclass = i,
+               maxiter = 1000, nrep = 5, verbose = FALSE)
+  results$AIC[i-1] <- lca$aic
+  results$BIC[i-1] <- lca$bic
+  results$loglik[i-1] <- lca$llik
+}
+
+print(results)  # Choisir le modèle avec BIC le plus bas`, desc: 'LCA basique' }
+                            ],
+                            tips: ['BIC est le critère de choix pour le nombre de classes', 'nrep > 1 pour éviter les optima locaux'],
+                            warnings: ['Les variables doivent être codées 1, 2, 3... (pas 0)']
+                        }
+                    },
+                    {
+                        cmd: 'Choisir le nombre de classes',
+                        desc: 'Comparer AIC, BIC, entropie',
+                        details: {
+                            explanation: 'Plusieurs critères aident à déterminer le nombre optimal de classes latentes.',
+                            syntax: 'Comparer AIC, BIC, entropy pour k = 2, 3, 4...',
+                            options: [
+                                { flag: 'AIC', desc: 'Akaike Information Criterion' },
+                                { flag: 'BIC', desc: 'Bayesian IC (pénalise plus)' },
+                                { flag: 'Entropy', desc: 'Qualité de la classification (> 0.8)' },
+                                { flag: 'LMR-LRT', desc: 'Test de vraisemblance' }
+                            ],
+                            examples: [
+                                { code: `library(poLCA)
+set.seed(42)
+
+data(values)
+f <- cbind(A, B, C, D) ~ 1
+
+# Fonction pour comparer les modèles
+compare_lca <- function(data, formula, max_class = 6, nrep = 10) {
+  results <- data.frame()
+
+  for (k in 2:max_class) {
+    lca <- poLCA(formula, data, nclass = k,
+                 maxiter = 1000, nrep = nrep, verbose = FALSE)
+
+    # Calculer l'entropie
+    entropy <- -sum(lca$posterior * log(lca$posterior + 1e-10)) / nrow(data)
+    rel_entropy <- 1 - (entropy / log(k))
+
+    results <- rbind(results, data.frame(
+      nclass = k,
+      AIC = lca$aic,
+      BIC = lca$bic,
+      loglik = lca$llik,
+      entropy = rel_entropy,
+      n_params = lca$npar
+    ))
+  }
+  return(results)
+}
+
+comparison <- compare_lca(values, f, max_class = 5)
+print(comparison)
+
+# Visualiser
+library(ggplot2)
+comparison %>%
+  pivot_longer(c(AIC, BIC)) %>%
+  ggplot(aes(x = nclass, y = value, color = name)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Critères de sélection LCA",
+       x = "Nombre de classes", y = "Valeur")`, desc: 'Sélection du nombre de classes' }
+                            ],
+                            tips: ['BIC est généralement le meilleur critère', 'Entropie > 0.8 = bonne classification'],
+                            warnings: ['Tester plusieurs valeurs de nrep pour la stabilité']
+                        }
+                    },
+                    {
+                        cmd: 'LCA avec covariables',
+                        desc: 'Prédire l\'appartenance aux classes',
+                        details: {
+                            explanation: 'Les covariables prédisent la probabilité d\'appartenir à chaque classe latente.',
+                            syntax: 'poLCA(manifest ~ covariate, data, nclass)',
+                            options: [
+                                { flag: '~ covariate', desc: 'Ajouter des prédicteurs d\'appartenance' }
+                            ],
+                            examples: [
+                                { code: `library(poLCA)
+set.seed(42)
+
+# Créer des données avec covariable
+data(values)
+values$age <- sample(1:3, nrow(values), replace = TRUE)
+
+# LCA avec covariable
+f_cov <- cbind(A, B, C, D) ~ age
+
+lca_cov <- poLCA(f_cov, data = values, nclass = 3,
+                 maxiter = 1000, nrep = 10, verbose = FALSE)
+
+# Coefficients de régression multinomiale
+lca_cov$coeff
+
+# Odds ratios
+exp(lca_cov$coeff)
+
+# Effet de la covariable sur l'appartenance aux classes
+# Référence = dernière classe
+print(lca_cov)`, desc: 'LCA avec covariables' }
+                            ],
+                            tips: ['Les covariables prédisent l\'appartenance, pas les réponses', 'La dernière classe est la référence'],
+                            warnings: ['Trop de covariables peut rendre le modèle instable']
+                        }
+                    },
+                    {
+                        cmd: 'Gaussian Mixture avec mclust',
+                        desc: 'LCA pour variables continues',
+                        details: {
+                            explanation: 'mclust fait du clustering basé sur des modèles de mélange gaussien.',
+                            syntax: 'Mclust(data, G = 1:9)',
+                            options: [
+                                { flag: 'G', desc: 'Nombre de composantes à tester' },
+                                { flag: 'modelNames', desc: 'Types de modèles de covariance' }
+                            ],
+                            examples: [
+                                { code: `library(mclust)
+set.seed(42)
+
+# Données continues
+data <- mtcars[, c("mpg", "hp", "wt")]
+
+# Mclust sélectionne automatiquement le nombre de clusters
+mc <- Mclust(data, G = 1:9)
+
+# Résumé
+summary(mc)
+
+# Nombre optimal de clusters
+mc$G
+
+# BIC par modèle et nombre de clusters
+plot(mc, what = "BIC")
+
+# Classification
+mc$classification
+
+# Probabilités d'appartenance
+mc$z
+
+# Visualisation
+plot(mc, what = "classification")
+plot(mc, what = "uncertainty")
+
+# Ajouter au dataset
+mtcars$cluster <- mc$classification
+
+# LPA avec tidyLPA (interface tidy)
+# install.packages("tidyLPA")
+library(tidyLPA)
+
+lpa_result <- data %>%
+  estimate_profiles(1:5) %>%
+  compare_solutions(statistics = c("AIC", "BIC", "Entropy"))
+
+print(lpa_result)`, desc: 'Gaussian Mixture / LPA' }
+                            ],
+                            tips: ['mclust teste différents modèles de covariance', 'tidyLPA offre une interface plus simple'],
+                            warnings: ['Nécessite suffisamment d\'observations']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'evaluation',
+                title: '🎯 Évaluation & Généralisation',
+                icon: 'fa-bullseye',
                 color: 'border-l-4 border-red-500',
                 commands: [
                     {
-                        cmd: 'ggplot() + aes() + geom_*()',
-                        desc: 'Structure de base',
+                        cmd: 'Validation croisée K-fold',
+                        desc: 'Estimer la performance sur données nouvelles',
                         details: {
-                            explanation: 'ggplot2 utilise une "grammaire des graphiques": données + esthétiques (aes) + géométries (geom).',
-                            syntax: 'ggplot(data, aes(x, y, color, fill, size)) + geom_*() + ...',
+                            explanation: 'La CV divise les données en K parties, entraîne sur K-1 et teste sur la partie restante.',
+                            syntax: 'trainControl(method = "cv", number = 10)',
                             options: [
-                                { flag: 'aes(x, y)', desc: 'Mapping des variables aux axes' },
-                                { flag: 'aes(color = var)', desc: 'Couleur selon une variable' },
-                                { flag: 'aes(fill = var)', desc: 'Remplissage selon une variable' },
-                                { flag: 'aes(size = var)', desc: 'Taille selon une variable' },
-                                { flag: 'aes(shape = var)', desc: 'Forme selon une variable' }
+                                { flag: 'cv', desc: 'K-fold cross-validation' },
+                                { flag: 'repeatedcv', desc: 'CV répétée plusieurs fois' },
+                                { flag: 'LOOCV', desc: 'Leave-one-out (K = n)' },
+                                { flag: 'boot', desc: 'Bootstrap' }
                             ],
                             examples: [
-                                { code: 'library(ggplot2)', desc: 'Charger ggplot2' },
-                                { code: 'ggplot(df, aes(x = age, y = salaire)) +\n  geom_point()', desc: 'Nuage de points basique' },
-                                { code: 'ggplot(df, aes(x = age, y = salaire, color = dept)) +\n  geom_point(size = 3)', desc: 'Points colorés par département' },
-                                { code: 'ggplot(df, aes(x = categorie, fill = categorie)) +\n  geom_bar()', desc: 'Barres avec couleurs' }
+                                { code: `library(caret)
+set.seed(42)
+
+# Configuration CV
+ctrl <- trainControl(
+  method = "repeatedcv",
+  number = 10,          # 10 folds
+  repeats = 3,          # Répéter 3 fois
+  savePredictions = "final",
+  classProbs = TRUE,    # Pour classification
+  summaryFunction = twoClassSummary  # AUC, Sens, Spec
+)
+
+# Entraînement avec CV
+mtcars$am_f <- factor(mtcars$am, labels = c("auto", "manual"))
+
+model_cv <- train(
+  am_f ~ mpg + hp + wt,
+  data = mtcars,
+  method = "glm",
+  family = "binomial",
+  trControl = ctrl,
+  metric = "ROC"
+)
+
+# Résultats CV
+print(model_cv)
+model_cv$results
+
+# Prédictions CV (out-of-fold)
+head(model_cv$pred)
+
+# Matrice de confusion sur prédictions CV
+confusionMatrix(model_cv$pred$pred, model_cv$pred$obs)`, desc: 'Cross-validation avec caret' }
                             ],
-                            tips: ['Le + ajoute des couches au graphique', 'aes() dans ggplot() = global, dans geom_() = local'],
-                            warnings: []
+                            tips: ['10-fold CV est un bon compromis biais-variance', 'repeatedcv réduit la variance de l\'estimation'],
+                            warnings: ['LOOCV peut être très lent sur gros datasets']
                         }
                     },
                     {
-                        cmd: 'geom_point() / geom_line()',
-                        desc: 'Points et lignes',
+                        cmd: 'Métriques de classification',
+                        desc: 'Accuracy, Precision, Recall, F1, AUC',
                         details: {
-                            explanation: 'geom_point pour scatter plots, geom_line pour séries temporelles.',
-                            syntax: 'geom_point(aes(), color, size, alpha, shape)',
+                            explanation: 'Différentes métriques capturent différents aspects de la performance.',
+                            syntax: 'confusionMatrix(pred, actual)',
                             options: [
-                                { flag: 'color', desc: 'Couleur des points/lignes' },
-                                { flag: 'size', desc: 'Taille des points' },
-                                { flag: 'alpha', desc: 'Transparence (0-1)' },
-                                { flag: 'shape', desc: 'Forme des points (0-25)' }
+                                { flag: 'Accuracy', desc: '(TP+TN)/Total' },
+                                { flag: 'Sensitivity (Recall)', desc: 'TP/(TP+FN)' },
+                                { flag: 'Specificity', desc: 'TN/(TN+FP)' },
+                                { flag: 'Precision (PPV)', desc: 'TP/(TP+FP)' },
+                                { flag: 'F1', desc: '2*(Prec*Rec)/(Prec+Rec)' },
+                                { flag: 'AUC', desc: 'Aire sous la courbe ROC' }
                             ],
                             examples: [
-                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point(color = "blue", size = 3, alpha = 0.5)', desc: 'Points bleus transparents' },
-                                { code: 'ggplot(df, aes(date, valeur)) +\n  geom_line(linewidth = 1) +\n  geom_point()', desc: 'Ligne avec points' },
-                                { code: 'ggplot(df, aes(date, valeur, color = groupe)) +\n  geom_line() +\n  geom_point()', desc: 'Plusieurs séries' }
+                                { code: `library(caret)
+library(pROC)
+
+# Prédictions
+pred_class <- factor(c(1,1,0,1,0,0,1,0))
+pred_prob <- c(0.9, 0.8, 0.3, 0.7, 0.4, 0.2, 0.6, 0.35)
+actual <- factor(c(1,1,0,0,0,0,1,1))
+
+# Matrice de confusion
+cm <- confusionMatrix(pred_class, actual, positive = "1")
+print(cm)
+
+# Extraire les métriques
+cm$overall["Accuracy"]
+cm$byClass["Sensitivity"]  # Recall
+cm$byClass["Specificity"]
+cm$byClass["Precision"]    # PPV
+cm$byClass["F1"]
+
+# Courbe ROC et AUC
+roc_obj <- roc(actual, pred_prob)
+plot(roc_obj, main = paste("AUC =", round(auc(roc_obj), 3)))
+
+# Seuil optimal (Youden)
+best_thresh <- coords(roc_obj, "best", ret = c("threshold", "sens", "spec"))
+print(best_thresh)
+
+# Comparaison de modèles avec courbes ROC
+# roc_list <- list(model1 = roc_obj1, model2 = roc_obj2)
+# ggroc(roc_list)`, desc: 'Métriques de classification' }
                             ],
-                            tips: ['geom_smooth() pour ajouter une tendance', 'geom_smooth(method = "lm") pour régression linéaire'],
-                            warnings: []
+                            tips: ['F1 est utile pour classes déséquilibrées', 'AUC > 0.8 = bonne discrimination'],
+                            warnings: ['Accuracy trompeuse si classes déséquilibrées']
                         }
                     },
                     {
-                        cmd: 'geom_bar() / geom_col()',
-                        desc: 'Graphiques en barres',
+                        cmd: 'Métriques de régression',
+                        desc: 'RMSE, MAE, R²',
                         details: {
-                            explanation: 'geom_bar compte automatiquement, geom_col utilise une valeur y.',
-                            syntax: 'geom_bar(stat = "count") / geom_col()',
+                            explanation: 'Mesurer l\'erreur de prédiction pour des modèles de régression.',
+                            syntax: 'RMSE = sqrt(mean((y - pred)^2))',
                             options: [
-                                { flag: 'fill', desc: 'Couleur de remplissage' },
-                                { flag: 'position', desc: '"stack", "dodge", "fill"' },
-                                { flag: 'width', desc: 'Largeur des barres' }
+                                { flag: 'RMSE', desc: 'Root Mean Square Error' },
+                                { flag: 'MAE', desc: 'Mean Absolute Error' },
+                                { flag: 'R²', desc: 'Variance expliquée' },
+                                { flag: 'MAPE', desc: 'Mean Absolute Percentage Error' }
                             ],
                             examples: [
-                                { code: 'ggplot(df, aes(x = categorie)) +\n  geom_bar()', desc: 'Compter les catégories' },
-                                { code: 'ggplot(df, aes(x = categorie, y = ventes)) +\n  geom_col(fill = "steelblue")', desc: 'Avec valeurs y' },
-                                { code: 'ggplot(df, aes(x = cat, fill = groupe)) +\n  geom_bar(position = "dodge")', desc: 'Barres groupées' },
-                                { code: 'ggplot(df, aes(x = cat, fill = groupe)) +\n  geom_bar(position = "fill")', desc: '100% stacked' }
+                                { code: `library(caret)
+
+# Prédictions
+y_actual <- c(3.5, 2.1, 4.8, 3.2, 5.1)
+y_pred <- c(3.2, 2.5, 4.5, 3.0, 4.8)
+
+# RMSE
+rmse <- sqrt(mean((y_actual - y_pred)^2))
+print(paste("RMSE:", round(rmse, 3)))
+
+# MAE
+mae <- mean(abs(y_actual - y_pred))
+print(paste("MAE:", round(mae, 3)))
+
+# R² (corrélation au carré)
+r2 <- cor(y_actual, y_pred)^2
+print(paste("R²:", round(r2, 3)))
+
+# R² ajusté (pour modèles)
+n <- length(y_actual)
+p <- 3  # nombre de prédicteurs
+r2_adj <- 1 - (1 - r2) * (n - 1) / (n - p - 1)
+
+# MAPE (attention aux valeurs proches de 0)
+mape <- mean(abs((y_actual - y_pred) / y_actual)) * 100
+print(paste("MAPE:", round(mape, 1), "%"))
+
+# Avec caret
+postResample(pred = y_pred, obs = y_actual)
+
+# Visualiser
+library(ggplot2)
+data.frame(actual = y_actual, pred = y_pred) %>%
+  ggplot(aes(x = actual, y = pred)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(title = "Actual vs Predicted")`, desc: 'Métriques de régression' }
                             ],
-                            tips: ['geom_bar: stat="count" par défaut', 'geom_col: stat="identity" par défaut'],
-                            warnings: []
+                            tips: ['MAE est plus robuste aux outliers que RMSE', 'R² peut être trompeur avec peu de données'],
+                            warnings: ['MAPE indéfini si y contient des zéros']
                         }
                     },
                     {
-                        cmd: 'geom_histogram() / geom_density()',
-                        desc: 'Distributions',
+                        cmd: 'Comparer plusieurs modèles',
+                        desc: 'Sélectionner le meilleur modèle',
                         details: {
-                            explanation: 'Histogramme pour distribution discrète, densité pour continue.',
-                            syntax: 'geom_histogram(bins, binwidth) / geom_density()',
+                            explanation: 'Comparer objectivement la performance de différents algorithmes.',
+                            syntax: 'resamples() pour comparer des modèles caret',
                             options: [
-                                { flag: 'bins', desc: 'Nombre d\'intervalles' },
-                                { flag: 'binwidth', desc: 'Largeur des intervalles' },
-                                { flag: 'fill / color', desc: 'Couleurs' }
+                                { flag: 'resamples()', desc: 'Comparer les CV de plusieurs modèles' },
+                                { flag: 'diff()', desc: 'Tester la significativité des différences' }
                             ],
                             examples: [
-                                { code: 'ggplot(df, aes(x = age)) +\n  geom_histogram(bins = 30, fill = "steelblue")', desc: 'Histogramme' },
-                                { code: 'ggplot(df, aes(x = age, fill = genre)) +\n  geom_histogram(position = "identity", alpha = 0.5)', desc: 'Superposé par groupe' },
-                                { code: 'ggplot(df, aes(x = salaire)) +\n  geom_density(fill = "lightblue", alpha = 0.5)', desc: 'Densité' },
-                                { code: 'ggplot(df, aes(x = salaire, fill = dept)) +\n  geom_density(alpha = 0.3)', desc: 'Densités par groupe' }
+                                { code: `library(caret)
+set.seed(42)
+
+# Même configuration CV pour tous les modèles
+ctrl <- trainControl(
+  method = "repeatedcv",
+  number = 10,
+  repeats = 3,
+  savePredictions = "final"
+)
+
+# Entraîner plusieurs modèles
+model_lm <- train(mpg ~ ., data = mtcars, method = "lm", trControl = ctrl)
+model_rf <- train(mpg ~ ., data = mtcars, method = "rf", trControl = ctrl)
+model_xgb <- train(mpg ~ ., data = mtcars, method = "xgbTree", trControl = ctrl)
+model_glmnet <- train(mpg ~ ., data = mtcars, method = "glmnet", trControl = ctrl)
+
+# Comparer
+results <- resamples(list(
+  LM = model_lm,
+  RF = model_rf,
+  XGB = model_xgb,
+  GLMNET = model_glmnet
+))
+
+# Résumé
+summary(results)
+
+# Visualisations
+bwplot(results)
+dotplot(results)
+
+# Test statistique des différences
+diff_results <- diff(results)
+summary(diff_results)
+
+# Sélectionner le meilleur
+best_model <- model_rf  # Celui avec le meilleur RMSE CV
+
+# Performance finale
+print(best_model)`, desc: 'Comparaison de modèles' }
                             ],
-                            tips: ['geom_freqpoly() pour des lignes au lieu de barres'],
-                            warnings: []
+                            tips: ['Utiliser la même CV pour tous les modèles', 'diff() teste si les différences sont significatives'],
+                            warnings: ['Plus de modèles = plus de chances de "gagner" par hasard']
                         }
                     },
                     {
-                        cmd: 'geom_boxplot() / geom_violin()',
-                        desc: 'Boîtes à moustaches',
+                        cmd: 'Train/Test split et holdout',
+                        desc: 'Évaluation finale sur données non vues',
                         details: {
-                            explanation: 'Boxplot pour résumé statistique, violin pour distribution complète.',
-                            syntax: 'geom_boxplot() / geom_violin()',
+                            explanation: 'Réserver un jeu de test non touché pendant le développement pour l\'évaluation finale.',
+                            syntax: 'createDataPartition(y, p = 0.8)',
                             options: [
-                                { flag: 'fill', desc: 'Couleur de remplissage' },
-                                { flag: 'outlier.color', desc: 'Couleur des outliers' }
+                                { flag: 'p', desc: 'Proportion pour l\'entraînement' },
+                                { flag: 'list', desc: 'FALSE retourne un vecteur d\'indices' }
                             ],
                             examples: [
-                                { code: 'ggplot(df, aes(x = dept, y = salaire)) +\n  geom_boxplot()', desc: 'Boxplot par département' },
-                                { code: 'ggplot(df, aes(x = dept, y = salaire, fill = dept)) +\n  geom_boxplot() +\n  geom_jitter(width = 0.2, alpha = 0.3)', desc: 'Avec les points' },
-                                { code: 'ggplot(df, aes(x = dept, y = salaire)) +\n  geom_violin() +\n  geom_boxplot(width = 0.2)', desc: 'Violin + boxplot' }
+                                { code: `library(caret)
+set.seed(42)
+
+# Split stratifié (conserve les proportions)
+train_idx <- createDataPartition(
+  mtcars$mpg,
+  p = 0.8,
+  list = FALSE
+)
+
+train_data <- mtcars[train_idx, ]
+test_data <- mtcars[-train_idx, ]
+
+# Vérifier les proportions
+nrow(train_data)
+nrow(test_data)
+
+# Entraîner sur train avec CV
+ctrl <- trainControl(method = "cv", number = 10)
+
+model <- train(
+  mpg ~ hp + wt + drat,
+  data = train_data,
+  method = "rf",
+  trControl = ctrl
+)
+
+# Performance CV (développement)
+print(model)
+
+# Évaluation finale sur TEST (jamais vu)
+pred_test <- predict(model, test_data)
+postResample(pred_test, test_data$mpg)
+
+# Workflow complet recommandé:
+# 1. Split train/test (80/20)
+# 2. Développer avec CV sur train uniquement
+# 3. Tuning hyperparamètres avec CV sur train
+# 4. Évaluation finale UNE SEULE FOIS sur test`, desc: 'Train/Test split' }
                             ],
-                            tips: ['geom_jitter() pour voir les points individuels'],
-                            warnings: []
+                            tips: ['Ne JAMAIS toucher au test set pendant le développement', 'createDataPartition fait un split stratifié'],
+                            warnings: ['Évaluer sur le test set une seule fois à la fin']
                         }
                     },
                     {
-                        cmd: 'facet_wrap() / facet_grid()',
-                        desc: 'Graphiques multiples',
+                        cmd: 'Nested Cross-Validation',
+                        desc: 'Estimation non biaisée avec tuning inclus',
                         details: {
-                            explanation: 'Crée des petits multiples (un graphique par catégorie).',
-                            syntax: 'facet_wrap(~var) / facet_grid(row~col)',
+                            explanation: 'La nested CV utilise une boucle externe pour estimer la performance et une boucle interne pour le tuning. Évite l\'optimisme biais.',
+                            syntax: 'Boucle externe (évaluation) + Boucle interne (tuning)',
                             options: [
-                                { flag: 'ncol / nrow', desc: 'Nombre de colonnes/lignes' },
-                                { flag: 'scales', desc: '"free", "free_x", "free_y"' }
+                                { flag: 'Outer loop', desc: 'K-fold pour estimation de performance' },
+                                { flag: 'Inner loop', desc: 'K-fold pour sélection d\'hyperparamètres' }
                             ],
                             examples: [
-                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point() +\n  facet_wrap(~categorie)', desc: 'Un graphique par catégorie' },
-                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point() +\n  facet_wrap(~categorie, ncol = 2)', desc: 'En 2 colonnes' },
-                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point() +\n  facet_grid(row_var ~ col_var)', desc: 'Grille 2D' },
-                                { code: 'facet_wrap(~cat, scales = "free_y")', desc: 'Échelles Y indépendantes' }
+                                { code: `library(caret)
+library(foreach)
+library(doParallel)
+set.seed(42)
+
+# Parallélisation
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl)
+
+# Données
+data <- mtcars
+data$am_f <- factor(data$am, labels = c("auto", "manual"))
+
+# === NESTED CV MANUELLE ===
+outer_folds <- createFolds(data$am_f, k = 5, returnTrain = TRUE)
+
+nested_results <- foreach(i = 1:5, .combine = rbind,
+                          .packages = c("caret")) %dopar% {
+  # Données outer fold
+  train_outer <- data[outer_folds[[i]], ]
+  test_outer <- data[-outer_folds[[i]], ]
+
+  # Inner CV pour tuning
+  inner_ctrl <- trainControl(
+    method = "cv",
+    number = 5,
+    classProbs = TRUE,
+    summaryFunction = twoClassSummary
+  )
+
+  # Tuning dans inner loop
+  model <- train(
+    am_f ~ mpg + hp + wt,
+    data = train_outer,
+    method = "rf",
+    trControl = inner_ctrl,
+    tuneGrid = expand.grid(mtry = 1:3),
+    metric = "ROC"
+  )
+
+  # Évaluation sur outer fold (non vu pendant tuning)
+  pred <- predict(model, test_outer)
+  pred_prob <- predict(model, test_outer, type = "prob")
+
+  # Métriques
+  cm <- confusionMatrix(pred, test_outer$am_f)
+
+  data.frame(
+    fold = i,
+    accuracy = cm$overall["Accuracy"],
+    best_mtry = model$bestTune$mtry
+  )
+}
+
+stopCluster(cl)
+
+# Résultats nested CV
+print(nested_results)
+mean(nested_results$accuracy)  # Estimation non biaisée`, desc: 'Nested CV manuelle' }
                             ],
-                            tips: ['scales = "free" pour des axes indépendants', 'facet_grid pour grille rigide 2D'],
-                            warnings: []
+                            tips: ['Nested CV donne une estimation honnête même avec tuning', 'Outer = 5-10 folds, Inner = 5 folds'],
+                            warnings: ['Très coûteux en calcul (K_outer × K_inner × n_hyperparams)']
                         }
                     },
                     {
-                        cmd: 'labs() + theme()',
-                        desc: 'Titres et thème',
+                        cmd: 'Tuning Bayésien des hyperparamètres',
+                        desc: 'Optimisation intelligente avec moins d\'essais',
                         details: {
-                            explanation: 'labs() pour les textes (titre, axes), theme() pour le style.',
-                            syntax: 'labs(title, x, y, color, fill) + theme_*()',
+                            explanation: 'Le tuning bayésien utilise un modèle probabiliste pour choisir intelligemment les prochains hyperparamètres à tester.',
+                            syntax: 'ParBayesianOptimization() ou mlr3mbo',
                             options: [
-                                { flag: 'theme_minimal()', desc: 'Thème épuré' },
-                                { flag: 'theme_classic()', desc: 'Thème classique' },
-                                { flag: 'theme_bw()', desc: 'Noir et blanc' },
-                                { flag: 'theme_dark()', desc: 'Fond sombre' }
+                                { flag: 'ParBayesianOptimization', desc: 'Package simple pour Bayes opt' },
+                                { flag: 'mlr3mbo', desc: 'Framework avancé' },
+                                { flag: 'Expected Improvement', desc: 'Critère d\'acquisition' }
                             ],
                             examples: [
-                                { code: 'ggplot(df, aes(x, y)) +\n  geom_point() +\n  labs(\n    title = "Mon graphique",\n    x = "Axe X",\n    y = "Axe Y"\n  )', desc: 'Ajouter titre et labels' },
-                                { code: 'ggplot(df, aes(x, y, color = cat)) +\n  geom_point() +\n  labs(color = "Catégorie") +\n  theme_minimal()', desc: 'Avec thème minimal' },
-                                { code: '+ theme(\n  axis.text.x = element_text(angle = 45, hjust = 1),\n  legend.position = "bottom"\n)', desc: 'Personnalisation fine' },
-                                { code: 'ggsave("plot.png", width = 10, height = 6, dpi = 300)', desc: 'Sauvegarder' }
+                                { code: `# install.packages("ParBayesianOptimization")
+library(ParBayesianOptimization)
+library(xgboost)
+library(caret)
+set.seed(42)
+
+# Préparer les données
+x <- as.matrix(mtcars[, c("hp", "wt", "drat", "qsec")])
+y <- mtcars$mpg
+
+# Fonction objectif à maximiser (retourne score)
+xgb_cv_bayes <- function(max_depth, eta, subsample, colsample_bytree) {
+  dtrain <- xgb.DMatrix(data = x, label = y)
+
+  params <- list(
+    objective = "reg:squarederror",
+    max_depth = max_depth,
+    eta = eta,
+    subsample = subsample,
+    colsample_bytree = colsample_bytree
+  )
+
+  cv <- xgb.cv(
+    params = params,
+    data = dtrain,
+    nrounds = 100,
+    nfold = 5,
+    early_stopping_rounds = 10,
+    verbose = 0
+  )
+
+  # Retourner -RMSE (on veut maximiser)
+  return(list(Score = -min(cv$evaluation_log$test_rmse_mean),
+              nrounds = cv$best_iteration))
+}
+
+# Bornes des hyperparamètres
+bounds <- list(
+  max_depth = c(2L, 8L),
+  eta = c(0.01, 0.3),
+  subsample = c(0.5, 1),
+  colsample_bytree = c(0.5, 1)
+)
+
+# Optimisation bayésienne
+bayes_result <- bayesOpt(
+  FUN = xgb_cv_bayes,
+  bounds = bounds,
+  initPoints = 5,     # Points initiaux aléatoires
+  iters.n = 20,       # Itérations bayésiennes
+  iters.k = 1,        # Points par itération
+  acq = "ei",         # Expected Improvement
+  verbose = TRUE
+)
+
+# Meilleurs hyperparamètres
+getBestPars(bayes_result)
+
+# Historique
+bayes_result$scoreSummary`, desc: 'Tuning Bayésien avec XGBoost' }
                             ],
-                            tips: ['theme() après theme_*() pour surcharger', 'ggsave() sauvegarde le dernier plot'],
-                            warnings: []
+                            tips: ['20-50 itérations suffisent souvent vs 1000+ pour grid search', 'initPoints = 5-10 pour exploration initiale'],
+                            warnings: ['Fixer le seed pour reproductibilité']
                         }
                     }
                 ]
             },
             {
-                id: 'readr',
-                title: 'Import/Export (readr)',
-                icon: 'fa-file-import',
-                color: 'border-l-4 border-gray-500',
+                id: 'workflows',
+                title: '🔄 Workflows ML Complets',
+                icon: 'fa-diagram-project',
+                color: 'border-l-4 border-indigo-500',
                 commands: [
                     {
-                        cmd: 'read_csv() / read_tsv()',
-                        desc: 'Lire des fichiers CSV',
+                        cmd: 'Pipeline Classification Complet',
+                        desc: 'De la préparation à l\'évaluation finale',
                         details: {
-                            explanation: 'Lit des fichiers CSV (virgule) ou TSV (tabulation). Plus rapide que read.csv de R base.',
-                            syntax: 'read_csv(file, col_names = TRUE, col_types = NULL)',
+                            explanation: 'Workflow complet pour un projet de classification : EDA, prétraitement, modélisation, évaluation.',
+                            syntax: 'Étapes: EDA → Prétraitement → Split → Modélisation → Évaluation',
                             options: [
-                                { flag: 'col_names', desc: 'TRUE si la première ligne est l\'en-tête' },
-                                { flag: 'col_types', desc: 'Spécifier les types de colonnes' },
-                                { flag: 'skip', desc: 'Sauter n lignes au début' },
-                                { flag: 'n_max', desc: 'Lire maximum n lignes' },
-                                { flag: 'na', desc: 'Valeurs à considérer comme NA' }
+                                { flag: '1. EDA', desc: 'Explorer et comprendre les données' },
+                                { flag: '2. Prétraitement', desc: 'Nettoyage, encodage, scaling' },
+                                { flag: '3. Split', desc: 'Train/Test stratifié' },
+                                { flag: '4. Modélisation', desc: 'CV + Tuning sur train' },
+                                { flag: '5. Évaluation', desc: 'Test final une seule fois' }
                             ],
                             examples: [
-                                { code: 'df <- read_csv("data.csv")', desc: 'Lire un CSV' },
-                                { code: 'df <- read_csv("data.csv", col_types = cols(\n  id = col_integer(),\n  date = col_date(),\n  prix = col_double()\n))', desc: 'Avec types explicites' },
-                                { code: 'df <- read_delim("data.txt", delim = ";")', desc: 'Délimiteur personnalisé' },
-                                { code: 'df <- read_csv("data.csv", na = c("", "NA", "N/A"))', desc: 'Valeurs NA' }
+                                { code: `# ============================================
+# PIPELINE CLASSIFICATION COMPLET
+# ============================================
+library(tidyverse)
+library(caret)
+library(pROC)
+set.seed(42)
+
+# === 1. CHARGEMENT ET EDA ===
+data <- iris
+data$Species <- factor(ifelse(data$Species == "setosa", "setosa", "other"))
+
+# Résumé
+summary(data)
+table(data$Species)  # Vérifier équilibre des classes
+
+# Visualisation
+data %>%
+  pivot_longer(-Species) %>%
+  ggplot(aes(x = value, fill = Species)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~name, scales = "free")
+
+# === 2. PRÉTRAITEMENT ===
+# Créer recipe (si besoin)
+# preProcess peut normaliser, imputer, etc.
+
+# === 3. SPLIT TRAIN/TEST (80/20) ===
+train_idx <- createDataPartition(data$Species, p = 0.8, list = FALSE)
+train_data <- data[train_idx, ]
+test_data <- data[-train_idx, ]
+
+cat("Train:", nrow(train_data), "| Test:", nrow(test_data), "\\n")
+cat("Train balance:", prop.table(table(train_data$Species)), "\\n")
+
+# === 4. MODÉLISATION AVEC CV ===
+ctrl <- trainControl(
+  method = "repeatedcv",
+  number = 10,
+  repeats = 3,
+  classProbs = TRUE,
+  summaryFunction = twoClassSummary,
+  savePredictions = "final"
+)
+
+# Plusieurs modèles
+model_glm <- train(Species ~ ., data = train_data, method = "glm",
+                   family = "binomial", trControl = ctrl, metric = "ROC")
+
+model_rf <- train(Species ~ ., data = train_data, method = "rf",
+                  trControl = ctrl, metric = "ROC",
+                  tuneGrid = expand.grid(mtry = 1:4))
+
+model_xgb <- train(Species ~ ., data = train_data, method = "xgbTree",
+                   trControl = ctrl, metric = "ROC")
+
+# Comparer
+results <- resamples(list(GLM = model_glm, RF = model_rf, XGB = model_xgb))
+summary(results)
+dotplot(results, metric = "ROC")
+
+# === 5. ÉVALUATION FINALE SUR TEST ===
+best_model <- model_rf  # Choisir le meilleur
+
+# Prédictions
+pred_class <- predict(best_model, test_data)
+pred_prob <- predict(best_model, test_data, type = "prob")
+
+# Matrice de confusion
+cm <- confusionMatrix(pred_class, test_data$Species, positive = "setosa")
+print(cm)
+
+# Courbe ROC
+roc_obj <- roc(test_data$Species, pred_prob[, "setosa"])
+plot(roc_obj, main = paste("Test AUC =", round(auc(roc_obj), 3)))
+
+cat("\\n=== RÉSULTATS FINAUX ===\\n")
+cat("Accuracy:", round(cm$overall["Accuracy"], 3), "\\n")
+cat("Sensitivity:", round(cm$byClass["Sensitivity"], 3), "\\n")
+cat("Specificity:", round(cm$byClass["Specificity"], 3), "\\n")
+cat("AUC:", round(auc(roc_obj), 3), "\\n")`, desc: 'Pipeline classification complet' }
                             ],
-                            tips: ['read_csv2() pour format européen (;)', 'locale = locale(decimal_mark = ",") pour décimales françaises'],
-                            warnings: []
+                            tips: ['Toujours séparer test avant toute exploration', 'Utiliser la même métrique pour comparer'],
+                            warnings: ['Ne jamais toucher au test set pendant le développement']
                         }
                     },
                     {
-                        cmd: 'write_csv()',
-                        desc: 'Écrire des fichiers CSV',
+                        cmd: 'Pipeline Régression Complet',
+                        desc: 'Workflow complet pour prédiction continue',
                         details: {
-                            explanation: 'Exporte un data frame vers un fichier CSV.',
-                            syntax: 'write_csv(df, file, na = "NA")',
+                            explanation: 'Pipeline de régression avec prétraitement, feature engineering, et comparaison de modèles.',
+                            syntax: 'EDA → Feature Engineering → Modeling → Evaluation',
                             options: [
-                                { flag: 'na', desc: 'Comment écrire les NA' },
-                                { flag: 'append', desc: 'Ajouter à un fichier existant' },
-                                { flag: 'col_names', desc: 'Écrire les noms de colonnes' }
+                                { flag: 'preProcess', desc: 'center, scale, YeoJohnson, pca' },
+                                { flag: 'Feature selection', desc: 'RFE, Boruta, LASSO' }
                             ],
                             examples: [
-                                { code: 'write_csv(df, "output.csv")', desc: 'Exporter en CSV' },
-                                { code: 'write_csv(df, "output.csv", na = "")', desc: 'NA comme chaînes vides' },
-                                { code: 'write_excel_csv(df, "output.csv")', desc: 'Compatible Excel (BOM UTF-8)' },
-                                { code: 'write_rds(df, "data.rds")', desc: 'Format R natif (compression)' }
+                                { code: `# ============================================
+# PIPELINE RÉGRESSION COMPLET
+# ============================================
+library(tidyverse)
+library(caret)
+set.seed(42)
+
+# === 1. DONNÉES ===
+data <- mtcars
+
+# === 2. EDA ===
+# Corrélations avec la cible
+cor(data)[, "mpg"] %>% sort(decreasing = TRUE)
+
+# Distribution de la cible
+hist(data$mpg, main = "Distribution MPG", breaks = 15)
+
+# === 3. SPLIT ===
+train_idx <- createDataPartition(data$mpg, p = 0.8, list = FALSE)
+train_data <- data[train_idx, ]
+test_data <- data[-train_idx, ]
+
+# === 4. PRÉTRAITEMENT ===
+# Définir le prétraitement sur TRAIN seulement
+preProc <- preProcess(train_data[, -1],
+                      method = c("center", "scale", "YeoJohnson"))
+
+train_processed <- predict(preProc, train_data)
+test_processed <- predict(preProc, test_data)
+
+# === 5. FEATURE SELECTION (optionnel) ===
+# Recursive Feature Elimination
+rfe_ctrl <- rfeControl(functions = rfFuncs, method = "cv", number = 5)
+rfe_result <- rfe(train_data[, -1], train_data$mpg,
+                  sizes = c(2, 4, 6, 8),
+                  rfeControl = rfe_ctrl)
+print(rfe_result)
+predictors(rfe_result)  # Meilleures features
+
+# === 6. MODÉLISATION ===
+ctrl <- trainControl(
+  method = "repeatedcv",
+  number = 10,
+  repeats = 3,
+  savePredictions = "final"
+)
+
+# Plusieurs modèles
+model_lm <- train(mpg ~ ., data = train_processed, method = "lm",
+                  trControl = ctrl)
+
+model_glmnet <- train(mpg ~ ., data = train_processed, method = "glmnet",
+                      trControl = ctrl,
+                      tuneLength = 10)
+
+model_rf <- train(mpg ~ ., data = train_processed, method = "rf",
+                  trControl = ctrl,
+                  tuneGrid = expand.grid(mtry = 2:6))
+
+model_xgb <- train(mpg ~ ., data = train_processed, method = "xgbTree",
+                   trControl = ctrl)
+
+# === 7. COMPARAISON ===
+results <- resamples(list(
+  LM = model_lm,
+  GLMNET = model_glmnet,
+  RF = model_rf,
+  XGB = model_xgb
+))
+
+summary(results)
+dotplot(results, metric = "RMSE")
+
+# Test différences significatives
+diff_results <- diff(results)
+summary(diff_results)
+
+# === 8. ÉVALUATION FINALE ===
+best_model <- model_rf
+
+pred_test <- predict(best_model, test_processed)
+final_metrics <- postResample(pred_test, test_processed$mpg)
+
+cat("\\n=== MÉTRIQUES TEST FINAL ===\\n")
+print(final_metrics)
+
+# Visualiser
+data.frame(actual = test_processed$mpg, predicted = pred_test) %>%
+  ggplot(aes(x = actual, y = predicted)) +
+  geom_point(size = 3) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs Predicted (Test Set)")`, desc: 'Pipeline régression complet' }
                             ],
-                            tips: ['write_rds() / read_rds() pour format R natif (conserve les types)'],
-                            warnings: []
+                            tips: ['Appliquer preProcess sur train, puis transformer test', 'RFE aide à identifier les features importantes'],
+                            warnings: ['Ne pas faire de feature selection sur tout le dataset']
                         }
                     },
                     {
-                        cmd: 'read_excel()',
-                        desc: 'Lire des fichiers Excel',
+                        cmd: 'Pipeline avec Prétraitement Avancé',
+                        desc: 'recipes pour preprocessing reproductible',
                         details: {
-                            explanation: 'Lit des fichiers Excel (.xlsx, .xls). Package readxl.',
-                            syntax: 'read_excel(path, sheet = 1, range = NULL)',
+                            explanation: 'Le package recipes permet de définir des étapes de prétraitement de manière déclarative et reproductible.',
+                            syntax: 'recipe() %>% step_*() %>% prep() %>% bake()',
                             options: [
-                                { flag: 'sheet', desc: 'Numéro ou nom de la feuille' },
-                                { flag: 'range', desc: 'Plage de cellules (ex: "A1:D100")' },
-                                { flag: 'skip', desc: 'Sauter n lignes' },
-                                { flag: 'col_names', desc: 'Première ligne = en-tête' }
+                                { flag: 'step_normalize()', desc: 'Centrer et réduire' },
+                                { flag: 'step_dummy()', desc: 'One-hot encoding' },
+                                { flag: 'step_impute_*()', desc: 'Imputation des NA' },
+                                { flag: 'step_pca()', desc: 'Réduction de dimension' }
                             ],
                             examples: [
-                                { code: 'library(readxl)', desc: 'Charger readxl' },
-                                { code: 'df <- read_excel("data.xlsx")', desc: 'Première feuille' },
-                                { code: 'df <- read_excel("data.xlsx", sheet = "Ventes")', desc: 'Feuille par nom' },
-                                { code: 'df <- read_excel("data.xlsx", range = "B2:E50")', desc: 'Plage spécifique' },
-                                { code: 'excel_sheets("data.xlsx")', desc: 'Lister les feuilles' }
+                                { code: `library(tidyverse)
+library(recipes)
+library(caret)
+set.seed(42)
+
+# Données avec NA et catégorielles
+data <- data.frame(
+  y = rnorm(100),
+  x1 = rnorm(100),
+  x2 = c(rnorm(95), rep(NA, 5)),  # Avec NA
+  x3 = sample(c("A", "B", "C"), 100, replace = TRUE),
+  x4 = rnorm(100)
+)
+
+# Split
+train_idx <- createDataPartition(data$y, p = 0.8, list = FALSE)
+train_data <- data[train_idx, ]
+test_data <- data[-train_idx, ]
+
+# === RECIPE ===
+rec <- recipe(y ~ ., data = train_data) %>%
+  # Imputer les NA avec la médiane
+  step_impute_median(all_numeric_predictors()) %>%
+  # One-hot encoding des catégorielles
+  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%
+  # Normaliser
+  step_normalize(all_numeric_predictors()) %>%
+  # Supprimer les colonnes à variance nulle
+  step_zv(all_predictors()) %>%
+  # Supprimer les colonnes corrélées > 0.9
+  step_corr(all_numeric_predictors(), threshold = 0.9)
+
+# Préparer la recipe sur TRAIN
+rec_prep <- prep(rec, training = train_data)
+
+# Appliquer
+train_baked <- bake(rec_prep, new_data = train_data)
+test_baked <- bake(rec_prep, new_data = test_data)
+
+# Voir les transformations
+rec_prep
+
+# === INTÉGRATION AVEC CARET ===
+# Avec recipes dans trainControl
+ctrl <- trainControl(method = "cv", number = 5)
+
+model <- train(
+  rec,  # Passer la recipe directement
+  data = train_data,
+  method = "glmnet",
+  trControl = ctrl
+)
+
+print(model)
+
+# Prédiction automatique avec preprocessing
+pred <- predict(model, test_data)
+postResample(pred, test_data$y)`, desc: 'Prétraitement avec recipes' }
                             ],
-                            tips: ['excel_sheets() pour voir les noms des feuilles', 'writexl::write_xlsx() pour écrire'],
-                            warnings: ['readxl est dans tidyverse mais pas chargé automatiquement']
+                            tips: ['recipes garantit que test est traité identiquement à train', 'step_unknown() pour gérer nouvelles catégories'],
+                            warnings: ['Toujours prep() sur train seulement']
+                        }
+                    },
+                    {
+                        cmd: 'Pipeline avec tidymodels',
+                        desc: 'Framework moderne unifié',
+                        details: {
+                            explanation: 'tidymodels est le successeur moderne de caret, avec une syntaxe tidy et des workflows.',
+                            syntax: 'workflow() %>% add_recipe() %>% add_model() %>% fit()',
+                            options: [
+                                { flag: 'parsnip', desc: 'Spécification de modèles' },
+                                { flag: 'recipes', desc: 'Prétraitement' },
+                                { flag: 'workflows', desc: 'Combiner recipe + model' },
+                                { flag: 'tune', desc: 'Tuning avec CV' }
+                            ],
+                            examples: [
+                                { code: `# install.packages("tidymodels")
+library(tidymodels)
+set.seed(42)
+
+# === DONNÉES ===
+data <- mtcars %>%
+  mutate(cyl = factor(cyl))
+
+# === SPLIT ===
+split <- initial_split(data, prop = 0.8, strata = cyl)
+train_data <- training(split)
+test_data <- testing(split)
+
+# === RECIPE ===
+rec <- recipe(cyl ~ ., data = train_data) %>%
+  step_normalize(all_numeric_predictors())
+
+# === MODÈLE (spécification) ===
+rf_spec <- rand_forest(
+  mtry = tune(),      # À tuner
+  trees = 500,
+  min_n = tune()      # À tuner
+) %>%
+  set_engine("ranger") %>%
+  set_mode("classification")
+
+# === WORKFLOW ===
+wf <- workflow() %>%
+  add_recipe(rec) %>%
+  add_model(rf_spec)
+
+# === TUNING AVEC CV ===
+cv_folds <- vfold_cv(train_data, v = 10, strata = cyl)
+
+# Grille d'hyperparamètres
+rf_grid <- grid_regular(
+  mtry(range = c(2, 8)),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# Tuning
+tune_results <- tune_grid(
+  wf,
+  resamples = cv_folds,
+  grid = rf_grid,
+  metrics = metric_set(accuracy, roc_auc)
+)
+
+# Meilleurs hyperparamètres
+show_best(tune_results, metric = "accuracy")
+autoplot(tune_results)
+
+# Finaliser le workflow
+best_params <- select_best(tune_results, metric = "accuracy")
+final_wf <- finalize_workflow(wf, best_params)
+
+# === ÉVALUATION FINALE ===
+final_fit <- last_fit(final_wf, split)
+
+# Métriques sur test
+collect_metrics(final_fit)
+
+# Prédictions
+collect_predictions(final_fit) %>%
+  conf_mat(cyl, .pred_class)`, desc: 'Pipeline tidymodels complet' }
+                            ],
+                            tips: ['tidymodels est plus moderne et flexible que caret', 'last_fit() fait l\'évaluation finale automatiquement'],
+                            warnings: ['Syntaxe différente de caret']
+                        }
+                    },
+                    {
+                        cmd: 'Rapport de modélisation automatique',
+                        desc: 'Générer un rapport complet avec performance',
+                        details: {
+                            explanation: 'Créer un rapport structuré avec toutes les métriques et visualisations.',
+                            syntax: 'Fonction personnalisée de reporting',
+                            options: [
+                                { flag: 'Métriques', desc: 'CV et Test metrics' },
+                                { flag: 'Visualisations', desc: 'ROC, Importance, Residuals' },
+                                { flag: 'Export', desc: 'HTML, PDF, CSV' }
+                            ],
+                            examples: [
+                                { code: `library(tidyverse)
+library(caret)
+library(pROC)
+library(knitr)
+
+# === FONCTION DE RAPPORT ===
+generate_model_report <- function(model, test_data, target_col,
+                                  task = "classification") {
+
+  cat("\\n", paste(rep("=", 50), collapse = ""), "\\n")
+  cat("RAPPORT DE MODÉLISATION\\n")
+  cat(paste(rep("=", 50), collapse = ""), "\\n\\n")
+
+  # Info modèle
+  cat("Modèle:", model$method, "\\n")
+  cat("Date:", format(Sys.time(), "%Y-%m-%d %H:%M"), "\\n\\n")
+
+  # === PERFORMANCE CV ===
+  cat("--- PERFORMANCE CV (TRAIN) ---\\n")
+  print(model$results[which.min(model$results$RMSE), ])
+  cat("\\n")
+
+  if (!is.null(model$bestTune)) {
+    cat("Meilleurs hyperparamètres:\\n")
+    print(model$bestTune)
+    cat("\\n")
+  }
+
+  # === ÉVALUATION TEST ===
+  cat("--- PERFORMANCE TEST ---\\n")
+  pred <- predict(model, test_data)
+
+  if (task == "classification") {
+    # Métriques classification
+    cm <- confusionMatrix(pred, test_data[[target_col]])
+    print(cm)
+
+    # ROC si binaire
+    if (length(levels(test_data[[target_col]])) == 2) {
+      pred_prob <- predict(model, test_data, type = "prob")
+      roc_obj <- roc(test_data[[target_col]], pred_prob[, 2])
+      cat("\\nAUC:", round(auc(roc_obj), 4), "\\n")
+
+      # Plot ROC
+      plot(roc_obj, main = paste("ROC Curve - AUC:", round(auc(roc_obj), 3)))
+    }
+
+  } else {
+    # Métriques régression
+    metrics <- postResample(pred, test_data[[target_col]])
+    cat("RMSE:", round(metrics["RMSE"], 4), "\\n")
+    cat("R²:", round(metrics["Rsquared"], 4), "\\n")
+    cat("MAE:", round(metrics["MAE"], 4), "\\n")
+
+    # Plot actual vs predicted
+    plot(test_data[[target_col]], pred,
+         main = "Actual vs Predicted",
+         xlab = "Actual", ylab = "Predicted")
+    abline(0, 1, col = "red")
+  }
+
+  # === IMPORTANCE ===
+  cat("\\n--- IMPORTANCE DES VARIABLES ---\\n")
+  imp <- varImp(model)
+  print(imp)
+  plot(imp, top = 10)
+
+  cat("\\n", paste(rep("=", 50), collapse = ""), "\\n")
+}
+
+# === UTILISATION ===
+# Entraîner un modèle
+data <- iris
+data$Species <- factor(ifelse(data$Species == "setosa", "setosa", "other"))
+train_idx <- createDataPartition(data$Species, p = 0.8, list = FALSE)
+train_data <- data[train_idx, ]
+test_data <- data[-train_idx, ]
+
+ctrl <- trainControl(method = "cv", number = 10, classProbs = TRUE)
+model <- train(Species ~ ., data = train_data, method = "rf", trControl = ctrl)
+
+# Générer le rapport
+generate_model_report(model, test_data, "Species", task = "classification")`, desc: 'Rapport de modélisation' }
+                            ],
+                            tips: ['Automatiser les rapports pour reproductibilité', 'Exporter en RMarkdown pour PDF/HTML'],
+                            warnings: ['Adapter la fonction selon vos besoins']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'explainable-ai',
+                title: '🔍 Explainable AI',
+                icon: 'fa-search',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Creer un explainer DALEX',
+                        desc: 'explain(), model, data, y',
+                        details: {
+                            explanation: 'DALEX (Descriptive mAchine Learning EXplanations) est un framework unifie pour expliquer tout type de modele ML en R.',
+                            syntax: 'explain(model, data = X, y = y, label = "Model Name")',
+                            options: [
+                                { flag: 'model', desc: 'Modele entraine (rf, xgb, glm, etc.)' },
+                                { flag: 'data', desc: 'Donnees sans la cible' },
+                                { flag: 'y', desc: 'Variable cible (vecteur)' },
+                                { flag: 'label', desc: 'Nom pour les graphiques' }
+                            ],
+                            examples: [
+                                { code: `# Installation
+install.packages("DALEX")
+library(DALEX)
+library(randomForest)
+
+# Donnees et modele
+data(titanic_imputed, package = "DALEX")
+df <- titanic_imputed
+
+model_rf <- randomForest(survived ~ ., data = df, ntree = 100)
+
+# Creer explainer DALEX
+explainer_rf <- explain(
+  model = model_rf,
+  data = df[, -8],  # Sans la cible
+  y = as.numeric(df$survived) - 1,  # 0/1
+  label = "Random Forest",
+  verbose = FALSE
+)
+
+# Afficher resume
+explainer_rf`, desc: 'Creer explainer DALEX' }
+                            ],
+                            tips: ['DALEX fonctionne avec tous les modeles ML', 'explain() cree un objet reutilisable'],
+                            warnings: ['La cible y doit etre numerique pour regression/binaire']
+                        }
+                    },
+                    {
+                        cmd: 'Analyser importance globale',
+                        desc: 'model_parts(), feature_importance',
+                        details: {
+                            explanation: 'Calculer importance globale des features par permutation (model-agnostic).',
+                            syntax: 'model_parts(explainer, type = "variable_importance")',
+                            options: [
+                                { flag: 'type', desc: '"variable_importance" ou "ratio"' },
+                                { flag: 'N', desc: 'Nombre de permutations' },
+                                { flag: 'B', desc: 'Nombre de repetitions' }
+                            ],
+                            examples: [
+                                { code: `library(DALEX)
+
+# Importance des variables par permutation
+vi <- model_parts(explainer_rf)
+
+# Visualiser
+plot(vi)
+
+# Importance avec intervalles de confiance
+vi_detailed <- model_parts(
+  explainer_rf,
+  type = "variable_importance",
+  B = 10  # Repetitions pour IC
+)
+plot(vi_detailed, show_boxplots = TRUE)
+
+# Comparer plusieurs modeles
+# explainer_glm <- explain(model_glm, ...)
+# vi_comparison <- model_parts(explainer_rf, explainer_glm)
+# plot(vi_comparison)`, desc: 'Importance globale' }
+                            ],
+                            tips: ['Permutation importance est model-agnostic', 'Comparer plusieurs modeles sur le meme plot'],
+                            warnings: ['Peut etre lent sur grands datasets']
+                        }
+                    },
+                    {
+                        cmd: 'Expliquer une prediction locale',
+                        desc: 'predict_parts(), break_down, shap',
+                        details: {
+                            explanation: 'Expliquer pourquoi le modele a fait une prediction specifique pour une observation.',
+                            syntax: 'predict_parts(explainer, new_observation, type = "break_down")',
+                            options: [
+                                { flag: 'type = "break_down"', desc: 'Decomposition additive' },
+                                { flag: 'type = "shap"', desc: 'Valeurs SHAP' },
+                                { flag: 'type = "oscillations"', desc: 'Importance locale' }
+                            ],
+                            examples: [
+                                { code: `library(DALEX)
+
+# Observation a expliquer
+new_obs <- df[1, ]
+
+# Break-down (decomposition)
+bd <- predict_parts(
+  explainer_rf,
+  new_observation = new_obs,
+  type = "break_down"
+)
+plot(bd)
+
+# Valeurs SHAP locales
+shap <- predict_parts(
+  explainer_rf,
+  new_observation = new_obs,
+  type = "shap",
+  B = 25  # Nombre de permutations
+)
+plot(shap)
+
+# Comparer Break-down vs SHAP
+plot(bd, shap)
+
+# Pour plusieurs observations
+for (i in 1:3) {
+  pp <- predict_parts(explainer_rf, df[i, ], type = "break_down")
+  print(plot(pp) + ggtitle(paste("Observation", i)))
+}`, desc: 'Explications locales' }
+                            ],
+                            tips: ['Break-down est deterministe, SHAP moyenne sur permutations', 'SHAP plus robuste mais plus lent'],
+                            warnings: ['SHAP necessite B > 20 pour stabilite']
+                        }
+                    },
+                    {
+                        cmd: 'Profiler les features',
+                        desc: 'model_profile(), partial_dependence',
+                        details: {
+                            explanation: 'Visualiser comment une feature affecte la prediction en moyenne (Partial Dependence Plots).',
+                            syntax: 'model_profile(explainer, variables = "feature")',
+                            options: [
+                                { flag: 'type = "partial"', desc: 'PDP classique' },
+                                { flag: 'type = "accumulated"', desc: 'ALE plot' },
+                                { flag: 'groups', desc: 'PDP par groupe' }
+                            ],
+                            examples: [
+                                { code: `library(DALEX)
+
+# Partial Dependence Plot
+pdp <- model_profile(
+  explainer_rf,
+  variables = c("age", "fare")
+)
+plot(pdp)
+
+# Accumulated Local Effects (robuste aux correlations)
+ale <- model_profile(
+  explainer_rf,
+  variables = "age",
+  type = "accumulated"
+)
+plot(ale)
+
+# PDP par groupe
+pdp_groups <- model_profile(
+  explainer_rf,
+  variables = "age",
+  groups = "gender"  # Separer par genre
+)
+plot(pdp_groups)
+
+# Interaction 2D
+pdp_2d <- model_profile(
+  explainer_rf,
+  variables = c("age", "fare"),
+  type = "partial"
+)`, desc: 'Profile des features' }
+                            ],
+                            tips: ['ALE plus robuste que PDP si features correlees', 'groups pour interactions simples'],
+                            warnings: ['PDP assume independance des features']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser LIME pour explications',
+                        desc: 'lime::explain(), lime::lime()',
+                        details: {
+                            explanation: 'LIME explique localement en approximant par un modele simple (lineaire) autour de observation.',
+                            syntax: 'lime(training_data, model) puis explain(new_obs)',
+                            options: [
+                                { flag: 'n_features', desc: 'Nombre de features a afficher' },
+                                { flag: 'n_permutations', desc: 'Nombre de perturbations' },
+                                { flag: 'kernel_width', desc: 'Largeur du kernel' }
+                            ],
+                            examples: [
+                                { code: `# Installation
+install.packages("lime")
+library(lime)
+library(randomForest)
+
+# Modele
+model_rf <- randomForest(Species ~ ., data = iris[1:100, ])
+
+# Creer explainer LIME
+lime_explainer <- lime(
+  iris[1:100, 1:4],  # Training data (features only)
+  model_rf
+)
+
+# Expliquer nouvelles observations
+new_obs <- iris[101:103, 1:4]
+
+explanation <- explain(
+  new_obs,
+  lime_explainer,
+  n_features = 4,
+  n_permutations = 1000
+)
+
+# Visualiser
+plot_features(explanation)
+
+# Texte
+plot_explanations(explanation)
+
+# Pour un seul cas
+explanation_single <- explain(
+  iris[101, 1:4],
+  lime_explainer,
+  n_features = 4
+)
+plot_features(explanation_single)`, desc: 'LIME en R' }
+                            ],
+                            tips: ['LIME est model-agnostic', 'Interpreter les poids comme importance locale'],
+                            warnings: ['Explications peuvent varier entre runs']
+                        }
+                    },
+                    {
+                        cmd: 'Calculer Shapley avec iml',
+                        desc: 'iml::Shapley, iml::FeatureEffects',
+                        details: {
+                            explanation: 'Le package iml offre une interface unifiee pour interpretabilite incluant Shapley et effets des features.',
+                            syntax: 'Shapley$new(predictor, x.interest)',
+                            options: [
+                                { flag: 'Shapley', desc: 'Valeurs Shapley locales' },
+                                { flag: 'FeatureEffects', desc: 'PDP et ICE plots' },
+                                { flag: 'FeatureImp', desc: 'Importance par permutation' }
+                            ],
+                            examples: [
+                                { code: `# Installation
+install.packages("iml")
+library(iml)
+library(randomForest)
+
+# Modele
+model_rf <- randomForest(mpg ~ ., data = mtcars)
+
+# Creer Predictor wrapper
+predictor <- Predictor$new(
+  model_rf,
+  data = mtcars[, -1],
+  y = mtcars$mpg
+)
+
+# Importance globale
+imp <- FeatureImp$new(predictor, loss = "mse")
+plot(imp)
+
+# Shapley pour une observation
+shapley <- Shapley$new(
+  predictor,
+  x.interest = mtcars[1, -1]
+)
+plot(shapley)
+
+# Feature Effects (PDP + ICE)
+effects <- FeatureEffects$new(predictor, features = c("hp", "wt"))
+plot(effects)
+
+# ICE plots individuels
+ice <- FeatureEffect$new(predictor, feature = "hp", method = "ice")
+plot(ice)`, desc: 'iml pour XAI' }
+                            ],
+                            tips: ['iml integre plusieurs methodes XAI', 'FeatureImp = permutation importance'],
+                            warnings: ['Shapley peut etre lent (exponentiel en features)']
+                        }
+                    },
+                    {
+                        cmd: 'Visualiser avec flashlight',
+                        desc: 'flashlight(), light_importance()',
+                        details: {
+                            explanation: 'flashlight offre des outils XAI model-agnostic avec une API simple et coherente.',
+                            syntax: 'flashlight(model, data, y, predict_function)',
+                            options: [
+                                { flag: 'light_importance', desc: 'Importance des features' },
+                                { flag: 'light_ice', desc: 'ICE plots' },
+                                { flag: 'light_breakdown', desc: 'SHAP-like breakdown' }
+                            ],
+                            examples: [
+                                { code: `# Installation
+install.packages("flashlight")
+library(flashlight)
+library(randomForest)
+
+# Modele
+model_rf <- randomForest(mpg ~ ., data = mtcars)
+
+# Creer flashlight
+fl <- flashlight(
+  model = model_rf,
+  data = mtcars,
+  y = "mpg",
+  label = "Random Forest",
+  predict_function = function(m, X) predict(m, X)
+)
+
+# Importance permutation
+imp <- light_importance(fl, m_repetitions = 10)
+plot(imp)
+
+# ICE et PDP
+ice <- light_ice(fl, v = "hp")
+plot(ice)
+
+# Effets avec interaction
+effects <- light_effects(fl, v = "hp", by = "am")
+plot(effects)
+
+# Breakdown pour observation
+bd <- light_breakdown(fl, new_obs = mtcars[1, ])
+plot(bd)
+
+# Comparer modeles
+# fl_glm <- flashlight(model_glm, ...)
+# fls <- multiflashlight(list(fl, fl_glm))
+# plot(light_importance(fls))`, desc: 'flashlight XAI' }
+                            ],
+                            tips: ['flashlight ideal pour comparaison de modeles', 'API coherente pour toutes les methodes'],
+                            warnings: ['Definir predict_function pour modeles personnalises']
                         }
                     }
                 ]

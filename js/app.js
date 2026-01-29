@@ -27,14 +27,14 @@ const appData = [
         link: 'sheets/dataviz.html'
     },
     {
-        id: 'scikit-learn',
-        title: 'Machine Learning',
-        desc: 'Scikit-Learn : fit, predict, preprocessing et métriques.',
+        id: 'ml-dl',
+        title: 'Machine Learning & Deep Learning',
+        desc: 'sklearn, PyTorch, Explainable AI (SHAP, LIME, Captum, Grad-CAM).',
         type: 'Data Science',
         icon: 'fas fa-brain',
         color: 'text-orange-400',
         bgGlow: 'bg-orange-500/20',
-        link: 'sheets/sklearn.html'
+        link: 'sheets/ml-dl.html'
     },
     {
         id: 'nlp-python',

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire SQL : requêtes SELECT, JOIN, GROUP BY et manipulation de bases de données.">
+    <meta name="description" content="Aide-mémoire SQL : workflows pratiques pour requêtes, jointures, agrégations et manipulation de bases de données.">
     <title>SQL Mémento - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,14 @@
                     <i class="fas fa-database text-3xl text-slate-300"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">SQL Mémento</h1>
-                <p class="text-slate-400">Requêtes SELECT, JOINS, GROUP BY et agrégations</p>
+                <p class="text-slate-400">Workflows pratiques pour bases de données relationnelles</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -53,795 +53,1018 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'select',
-                title: 'Requêtes SELECT',
-                icon: 'fa-search',
+                id: 'extraire',
+                title: 'Extraire des Données',
+                icon: 'fa-download',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'SELECT * FROM table',
-                        desc: 'Sélectionner toutes les colonnes',
+                        cmd: 'Sélectionner toutes les données',
+                        desc: 'SELECT * FROM table avec LIMIT',
                         details: {
-                            explanation: 'Récupère toutes les colonnes et lignes d\'une table. L\'astérisque (*) est un joker qui signifie "toutes les colonnes".',
-                            syntax: 'SELECT * FROM nom_table',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT * FROM clients', desc: 'Toutes les données de la table clients' },
-                                { code: 'SELECT * FROM clients LIMIT 10', desc: 'Les 10 premières lignes' }
+                            explanation: 'Récupère toutes les colonnes d\'une table. L\'astérisque (*) signifie "toutes les colonnes". Utilisez LIMIT pour limiter les résultats.',
+                            syntax: 'SELECT * FROM table [LIMIT n]',
+                            options: [
+                                { flag: '*', desc: 'Sélectionne toutes les colonnes' },
+                                { flag: 'LIMIT n', desc: 'Limite à n lignes' },
+                                { flag: 'TOP n', desc: 'SQL Server : limite à n lignes' }
                             ],
-                            tips: ['Évitez SELECT * en production, spécifiez les colonnes nécessaires'],
-                            warnings: ['Peut être lent sur de grandes tables']
+                            examples: [
+                                { code: 'SELECT * FROM clients', desc: 'Toutes les données clients' },
+                                { code: 'SELECT * FROM clients LIMIT 10', desc: 'Les 10 premières lignes' },
+                                { code: 'SELECT TOP 10 * FROM clients', desc: 'SQL Server : 10 premières lignes' }
+                            ],
+                            tips: ['Évitez SELECT * en production, spécifiez les colonnes', 'Toujours utiliser LIMIT pour les grandes tables'],
+                            warnings: ['SELECT * peut être très lent sur de grandes tables']
                         }
                     },
                     {
-                        cmd: 'SELECT col1, col2 FROM table',
-                        desc: 'Sélectionner des colonnes spécifiques',
+                        cmd: 'Choisir des colonnes spécifiques',
+                        desc: 'SELECT col1, col2 et DISTINCT',
                         details: {
-                            explanation: 'Récupère uniquement les colonnes spécifiées. Plus efficace que SELECT *.',
-                            syntax: 'SELECT colonne1, colonne2 FROM nom_table',
-                            options: [],
+                            explanation: 'Récupère uniquement les colonnes nécessaires. Plus efficace que SELECT *. DISTINCT élimine les doublons.',
+                            syntax: 'SELECT [DISTINCT] col1, col2 FROM table',
+                            options: [
+                                { flag: 'DISTINCT', desc: 'Supprime les doublons du résultat' },
+                                { flag: 'ALL', desc: 'Garde tous les résultats (défaut)' }
+                            ],
                             examples: [
-                                { code: 'SELECT nom, email FROM clients', desc: 'Nom et email des clients' },
+                                { code: 'SELECT nom, email FROM clients', desc: 'Nom et email uniquement' },
                                 { code: 'SELECT DISTINCT ville FROM clients', desc: 'Villes uniques (sans doublons)' },
-                                { code: 'SELECT nom, prenom, ville FROM clients', desc: 'Plusieurs colonnes' }
+                                { code: 'SELECT DISTINCT categorie, statut FROM produits', desc: 'Combinaisons uniques' }
                             ],
-                            tips: ['DISTINCT élimine les doublons'],
+                            tips: ['DISTINCT s\'applique à toutes les colonnes sélectionnées'],
+                            warnings: ['DISTINCT peut être coûteux en performance sur de gros volumes']
+                        }
+                    },
+                    {
+                        cmd: 'Renommer des colonnes',
+                        desc: 'AS pour alias de colonnes et tables',
+                        details: {
+                            explanation: 'Donne un nom temporaire (alias) à une colonne, une expression ou une table pour plus de lisibilité.',
+                            syntax: 'SELECT colonne AS alias FROM table AS t',
+                            options: [
+                                { flag: 'AS', desc: 'Mot-clé pour définir l\'alias (optionnel)' },
+                                { flag: 'Guillemets', desc: 'Pour alias avec espaces : "Mon Alias"' }
+                            ],
+                            examples: [
+                                { code: 'SELECT nom AS client_name FROM clients', desc: 'Renommer une colonne' },
+                                { code: 'SELECT nom, prix * 1.2 AS prix_ttc FROM produits', desc: 'Alias sur expression' },
+                                { code: 'SELECT c.nom, o.date\nFROM clients c\nJOIN orders o ON c.id = o.client_id', desc: 'Alias de tables pour les jointures' }
+                            ],
+                            tips: ['Les alias de tables sont essentiels pour les jointures', 'AS est optionnel mais améliore la lisibilité'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'SELECT col AS alias',
-                        desc: 'Renommer une colonne (alias)',
+                        cmd: 'Transformer des valeurs',
+                        desc: 'CASE WHEN pour conditions',
                         details: {
-                            explanation: 'Donne un nom temporaire à une colonne ou une expression pour plus de lisibilité.',
-                            syntax: 'SELECT colonne AS nom_alias FROM table',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT nom AS client_name FROM clients', desc: 'Renommer la colonne' },
-                                { code: 'SELECT prix * 1.2 AS prix_ttc FROM produits', desc: 'Alias sur calcul' },
-                                { code: 'SELECT c.nom, co.date FROM clients c JOIN commandes co ON c.id = co.client_id', desc: 'Alias de table' }
+                            explanation: 'Crée des colonnes calculées avec des conditions. Équivalent d\'un if/else dans SQL.',
+                            syntax: 'CASE WHEN condition THEN valeur [ELSE valeur] END',
+                            options: [
+                                { flag: 'WHEN', desc: 'Condition à évaluer' },
+                                { flag: 'THEN', desc: 'Valeur si condition vraie' },
+                                { flag: 'ELSE', desc: 'Valeur par défaut (optionnel)' },
+                                { flag: 'END', desc: 'Fin du CASE' }
                             ],
-                            tips: ['AS est optionnel: SELECT nom client_name fonctionne aussi', 'Les alias de table raccourcissent les requêtes'],
-                            warnings: []
+                            examples: [
+                                { code: 'SELECT nom,\n  CASE WHEN age >= 18 THEN \'Adulte\' ELSE \'Mineur\' END AS statut\nFROM personnes', desc: 'Catégorisation simple' },
+                                { code: 'SELECT nom,\n  CASE\n    WHEN note >= 16 THEN \'Très bien\'\n    WHEN note >= 12 THEN \'Bien\'\n    WHEN note >= 10 THEN \'Passable\'\n    ELSE \'Insuffisant\'\n  END AS mention\nFROM etudiants', desc: 'Plusieurs conditions' },
+                                { code: 'SELECT \n  SUM(CASE WHEN statut = \'actif\' THEN 1 ELSE 0 END) AS nb_actifs,\n  SUM(CASE WHEN statut = \'inactif\' THEN 1 ELSE 0 END) AS nb_inactifs\nFROM clients', desc: 'Comptage conditionnel' }
+                            ],
+                            tips: ['CASE peut être utilisé dans SELECT, WHERE, ORDER BY, etc.', 'Toujours terminer par END'],
+                            warnings: ['Sans ELSE, les cas non couverts retournent NULL']
                         }
                     },
                     {
-                        cmd: 'CASE WHEN ... THEN ... END',
-                        desc: 'Condition dans SELECT',
+                        cmd: 'Gérer les valeurs manquantes',
+                        desc: 'COALESCE, IFNULL, NULLIF',
                         details: {
-                            explanation: 'Permet d\'ajouter une logique conditionnelle dans les requêtes, comme un if/else.',
-                            syntax: 'CASE WHEN condition THEN resultat ELSE default END',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT nom,\n  CASE WHEN age < 18 THEN \'Mineur\'\n       WHEN age < 65 THEN \'Adulte\'\n       ELSE \'Senior\' END AS categorie\nFROM clients', desc: 'Catégoriser par âge' },
-                                { code: 'SELECT produit,\n  CASE status\n    WHEN \'A\' THEN \'Actif\'\n    WHEN \'I\' THEN \'Inactif\'\n    ELSE \'Inconnu\' END AS status_label\nFROM produits', desc: 'CASE simple (égalité)' },
-                                { code: 'SELECT SUM(CASE WHEN status = \'vendu\' THEN 1 ELSE 0 END) AS nb_vendus\nFROM produits', desc: 'Compter conditionnellement' }
+                            explanation: 'Fonctions pour gérer les valeurs NULL : remplacer, détecter ou créer des NULL.',
+                            syntax: 'COALESCE(val1, val2, ...) / IFNULL(val, default)',
+                            options: [
+                                { flag: 'COALESCE', desc: 'Retourne la première valeur non NULL' },
+                                { flag: 'IFNULL', desc: 'MySQL : remplace NULL par défaut' },
+                                { flag: 'ISNULL', desc: 'SQL Server : remplace NULL' },
+                                { flag: 'NULLIF', desc: 'Retourne NULL si val1 = val2' }
                             ],
-                            tips: ['CASE WHEN pour conditions complexes, CASE col WHEN pour égalité simple', 'ELSE est optionnel (NULL par défaut)'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'COALESCE(col1, col2, ...)',
-                        desc: 'Première valeur non NULL',
-                        details: {
-                            explanation: 'Retourne la première valeur non NULL parmi les arguments. Utile pour les valeurs par défaut.',
-                            syntax: 'COALESCE(valeur1, valeur2, valeur_defaut)',
-                            options: [],
                             examples: [
-                                { code: 'SELECT COALESCE(surnom, prenom, \'Anonyme\') AS nom_affiche FROM clients', desc: 'Premier non NULL' },
-                                { code: 'SELECT produit, COALESCE(remise, 0) AS remise FROM produits', desc: 'Remplacer NULL par 0' },
-                                { code: 'SELECT COALESCE(telephone, email, \'Pas de contact\') FROM clients', desc: 'Contact principal' }
+                                { code: 'SELECT nom, COALESCE(telephone, email, \'Non renseigné\') AS contact\nFROM clients', desc: 'Premier contact disponible' },
+                                { code: 'SELECT nom, IFNULL(note, 0) AS note\nFROM etudiants', desc: 'MySQL : remplacer NULL par 0' },
+                                { code: 'SELECT prix / NULLIF(quantite, 0) AS prix_unitaire\nFROM ventes', desc: 'Éviter division par zéro' }
                             ],
-                            tips: ['Alternative: IFNULL(col, defaut) en MySQL, ISNULL(col, defaut) en SQL Server'],
-                            warnings: []
+                            tips: ['COALESCE est standard SQL et fonctionne partout', 'NULLIF est utile pour éviter les divisions par zéro'],
+                            warnings: ['IFNULL est spécifique à MySQL, préférez COALESCE']
                         }
                     }
                 ]
             },
             {
-                id: 'filter',
-                title: 'Filtrage (WHERE)',
+                id: 'filtrer',
+                title: 'Filtrer et Rechercher',
                 icon: 'fa-filter',
                 color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'WHERE condition',
-                        desc: 'Filtrer les résultats',
+                        cmd: 'Filtrer avec des conditions simples',
+                        desc: 'WHERE avec =, <>, >, BETWEEN, IN',
                         details: {
-                            explanation: 'Filtre les lignes selon une condition. Seules les lignes satisfaisant la condition sont retournées.',
+                            explanation: 'WHERE filtre les lignes selon des conditions. Les opérateurs de comparaison permettent de sélectionner précisément les données.',
                             syntax: 'SELECT ... FROM table WHERE condition',
                             options: [
-                                { flag: '=', desc: 'Égalité' },
-                                { flag: '<>, !=', desc: 'Différent de' },
-                                { flag: '<, >, <=, >=', desc: 'Comparaisons' },
-                                { flag: 'BETWEEN a AND b', desc: 'Entre deux valeurs (inclus)' },
-                                { flag: 'IN (a, b, c)', desc: 'Dans une liste de valeurs' },
-                                { flag: 'LIKE pattern', desc: 'Correspondance de motif' }
+                                { flag: '=, <>, !=', desc: 'Égal, différent' },
+                                { flag: '>, <, >=, <=', desc: 'Comparaisons numériques' },
+                                { flag: 'BETWEEN a AND b', desc: 'Valeur dans un intervalle (inclus)' },
+                                { flag: 'IN (v1, v2, ...)', desc: 'Valeur dans une liste' }
                             ],
                             examples: [
-                                { code: 'SELECT * FROM clients WHERE age > 18', desc: 'Clients majeurs' },
+                                { code: 'SELECT * FROM clients WHERE age >= 18', desc: 'Clients majeurs' },
                                 { code: 'SELECT * FROM produits WHERE prix BETWEEN 10 AND 50', desc: 'Prix entre 10 et 50' },
-                                { code: 'SELECT * FROM clients WHERE ville IN (\'Paris\', \'Lyon\', \'Marseille\')', desc: 'Villes spécifiques' }
+                                { code: 'SELECT * FROM commandes WHERE statut IN (\'envoyé\', \'livré\')', desc: 'Statuts spécifiques' },
+                                { code: 'SELECT * FROM clients WHERE ville <> \'Paris\'', desc: 'Hors Paris' }
                             ],
-                            tips: ['BETWEEN inclut les bornes', 'IN est équivalent à plusieurs OR'],
-                            warnings: []
+                            tips: ['BETWEEN inclut les bornes', 'IN est plus lisible que plusieurs OR'],
+                            warnings: ['<> est standard SQL, != fonctionne mais n\'est pas standard']
                         }
                     },
                     {
-                        cmd: 'LIKE pattern',
-                        desc: 'Recherche par motif',
+                        cmd: 'Rechercher par motif de texte',
+                        desc: 'LIKE avec % et _ pour patterns',
                         details: {
-                            explanation: 'Recherche de texte avec des jokers. % = n\'importe quels caractères, _ = un seul caractère.',
+                            explanation: 'LIKE permet de rechercher des motifs dans les chaînes de caractères avec des jokers.',
                             syntax: 'WHERE colonne LIKE \'pattern\'',
                             options: [
-                                { flag: '%', desc: 'N\'importe quelle séquence (0 ou plus caractères)' },
-                                { flag: '_', desc: 'Exactement un caractère' },
-                                { flag: 'ESCAPE', desc: 'Définir un caractère d\'échappement' }
+                                { flag: '%', desc: 'Remplace 0 ou plusieurs caractères' },
+                                { flag: '_', desc: 'Remplace exactement 1 caractère' },
+                                { flag: 'ILIKE', desc: 'PostgreSQL : LIKE insensible à la casse' },
+                                { flag: 'ESCAPE', desc: 'Caractère d\'échappement pour % et _' }
                             ],
                             examples: [
-                                { code: 'WHERE nom LIKE \'Dup%\'', desc: 'Commence par "Dup"' },
-                                { code: 'WHERE email LIKE \'%@gmail.com\'', desc: 'Finit par @gmail.com' },
-                                { code: 'WHERE nom LIKE \'%jean%\'', desc: 'Contient "jean"' },
-                                { code: 'WHERE code LIKE \'A_B\'', desc: 'A suivi d\'un caractère puis B' },
-                                { code: 'WHERE nom LIKE \'%100\\%%\' ESCAPE \'\\\'', desc: 'Contient "100%" littéralement' }
+                                { code: 'SELECT * FROM clients WHERE nom LIKE \'Mar%\'', desc: 'Noms commençant par Mar' },
+                                { code: 'SELECT * FROM clients WHERE email LIKE \'%@gmail.com\'', desc: 'Emails Gmail' },
+                                { code: 'SELECT * FROM produits WHERE code LIKE \'A__\'', desc: 'Code A suivi de 2 caractères' },
+                                { code: 'SELECT * FROM clients WHERE nom ILIKE \'%dupont%\'', desc: 'PostgreSQL : recherche insensible à la casse' }
                             ],
-                            tips: ['ILIKE pour recherche insensible à la casse (PostgreSQL)', 'NOT LIKE pour exclure un motif'],
-                            warnings: ['LIKE \'%mot%\' ne peut pas utiliser d\'index (lent)']
+                            tips: ['%texte% = contient "texte"', 'Pour chercher littéralement % ou _, utilisez ESCAPE'],
+                            warnings: ['LIKE avec % au début est lent (pas d\'utilisation d\'index)']
                         }
                     },
                     {
-                        cmd: 'IS NULL / IS NOT NULL',
-                        desc: 'Tester les valeurs NULL',
+                        cmd: 'Trouver les valeurs NULL',
+                        desc: 'IS NULL et IS NOT NULL',
                         details: {
-                            explanation: 'NULL n\'est pas une valeur, c\'est l\'absence de valeur. = NULL ne fonctionne pas, utilisez IS NULL.',
-                            syntax: 'WHERE colonne IS NULL / IS NOT NULL',
-                            options: [],
+                            explanation: 'NULL représente l\'absence de valeur. On ne peut pas utiliser = pour tester NULL, il faut IS NULL.',
+                            syntax: 'WHERE colonne IS [NOT] NULL',
+                            options: [
+                                { flag: 'IS NULL', desc: 'Teste si la valeur est NULL' },
+                                { flag: 'IS NOT NULL', desc: 'Teste si la valeur existe' }
+                            ],
                             examples: [
                                 { code: 'SELECT * FROM clients WHERE telephone IS NULL', desc: 'Clients sans téléphone' },
-                                { code: 'SELECT * FROM commandes WHERE date_livraison IS NOT NULL', desc: 'Commandes livrées' },
-                                { code: 'SELECT * FROM produits WHERE description IS NULL OR description = \'\'', desc: 'Sans description ou vide' }
+                                { code: 'SELECT * FROM clients WHERE email IS NOT NULL', desc: 'Clients avec email' },
+                                { code: 'SELECT COUNT(*) FROM produits WHERE description IS NULL', desc: 'Compter les produits sans description' }
                             ],
-                            tips: ['NULL = NULL retourne NULL (pas TRUE!)', 'Utilisez COALESCE pour remplacer NULL'],
-                            warnings: ['Ne JAMAIS utiliser = NULL ou != NULL']
+                            tips: ['Toujours utiliser IS NULL, jamais = NULL', 'NULL != NULL est vrai (comportement SQL)'],
+                            warnings: ['= NULL ne fonctionne JAMAIS, utilisez IS NULL']
                         }
                     },
                     {
-                        cmd: 'AND / OR / NOT',
-                        desc: 'Combiner des conditions',
+                        cmd: 'Combiner plusieurs conditions',
+                        desc: 'AND, OR, NOT et parenthèses',
                         details: {
-                            explanation: 'Opérateurs logiques pour combiner plusieurs conditions dans un WHERE.',
-                            syntax: 'WHERE condition1 AND condition2 OR condition3',
+                            explanation: 'Les opérateurs logiques combinent plusieurs conditions. Les parenthèses contrôlent la priorité.',
+                            syntax: 'WHERE condition1 AND/OR condition2',
                             options: [
                                 { flag: 'AND', desc: 'Les deux conditions doivent être vraies' },
-                                { flag: 'OR', desc: 'Au moins une condition doit être vraie' },
-                                { flag: 'NOT', desc: 'Inverse la condition' }
+                                { flag: 'OR', desc: 'Au moins une condition vraie' },
+                                { flag: 'NOT', desc: 'Inverse la condition' },
+                                { flag: '()', desc: 'Parenthèses pour priorité' }
                             ],
                             examples: [
-                                { code: 'WHERE age > 18 AND ville = \'Paris\'', desc: 'Majeurs parisiens' },
-                                { code: 'WHERE ville = \'Paris\' OR ville = \'Lyon\'', desc: 'Paris OU Lyon' },
-                                { code: 'WHERE NOT status = \'inactif\'', desc: 'Tous sauf les inactifs' },
-                                { code: 'WHERE (age > 18 AND ville = \'Paris\') OR vip = TRUE', desc: 'Avec parenthèses' }
+                                { code: 'SELECT * FROM clients\nWHERE age >= 18 AND ville = \'Paris\'', desc: 'Adultes parisiens' },
+                                { code: 'SELECT * FROM produits\nWHERE categorie = \'Tech\' OR prix > 100', desc: 'Tech ou prix > 100' },
+                                { code: 'SELECT * FROM clients\nWHERE ville = \'Paris\' AND (age < 25 OR vip = true)', desc: 'Parisiens jeunes ou VIP' },
+                                { code: 'SELECT * FROM produits\nWHERE NOT categorie = \'Obsolète\'', desc: 'Exclure une catégorie' }
                             ],
-                            tips: ['AND est évalué avant OR', 'Utilisez des parenthèses pour clarifier'],
-                            warnings: []
+                            tips: ['AND a priorité sur OR, utilisez des parenthèses pour clarifier', 'NOT IN et NOT LIKE existent aussi'],
+                            warnings: ['Sans parenthèses, AND s\'exécute avant OR']
                         }
                     },
                     {
-                        cmd: 'EXISTS (subquery)',
-                        desc: 'Tester l\'existence',
+                        cmd: 'Vérifier l\'existence dans une autre table',
+                        desc: 'EXISTS et NOT EXISTS',
                         details: {
-                            explanation: 'Vérifie si une sous-requête retourne au moins une ligne. Plus efficace que IN pour de grandes tables.',
-                            syntax: 'WHERE EXISTS (SELECT 1 FROM table2 WHERE condition)',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT * FROM clients c\nWHERE EXISTS (\n  SELECT 1 FROM commandes co\n  WHERE co.client_id = c.id\n)', desc: 'Clients ayant commandé' },
-                                { code: 'SELECT * FROM produits p\nWHERE NOT EXISTS (\n  SELECT 1 FROM ventes v\n  WHERE v.produit_id = p.id\n)', desc: 'Produits jamais vendus' }
+                            explanation: 'EXISTS teste si une sous-requête retourne au moins une ligne. Plus efficace que IN pour les grandes tables.',
+                            syntax: 'WHERE [NOT] EXISTS (sous-requête)',
+                            options: [
+                                { flag: 'EXISTS', desc: 'Vrai si la sous-requête retourne des lignes' },
+                                { flag: 'NOT EXISTS', desc: 'Vrai si la sous-requête est vide' }
                             ],
-                            tips: ['SELECT 1 suffit, pas besoin de colonnes', 'Souvent plus performant que IN avec sous-requête'],
-                            warnings: []
+                            examples: [
+                                { code: 'SELECT * FROM clients c\nWHERE EXISTS (\n  SELECT 1 FROM commandes o\n  WHERE o.client_id = c.id\n)', desc: 'Clients avec au moins une commande' },
+                                { code: 'SELECT * FROM clients c\nWHERE NOT EXISTS (\n  SELECT 1 FROM commandes o\n  WHERE o.client_id = c.id\n)', desc: 'Clients sans aucune commande' },
+                                { code: 'SELECT * FROM produits p\nWHERE EXISTS (\n  SELECT 1 FROM ventes v\n  WHERE v.produit_id = p.id\n  AND v.date > \'2024-01-01\'\n)', desc: 'Produits vendus en 2024' }
+                            ],
+                            tips: ['EXISTS s\'arrête dès qu\'une ligne est trouvée (efficace)', 'SELECT 1 ou SELECT * dans EXISTS - pas de différence'],
+                            warnings: ['EXISTS peut être plus performant que IN sur grandes tables']
                         }
                     }
                 ]
             },
             {
-                id: 'order',
-                title: 'Tri et pagination',
+                id: 'trier',
+                title: 'Trier et Paginer',
                 icon: 'fa-sort',
                 color: 'border-l-4 border-cyan-500',
                 commands: [
                     {
-                        cmd: 'ORDER BY col [ASC|DESC]',
-                        desc: 'Trier les résultats',
+                        cmd: 'Trier les résultats',
+                        desc: 'ORDER BY ASC/DESC multi-colonnes',
                         details: {
-                            explanation: 'Trie les résultats par une ou plusieurs colonnes. ASC = croissant (défaut), DESC = décroissant.',
-                            syntax: 'SELECT ... FROM table ORDER BY col1 [ASC|DESC], col2 [ASC|DESC]',
+                            explanation: 'ORDER BY trie les résultats selon une ou plusieurs colonnes, en ordre croissant (ASC) ou décroissant (DESC).',
+                            syntax: 'SELECT ... ORDER BY col1 [ASC|DESC], col2 [ASC|DESC]',
                             options: [
-                                { flag: 'ASC', desc: 'Tri croissant (A→Z, 1→9) - par défaut' },
-                                { flag: 'DESC', desc: 'Tri décroissant (Z→A, 9→1)' },
-                                { flag: 'NULLS FIRST/LAST', desc: 'Position des NULL (PostgreSQL)' }
+                                { flag: 'ASC', desc: 'Ordre croissant (défaut)' },
+                                { flag: 'DESC', desc: 'Ordre décroissant' },
+                                { flag: 'NULLS FIRST', desc: 'NULL en premier (PostgreSQL)' },
+                                { flag: 'NULLS LAST', desc: 'NULL en dernier (PostgreSQL)' }
                             ],
                             examples: [
-                                { code: 'SELECT * FROM clients ORDER BY nom', desc: 'Tri alphabétique' },
-                                { code: 'SELECT * FROM produits ORDER BY prix DESC', desc: 'Plus cher en premier' },
-                                { code: 'SELECT * FROM commandes ORDER BY date DESC, montant DESC', desc: 'Multi-colonnes' },
-                                { code: 'SELECT * FROM clients ORDER BY 2', desc: 'Par position de colonne' }
+                                { code: 'SELECT * FROM clients ORDER BY nom ASC', desc: 'Tri alphabétique' },
+                                { code: 'SELECT * FROM produits ORDER BY prix DESC', desc: 'Du plus cher au moins cher' },
+                                { code: 'SELECT * FROM ventes\nORDER BY date DESC, montant DESC', desc: 'Tri multi-colonnes' },
+                                { code: 'SELECT * FROM clients\nORDER BY ville ASC, nom ASC', desc: 'Par ville puis par nom' }
                             ],
-                            tips: ['On peut trier par numéro de colonne (1, 2, 3...)', 'Les NULL sont triés en premier ou dernier selon le SGBD'],
+                            tips: ['ASC est le défaut, on peut l\'omettre', 'On peut trier par numéro de colonne : ORDER BY 1, 2'],
+                            warnings: ['Le tri est coûteux sur de grandes tables sans index']
+                        }
+                    },
+                    {
+                        cmd: 'Limiter le nombre de résultats',
+                        desc: 'LIMIT, TOP, FETCH FIRST',
+                        details: {
+                            explanation: 'Limite le nombre de lignes retournées. La syntaxe varie selon le SGBD.',
+                            syntax: 'LIMIT n / TOP n / FETCH FIRST n ROWS ONLY',
+                            options: [
+                                { flag: 'LIMIT n', desc: 'MySQL, PostgreSQL, SQLite' },
+                                { flag: 'TOP n', desc: 'SQL Server (après SELECT)' },
+                                { flag: 'FETCH FIRST n ROWS ONLY', desc: 'Standard SQL (après ORDER BY)' },
+                                { flag: 'ROWNUM <= n', desc: 'Oracle (ancienne syntaxe)' }
+                            ],
+                            examples: [
+                                { code: 'SELECT * FROM clients\nORDER BY date_inscription DESC\nLIMIT 10', desc: 'MySQL/PostgreSQL : 10 derniers inscrits' },
+                                { code: 'SELECT TOP 10 * FROM clients\nORDER BY date_inscription DESC', desc: 'SQL Server : 10 derniers inscrits' },
+                                { code: 'SELECT * FROM clients\nORDER BY date_inscription DESC\nFETCH FIRST 10 ROWS ONLY', desc: 'Standard SQL' }
+                            ],
+                            tips: ['Toujours combiner avec ORDER BY pour des résultats prévisibles', 'LIMIT est le plus répandu'],
+                            warnings: ['Sans ORDER BY, les résultats sont imprévisibles']
+                        }
+                    },
+                    {
+                        cmd: 'Paginer les résultats',
+                        desc: 'OFFSET pour la pagination',
+                        details: {
+                            explanation: 'OFFSET saute un nombre de lignes, combiné avec LIMIT pour paginer les résultats.',
+                            syntax: 'LIMIT n OFFSET m / OFFSET m ROWS FETCH NEXT n ROWS ONLY',
+                            options: [
+                                { flag: 'OFFSET m', desc: 'Saute les m premières lignes' },
+                                { flag: 'LIMIT n OFFSET m', desc: 'MySQL, PostgreSQL, SQLite' },
+                                { flag: 'OFFSET m ROWS FETCH NEXT n ROWS ONLY', desc: 'Standard SQL' }
+                            ],
+                            examples: [
+                                { code: '-- Page 1 (items 1-10)\nSELECT * FROM produits\nORDER BY id\nLIMIT 10 OFFSET 0', desc: 'Première page' },
+                                { code: '-- Page 2 (items 11-20)\nSELECT * FROM produits\nORDER BY id\nLIMIT 10 OFFSET 10', desc: 'Deuxième page' },
+                                { code: '-- Page n (générique)\n-- OFFSET = (page - 1) * items_par_page\nSELECT * FROM produits\nORDER BY id\nLIMIT 10 OFFSET 20', desc: 'Troisième page' }
+                            ],
+                            tips: ['Formule : OFFSET = (numéro_page - 1) × items_par_page', 'Pour de grandes tables, préférez la pagination par curseur (WHERE id > last_id)'],
+                            warnings: ['OFFSET élevé = performances dégradées']
+                        }
+                    },
+                    {
+                        cmd: 'Obtenir le premier/dernier',
+                        desc: 'ORDER BY + LIMIT 1',
+                        details: {
+                            explanation: 'Combine ORDER BY et LIMIT 1 pour obtenir la valeur minimale ou maximale d\'une colonne.',
+                            syntax: 'SELECT ... ORDER BY col [ASC|DESC] LIMIT 1',
+                            options: [
+                                { flag: 'ORDER BY col ASC LIMIT 1', desc: 'Premier (minimum)' },
+                                { flag: 'ORDER BY col DESC LIMIT 1', desc: 'Dernier (maximum)' }
+                            ],
+                            examples: [
+                                { code: 'SELECT * FROM clients\nORDER BY date_inscription ASC\nLIMIT 1', desc: 'Premier client inscrit' },
+                                { code: 'SELECT * FROM commandes\nORDER BY montant DESC\nLIMIT 1', desc: 'Commande la plus élevée' },
+                                { code: 'SELECT * FROM produits\nWHERE categorie = \'Tech\'\nORDER BY prix DESC\nLIMIT 1', desc: 'Produit tech le plus cher' }
+                            ],
+                            tips: ['Plus efficace que MAX() si vous voulez toute la ligne', 'Utilisez un index sur la colonne triée'],
                             warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'LIMIT n [OFFSET m]',
-                        desc: 'Limiter le nombre de résultats',
-                        details: {
-                            explanation: 'Limite le nombre de lignes retournées. OFFSET saute les n premières lignes (pagination).',
-                            syntax: 'SELECT ... LIMIT nombre [OFFSET debut]',
-                            options: [
-                                { flag: 'LIMIT n', desc: 'Retourner maximum n lignes' },
-                                { flag: 'OFFSET m', desc: 'Sauter les m premières lignes' }
-                            ],
-                            examples: [
-                                { code: 'SELECT * FROM clients LIMIT 10', desc: 'Les 10 premiers' },
-                                { code: 'SELECT * FROM clients ORDER BY id LIMIT 10 OFFSET 20', desc: 'Lignes 21 à 30 (page 3)' },
-                                { code: 'SELECT * FROM produits ORDER BY prix DESC LIMIT 5', desc: 'Top 5 les plus chers' },
-                                { code: 'SELECT TOP 10 * FROM clients', desc: 'Syntaxe SQL Server' }
-                            ],
-                            tips: ['Toujours utiliser ORDER BY avec LIMIT pour des résultats prévisibles', 'MySQL: LIMIT m, n = LIMIT n OFFSET m'],
-                            warnings: ['Syntaxe varie: LIMIT (MySQL/PostgreSQL), TOP (SQL Server), FETCH FIRST (Oracle/Standard)']
-                        }
-                    },
-                    {
-                        cmd: 'FETCH FIRST n ROWS',
-                        desc: 'Standard SQL pour limiter',
-                        details: {
-                            explanation: 'Syntaxe SQL standard pour la pagination, supportée par Oracle, PostgreSQL, SQL Server 2012+.',
-                            syntax: 'OFFSET m ROWS FETCH FIRST n ROWS ONLY',
-                            options: [
-                                { flag: 'OFFSET m ROWS', desc: 'Sauter m lignes' },
-                                { flag: 'FETCH FIRST n ROWS ONLY', desc: 'Retourner n lignes' },
-                                { flag: 'WITH TIES', desc: 'Inclure les égalités' }
-                            ],
-                            examples: [
-                                { code: 'SELECT * FROM clients\nORDER BY nom\nOFFSET 20 ROWS\nFETCH FIRST 10 ROWS ONLY', desc: 'Page 3 (21-30)' },
-                                { code: 'SELECT * FROM produits\nORDER BY prix DESC\nFETCH FIRST 5 ROWS WITH TIES', desc: 'Top 5, inclure les ex-aequo' }
-                            ],
-                            tips: ['WITH TIES inclut les lignes à égalité avec la dernière'],
-                            warnings: ['Nécessite ORDER BY']
                         }
                     }
                 ]
             },
             {
-                id: 'join',
-                title: 'Jointures (JOIN)',
+                id: 'combiner',
+                title: 'Combiner des Tables',
                 icon: 'fa-link',
                 color: 'border-l-4 border-purple-500',
                 commands: [
                     {
-                        cmd: 'INNER JOIN',
-                        desc: 'Jointure interne',
+                        cmd: 'Joindre avec correspondance',
+                        desc: 'INNER JOIN pour intersection',
                         details: {
-                            explanation: 'Retourne uniquement les lignes ayant une correspondance dans les deux tables. Le type de jointure le plus courant.',
-                            syntax: 'SELECT ... FROM table1 INNER JOIN table2 ON table1.col = table2.col',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT c.nom, co.date, co.montant\nFROM clients c\nINNER JOIN commandes co ON c.id = co.client_id', desc: 'Clients avec commandes' },
-                                { code: 'SELECT p.nom, cat.libelle\nFROM produits p\nJOIN categories cat ON p.categorie_id = cat.id', desc: 'JOIN = INNER JOIN' }
+                            explanation: 'INNER JOIN retourne uniquement les lignes qui ont une correspondance dans les deux tables.',
+                            syntax: 'SELECT ... FROM table1 INNER JOIN table2 ON condition',
+                            options: [
+                                { flag: 'INNER JOIN', desc: 'Jointure interne (intersection)' },
+                                { flag: 'JOIN', desc: 'Synonyme de INNER JOIN' },
+                                { flag: 'ON', desc: 'Condition de jointure' },
+                                { flag: 'USING(col)', desc: 'Si même nom de colonne' }
                             ],
-                            tips: ['JOIN sans préfixe = INNER JOIN', 'Utilisez des alias (c, co) pour raccourcir'],
+                            examples: [
+                                { code: 'SELECT c.nom, o.date, o.montant\nFROM clients c\nINNER JOIN commandes o ON c.id = o.client_id', desc: 'Clients avec leurs commandes' },
+                                { code: 'SELECT p.nom, cat.nom AS categorie\nFROM produits p\nJOIN categories cat ON p.categorie_id = cat.id', desc: 'Produits avec catégorie' },
+                                { code: 'SELECT e.nom, d.nom AS departement\nFROM employes e\nJOIN departements d USING(departement_id)', desc: 'Avec USING si même nom de colonne' }
+                            ],
+                            tips: ['Utilisez des alias de tables (c, o) pour plus de clarté', 'INNER JOIN est le type de jointure le plus courant'],
                             warnings: ['Les lignes sans correspondance sont exclues']
                         }
                     },
                     {
-                        cmd: 'LEFT [OUTER] JOIN',
-                        desc: 'Jointure gauche',
+                        cmd: 'Garder toutes les lignes d\'une table',
+                        desc: 'LEFT JOIN et RIGHT JOIN',
                         details: {
-                            explanation: 'Retourne TOUTES les lignes de la table de gauche, avec NULL si pas de correspondance à droite.',
+                            explanation: 'LEFT JOIN garde toutes les lignes de la table de gauche, même sans correspondance (NULL pour les colonnes de droite).',
                             syntax: 'SELECT ... FROM table1 LEFT JOIN table2 ON condition',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT c.nom, co.date\nFROM clients c\nLEFT JOIN commandes co ON c.id = co.client_id', desc: 'Tous clients, avec ou sans commande' },
-                                { code: 'SELECT c.nom\nFROM clients c\nLEFT JOIN commandes co ON c.id = co.client_id\nWHERE co.id IS NULL', desc: 'Clients SANS commande' }
+                            options: [
+                                { flag: 'LEFT JOIN', desc: 'Garde toutes les lignes de la table de gauche' },
+                                { flag: 'RIGHT JOIN', desc: 'Garde toutes les lignes de la table de droite' },
+                                { flag: 'LEFT OUTER JOIN', desc: 'Synonyme de LEFT JOIN' }
                             ],
-                            tips: ['WHERE right_table.col IS NULL pour trouver les "orphelins"'],
-                            warnings: []
+                            examples: [
+                                { code: 'SELECT c.nom, o.date, o.montant\nFROM clients c\nLEFT JOIN commandes o ON c.id = o.client_id', desc: 'Tous les clients, avec ou sans commande' },
+                                { code: 'SELECT c.nom, COUNT(o.id) AS nb_commandes\nFROM clients c\nLEFT JOIN commandes o ON c.id = o.client_id\nGROUP BY c.id, c.nom', desc: 'Nombre de commandes par client (0 si aucune)' },
+                                { code: 'SELECT p.nom, v.quantite\nFROM produits p\nLEFT JOIN ventes v ON p.id = v.produit_id\nWHERE v.id IS NULL', desc: 'Produits jamais vendus' }
+                            ],
+                            tips: ['LEFT JOIN + WHERE IS NULL = lignes sans correspondance', 'RIGHT JOIN est rarement utilisé (on réécrit en LEFT JOIN)'],
+                            warnings: ['Attention à l\'ordre des tables avec LEFT/RIGHT JOIN']
                         }
                     },
                     {
-                        cmd: 'RIGHT [OUTER] JOIN',
-                        desc: 'Jointure droite',
+                        cmd: 'Garder toutes les lignes des deux tables',
+                        desc: 'FULL OUTER JOIN',
                         details: {
-                            explanation: 'Retourne TOUTES les lignes de la table de droite, avec NULL si pas de correspondance à gauche.',
-                            syntax: 'SELECT ... FROM table1 RIGHT JOIN table2 ON condition',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT c.nom, co.date\nFROM clients c\nRIGHT JOIN commandes co ON c.id = co.client_id', desc: 'Toutes commandes, même sans client' }
+                            explanation: 'FULL OUTER JOIN garde toutes les lignes des deux tables, avec NULL pour les non-correspondances.',
+                            syntax: 'SELECT ... FROM table1 FULL OUTER JOIN table2 ON condition',
+                            options: [
+                                { flag: 'FULL OUTER JOIN', desc: 'Union des deux tables' },
+                                { flag: 'FULL JOIN', desc: 'Synonyme' }
                             ],
-                            tips: ['RIGHT JOIN peut toujours être réécrit en LEFT JOIN (inverser les tables)'],
-                            warnings: ['Moins utilisé que LEFT JOIN par convention']
+                            examples: [
+                                { code: 'SELECT c.nom, o.date\nFROM clients c\nFULL OUTER JOIN commandes o ON c.id = o.client_id', desc: 'Tous clients et toutes commandes' },
+                                { code: 'SELECT e.nom AS employe, p.nom AS projet\nFROM employes e\nFULL OUTER JOIN projets p ON e.projet_id = p.id', desc: 'Employés et projets (tous)' }
+                            ],
+                            tips: ['Utile pour identifier les données manquantes des deux côtés', 'Peut être simulé avec UNION de deux LEFT JOIN'],
+                            warnings: ['Non supporté par MySQL (utiliser UNION)', 'Peut générer beaucoup de NULL']
                         }
                     },
                     {
-                        cmd: 'FULL [OUTER] JOIN',
-                        desc: 'Jointure complète',
+                        cmd: 'Générer toutes les combinaisons',
+                        desc: 'CROSS JOIN pour produit cartésien',
                         details: {
-                            explanation: 'Retourne TOUTES les lignes des deux tables, avec NULL quand il n\'y a pas de correspondance.',
-                            syntax: 'SELECT ... FROM table1 FULL JOIN table2 ON condition',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT c.nom, co.date\nFROM clients c\nFULL JOIN commandes co ON c.id = co.client_id', desc: 'Tous les clients ET toutes les commandes' },
-                                { code: 'SELECT *\nFROM table_a a\nFULL JOIN table_b b ON a.id = b.id\nWHERE a.id IS NULL OR b.id IS NULL', desc: 'Lignes sans correspondance des deux côtés' }
-                            ],
-                            tips: ['Utile pour comparer deux tables ou trouver les différences'],
-                            warnings: ['Non supporté par MySQL (simuler avec UNION de LEFT + RIGHT)']
-                        }
-                    },
-                    {
-                        cmd: 'CROSS JOIN',
-                        desc: 'Produit cartésien',
-                        details: {
-                            explanation: 'Combine chaque ligne de table1 avec chaque ligne de table2. Résultat = n × m lignes.',
+                            explanation: 'CROSS JOIN combine chaque ligne de la première table avec chaque ligne de la seconde (produit cartésien).',
                             syntax: 'SELECT ... FROM table1 CROSS JOIN table2',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT couleur.nom, taille.nom\nFROM couleurs couleur\nCROSS JOIN tailles taille', desc: 'Toutes les combinaisons couleur × taille' },
-                                { code: 'SELECT d.date, p.nom\nFROM dates d\nCROSS JOIN produits p', desc: 'Générer un calendrier par produit' }
+                            options: [
+                                { flag: 'CROSS JOIN', desc: 'Produit cartésien explicite' },
+                                { flag: 'FROM t1, t2', desc: 'Syntaxe implicite (éviter)' }
                             ],
-                            tips: ['Utile pour générer des combinaisons', 'Équivalent: FROM table1, table2 (sans ON)'],
-                            warnings: ['Attention à l\'explosion du nombre de lignes!']
+                            examples: [
+                                { code: 'SELECT c.nom AS couleur, t.nom AS taille\nFROM couleurs c\nCROSS JOIN tailles t', desc: 'Toutes combinaisons couleur-taille' },
+                                { code: 'SELECT d.date, p.nom\nFROM dates d\nCROSS JOIN produits p', desc: 'Chaque produit pour chaque date' },
+                                { code: 'SELECT a.valeur AS a, b.valeur AS b\nFROM chiffres a\nCROSS JOIN chiffres b\nWHERE a.valeur < b.valeur', desc: 'Toutes les paires ordonnées' }
+                            ],
+                            tips: ['Utile pour générer des combinaisons ou un calendrier', 'Nombre de lignes = lignes_t1 × lignes_t2'],
+                            warnings: ['Peut générer un très grand nombre de lignes !', '100 × 100 = 10 000 lignes']
                         }
                     },
                     {
-                        cmd: 'Self JOIN',
-                        desc: 'Jointure sur elle-même',
+                        cmd: 'Joindre une table avec elle-même',
+                        desc: 'Self JOIN pour hiérarchies',
                         details: {
-                            explanation: 'Jointure d\'une table avec elle-même. Utile pour les relations hiérarchiques.',
-                            syntax: 'SELECT ... FROM table t1 JOIN table t2 ON t1.col = t2.autre_col',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT e.nom AS employe, m.nom AS manager\nFROM employes e\nLEFT JOIN employes m ON e.manager_id = m.id', desc: 'Employé et son manager' },
-                                { code: 'SELECT c1.nom, c2.nom AS collegue\nFROM clients c1\nJOIN clients c2 ON c1.ville = c2.ville AND c1.id < c2.id', desc: 'Paires de clients même ville' }
+                            explanation: 'Une self-join joint une table avec elle-même. Utile pour les hiérarchies (manager/employé) ou comparaisons.',
+                            syntax: 'SELECT ... FROM table t1 JOIN table t2 ON condition',
+                            options: [
+                                { flag: 'Alias obligatoires', desc: 't1, t2 pour distinguer les deux instances' }
                             ],
-                            tips: ['Obligatoire d\'utiliser des alias différents (t1, t2)'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Multiple JOINs',
-                        desc: 'Jointures multiples',
-                        details: {
-                            explanation: 'Joindre plus de 2 tables en chaînant les JOIN.',
-                            syntax: 'SELECT ... FROM t1 JOIN t2 ON ... JOIN t3 ON ...',
-                            options: [],
                             examples: [
-                                { code: 'SELECT c.nom, p.nom AS produit, co.date\nFROM clients c\nJOIN commandes co ON c.id = co.client_id\nJOIN produits p ON co.produit_id = p.id', desc: 'Client → Commande → Produit' },
-                                { code: 'SELECT c.nom, ca.libelle, SUM(co.montant)\nFROM clients c\nJOIN commandes co ON c.id = co.client_id\nJOIN produits p ON co.produit_id = p.id\nJOIN categories ca ON p.categorie_id = ca.id\nGROUP BY c.nom, ca.libelle', desc: 'Ventes par client et catégorie' }
+                                { code: 'SELECT e.nom AS employe, m.nom AS manager\nFROM employes e\nLEFT JOIN employes m ON e.manager_id = m.id', desc: 'Employés avec leur manager' },
+                                { code: 'SELECT c1.nom, c2.nom AS client_meme_ville\nFROM clients c1\nJOIN clients c2 ON c1.ville = c2.ville\nWHERE c1.id < c2.id', desc: 'Paires de clients de même ville' },
+                                { code: 'SELECT p1.nom, p2.nom AS produit_similaire\nFROM produits p1\nJOIN produits p2 ON p1.categorie_id = p2.categorie_id\nWHERE p1.id <> p2.id', desc: 'Produits de même catégorie' }
                             ],
-                            tips: ['L\'ordre des JOIN peut affecter les performances'],
-                            warnings: []
+                            tips: ['c1.id < c2.id évite les doublons (A,B et B,A)', 'LEFT JOIN pour inclure les éléments sans parent'],
+                            warnings: ['Toujours utiliser des alias différents']
                         }
                     }
                 ]
             },
             {
-                id: 'aggregate',
-                title: 'Agrégation',
+                id: 'agreger',
+                title: 'Calculer des Statistiques',
                 icon: 'fa-calculator',
                 color: 'border-l-4 border-orange-500',
                 commands: [
                     {
-                        cmd: 'COUNT, SUM, AVG, MIN, MAX',
-                        desc: 'Fonctions d\'agrégation',
+                        cmd: 'Compter des lignes',
+                        desc: 'COUNT(*) et COUNT(DISTINCT)',
                         details: {
-                            explanation: 'Fonctions pour calculer des statistiques sur un ensemble de lignes.',
-                            syntax: 'SELECT AGG(colonne) FROM table',
+                            explanation: 'COUNT compte le nombre de lignes. COUNT(*) compte toutes les lignes, COUNT(col) ignore les NULL.',
+                            syntax: 'SELECT COUNT(*) FROM table',
                             options: [
-                                { flag: 'COUNT(*)', desc: 'Nombre total de lignes' },
-                                { flag: 'COUNT(col)', desc: 'Nombre de valeurs non NULL' },
-                                { flag: 'COUNT(DISTINCT col)', desc: 'Nombre de valeurs uniques' },
-                                { flag: 'SUM(col)', desc: 'Somme des valeurs' },
-                                { flag: 'AVG(col)', desc: 'Moyenne' },
-                                { flag: 'MIN(col) / MAX(col)', desc: 'Valeurs min et max' }
+                                { flag: 'COUNT(*)', desc: 'Compte toutes les lignes' },
+                                { flag: 'COUNT(col)', desc: 'Compte les valeurs non NULL' },
+                                { flag: 'COUNT(DISTINCT col)', desc: 'Compte les valeurs uniques' }
                             ],
                             examples: [
-                                { code: 'SELECT COUNT(*) FROM commandes', desc: 'Nombre de commandes' },
-                                { code: 'SELECT COUNT(DISTINCT client_id) FROM commandes', desc: 'Nombre de clients distincts' },
-                                { code: 'SELECT SUM(montant), AVG(montant) FROM ventes', desc: 'Total et moyenne' },
-                                { code: 'SELECT MIN(date), MAX(date) FROM commandes', desc: 'Première et dernière commande' }
+                                { code: 'SELECT COUNT(*) FROM clients', desc: 'Nombre total de clients' },
+                                { code: 'SELECT COUNT(email) FROM clients', desc: 'Clients avec email (non NULL)' },
+                                { code: 'SELECT COUNT(DISTINCT ville) FROM clients', desc: 'Nombre de villes différentes' },
+                                { code: 'SELECT categorie, COUNT(*) AS nb_produits\nFROM produits\nGROUP BY categorie', desc: 'Produits par catégorie' }
                             ],
-                            tips: ['COUNT(*) compte tout, COUNT(col) ignore les NULL', 'AVG ignore les NULL'],
+                            tips: ['COUNT(*) est souvent plus rapide que COUNT(col)', 'COUNT(DISTINCT) peut être coûteux'],
+                            warnings: ['COUNT(col) ignore les NULL']
+                        }
+                    },
+                    {
+                        cmd: 'Calculer somme et moyenne',
+                        desc: 'SUM et AVG',
+                        details: {
+                            explanation: 'SUM calcule la somme, AVG calcule la moyenne des valeurs numériques.',
+                            syntax: 'SELECT SUM(col), AVG(col) FROM table',
+                            options: [
+                                { flag: 'SUM(col)', desc: 'Somme des valeurs' },
+                                { flag: 'AVG(col)', desc: 'Moyenne des valeurs' },
+                                { flag: 'SUM(DISTINCT col)', desc: 'Somme des valeurs uniques' }
+                            ],
+                            examples: [
+                                { code: 'SELECT SUM(montant) AS total_ventes\nFROM commandes', desc: 'Total des ventes' },
+                                { code: 'SELECT AVG(prix) AS prix_moyen\nFROM produits', desc: 'Prix moyen des produits' },
+                                { code: 'SELECT categorie,\n  SUM(quantite) AS total,\n  AVG(prix) AS prix_moyen\nFROM produits\nGROUP BY categorie', desc: 'Stats par catégorie' }
+                            ],
+                            tips: ['AVG ignore les NULL automatiquement', 'Pour inclure les NULL comme 0 : AVG(COALESCE(col, 0))'],
+                            warnings: ['SUM et AVG sur des colonnes non numériques = erreur']
+                        }
+                    },
+                    {
+                        cmd: 'Trouver min et max',
+                        desc: 'MIN et MAX',
+                        details: {
+                            explanation: 'MIN et MAX retournent la valeur minimale et maximale. Fonctionnent aussi sur les dates et textes.',
+                            syntax: 'SELECT MIN(col), MAX(col) FROM table',
+                            options: [
+                                { flag: 'MIN(col)', desc: 'Valeur minimale' },
+                                { flag: 'MAX(col)', desc: 'Valeur maximale' }
+                            ],
+                            examples: [
+                                { code: 'SELECT MIN(prix), MAX(prix) FROM produits', desc: 'Prix min et max' },
+                                { code: 'SELECT MIN(date_commande) AS premiere,\n       MAX(date_commande) AS derniere\nFROM commandes', desc: 'Première et dernière commande' },
+                                { code: 'SELECT categorie,\n  MIN(prix) AS moins_cher,\n  MAX(prix) AS plus_cher\nFROM produits\nGROUP BY categorie', desc: 'Extremes par catégorie' }
+                            ],
+                            tips: ['MIN/MAX sur texte = ordre alphabétique', 'Pour obtenir la ligne complète, utilisez ORDER BY + LIMIT 1'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'GROUP BY',
-                        desc: 'Grouper les résultats',
+                        cmd: 'Grouper par catégorie',
+                        desc: 'GROUP BY pour agrégations',
                         details: {
-                            explanation: 'Regroupe les lignes ayant les mêmes valeurs pour appliquer des fonctions d\'agrégation.',
-                            syntax: 'SELECT col, AGG(col2) FROM table GROUP BY col',
-                            options: [],
+                            explanation: 'GROUP BY regroupe les lignes par valeurs identiques pour calculer des agrégations par groupe.',
+                            syntax: 'SELECT col, AGG() FROM table GROUP BY col',
+                            options: [
+                                { flag: 'GROUP BY col', desc: 'Groupe par une colonne' },
+                                { flag: 'GROUP BY col1, col2', desc: 'Groupe par plusieurs colonnes' },
+                                { flag: 'GROUP BY ROLLUP', desc: 'Ajoute des sous-totaux (PostgreSQL, Oracle)' }
+                            ],
                             examples: [
                                 { code: 'SELECT ville, COUNT(*) AS nb_clients\nFROM clients\nGROUP BY ville', desc: 'Clients par ville' },
-                                { code: 'SELECT annee, mois, SUM(montant) AS total\nFROM ventes\nGROUP BY annee, mois', desc: 'Ventes par mois' },
-                                { code: 'SELECT categorie_id, AVG(prix), MIN(prix), MAX(prix)\nFROM produits\nGROUP BY categorie_id', desc: 'Stats prix par catégorie' }
+                                { code: 'SELECT annee, mois, SUM(montant) AS total\nFROM ventes\nGROUP BY annee, mois\nORDER BY annee, mois', desc: 'Ventes par année et mois' },
+                                { code: 'SELECT categorie, statut, COUNT(*) AS nb\nFROM produits\nGROUP BY categorie, statut', desc: 'Combinaisons catégorie/statut' }
                             ],
-                            tips: ['Toute colonne non agrégée DOIT être dans GROUP BY', 'GROUP BY peut référencer un alias ou un numéro de colonne'],
-                            warnings: []
+                            tips: ['Toutes les colonnes non agrégées doivent être dans GROUP BY', 'ORDER BY peut suivre GROUP BY'],
+                            warnings: ['Erreur si une colonne SELECT n\'est ni agrégée ni dans GROUP BY']
                         }
                     },
                     {
-                        cmd: 'HAVING condition',
-                        desc: 'Filtrer les groupes',
+                        cmd: 'Filtrer les groupes',
+                        desc: 'HAVING pour conditions après agrégation',
                         details: {
-                            explanation: 'Filtre les résultats APRÈS le GROUP BY. WHERE filtre avant, HAVING filtre après agrégation.',
-                            syntax: 'SELECT ... GROUP BY col HAVING condition_agregation',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT ville, COUNT(*) AS nb\nFROM clients\nGROUP BY ville\nHAVING COUNT(*) > 10', desc: 'Villes avec > 10 clients' },
-                                { code: 'SELECT client_id, SUM(montant) AS total\nFROM commandes\nGROUP BY client_id\nHAVING SUM(montant) > 1000', desc: 'Clients > 1000€ de commandes' },
-                                { code: 'SELECT categorie, AVG(prix) AS prix_moyen\nFROM produits\nGROUP BY categorie\nHAVING AVG(prix) BETWEEN 50 AND 200', desc: 'Catégories prix moyen 50-200€' }
-                            ],
-                            tips: ['WHERE = avant agrégation, HAVING = après agrégation', 'HAVING peut utiliser des alias dans certains SGBD'],
-                            warnings: ['Utilisez WHERE quand possible (plus performant)']
-                        }
-                    },
-                    {
-                        cmd: 'GROUP BY avec ROLLUP/CUBE',
-                        desc: 'Sous-totaux automatiques',
-                        details: {
-                            explanation: 'Génère automatiquement des sous-totaux et totaux pour les groupes.',
-                            syntax: 'GROUP BY ROLLUP(col1, col2) / GROUP BY CUBE(col1, col2)',
+                            explanation: 'HAVING filtre les groupes après agrégation (contrairement à WHERE qui filtre avant).',
+                            syntax: 'SELECT ... GROUP BY col HAVING condition',
                             options: [
-                                { flag: 'ROLLUP', desc: 'Sous-totaux hiérarchiques (du détail au total)' },
-                                { flag: 'CUBE', desc: 'Toutes les combinaisons de sous-totaux' },
-                                { flag: 'GROUPING()', desc: 'Identifie les lignes de sous-total' }
+                                { flag: 'HAVING', desc: 'Filtre après GROUP BY' },
+                                { flag: 'WHERE vs HAVING', desc: 'WHERE = avant, HAVING = après agrégation' }
                             ],
                             examples: [
-                                { code: 'SELECT annee, mois, SUM(ventes) AS total\nFROM ventes\nGROUP BY ROLLUP(annee, mois)', desc: 'Total par mois, par an, et grand total' },
-                                { code: 'SELECT region, produit, SUM(ventes)\nFROM ventes\nGROUP BY CUBE(region, produit)', desc: 'Toutes combinaisons région × produit' },
-                                { code: 'SELECT\n  CASE WHEN GROUPING(ville) = 1 THEN \'TOTAL\' ELSE ville END AS ville,\n  SUM(montant)\nFROM ventes\nGROUP BY ROLLUP(ville)', desc: 'Identifier les sous-totaux' }
+                                { code: 'SELECT ville, COUNT(*) AS nb_clients\nFROM clients\nGROUP BY ville\nHAVING COUNT(*) >= 10', desc: 'Villes avec 10+ clients' },
+                                { code: 'SELECT client_id, SUM(montant) AS total\nFROM commandes\nGROUP BY client_id\nHAVING SUM(montant) > 1000', desc: 'Clients avec plus de 1000€ de commandes' },
+                                { code: 'SELECT categorie, AVG(prix) AS prix_moyen\nFROM produits\nWHERE actif = true\nGROUP BY categorie\nHAVING AVG(prix) > 50', desc: 'WHERE et HAVING combinés' }
                             ],
-                            tips: ['ROLLUP: total général + sous-totaux hiérarchiques', 'CUBE: toutes les combinaisons possibles'],
-                            warnings: ['Syntaxe peut varier selon le SGBD']
+                            tips: ['WHERE filtre les lignes, HAVING filtre les groupes', 'On peut utiliser les deux dans la même requête'],
+                            warnings: ['HAVING sans GROUP BY est possible mais rare']
                         }
                     }
                 ]
             },
             {
-                id: 'subquery',
-                title: 'Sous-requêtes',
-                icon: 'fa-layer-group',
-                color: 'border-l-4 border-indigo-500',
+                id: 'classer',
+                title: 'Classer et Numéroter',
+                icon: 'fa-medal',
+                color: 'border-l-4 border-yellow-500',
                 commands: [
                     {
-                        cmd: 'Sous-requête dans WHERE',
-                        desc: 'Filtrer avec une requête imbriquée',
+                        cmd: 'Numéroter les lignes',
+                        desc: 'ROW_NUMBER() OVER',
                         details: {
-                            explanation: 'Utilise le résultat d\'une requête comme condition de filtre.',
-                            syntax: 'SELECT ... WHERE col IN (SELECT col FROM ...)',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT * FROM clients\nWHERE id IN (\n  SELECT client_id FROM commandes\n  WHERE montant > 1000\n)', desc: 'Clients avec commandes > 1000€' },
-                                { code: 'SELECT * FROM produits\nWHERE prix > (\n  SELECT AVG(prix) FROM produits\n)', desc: 'Produits plus chers que la moyenne' },
-                                { code: 'SELECT * FROM employes\nWHERE salaire > ALL (\n  SELECT salaire FROM employes WHERE dept = \'IT\'\n)', desc: 'Gagne plus que tous les IT' }
-                            ],
-                            tips: ['IN: dans la liste', 'ANY/SOME: au moins un', 'ALL: tous'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Sous-requête dans SELECT',
-                        desc: 'Calculer une valeur par ligne',
-                        details: {
-                            explanation: 'Sous-requête scalaire retournant UNE valeur pour chaque ligne.',
-                            syntax: 'SELECT col, (SELECT ...) AS alias FROM table',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT nom,\n  (SELECT COUNT(*) FROM commandes co WHERE co.client_id = c.id) AS nb_commandes\nFROM clients c', desc: 'Nombre de commandes par client' },
-                                { code: 'SELECT nom, prix,\n  (SELECT AVG(prix) FROM produits) AS prix_moyen,\n  prix - (SELECT AVG(prix) FROM produits) AS ecart\nFROM produits', desc: 'Écart au prix moyen' }
-                            ],
-                            tips: ['Doit retourner exactement UNE valeur', 'Corrélée si référence la requête externe'],
-                            warnings: ['Peut être lent (exécuté pour chaque ligne)']
-                        }
-                    },
-                    {
-                        cmd: 'Sous-requête dans FROM',
-                        desc: 'Table dérivée',
-                        details: {
-                            explanation: 'Utilise le résultat d\'une requête comme une table temporaire.',
-                            syntax: 'SELECT ... FROM (SELECT ...) AS alias',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT ville, avg_age\nFROM (\n  SELECT ville, AVG(age) AS avg_age\n  FROM clients\n  GROUP BY ville\n) AS stats\nWHERE avg_age > 30', desc: 'Filtrer sur agrégat' },
-                                { code: 'SELECT c.nom, sub.total\nFROM clients c\nJOIN (\n  SELECT client_id, SUM(montant) AS total\n  FROM commandes\n  GROUP BY client_id\n) AS sub ON c.id = sub.client_id', desc: 'Joindre avec agrégat' }
-                            ],
-                            tips: ['L\'alias est obligatoire', 'Alternative: CTE (WITH)'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'WITH ... AS (CTE)',
-                        desc: 'Common Table Expression',
-                        details: {
-                            explanation: 'Définit une requête nommée réutilisable dans la requête principale. Plus lisible que les sous-requêtes imbriquées.',
-                            syntax: 'WITH nom AS (SELECT ...) SELECT ... FROM nom',
+                            explanation: 'ROW_NUMBER() attribue un numéro séquentiel à chaque ligne dans une partition, selon l\'ordre spécifié.',
+                            syntax: 'ROW_NUMBER() OVER ([PARTITION BY col] ORDER BY col)',
                             options: [
-                                { flag: 'WITH', desc: 'Définit une ou plusieurs CTEs' },
-                                { flag: 'RECURSIVE', desc: 'Pour les requêtes récursives (hiérarchies)' }
+                                { flag: 'OVER()', desc: 'Définit la fenêtre de calcul' },
+                                { flag: 'PARTITION BY', desc: 'Repart de 1 pour chaque groupe' },
+                                { flag: 'ORDER BY', desc: 'Définit l\'ordre de numérotation' }
                             ],
                             examples: [
-                                { code: 'WITH ventes_par_mois AS (\n  SELECT mois, SUM(montant) AS total\n  FROM ventes\n  GROUP BY mois\n)\nSELECT * FROM ventes_par_mois\nWHERE total > 10000', desc: 'CTE simple' },
-                                { code: 'WITH\n  top_clients AS (\n    SELECT client_id FROM commandes GROUP BY client_id HAVING SUM(montant) > 5000\n  ),\n  details AS (\n    SELECT c.*, co.date FROM clients c JOIN commandes co ON c.id = co.client_id\n  )\nSELECT d.* FROM details d WHERE d.client_id IN (SELECT client_id FROM top_clients)', desc: 'Plusieurs CTEs' },
-                                { code: 'WITH RECURSIVE hierarchie AS (\n  SELECT id, nom, manager_id, 1 AS niveau\n  FROM employes WHERE manager_id IS NULL\n  UNION ALL\n  SELECT e.id, e.nom, e.manager_id, h.niveau + 1\n  FROM employes e\n  JOIN hierarchie h ON e.manager_id = h.id\n)\nSELECT * FROM hierarchie', desc: 'CTE récursive (organigramme)' }
+                                { code: 'SELECT nom, date_inscription,\n  ROW_NUMBER() OVER (ORDER BY date_inscription) AS rang\nFROM clients', desc: 'Numéroter par date d\'inscription' },
+                                { code: 'SELECT categorie, nom, prix,\n  ROW_NUMBER() OVER (\n    PARTITION BY categorie\n    ORDER BY prix DESC\n  ) AS rang_categorie\nFROM produits', desc: 'Rang par catégorie' },
+                                { code: 'WITH numbered AS (\n  SELECT *, ROW_NUMBER() OVER (ORDER BY id) AS rn\n  FROM clients\n)\nSELECT * FROM numbered WHERE rn BETWEEN 11 AND 20', desc: 'Pagination avec ROW_NUMBER' }
                             ],
-                            tips: ['Plus lisible que les sous-requêtes imbriquées', 'Peut être référencé plusieurs fois'],
-                            warnings: ['RECURSIVE: attention aux boucles infinies']
+                            tips: ['ROW_NUMBER donne toujours des numéros uniques', 'Utile pour la pagination ou sélectionner le premier de chaque groupe'],
+                            warnings: ['Requiert ORDER BY dans OVER() pour des résultats prévisibles']
+                        }
+                    },
+                    {
+                        cmd: 'Calculer un classement',
+                        desc: 'RANK() et DENSE_RANK()',
+                        details: {
+                            explanation: 'RANK et DENSE_RANK créent des classements. RANK saute des rangs en cas d\'égalité, DENSE_RANK non.',
+                            syntax: 'RANK() OVER (ORDER BY col) / DENSE_RANK() OVER (ORDER BY col)',
+                            options: [
+                                { flag: 'RANK()', desc: 'Saute des rangs après égalité (1,1,3,4)' },
+                                { flag: 'DENSE_RANK()', desc: 'Pas de saut (1,1,2,3)' },
+                                { flag: 'PERCENT_RANK()', desc: 'Rang en pourcentage (0 à 1)' }
+                            ],
+                            examples: [
+                                { code: 'SELECT nom, score,\n  RANK() OVER (ORDER BY score DESC) AS classement\nFROM joueurs', desc: 'Classement des joueurs' },
+                                { code: 'SELECT nom, ventes,\n  RANK() OVER (ORDER BY ventes DESC) AS rang,\n  DENSE_RANK() OVER (ORDER BY ventes DESC) AS rang_dense\nFROM vendeurs', desc: 'Comparaison RANK vs DENSE_RANK' },
+                                { code: 'SELECT departement, nom, salaire,\n  RANK() OVER (\n    PARTITION BY departement\n    ORDER BY salaire DESC\n  ) AS rang_dept\nFROM employes', desc: 'Classement par département' }
+                            ],
+                            tips: ['DENSE_RANK est souvent préféré pour les tops (pas de saut)', 'Avec égalité : RANK=1,1,3 | DENSE_RANK=1,1,2 | ROW_NUMBER=1,2,3'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Diviser en groupes égaux',
+                        desc: 'NTILE(n) pour quartiles, déciles',
+                        details: {
+                            explanation: 'NTILE(n) divise les lignes en n groupes de taille égale (ou presque égale si pas divisible).',
+                            syntax: 'NTILE(n) OVER (ORDER BY col)',
+                            options: [
+                                { flag: 'NTILE(4)', desc: 'Quartiles (4 groupes)' },
+                                { flag: 'NTILE(10)', desc: 'Déciles (10 groupes)' },
+                                { flag: 'NTILE(100)', desc: 'Percentiles' }
+                            ],
+                            examples: [
+                                { code: 'SELECT nom, salaire,\n  NTILE(4) OVER (ORDER BY salaire) AS quartile\nFROM employes', desc: 'Diviser en quartiles de salaire' },
+                                { code: 'SELECT nom, score,\n  NTILE(10) OVER (ORDER BY score DESC) AS decile\nFROM etudiants', desc: 'Top 10%, 20%, etc.' },
+                                { code: 'SELECT nom, chiffre_affaires,\n  CASE NTILE(4) OVER (ORDER BY chiffre_affaires DESC)\n    WHEN 1 THEN \'Top 25%\'\n    WHEN 2 THEN \'25-50%\'\n    WHEN 3 THEN \'50-75%\'\n    ELSE \'Bottom 25%\'\n  END AS segment\nFROM clients', desc: 'Segmentation client' }
+                            ],
+                            tips: ['NTILE(4) = quartiles, NTILE(5) = quintiles', 'Utile pour la segmentation et l\'analyse'],
+                            warnings: ['Si lignes non divisibles par n, certains groupes auront +1 ligne']
+                        }
+                    },
+                    {
+                        cmd: 'Calculer des totaux cumulatifs',
+                        desc: 'SUM() OVER (ORDER BY)',
+                        details: {
+                            explanation: 'SUM avec OVER et ORDER BY calcule un total cumulatif ligne par ligne.',
+                            syntax: 'SUM(col) OVER (ORDER BY col)',
+                            options: [
+                                { flag: 'ORDER BY', desc: 'Cumule dans cet ordre' },
+                                { flag: 'PARTITION BY', desc: 'Repart de 0 pour chaque groupe' },
+                                { flag: 'ROWS UNBOUNDED PRECEDING', desc: 'Depuis le début (défaut)' }
+                            ],
+                            examples: [
+                                { code: 'SELECT date, montant,\n  SUM(montant) OVER (ORDER BY date) AS cumul\nFROM ventes', desc: 'Ventes cumulées par date' },
+                                { code: 'SELECT mois, categorie, ventes,\n  SUM(ventes) OVER (\n    PARTITION BY categorie\n    ORDER BY mois\n  ) AS cumul_categorie\nFROM stats_ventes', desc: 'Cumul par catégorie' },
+                                { code: 'SELECT date, montant,\n  SUM(montant) OVER (ORDER BY date) AS cumul,\n  montant * 100.0 / SUM(montant) OVER () AS pct_total\nFROM ventes', desc: 'Cumul et pourcentage du total' }
+                            ],
+                            tips: ['OVER () sans ORDER BY = total global sur toutes les lignes', 'Très utile pour les graphiques d\'évolution'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Calculer des moyennes mobiles',
+                        desc: 'AVG() OVER (ROWS BETWEEN)',
+                        details: {
+                            explanation: 'ROWS BETWEEN définit une fenêtre glissante pour calculer des moyennes mobiles ou autres agrégations.',
+                            syntax: 'AVG(col) OVER (ORDER BY col ROWS BETWEEN n PRECEDING AND m FOLLOWING)',
+                            options: [
+                                { flag: 'n PRECEDING', desc: 'n lignes avant' },
+                                { flag: 'CURRENT ROW', desc: 'Ligne actuelle' },
+                                { flag: 'm FOLLOWING', desc: 'm lignes après' },
+                                { flag: 'UNBOUNDED PRECEDING', desc: 'Depuis le début' }
+                            ],
+                            examples: [
+                                { code: 'SELECT date, ventes,\n  AVG(ventes) OVER (\n    ORDER BY date\n    ROWS BETWEEN 6 PRECEDING AND CURRENT ROW\n  ) AS moyenne_7j\nFROM stats_journalieres', desc: 'Moyenne mobile sur 7 jours' },
+                                { code: 'SELECT mois, chiffre_affaires,\n  AVG(chiffre_affaires) OVER (\n    ORDER BY mois\n    ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING\n  ) AS moyenne_centree\nFROM stats_mensuelles', desc: 'Moyenne centrée (2 avant, 2 après)' },
+                                { code: 'SELECT date, cours,\n  AVG(cours) OVER (\n    ORDER BY date\n    ROWS BETWEEN 29 PRECEDING AND CURRENT ROW\n  ) AS moyenne_30j\nFROM cotations', desc: 'Moyenne mobile 30 jours (bourse)' }
+                            ],
+                            tips: ['ROWS = lignes physiques, RANGE = valeurs logiques', 'Moyenne mobile 7 jours = 6 PRECEDING + CURRENT ROW'],
+                            warnings: ['Au début, la fenêtre peut être plus petite (pas assez de lignes précédentes)']
                         }
                     }
                 ]
             },
             {
-                id: 'window',
-                title: 'Window Functions',
-                icon: 'fa-window-restore',
+                id: 'comparer',
+                title: 'Comparer des Lignes',
+                icon: 'fa-balance-scale',
                 color: 'border-l-4 border-pink-500',
                 commands: [
                     {
-                        cmd: 'OVER (PARTITION BY ... ORDER BY ...)',
-                        desc: 'Fenêtre de calcul',
+                        cmd: 'Comparer avec la ligne précédente',
+                        desc: 'LAG() pour accéder à la ligne d\'avant',
                         details: {
-                            explanation: 'Calcule une valeur sur un ensemble de lignes (fenêtre) sans réduire le nombre de lignes comme GROUP BY.',
-                            syntax: 'AGG() OVER (PARTITION BY col ORDER BY col)',
-                            options: [
-                                { flag: 'PARTITION BY', desc: 'Divise en groupes (optionnel)' },
-                                { flag: 'ORDER BY', desc: 'Ordre dans la fenêtre' },
-                                { flag: 'ROWS/RANGE', desc: 'Définit les limites de la fenêtre' }
-                            ],
-                            examples: [
-                                { code: 'SELECT nom, dept, salaire,\n  AVG(salaire) OVER (PARTITION BY dept) AS avg_dept\nFROM employes', desc: 'Moyenne par département (sans GROUP BY)' },
-                                { code: 'SELECT date, montant,\n  SUM(montant) OVER (ORDER BY date) AS cumul\nFROM ventes', desc: 'Somme cumulative' },
-                                { code: 'SELECT date, montant,\n  SUM(montant) OVER (ORDER BY date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rolling_3\nFROM ventes', desc: 'Moyenne mobile sur 3 lignes' }
-                            ],
-                            tips: ['Garde toutes les lignes, ajoute une colonne calculée', 'PARTITION BY = GROUP BY sans réduction'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'ROW_NUMBER() / RANK() / DENSE_RANK()',
-                        desc: 'Numérotation et classement',
-                        details: {
-                            explanation: 'Attribue un numéro ou rang à chaque ligne dans une partition.',
-                            syntax: 'ROW_NUMBER() OVER (PARTITION BY col ORDER BY col)',
-                            options: [
-                                { flag: 'ROW_NUMBER()', desc: 'Numéro unique (1, 2, 3, 4, 5)' },
-                                { flag: 'RANK()', desc: 'Rang avec sauts (1, 2, 2, 4, 5)' },
-                                { flag: 'DENSE_RANK()', desc: 'Rang sans sauts (1, 2, 2, 3, 4)' }
-                            ],
-                            examples: [
-                                { code: 'SELECT nom, salaire,\n  ROW_NUMBER() OVER (ORDER BY salaire DESC) AS rang\nFROM employes', desc: 'Numéroter par salaire' },
-                                { code: 'SELECT nom, dept, salaire,\n  RANK() OVER (PARTITION BY dept ORDER BY salaire DESC) AS rang_dept\nFROM employes', desc: 'Rang par département' },
-                                { code: 'SELECT * FROM (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY client_id ORDER BY date DESC) AS rn\n  FROM commandes\n) t WHERE rn = 1', desc: 'Dernière commande par client' }
-                            ],
-                            tips: ['ROW_NUMBER pour garder 1 ligne par groupe', 'RANK/DENSE_RANK pour les classements avec égalités'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'LAG() / LEAD()',
-                        desc: 'Accès aux lignes précédentes/suivantes',
-                        details: {
-                            explanation: 'Accède à la valeur d\'une ligne précédente (LAG) ou suivante (LEAD) dans la fenêtre.',
-                            syntax: 'LAG(col, n, default) OVER (ORDER BY col)',
+                            explanation: 'LAG() accède à la valeur d\'une colonne de la ligne précédente (selon l\'ordre défini).',
+                            syntax: 'LAG(col, [offset], [default]) OVER (ORDER BY col)',
                             options: [
                                 { flag: 'col', desc: 'Colonne à récupérer' },
-                                { flag: 'n', desc: 'Nombre de lignes (défaut: 1)' },
-                                { flag: 'default', desc: 'Valeur si pas de ligne (NULL par défaut)' }
+                                { flag: 'offset', desc: 'Nombre de lignes en arrière (défaut: 1)' },
+                                { flag: 'default', desc: 'Valeur si pas de ligne précédente' }
                             ],
                             examples: [
-                                { code: 'SELECT date, montant,\n  LAG(montant) OVER (ORDER BY date) AS montant_precedent,\n  montant - LAG(montant) OVER (ORDER BY date) AS variation\nFROM ventes', desc: 'Comparaison avec la veille' },
-                                { code: 'SELECT date, prix,\n  LEAD(prix, 1, prix) OVER (ORDER BY date) AS prix_demain\nFROM cours', desc: 'Prix du lendemain' },
-                                { code: 'SELECT date, montant,\n  LAG(montant, 7) OVER (ORDER BY date) AS meme_jour_semaine_precedente\nFROM ventes', desc: 'Il y a 7 jours' }
+                                { code: 'SELECT date, ventes,\n  LAG(ventes) OVER (ORDER BY date) AS ventes_veille\nFROM stats_journalieres', desc: 'Ventes de la veille' },
+                                { code: 'SELECT date, ventes,\n  ventes - LAG(ventes) OVER (ORDER BY date) AS variation\nFROM stats_journalieres', desc: 'Variation jour après jour' },
+                                { code: 'SELECT mois, chiffre_affaires,\n  LAG(chiffre_affaires, 12) OVER (ORDER BY mois) AS ca_annee_precedente\nFROM stats_mensuelles', desc: 'Même mois année précédente' }
                             ],
-                            tips: ['LAG = en arrière, LEAD = en avant', 'Très utile pour les comparaisons période à période'],
-                            warnings: []
+                            tips: ['LAG(col, 2) = 2 lignes en arrière', 'Ajoutez un default pour éviter les NULL au début'],
+                            warnings: ['Première ligne = NULL (pas de précédent)']
                         }
                     },
                     {
-                        cmd: 'FIRST_VALUE() / LAST_VALUE()',
-                        desc: 'Première/dernière valeur',
+                        cmd: 'Comparer avec la ligne suivante',
+                        desc: 'LEAD() pour accéder à la ligne d\'après',
                         details: {
-                            explanation: 'Retourne la première ou dernière valeur de la fenêtre.',
-                            syntax: 'FIRST_VALUE(col) OVER (ORDER BY col)',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT nom, date_embauche,\n  FIRST_VALUE(nom) OVER (ORDER BY date_embauche) AS premier_employe\nFROM employes', desc: 'Nom du premier embauché' },
-                                { code: 'SELECT date, prix,\n  prix - FIRST_VALUE(prix) OVER (ORDER BY date) AS variation_depuis_debut\nFROM cours', desc: 'Variation depuis le début' },
-                                { code: 'SELECT nom, dept, salaire,\n  FIRST_VALUE(nom) OVER (PARTITION BY dept ORDER BY salaire DESC) AS top_salaire_dept\nFROM employes', desc: 'Meilleur salaire par dept' }
+                            explanation: 'LEAD() accède à la valeur d\'une colonne de la ligne suivante (selon l\'ordre défini).',
+                            syntax: 'LEAD(col, [offset], [default]) OVER (ORDER BY col)',
+                            options: [
+                                { flag: 'col', desc: 'Colonne à récupérer' },
+                                { flag: 'offset', desc: 'Nombre de lignes en avant (défaut: 1)' },
+                                { flag: 'default', desc: 'Valeur si pas de ligne suivante' }
                             ],
-                            tips: ['LAST_VALUE nécessite souvent ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING'],
-                            warnings: ['LAST_VALUE peut surprendre avec la frame par défaut']
+                            examples: [
+                                { code: 'SELECT date, ventes,\n  LEAD(ventes) OVER (ORDER BY date) AS ventes_lendemain\nFROM stats_journalieres', desc: 'Ventes du lendemain' },
+                                { code: 'SELECT nom, date_depart,\n  LEAD(date_depart) OVER (ORDER BY date_depart) - date_depart AS jours_avant_prochain\nFROM vols', desc: 'Jours jusqu\'au prochain vol' },
+                                { code: 'SELECT id, evenement, timestamp,\n  LEAD(timestamp) OVER (ORDER BY timestamp) AS timestamp_suivant\nFROM logs', desc: 'Timestamp de l\'événement suivant' }
+                            ],
+                            tips: ['LEAD(col, 2) = 2 lignes en avant', 'Utile pour calculer des durées entre événements'],
+                            warnings: ['Dernière ligne = NULL (pas de suivant)']
                         }
                     },
                     {
-                        cmd: 'NTILE(n)',
-                        desc: 'Diviser en n groupes égaux',
+                        cmd: 'Obtenir la première/dernière valeur',
+                        desc: 'FIRST_VALUE() et LAST_VALUE()',
                         details: {
-                            explanation: 'Divise les lignes en n groupes de taille égale (quartiles, déciles, etc.).',
-                            syntax: 'NTILE(n) OVER (ORDER BY col)',
-                            options: [],
-                            examples: [
-                                { code: 'SELECT nom, salaire,\n  NTILE(4) OVER (ORDER BY salaire) AS quartile\nFROM employes', desc: 'Quartiles de salaire' },
-                                { code: 'SELECT produit, ventes,\n  NTILE(10) OVER (ORDER BY ventes DESC) AS decile\nFROM produits', desc: 'Déciles de performance' },
-                                { code: 'SELECT * FROM (\n  SELECT *, NTILE(5) OVER (ORDER BY score) AS quintile FROM clients\n) t WHERE quintile = 5', desc: 'Top 20% des clients' }
+                            explanation: 'FIRST_VALUE et LAST_VALUE retournent la première/dernière valeur d\'une fenêtre.',
+                            syntax: 'FIRST_VALUE(col) OVER (ORDER BY col) / LAST_VALUE(col) OVER (...)',
+                            options: [
+                                { flag: 'FIRST_VALUE()', desc: 'Première valeur de la fenêtre' },
+                                { flag: 'LAST_VALUE()', desc: 'Dernière valeur de la fenêtre' },
+                                { flag: 'ROWS BETWEEN ... AND UNBOUNDED FOLLOWING', desc: 'Pour LAST_VALUE correct' }
                             ],
-                            tips: ['NTILE(4) = quartiles, NTILE(10) = déciles, NTILE(100) = centiles'],
-                            warnings: ['Si n ne divise pas exactement, les premiers groupes auront 1 ligne de plus']
+                            examples: [
+                                { code: 'SELECT nom, salaire,\n  FIRST_VALUE(nom) OVER (ORDER BY salaire DESC) AS top_salaire\nFROM employes', desc: 'Nom du mieux payé' },
+                                { code: 'SELECT categorie, nom, prix,\n  FIRST_VALUE(nom) OVER (\n    PARTITION BY categorie\n    ORDER BY prix DESC\n  ) AS plus_cher_categorie\nFROM produits', desc: 'Produit le plus cher par catégorie' },
+                                { code: 'SELECT date, cours,\n  cours - FIRST_VALUE(cours) OVER (ORDER BY date) AS variation_depuis_debut\nFROM cotations', desc: 'Variation depuis le premier jour' }
+                            ],
+                            tips: ['FIRST_VALUE est souvent plus intuitif que LAST_VALUE', 'LAST_VALUE nécessite ROWS BETWEEN ... UNBOUNDED FOLLOWING'],
+                            warnings: ['LAST_VALUE par défaut ne prend que jusqu\'à la ligne courante']
+                        }
+                    },
+                    {
+                        cmd: 'Calculer la variation période à période',
+                        desc: 'LAG + calcul de différence/pourcentage',
+                        details: {
+                            explanation: 'Combine LAG avec des calculs pour obtenir des variations absolues ou en pourcentage.',
+                            syntax: '(col - LAG(col)) / LAG(col) * 100 AS variation_pct',
+                            options: [
+                                { flag: 'Variation absolue', desc: 'col - LAG(col)' },
+                                { flag: 'Variation %', desc: '(col - LAG(col)) / LAG(col) * 100' },
+                                { flag: 'YoY (Year over Year)', desc: 'LAG(col, 12) pour données mensuelles' }
+                            ],
+                            examples: [
+                                { code: 'SELECT date, ventes,\n  ventes - LAG(ventes) OVER (ORDER BY date) AS variation,\n  ROUND((ventes - LAG(ventes) OVER (ORDER BY date)) * 100.0 /\n    LAG(ventes) OVER (ORDER BY date), 2) AS variation_pct\nFROM stats_journalieres', desc: 'Variation absolue et pourcentage' },
+                                { code: 'SELECT mois, ca,\n  LAG(ca, 12) OVER (ORDER BY mois) AS ca_n1,\n  ROUND((ca - LAG(ca, 12) OVER (ORDER BY mois)) * 100.0 /\n    LAG(ca, 12) OVER (ORDER BY mois), 2) AS croissance_yoy\nFROM stats_mensuelles', desc: 'Croissance année sur année (YoY)' },
+                                { code: 'SELECT date, cours,\n  ROUND((cours - LAG(cours) OVER (ORDER BY date)) * 100.0 /\n    LAG(cours) OVER (ORDER BY date), 2) AS variation_pct,\n  CASE\n    WHEN cours > LAG(cours) OVER (ORDER BY date) THEN \'↑\'\n    WHEN cours < LAG(cours) OVER (ORDER BY date) THEN \'↓\'\n    ELSE \'→\'\n  END AS tendance\nFROM cotations', desc: 'Variation avec indicateur de tendance' }
+                            ],
+                            tips: ['Utilisez NULLIF pour éviter la division par zéro', 'ROUND pour limiter les décimales'],
+                            warnings: ['La première ligne a des NULL (pas de période précédente)']
                         }
                     }
                 ]
             },
             {
-                id: 'modify',
-                title: 'Modification des données',
-                icon: 'fa-edit',
+                id: 'detecter',
+                title: 'Détecter des Anomalies',
+                icon: 'fa-magnifying-glass',
                 color: 'border-l-4 border-red-500',
                 commands: [
                     {
-                        cmd: 'INSERT INTO ... VALUES',
-                        desc: 'Insérer des données',
+                        cmd: 'Trouver les doublons',
+                        desc: 'GROUP BY + HAVING COUNT > 1',
                         details: {
-                            explanation: 'Ajoute une ou plusieurs nouvelles lignes dans une table.',
-                            syntax: 'INSERT INTO table (col1, col2) VALUES (val1, val2)',
-                            options: [],
-                            examples: [
-                                { code: 'INSERT INTO clients (nom, email)\nVALUES (\'Dupont\', \'dupont@mail.com\')', desc: 'Insérer une ligne' },
-                                { code: 'INSERT INTO clients (nom, email) VALUES\n  (\'A\', \'a@mail.com\'),\n  (\'B\', \'b@mail.com\'),\n  (\'C\', \'c@mail.com\')', desc: 'Insertion multiple' },
-                                { code: 'INSERT INTO archive\nSELECT * FROM commandes\nWHERE date < \'2023-01-01\'', desc: 'INSERT ... SELECT' }
+                            explanation: 'Identifie les valeurs qui apparaissent plusieurs fois dans une ou plusieurs colonnes.',
+                            syntax: 'SELECT col, COUNT(*) FROM table GROUP BY col HAVING COUNT(*) > 1',
+                            options: [
+                                { flag: 'GROUP BY col', desc: 'Groupe par la colonne à vérifier' },
+                                { flag: 'HAVING COUNT(*) > 1', desc: 'Garde seulement les doublons' }
                             ],
-                            tips: ['Toujours spécifier les colonnes explicitement', 'INSERT ... SELECT pour copier des données'],
+                            examples: [
+                                { code: 'SELECT email, COUNT(*) AS nb\nFROM clients\nGROUP BY email\nHAVING COUNT(*) > 1', desc: 'Emails en doublon' },
+                                { code: 'SELECT nom, prenom, date_naissance, COUNT(*) AS nb\nFROM personnes\nGROUP BY nom, prenom, date_naissance\nHAVING COUNT(*) > 1', desc: 'Doublons sur plusieurs colonnes' },
+                                { code: 'WITH doublons AS (\n  SELECT email FROM clients\n  GROUP BY email HAVING COUNT(*) > 1\n)\nSELECT c.* FROM clients c\nJOIN doublons d ON c.email = d.email\nORDER BY c.email', desc: 'Voir toutes les lignes en doublon' }
+                            ],
+                            tips: ['Utilisez un CTE pour voir les lignes complètes', 'ROW_NUMBER peut aider à identifier le "premier" de chaque groupe'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'UPDATE ... SET ... WHERE',
-                        desc: 'Mettre à jour des données',
+                        cmd: 'Trouver les orphelins',
+                        desc: 'LEFT JOIN WHERE IS NULL',
                         details: {
-                            explanation: 'Modifie les valeurs existantes dans une table.',
-                            syntax: 'UPDATE table SET col1 = val1, col2 = val2 WHERE condition',
-                            options: [],
-                            examples: [
-                                { code: 'UPDATE clients\nSET email = \'new@mail.com\'\nWHERE id = 1', desc: 'Modifier une ligne' },
-                                { code: 'UPDATE produits\nSET prix = prix * 1.1\nWHERE categorie = \'luxe\'', desc: 'Augmenter prix de 10%' },
-                                { code: 'UPDATE commandes c\nSET status = \'annule\'\nWHERE EXISTS (\n  SELECT 1 FROM clients cl\n  WHERE cl.id = c.client_id AND cl.actif = FALSE\n)', desc: 'UPDATE avec sous-requête' }
+                            explanation: 'Trouve les lignes d\'une table qui n\'ont pas de correspondance dans une autre table (clé étrangère invalide).',
+                            syntax: 'SELECT a.* FROM table1 a LEFT JOIN table2 b ON a.fk = b.pk WHERE b.pk IS NULL',
+                            options: [
+                                { flag: 'LEFT JOIN', desc: 'Garde toutes les lignes de gauche' },
+                                { flag: 'WHERE IS NULL', desc: 'Filtre celles sans correspondance' }
                             ],
-                            tips: ['TOUJOURS tester avec SELECT d\'abord', 'Transaction + ROLLBACK pour sécurité'],
-                            warnings: ['Sans WHERE, TOUTES les lignes sont modifiées!']
+                            examples: [
+                                { code: 'SELECT c.* FROM commandes c\nLEFT JOIN clients cl ON c.client_id = cl.id\nWHERE cl.id IS NULL', desc: 'Commandes avec client inexistant' },
+                                { code: 'SELECT p.* FROM produits p\nLEFT JOIN categories cat ON p.categorie_id = cat.id\nWHERE cat.id IS NULL', desc: 'Produits avec catégorie invalide' },
+                                { code: 'SELECT e.* FROM employes e\nLEFT JOIN employes m ON e.manager_id = m.id\nWHERE e.manager_id IS NOT NULL\nAND m.id IS NULL', desc: 'Employés avec manager inexistant' }
+                            ],
+                            tips: ['Technique classique pour vérifier l\'intégrité référentielle', 'NOT EXISTS est une alternative équivalente'],
+                            warnings: ['Distinguez IS NULL (pas de correspondance) de valeur NULL dans la colonne FK']
                         }
                     },
                     {
-                        cmd: 'DELETE FROM ... WHERE',
-                        desc: 'Supprimer des données',
+                        cmd: 'Trouver les valeurs manquantes',
+                        desc: 'Séquences et données attendues',
                         details: {
-                            explanation: 'Supprime des lignes d\'une table.',
-                            syntax: 'DELETE FROM table WHERE condition',
-                            options: [],
-                            examples: [
-                                { code: 'DELETE FROM clients WHERE id = 1', desc: 'Supprimer une ligne' },
-                                { code: 'DELETE FROM commandes\nWHERE date < DATE_SUB(NOW(), INTERVAL 5 YEAR)', desc: 'Supprimer les vieilles commandes' },
-                                { code: 'DELETE FROM clients\nWHERE id NOT IN (SELECT DISTINCT client_id FROM commandes)', desc: 'Clients sans commande' }
+                            explanation: 'Identifie les valeurs manquantes dans une séquence (dates, numéros) ou par rapport à un référentiel.',
+                            syntax: 'SELECT * FROM reference WHERE NOT EXISTS (...)',
+                            options: [
+                                { flag: 'NOT EXISTS', desc: 'Valeurs du référentiel absentes des données' },
+                                { flag: 'NOT IN', desc: 'Alternative (attention aux NULL)' },
+                                { flag: 'EXCEPT', desc: 'Différence ensembliste' }
                             ],
-                            tips: ['TRUNCATE TABLE est plus rapide pour vider une table', 'Attention aux contraintes de clé étrangère'],
-                            warnings: ['Sans WHERE, TOUTES les lignes sont supprimées!', 'Irréversible sans transaction!']
+                            examples: [
+                                { code: 'WITH dates AS (\n  SELECT generate_series(\n    \'2024-01-01\'::date,\n    \'2024-12-31\'::date,\n    \'1 day\'::interval\n  )::date AS date\n)\nSELECT d.date FROM dates d\nLEFT JOIN ventes v ON d.date = v.date\nWHERE v.date IS NULL', desc: 'Jours sans vente (PostgreSQL)' },
+                                { code: 'SELECT p.nom FROM produits p\nWHERE NOT EXISTS (\n  SELECT 1 FROM ventes v\n  WHERE v.produit_id = p.id\n  AND v.date >= \'2024-01-01\'\n)', desc: 'Produits sans vente en 2024' },
+                                { code: 'SELECT ville FROM villes_cibles\nEXCEPT\nSELECT DISTINCT ville FROM clients', desc: 'Villes cibles sans client' }
+                            ],
+                            tips: ['Créez une table de référence ou utilisez generate_series', 'EXCEPT est très lisible mais moins flexible'],
+                            warnings: ['NOT IN avec des NULL peut donner des résultats inattendus']
                         }
                     },
                     {
-                        cmd: 'MERGE / UPSERT',
-                        desc: 'Insert ou Update conditionnel',
+                        cmd: 'Identifier les valeurs extrêmes',
+                        desc: 'Outliers avec statistiques',
                         details: {
-                            explanation: 'Insère si la ligne n\'existe pas, met à jour sinon. Syntaxe varie selon le SGBD.',
-                            syntax: 'MERGE INTO target USING source ON condition WHEN MATCHED THEN ... WHEN NOT MATCHED THEN ...',
-                            options: [],
-                            examples: [
-                                { code: '-- SQL Server / Oracle\nMERGE INTO clients c\nUSING new_clients n ON c.email = n.email\nWHEN MATCHED THEN\n  UPDATE SET c.nom = n.nom\nWHEN NOT MATCHED THEN\n  INSERT (nom, email) VALUES (n.nom, n.email)', desc: 'MERGE standard' },
-                                { code: '-- PostgreSQL\nINSERT INTO clients (email, nom)\nVALUES (\'a@mail.com\', \'A\')\nON CONFLICT (email)\nDO UPDATE SET nom = EXCLUDED.nom', desc: 'PostgreSQL UPSERT' },
-                                { code: '-- MySQL\nINSERT INTO clients (email, nom)\nVALUES (\'a@mail.com\', \'A\')\nON DUPLICATE KEY UPDATE nom = VALUES(nom)', desc: 'MySQL UPSERT' }
+                            explanation: 'Détecte les valeurs anormalement hautes ou basses par rapport à la distribution.',
+                            syntax: 'WHERE col > AVG(col) + n * STDDEV(col)',
+                            options: [
+                                { flag: 'AVG + n*STDDEV', desc: 'Écart-type (n=2 ou 3)' },
+                                { flag: 'Percentiles', desc: 'En dehors de P1-P99' },
+                                { flag: 'IQR', desc: 'Méthode des quartiles' }
                             ],
-                            tips: ['Syntaxe très différente selon le SGBD'],
-                            warnings: ['Vérifiez la doc de votre SGBD']
+                            examples: [
+                                { code: 'WITH stats AS (\n  SELECT AVG(montant) AS moy, STDDEV(montant) AS std\n  FROM commandes\n)\nSELECT c.* FROM commandes c, stats s\nWHERE c.montant > s.moy + 3 * s.std\n   OR c.montant < s.moy - 3 * s.std', desc: 'Outliers à 3 écarts-types' },
+                                { code: 'WITH quartiles AS (\n  SELECT\n    PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY prix) AS q1,\n    PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY prix) AS q3\n  FROM produits\n)\nSELECT p.* FROM produits p, quartiles q\nWHERE p.prix < q.q1 - 1.5 * (q.q3 - q.q1)\n   OR p.prix > q.q3 + 1.5 * (q.q3 - q.q1)', desc: 'Outliers méthode IQR' },
+                                { code: 'SELECT * FROM transactions\nWHERE montant > (\n  SELECT PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY montant)\n  FROM transactions\n)', desc: 'Top 1% des montants' }
+                            ],
+                            tips: ['3 écarts-types = environ 0.3% des valeurs normales', 'La méthode IQR est plus robuste aux distributions asymétriques'],
+                            warnings: ['Ces méthodes supposent une distribution relativement normale']
+                        }
+                    },
+                    {
+                        cmd: 'Vérifier l\'intégrité référentielle',
+                        desc: 'Cohérence des clés étrangères',
+                        details: {
+                            explanation: 'Vérifie que toutes les clés étrangères pointent vers des enregistrements existants.',
+                            syntax: 'SELECT ... LEFT JOIN ... WHERE pk IS NULL',
+                            options: [
+                                { flag: 'LEFT JOIN + IS NULL', desc: 'Trouve les FK invalides' },
+                                { flag: 'NOT EXISTS', desc: 'Alternative équivalente' }
+                            ],
+                            examples: [
+                                { code: '-- Script de vérification complet\nSELECT \'commandes.client_id\' AS relation, COUNT(*) AS orphelins\nFROM commandes c\nLEFT JOIN clients cl ON c.client_id = cl.id\nWHERE cl.id IS NULL\nUNION ALL\nSELECT \'produits.categorie_id\', COUNT(*)\nFROM produits p\nLEFT JOIN categories cat ON p.categorie_id = cat.id\nWHERE cat.id IS NULL', desc: 'Vérifier plusieurs relations' },
+                                { code: 'SELECT\n  \'clients sans commande\' AS check,\n  COUNT(*) AS nb\nFROM clients c\nWHERE NOT EXISTS (\n  SELECT 1 FROM commandes o WHERE o.client_id = c.id\n)\nUNION ALL\nSELECT\n  \'produits sans vente\',\n  COUNT(*)\nFROM produits p\nWHERE NOT EXISTS (\n  SELECT 1 FROM ventes v WHERE v.produit_id = p.id\n)', desc: 'Données inutilisées' },
+                                { code: 'SELECT DISTINCT client_id\nFROM commandes\nWHERE client_id NOT IN (\n  SELECT id FROM clients WHERE id IS NOT NULL\n)', desc: 'IDs clients invalides (avec NOT IN)' }
+                            ],
+                            tips: ['Exécutez régulièrement ces vérifications', 'Utilisez des contraintes FOREIGN KEY pour prévenir'],
+                            warnings: ['NOT IN avec NULL peut exclure tous les résultats']
                         }
                     }
                 ]
             },
             {
-                id: 'ddl',
-                title: 'Structure (DDL)',
+                id: 'modifier',
+                title: 'Modifier des Données',
+                icon: 'fa-edit',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Insérer des données',
+                        desc: 'INSERT INTO avec VALUES ou SELECT',
+                        details: {
+                            explanation: 'INSERT ajoute de nouvelles lignes dans une table, soit avec des valeurs explicites, soit depuis une autre requête.',
+                            syntax: 'INSERT INTO table (cols) VALUES (vals) / INSERT INTO table SELECT ...',
+                            options: [
+                                { flag: 'VALUES', desc: 'Valeurs explicites' },
+                                { flag: 'SELECT', desc: 'Depuis une requête' },
+                                { flag: 'DEFAULT', desc: 'Utilise la valeur par défaut' },
+                                { flag: 'RETURNING', desc: 'PostgreSQL : retourne les lignes insérées' }
+                            ],
+                            examples: [
+                                { code: 'INSERT INTO clients (nom, email, ville)\nVALUES (\'Dupont\', \'dupont@email.com\', \'Paris\')', desc: 'Insertion simple' },
+                                { code: 'INSERT INTO clients (nom, email, ville)\nVALUES\n  (\'Martin\', \'martin@email.com\', \'Lyon\'),\n  (\'Bernard\', \'bernard@email.com\', \'Marseille\')', desc: 'Insertion multiple' },
+                                { code: 'INSERT INTO archive_clients (id, nom, email)\nSELECT id, nom, email FROM clients\nWHERE actif = false', desc: 'Insertion depuis SELECT' },
+                                { code: 'INSERT INTO commandes (client_id, date, montant)\nVALUES (1, CURRENT_DATE, 100.00)\nRETURNING id, date', desc: 'PostgreSQL : récupérer l\'ID généré' }
+                            ],
+                            tips: ['Spécifiez toujours les colonnes pour plus de clarté', 'RETURNING évite un SELECT supplémentaire'],
+                            warnings: ['Vérifiez les contraintes (NOT NULL, UNIQUE, FK) avant l\'insertion']
+                        }
+                    },
+                    {
+                        cmd: 'Mettre à jour des données',
+                        desc: 'UPDATE SET WHERE',
+                        details: {
+                            explanation: 'UPDATE modifie les valeurs de colonnes existantes. WHERE est essentiel pour cibler les bonnes lignes.',
+                            syntax: 'UPDATE table SET col = val WHERE condition',
+                            options: [
+                                { flag: 'SET col = val', desc: 'Nouvelle valeur' },
+                                { flag: 'SET col = col + 1', desc: 'Valeur calculée' },
+                                { flag: 'WHERE', desc: 'Condition de mise à jour' },
+                                { flag: 'FROM', desc: 'PostgreSQL : jointure pour UPDATE' }
+                            ],
+                            examples: [
+                                { code: 'UPDATE clients\nSET email = \'nouveau@email.com\'\nWHERE id = 123', desc: 'Mise à jour simple' },
+                                { code: 'UPDATE produits\nSET prix = prix * 1.10,\n    date_maj = CURRENT_TIMESTAMP\nWHERE categorie = \'Tech\'', desc: 'Augmentation de 10%' },
+                                { code: 'UPDATE commandes c\nSET statut = \'livré\'\nFROM livraisons l\nWHERE c.id = l.commande_id\nAND l.date_livraison IS NOT NULL', desc: 'PostgreSQL : UPDATE avec jointure' },
+                                { code: 'UPDATE clients\nSET segment = CASE\n  WHEN total_achats > 1000 THEN \'Gold\'\n  WHEN total_achats > 500 THEN \'Silver\'\n  ELSE \'Bronze\'\nEND', desc: 'Mise à jour conditionnelle' }
+                            ],
+                            tips: ['Testez d\'abord avec SELECT pour vérifier les lignes ciblées', 'Utilisez une transaction pour pouvoir annuler'],
+                            warnings: ['UPDATE sans WHERE modifie TOUTES les lignes !']
+                        }
+                    },
+                    {
+                        cmd: 'Supprimer des données',
+                        desc: 'DELETE FROM WHERE et TRUNCATE',
+                        details: {
+                            explanation: 'DELETE supprime des lignes selon une condition. TRUNCATE vide une table entière plus rapidement.',
+                            syntax: 'DELETE FROM table WHERE condition / TRUNCATE TABLE table',
+                            options: [
+                                { flag: 'DELETE FROM', desc: 'Suppression avec condition' },
+                                { flag: 'TRUNCATE TABLE', desc: 'Vide toute la table (plus rapide)' },
+                                { flag: 'CASCADE', desc: 'Supprime aussi les lignes dépendantes' }
+                            ],
+                            examples: [
+                                { code: 'DELETE FROM clients\nWHERE derniere_connexion < \'2020-01-01\'', desc: 'Supprimer les clients inactifs' },
+                                { code: 'DELETE FROM commandes\nWHERE statut = \'annulé\'\nAND date < CURRENT_DATE - INTERVAL \'1 year\'', desc: 'Supprimer vieilles commandes annulées' },
+                                { code: 'TRUNCATE TABLE logs', desc: 'Vider la table des logs' },
+                                { code: 'DELETE FROM produits p\nUSING categories c\nWHERE p.categorie_id = c.id\nAND c.nom = \'Obsolète\'', desc: 'PostgreSQL : DELETE avec jointure' }
+                            ],
+                            tips: ['TRUNCATE est plus rapide mais ne peut pas être annulé facilement', 'Testez d\'abord avec SELECT COUNT(*)'],
+                            warnings: ['DELETE sans WHERE supprime TOUT !', 'TRUNCATE réinitialise les auto-increment']
+                        }
+                    },
+                    {
+                        cmd: 'Insérer ou mettre à jour',
+                        desc: 'MERGE, ON CONFLICT, UPSERT',
+                        details: {
+                            explanation: 'Insère une ligne si elle n\'existe pas, sinon la met à jour. La syntaxe varie selon le SGBD.',
+                            syntax: 'INSERT ... ON CONFLICT ... DO UPDATE (PostgreSQL)',
+                            options: [
+                                { flag: 'ON CONFLICT DO UPDATE', desc: 'PostgreSQL : upsert' },
+                                { flag: 'ON DUPLICATE KEY UPDATE', desc: 'MySQL : upsert' },
+                                { flag: 'MERGE', desc: 'SQL Server, Oracle : upsert complet' },
+                                { flag: 'REPLACE INTO', desc: 'MySQL : supprime puis insère' }
+                            ],
+                            examples: [
+                                { code: 'INSERT INTO produits (code, nom, prix)\nVALUES (\'ABC123\', \'Produit A\', 29.99)\nON CONFLICT (code)\nDO UPDATE SET\n  nom = EXCLUDED.nom,\n  prix = EXCLUDED.prix', desc: 'PostgreSQL : upsert sur code unique' },
+                                { code: 'INSERT INTO produits (code, nom, prix)\nVALUES (\'ABC123\', \'Produit A\', 29.99)\nON DUPLICATE KEY UPDATE\n  nom = VALUES(nom),\n  prix = VALUES(prix)', desc: 'MySQL : upsert' },
+                                { code: 'MERGE INTO cible t\nUSING source s ON t.id = s.id\nWHEN MATCHED THEN\n  UPDATE SET t.nom = s.nom, t.prix = s.prix\nWHEN NOT MATCHED THEN\n  INSERT (id, nom, prix)\n  VALUES (s.id, s.nom, s.prix)', desc: 'SQL Server/Oracle : MERGE' }
+                            ],
+                            tips: ['EXCLUDED (PostgreSQL) ou VALUES() (MySQL) référence les nouvelles valeurs', 'Utile pour les imports et synchronisations'],
+                            warnings: ['Nécessite une contrainte UNIQUE pour détecter les conflits']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'structurer',
+                title: 'Gérer la Structure',
                 icon: 'fa-table',
                 color: 'border-l-4 border-gray-500',
                 commands: [
                     {
-                        cmd: 'CREATE TABLE',
-                        desc: 'Créer une table',
+                        cmd: 'Créer une table',
+                        desc: 'CREATE TABLE avec contraintes',
                         details: {
-                            explanation: 'Définit une nouvelle table avec ses colonnes et contraintes.',
-                            syntax: 'CREATE TABLE nom (col1 TYPE contraintes, col2 TYPE, ...)',
+                            explanation: 'CREATE TABLE définit une nouvelle table avec ses colonnes, types de données et contraintes.',
+                            syntax: 'CREATE TABLE nom (col1 type contraintes, ...)',
                             options: [
-                                { flag: 'PRIMARY KEY', desc: 'Clé primaire (unique, not null)' },
+                                { flag: 'PRIMARY KEY', desc: 'Clé primaire (unique, non null)' },
+                                { flag: 'FOREIGN KEY', desc: 'Clé étrangère vers une autre table' },
                                 { flag: 'NOT NULL', desc: 'Valeur obligatoire' },
-                                { flag: 'UNIQUE', desc: 'Valeur unique' },
+                                { flag: 'UNIQUE', desc: 'Valeurs uniques' },
                                 { flag: 'DEFAULT', desc: 'Valeur par défaut' },
-                                { flag: 'FOREIGN KEY', desc: 'Clé étrangère' },
                                 { flag: 'CHECK', desc: 'Contrainte de validation' }
                             ],
                             examples: [
-                                { code: 'CREATE TABLE clients (\n  id INT PRIMARY KEY AUTO_INCREMENT,\n  nom VARCHAR(100) NOT NULL,\n  email VARCHAR(255) UNIQUE,\n  age INT CHECK (age >= 0),\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n)', desc: 'Table avec contraintes' },
-                                { code: 'CREATE TABLE commandes (\n  id INT PRIMARY KEY,\n  client_id INT NOT NULL,\n  montant DECIMAL(10, 2),\n  FOREIGN KEY (client_id) REFERENCES clients(id)\n)', desc: 'Avec clé étrangère' }
+                                { code: 'CREATE TABLE clients (\n  id SERIAL PRIMARY KEY,\n  nom VARCHAR(100) NOT NULL,\n  email VARCHAR(255) UNIQUE,\n  date_inscription DATE DEFAULT CURRENT_DATE\n)', desc: 'Table simple avec contraintes' },
+                                { code: 'CREATE TABLE commandes (\n  id SERIAL PRIMARY KEY,\n  client_id INTEGER NOT NULL,\n  montant DECIMAL(10,2) CHECK (montant > 0),\n  statut VARCHAR(20) DEFAULT \'en_attente\',\n  FOREIGN KEY (client_id) REFERENCES clients(id)\n)', desc: 'Table avec clé étrangère' },
+                                { code: 'CREATE TABLE IF NOT EXISTS logs (\n  id BIGSERIAL PRIMARY KEY,\n  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  niveau VARCHAR(10),\n  message TEXT\n)', desc: 'Créer si n\'existe pas' }
                             ],
-                            tips: ['Types courants: INT, VARCHAR(n), TEXT, DECIMAL(p,s), DATE, TIMESTAMP, BOOLEAN'],
-                            warnings: ['Syntaxe AUTO_INCREMENT (MySQL) vs SERIAL (PostgreSQL) vs IDENTITY (SQL Server)']
+                            tips: ['Utilisez SERIAL/BIGSERIAL (PostgreSQL) ou AUTO_INCREMENT (MySQL) pour les IDs', 'IF NOT EXISTS évite les erreurs si la table existe'],
+                            warnings: ['Choisissez bien les types de données (VARCHAR vs TEXT, INTEGER vs BIGINT)']
                         }
                     },
                     {
-                        cmd: 'ALTER TABLE',
-                        desc: 'Modifier une table',
+                        cmd: 'Modifier une table',
+                        desc: 'ALTER TABLE ADD/DROP/MODIFY',
                         details: {
-                            explanation: 'Modifie la structure d\'une table existante.',
-                            syntax: 'ALTER TABLE nom ADD/MODIFY/DROP ...',
+                            explanation: 'ALTER TABLE modifie la structure d\'une table existante : ajoute, supprime ou modifie des colonnes.',
+                            syntax: 'ALTER TABLE nom ADD/DROP/ALTER COLUMN ...',
                             options: [
-                                { flag: 'ADD COLUMN', desc: 'Ajouter une colonne' },
-                                { flag: 'DROP COLUMN', desc: 'Supprimer une colonne' },
-                                { flag: 'MODIFY/ALTER COLUMN', desc: 'Modifier une colonne' },
-                                { flag: 'ADD CONSTRAINT', desc: 'Ajouter une contrainte' },
-                                { flag: 'RENAME TO', desc: 'Renommer la table' }
+                                { flag: 'ADD COLUMN', desc: 'Ajoute une colonne' },
+                                { flag: 'DROP COLUMN', desc: 'Supprime une colonne' },
+                                { flag: 'ALTER COLUMN', desc: 'Modifie une colonne' },
+                                { flag: 'RENAME COLUMN', desc: 'Renomme une colonne' },
+                                { flag: 'ADD CONSTRAINT', desc: 'Ajoute une contrainte' }
                             ],
                             examples: [
-                                { code: 'ALTER TABLE clients ADD COLUMN telephone VARCHAR(20)', desc: 'Ajouter colonne' },
-                                { code: 'ALTER TABLE clients DROP COLUMN fax', desc: 'Supprimer colonne' },
-                                { code: 'ALTER TABLE clients\nALTER COLUMN email SET NOT NULL', desc: 'Rendre obligatoire (PostgreSQL)' },
-                                { code: 'ALTER TABLE clients\nADD CONSTRAINT fk_ville\nFOREIGN KEY (ville_id) REFERENCES villes(id)', desc: 'Ajouter clé étrangère' }
+                                { code: 'ALTER TABLE clients\nADD COLUMN telephone VARCHAR(20)', desc: 'Ajouter une colonne' },
+                                { code: 'ALTER TABLE clients\nDROP COLUMN fax', desc: 'Supprimer une colonne' },
+                                { code: 'ALTER TABLE clients\nALTER COLUMN email SET NOT NULL', desc: 'PostgreSQL : rendre obligatoire' },
+                                { code: 'ALTER TABLE clients\nRENAME COLUMN nom TO nom_complet', desc: 'Renommer une colonne' },
+                                { code: 'ALTER TABLE commandes\nADD CONSTRAINT fk_client\nFOREIGN KEY (client_id) REFERENCES clients(id)', desc: 'Ajouter une clé étrangère' }
                             ],
-                            tips: ['Syntaxe MODIFY vs ALTER COLUMN varie selon le SGBD'],
-                            warnings: ['Attention sur tables volumineuses (verrou)']
+                            tips: ['Faites un backup avant de modifier la structure', 'Ajoutez les colonnes avec DEFAULT pour éviter les NULL'],
+                            warnings: ['DROP COLUMN est irréversible', 'Modifier le type peut échouer si données incompatibles']
                         }
                     },
                     {
-                        cmd: 'DROP TABLE / TRUNCATE',
-                        desc: 'Supprimer une table',
+                        cmd: 'Supprimer une table',
+                        desc: 'DROP TABLE et TRUNCATE',
                         details: {
-                            explanation: 'DROP supprime la table et sa structure. TRUNCATE vide la table mais garde la structure.',
-                            syntax: 'DROP TABLE nom / TRUNCATE TABLE nom',
+                            explanation: 'DROP TABLE supprime complètement une table. TRUNCATE vide son contenu mais garde la structure.',
+                            syntax: 'DROP TABLE [IF EXISTS] nom [CASCADE]',
                             options: [
+                                { flag: 'DROP TABLE', desc: 'Supprime table et données' },
                                 { flag: 'IF EXISTS', desc: 'Pas d\'erreur si n\'existe pas' },
-                                { flag: 'CASCADE', desc: 'Supprimer les dépendances' }
+                                { flag: 'CASCADE', desc: 'Supprime aussi les dépendances' },
+                                { flag: 'TRUNCATE', desc: 'Vide la table, garde la structure' }
                             ],
                             examples: [
-                                { code: 'DROP TABLE IF EXISTS temp_data', desc: 'Supprimer si existe' },
+                                { code: 'DROP TABLE IF EXISTS temp_import', desc: 'Supprimer si existe' },
                                 { code: 'DROP TABLE commandes CASCADE', desc: 'Supprimer avec dépendances' },
-                                { code: 'TRUNCATE TABLE logs', desc: 'Vider la table (rapide)' }
+                                { code: 'TRUNCATE TABLE logs', desc: 'Vider la table' },
+                                { code: 'TRUNCATE TABLE stats RESTART IDENTITY', desc: 'Vider et réinitialiser les séquences' }
                             ],
-                            tips: ['TRUNCATE plus rapide que DELETE (pas de log ligne par ligne)', 'TRUNCATE remet les auto-increment à 0'],
-                            warnings: ['DROP est irréversible!', 'TRUNCATE ne peut pas être rollback dans certains SGBD']
+                            tips: ['IF EXISTS évite les erreurs dans les scripts', 'TRUNCATE est plus rapide que DELETE FROM'],
+                            warnings: ['DROP TABLE est irréversible !', 'CASCADE peut supprimer des vues et contraintes dépendantes']
                         }
                     },
                     {
-                        cmd: 'CREATE INDEX',
-                        desc: 'Créer un index',
+                        cmd: 'Optimiser avec des index',
+                        desc: 'CREATE INDEX pour les performances',
                         details: {
-                            explanation: 'Accélère les recherches sur une ou plusieurs colonnes. Essentiel pour les performances.',
-                            syntax: 'CREATE INDEX nom ON table (col1, col2)',
+                            explanation: 'Les index accélèrent les recherches (WHERE, JOIN, ORDER BY) au prix d\'un espace disque supplémentaire.',
+                            syntax: 'CREATE [UNIQUE] INDEX nom ON table (colonnes)',
                             options: [
-                                { flag: 'UNIQUE', desc: 'Index unique (pas de doublons)' },
-                                { flag: 'DESC', desc: 'Index décroissant' },
-                                { flag: 'WHERE', desc: 'Index partiel (PostgreSQL)' }
+                                { flag: 'INDEX', desc: 'Index standard (B-tree)' },
+                                { flag: 'UNIQUE INDEX', desc: 'Index avec contrainte d\'unicité' },
+                                { flag: 'CONCURRENTLY', desc: 'PostgreSQL : sans bloquer la table' },
+                                { flag: 'USING', desc: 'Type d\'index (btree, hash, gin, gist)' }
                             ],
                             examples: [
-                                { code: 'CREATE INDEX idx_nom ON clients (nom)', desc: 'Index simple' },
-                                { code: 'CREATE UNIQUE INDEX idx_email ON clients (email)', desc: 'Index unique' },
-                                { code: 'CREATE INDEX idx_date_status ON commandes (date, status)', desc: 'Index composite' },
-                                { code: 'CREATE INDEX idx_actifs ON clients (email) WHERE actif = TRUE', desc: 'Index partiel (PostgreSQL)' }
+                                { code: 'CREATE INDEX idx_clients_ville\nON clients (ville)', desc: 'Index simple' },
+                                { code: 'CREATE UNIQUE INDEX idx_clients_email\nON clients (email)', desc: 'Index unique (contrainte)' },
+                                { code: 'CREATE INDEX idx_commandes_client_date\nON commandes (client_id, date DESC)', desc: 'Index multi-colonnes' },
+                                { code: 'CREATE INDEX CONCURRENTLY idx_logs_date\nON logs (date)', desc: 'PostgreSQL : création sans blocage' },
+                                { code: 'DROP INDEX IF EXISTS idx_old_index', desc: 'Supprimer un index' }
                             ],
-                            tips: ['Indexer les colonnes utilisées dans WHERE, JOIN, ORDER BY', 'L\'ordre des colonnes est important pour les index composites'],
-                            warnings: ['Les index ralentissent les INSERT/UPDATE', 'Trop d\'index = contre-productif']
+                            tips: ['Indexez les colonnes souvent utilisées dans WHERE et JOIN', 'L\'ordre des colonnes dans un index multi-colonnes compte'],
+                            warnings: ['Trop d\'index ralentit INSERT/UPDATE/DELETE', 'Les index prennent de l\'espace disque']
                         }
                     }
                 ]

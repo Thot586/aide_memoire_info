@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire Computer Vision : OpenCV, PIL, détection d'objets et traitement d'images.">
+    <meta name="description" content="Aide-mémoire Computer Vision : OpenCV, traitement vidéo, détection, segmentation, tracking et deep learning.">
     <title>Computer Vision - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -22,11 +22,11 @@
                 </a>
             </div>
             <div class="text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-rose-500/20 mb-4 icon-glow">
-                    <i class="fas fa-eye text-3xl text-rose-400"></i>
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-emerald-500/20 mb-4 icon-glow">
+                    <i class="fas fa-eye text-3xl text-emerald-400"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">Computer Vision</h1>
-                <p class="text-slate-400">OpenCV, PIL, détection d'objets et traitement d'images</p>
+                <p class="text-slate-400">Images, vidéos, détection, segmentation, tracking et deep learning</p>
             </div>
         </div>
     </header>
@@ -53,332 +53,1114 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'opencv-basic',
-                title: 'OpenCV - Fondamentaux',
+                id: 'load-display',
+                title: '📷 Charger et Afficher',
                 icon: 'fa-image',
                 color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'cv2.imread("image.jpg")',
-                        desc: 'Charger une image',
+                        cmd: 'Charger une image',
+                        desc: 'cv2.imread(), Image.open(), io.imread()',
                         details: {
-                            explanation: 'Lit une image depuis le disque et la retourne sous forme de tableau NumPy (BGR par défaut).',
-                            syntax: 'cv2.imread(filename, flags)',
+                            explanation: 'Lit une image depuis le disque avec OpenCV, PIL ou scikit-image.',
+                            syntax: 'cv2.imread(filename, flags)\nImage.open(filename)\nio.imread(filename)',
                             options: [
-                                { flag: 'cv2.IMREAD_COLOR', desc: 'Charge en couleur (BGR), ignore transparence' },
+                                { flag: 'cv2.IMREAD_COLOR', desc: 'Charge en couleur BGR (defaut)' },
                                 { flag: 'cv2.IMREAD_GRAYSCALE', desc: 'Charge en niveaux de gris' },
-                                { flag: 'cv2.IMREAD_UNCHANGED', desc: 'Charge avec canal alpha si présent' }
+                                { flag: 'cv2.IMREAD_UNCHANGED', desc: 'Avec canal alpha si present' }
                             ],
                             examples: [
-                                { code: 'import cv2\nimg = cv2.imread("photo.jpg")', desc: 'Chargement basique' },
-                                { code: 'gray = cv2.imread("photo.jpg", cv2.IMREAD_GRAYSCALE)', desc: 'En niveaux de gris' }
+                                { code: 'import cv2\nimg = cv2.imread("photo.jpg")\nprint(img.shape)  # (H, W, C) en BGR', desc: 'OpenCV (BGR)' },
+                                { code: 'from PIL import Image\nimg = Image.open("photo.jpg")\nprint(img.size, img.mode)  # (W, H), RGB', desc: 'PIL (RGB)' },
+                                { code: 'from skimage import io\nimg = io.imread("photo.jpg")  # RGB numpy array', desc: 'scikit-image' }
                             ],
-                            tips: ['OpenCV charge les images en BGR, pas RGB !'],
-                            warnings: ['Retourne None si le fichier n\'existe pas']
+                            tips: ['OpenCV charge en BGR, PIL en RGB - attention aux conversions!'],
+                            warnings: ['cv2.imread retourne None si le fichier est introuvable']
                         }
                     },
                     {
-                        cmd: 'cv2.imshow("Window", img)',
-                        desc: 'Afficher une image',
+                        cmd: 'Afficher une image',
+                        desc: 'cv2.imshow(), plt.imshow(), PIL show()',
                         details: {
-                            explanation: 'Affiche une image dans une fenêtre. Nécessite cv2.waitKey() pour maintenir la fenêtre.',
-                            syntax: 'cv2.imshow(window_name, image)',
-                            options: [],
-                            examples: [
-                                { code: 'cv2.imshow("Image", img)\ncv2.waitKey(0)\ncv2.destroyAllWindows()', desc: 'Affichage avec attente' }
-                            ],
-                            tips: ['waitKey(0) attend une touche, waitKey(1) attend 1ms'],
-                            warnings: ['Ne fonctionne pas dans Jupyter, utilisez matplotlib']
-                        }
-                    },
-                    {
-                        cmd: 'cv2.imwrite("output.jpg", img)',
-                        desc: 'Sauvegarder une image',
-                        details: {
-                            explanation: 'Enregistre une image sur le disque. Le format est déterminé par l\'extension.',
-                            syntax: 'cv2.imwrite(filename, image, params)',
+                            explanation: 'Affiche une image dans une fenetre ou dans un notebook.',
+                            syntax: 'cv2.imshow(window_name, image)\nplt.imshow(image)\nimg.show()',
                             options: [
-                                { flag: '[cv2.IMWRITE_JPEG_QUALITY, 95]', desc: 'Qualité JPEG (0-100)' },
-                                { flag: '[cv2.IMWRITE_PNG_COMPRESSION, 9]', desc: 'Compression PNG (0-9)' }
+                                { flag: 'cv2.waitKey(0)', desc: 'Attend une touche (0=infini)' },
+                                { flag: 'cv2.destroyAllWindows()', desc: 'Ferme toutes les fenetres' },
+                                { flag: 'plt.axis("off")', desc: 'Cache les axes matplotlib' }
                             ],
                             examples: [
-                                { code: 'cv2.imwrite("result.png", img)', desc: 'Sauvegarde simple' },
-                                { code: 'cv2.imwrite("result.jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])', desc: 'JPEG qualité 90%' }
+                                { code: 'cv2.imshow("Image", img)\ncv2.waitKey(0)\ncv2.destroyAllWindows()', desc: 'OpenCV (scripts)' },
+                                { code: 'import matplotlib.pyplot as plt\nplt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))\nplt.axis("off")\nplt.show()', desc: 'Matplotlib (Jupyter)' }
                             ],
-                            tips: ['Retourne True si succès, False sinon'],
+                            tips: ['En Jupyter, utilisez matplotlib ou IPython.display'],
+                            warnings: ['cv2.imshow ne fonctionne pas dans les notebooks']
+                        }
+                    },
+                    {
+                        cmd: 'Sauvegarder une image',
+                        desc: 'cv2.imwrite(), img.save(), formats',
+                        details: {
+                            explanation: 'Enregistre une image sur le disque dans differents formats.',
+                            syntax: 'cv2.imwrite(filename, image, params)\nimg.save(filename, format, quality)',
+                            options: [
+                                { flag: '[cv2.IMWRITE_JPEG_QUALITY, 95]', desc: 'Qualite JPEG (0-100)' },
+                                { flag: '[cv2.IMWRITE_PNG_COMPRESSION, 9]', desc: 'Compression PNG (0-9)' },
+                                { flag: 'quality=95', desc: 'Qualite PIL pour JPEG' }
+                            ],
+                            examples: [
+                                { code: 'cv2.imwrite("result.jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])', desc: 'OpenCV JPEG 90%' },
+                                { code: 'from PIL import Image\nimg.save("result.png", "PNG")\nimg.save("result.jpg", "JPEG", quality=85)', desc: 'PIL avec options' }
+                            ],
+                            tips: ['Le format est determine par extension (.jpg, .png, .webp)'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'cv2.cvtColor(img, cv2.COLOR_BGR2RGB)',
-                        desc: 'Convertir l\'espace colorimétrique',
+                        cmd: 'Convertir les espaces couleur',
+                        desc: 'cv2.cvtColor(), BGR/RGB/HSV/LAB',
                         details: {
-                            explanation: 'Convertit une image d\'un espace couleur à un autre (BGR, RGB, HSV, LAB, etc.).',
+                            explanation: 'Convertit une image entre differents espaces colorimetriques.',
                             syntax: 'cv2.cvtColor(src, code)',
                             options: [
-                                { flag: 'COLOR_BGR2RGB', desc: 'BGR vers RGB' },
+                                { flag: 'COLOR_BGR2RGB', desc: 'BGR vers RGB (pour matplotlib)' },
                                 { flag: 'COLOR_BGR2GRAY', desc: 'BGR vers niveaux de gris' },
-                                { flag: 'COLOR_BGR2HSV', desc: 'BGR vers HSV' },
-                                { flag: 'COLOR_RGB2BGR', desc: 'RGB vers BGR' }
+                                { flag: 'COLOR_BGR2HSV', desc: 'BGR vers HSV (detection couleur)' },
+                                { flag: 'COLOR_BGR2LAB', desc: 'BGR vers LAB (perception humaine)' }
                             ],
                             examples: [
-                                { code: 'rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)', desc: 'Pour matplotlib' },
-                                { code: 'hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)', desc: 'Pour détection couleur' }
+                                { code: 'rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Pour matplotlib/PIL', desc: 'BGR vers RGB' },
+                                { code: 'hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)\nmask = cv2.inRange(hsv, lower, upper)  # Detection couleur', desc: 'HSV pour filtrage' },
+                                { code: 'gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)', desc: 'Niveaux de gris' }
                             ],
-                            tips: ['Convertissez en RGB avant d\'afficher avec matplotlib'],
+                            tips: ['HSV est ideal pour la detection de couleurs specifiques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Obtenir les metadonnees',
+                        desc: 'shape, dtype, size, mode',
+                        details: {
+                            explanation: 'Recupere les informations sur une image (dimensions, type, etc.).',
+                            syntax: 'img.shape  # (H, W, C)\nimg.dtype  # uint8, float32\nimg.size   # PIL: (W, H)',
+                            options: [
+                                { flag: 'shape', desc: 'NumPy: (hauteur, largeur, canaux)' },
+                                { flag: 'dtype', desc: 'Type de donnees (uint8, float32)' },
+                                { flag: 'size', desc: 'PIL: (largeur, hauteur)' },
+                                { flag: 'mode', desc: 'PIL: RGB, L, RGBA, etc.' }
+                            ],
+                            examples: [
+                                { code: 'h, w, c = img.shape\nprint(f"Dimensions: {w}x{h}, {c} canaux")\nprint(f"Type: {img.dtype}")', desc: 'OpenCV/NumPy' },
+                                { code: 'from PIL import Image\nimg = Image.open("photo.jpg")\nprint(f"Size: {img.size}, Mode: {img.mode}")', desc: 'PIL' }
+                            ],
+                            tips: ['Attention: NumPy = (H,W,C), PIL size = (W,H)'],
                             warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'transforms',
-                title: 'Transformations',
+                id: 'transform-preprocess',
+                title: '✂️ Transformer et Pretraiter',
                 icon: 'fa-crop-alt',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'cv2.resize(img, (width, height))',
-                        desc: 'Redimensionner une image',
+                        cmd: 'Redimensionner une image',
+                        desc: 'cv2.resize(), interpolation methods',
                         details: {
-                            explanation: 'Change la taille d\'une image avec différentes méthodes d\'interpolation.',
+                            explanation: 'Change la taille d\'une image avec differentes methodes d\'interpolation.',
                             syntax: 'cv2.resize(src, dsize, fx, fy, interpolation)',
                             options: [
-                                { flag: 'cv2.INTER_LINEAR', desc: 'Interpolation bilinéaire (défaut)' },
-                                { flag: 'cv2.INTER_AREA', desc: 'Meilleur pour réduction' },
-                                { flag: 'cv2.INTER_CUBIC', desc: 'Meilleur pour agrandissement' }
+                                { flag: 'cv2.INTER_LINEAR', desc: 'Bilineaire (defaut, rapide)' },
+                                { flag: 'cv2.INTER_AREA', desc: 'Optimal pour reduction' },
+                                { flag: 'cv2.INTER_CUBIC', desc: 'Bicubique (agrandissement)' },
+                                { flag: 'cv2.INTER_LANCZOS4', desc: 'Haute qualite (lent)' }
                             ],
                             examples: [
-                                { code: 'resized = cv2.resize(img, (640, 480))', desc: 'Taille fixe' },
-                                { code: 'resized = cv2.resize(img, None, fx=0.5, fy=0.5)', desc: 'Réduire de 50%' }
+                                { code: 'resized = cv2.resize(img, (640, 480))  # Taille fixe', desc: 'Dimensions exactes' },
+                                { code: 'resized = cv2.resize(img, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)', desc: 'Reduire de 50%' },
+                                { code: '# Garder le ratio\nh, w = img.shape[:2]\nnew_w = 800\nnew_h = int(h * new_w / w)\nresized = cv2.resize(img, (new_w, new_h))', desc: 'Conserver aspect ratio' }
                             ],
-                            tips: ['INTER_AREA évite le moiré lors de la réduction'],
+                            tips: ['INTER_AREA pour reduire, INTER_CUBIC pour agrandir'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)',
-                        desc: 'Rotation de l\'image',
+                        cmd: 'Recadrer et rogner',
+                        desc: 'slicing, crop(), ROI',
                         details: {
-                            explanation: 'Effectue des rotations de 90°, 180° ou 270°.',
-                            syntax: 'cv2.rotate(src, rotateCode)',
+                            explanation: 'Extrait une region d\'interet (ROI) d\'une image.',
+                            syntax: 'roi = img[y1:y2, x1:x2]  # NumPy slicing\nroi = img.crop((x1, y1, x2, y2))  # PIL',
                             options: [
-                                { flag: 'ROTATE_90_CLOCKWISE', desc: 'Rotation 90° horaire' },
-                                { flag: 'ROTATE_180', desc: 'Rotation 180°' },
-                                { flag: 'ROTATE_90_COUNTERCLOCKWISE', desc: 'Rotation 90° anti-horaire' }
+                                { flag: 'img[y:y+h, x:x+w]', desc: 'NumPy: y puis x' },
+                                { flag: 'img.crop((left, top, right, bottom))', desc: 'PIL: x puis y' }
                             ],
                             examples: [
-                                { code: 'rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)', desc: 'Rotation 90°' }
+                                { code: '# OpenCV/NumPy - attention ordre y, x\nroi = img[100:300, 50:250]  # y1:y2, x1:x2', desc: 'Crop OpenCV' },
+                                { code: '# PIL - ordre x, y\nfrom PIL import Image\nimg = Image.open("photo.jpg")\nroi = img.crop((50, 100, 250, 300))  # left, top, right, bottom', desc: 'Crop PIL' },
+                                { code: '# Crop central\nh, w = img.shape[:2]\nsize = min(h, w)\ny = (h - size) // 2\nx = (w - size) // 2\ncenter_crop = img[y:y+size, x:x+size]', desc: 'Crop carre central' }
                             ],
-                            tips: ['Pour des angles arbitraires, utilisez cv2.warpAffine()'],
+                            tips: ['NumPy: [y:y+h, x:x+w], PIL: crop((x1, y1, x2, y2))'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'cv2.GaussianBlur(img, (5, 5), 0)',
-                        desc: 'Flou gaussien',
+                        cmd: 'Appliquer rotation/flip',
+                        desc: 'cv2.rotate(), cv2.flip(), transpose',
                         details: {
-                            explanation: 'Applique un flou gaussien pour réduire le bruit ou lisser l\'image.',
-                            syntax: 'cv2.GaussianBlur(src, ksize, sigmaX)',
+                            explanation: 'Effectue des rotations et retournements d\'image.',
+                            syntax: 'cv2.rotate(src, rotateCode)\ncv2.flip(src, flipCode)',
                             options: [
-                                { flag: 'ksize', desc: 'Taille du kernel (doit être impair)' },
-                                { flag: 'sigmaX', desc: 'Écart-type (0 = calculé auto)' }
+                                { flag: 'cv2.ROTATE_90_CLOCKWISE', desc: 'Rotation 90 degres horaire' },
+                                { flag: 'cv2.ROTATE_180', desc: 'Rotation 180 degres' },
+                                { flag: 'cv2.flip(img, 0)', desc: 'Flip vertical' },
+                                { flag: 'cv2.flip(img, 1)', desc: 'Flip horizontal' }
                             ],
                             examples: [
-                                { code: 'blur = cv2.GaussianBlur(img, (5, 5), 0)', desc: 'Flou léger' },
-                                { code: 'blur = cv2.GaussianBlur(img, (15, 15), 0)', desc: 'Flou fort' }
+                                { code: 'rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)', desc: 'Rotation 90 degres' },
+                                { code: 'flipped_h = cv2.flip(img, 1)  # Miroir horizontal\nflipped_v = cv2.flip(img, 0)  # Miroir vertical', desc: 'Flip' },
+                                { code: '# Rotation angle arbitraire\ncenter = (w // 2, h // 2)\nM = cv2.getRotationMatrix2D(center, angle=45, scale=1.0)\nrotated = cv2.warpAffine(img, M, (w, h))', desc: 'Rotation 45 degres' }
                             ],
-                            tips: ['Utile avant la détection de contours'],
+                            tips: ['Pour angles arbitraires, utilisez warpAffine'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'cv2.Canny(img, 100, 200)',
-                        desc: 'Détection de contours',
+                        cmd: 'Ajuster luminosite/contraste',
+                        desc: 'convertScaleAbs(), CLAHE, histogram eq',
                         details: {
-                            explanation: 'Algorithme de Canny pour détecter les bords/contours dans une image.',
-                            syntax: 'cv2.Canny(image, threshold1, threshold2)',
+                            explanation: 'Modifie la luminosite, le contraste ou egalise l\'histogramme.',
+                            syntax: 'cv2.convertScaleAbs(src, alpha, beta)\ncv2.equalizeHist(src)\nclahe.apply(src)',
                             options: [
-                                { flag: 'threshold1', desc: 'Seuil bas (pixels en dessous ignorés)' },
-                                { flag: 'threshold2', desc: 'Seuil haut (pixels au-dessus = contours)' }
+                                { flag: 'alpha', desc: 'Facteur de contraste (1.0 = inchange)' },
+                                { flag: 'beta', desc: 'Ajout de luminosite (0 = inchange)' },
+                                { flag: 'CLAHE', desc: 'Egalisation adaptative (meilleur)' }
                             ],
                             examples: [
-                                { code: 'edges = cv2.Canny(gray, 50, 150)', desc: 'Détection standard' },
-                                { code: 'edges = cv2.Canny(cv2.GaussianBlur(img, (5,5), 0), 50, 150)', desc: 'Avec flou préalable' }
+                                { code: '# Luminosite + contraste\nadjusted = cv2.convertScaleAbs(img, alpha=1.2, beta=30)', desc: 'Contraste +20%, luminosite +30' },
+                                { code: '# Egalisation histogramme (niveaux de gris)\ngray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\neq = cv2.equalizeHist(gray)', desc: 'Equalisation simple' },
+                                { code: '# CLAHE - meilleur pour images variees\nclahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))\ngray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\nenhanced = clahe.apply(gray)', desc: 'CLAHE adaptatif' }
                             ],
-                            tips: ['Ratio recommandé threshold2/threshold1 entre 2:1 et 3:1'],
-                            warnings: ['L\'image doit être en niveaux de gris']
+                            tips: ['CLAHE donne de meilleurs resultats que equalizeHist'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Appliquer des filtres',
+                        desc: 'GaussianBlur, medianBlur, bilateralFilter',
+                        details: {
+                            explanation: 'Applique des filtres de flou pour reduire le bruit ou lisser l\'image.',
+                            syntax: 'cv2.GaussianBlur(src, ksize, sigmaX)\ncv2.medianBlur(src, ksize)\ncv2.bilateralFilter(src, d, sigmaColor, sigmaSpace)',
+                            options: [
+                                { flag: 'GaussianBlur', desc: 'Flou gaussien (lissage general)' },
+                                { flag: 'medianBlur', desc: 'Filtre median (bruit sel/poivre)' },
+                                { flag: 'bilateralFilter', desc: 'Preserve les bords (lissage peau)' }
+                            ],
+                            examples: [
+                                { code: 'blur = cv2.GaussianBlur(img, (5, 5), 0)  # ksize impair', desc: 'Flou gaussien' },
+                                { code: 'denoised = cv2.medianBlur(img, 5)  # Ideal bruit sel/poivre', desc: 'Filtre median' },
+                                { code: '# Bilateral - preserve les contours\nsmooth = cv2.bilateralFilter(img, d=9, sigmaColor=75, sigmaSpace=75)', desc: 'Filtre bilateral' }
+                            ],
+                            tips: ['Bilateral est excellent pour le lissage de peau'],
+                            warnings: ['La taille du kernel doit etre impaire']
                         }
                     }
                 ]
             },
             {
-                id: 'pil',
-                title: 'PIL / Pillow',
-                icon: 'fa-palette',
-                color: 'border-l-4 border-purple-500',
-                commands: [
-                    {
-                        cmd: 'Image.open("image.jpg")',
-                        desc: 'Ouvrir une image avec PIL',
-                        details: {
-                            explanation: 'Charge une image avec Pillow. Plus simple que OpenCV pour des opérations basiques.',
-                            syntax: 'from PIL import Image\nimg = Image.open(filename)',
-                            options: [],
-                            examples: [
-                                { code: 'from PIL import Image\nimg = Image.open("photo.jpg")\nimg.show()', desc: 'Ouvrir et afficher' },
-                                { code: 'print(img.size, img.mode)', desc: 'Taille et mode (RGB, L, etc.)' }
-                            ],
-                            tips: ['PIL utilise RGB par défaut, pas BGR'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'img.resize((width, height))',
-                        desc: 'Redimensionner avec PIL',
-                        details: {
-                            explanation: 'Redimensionne l\'image à une nouvelle taille.',
-                            syntax: 'img.resize(size, resample)',
-                            options: [
-                                { flag: 'Image.LANCZOS', desc: 'Haute qualité (lent)' },
-                                { flag: 'Image.BILINEAR', desc: 'Qualité moyenne' },
-                                { flag: 'Image.NEAREST', desc: 'Rapide, basse qualité' }
-                            ],
-                            examples: [
-                                { code: 'resized = img.resize((800, 600), Image.LANCZOS)', desc: 'Redimensionnement HQ' },
-                                { code: 'thumb = img.copy()\nthumb.thumbnail((128, 128))', desc: 'Thumbnail (garde ratio)' }
-                            ],
-                            tips: ['thumbnail() modifie l\'image en place et garde le ratio'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'np.array(img)',
-                        desc: 'Convertir PIL vers NumPy',
-                        details: {
-                            explanation: 'Convertit une image PIL en tableau NumPy pour traitement avancé.',
-                            syntax: 'import numpy as np\narr = np.array(pil_image)',
-                            options: [],
-                            examples: [
-                                { code: 'import numpy as np\nfrom PIL import Image\n\nimg = Image.open("photo.jpg")\narr = np.array(img)  # Shape: (H, W, 3)', desc: 'PIL vers NumPy' },
-                                { code: 'pil_img = Image.fromarray(arr)', desc: 'NumPy vers PIL' }
-                            ],
-                            tips: ['Utilisez cette conversion pour passer entre PIL et OpenCV'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'detection',
-                title: 'Détection d\'objets',
-                icon: 'fa-object-group',
+                id: 'object-detection',
+                title: '🎯 Detecter des Objets',
+                icon: 'fa-crosshairs',
                 color: 'border-l-4 border-yellow-500',
                 commands: [
                     {
-                        cmd: 'cv2.CascadeClassifier()',
-                        desc: 'Détection par cascade (visages)',
+                        cmd: 'Detecter avec YOLOv8/v11',
+                        desc: 'ultralytics, model.predict(), boxes',
                         details: {
-                            explanation: 'Utilise des classificateurs Haar cascade pour détecter des objets (visages, yeux, etc.).',
-                            syntax: 'cascade = cv2.CascadeClassifier(xml_path)',
-                            options: [],
-                            examples: [
-                                { code: 'face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")\ngray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\nfaces = face_cascade.detectMultiScale(gray, 1.1, 4)\nfor (x, y, w, h) in faces:\n    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)', desc: 'Détection de visages' }
-                            ],
-                            tips: ['Méthode classique mais moins précise que YOLO/SSD'],
-                            warnings: ['Sensible aux conditions d\'éclairage']
-                        }
-                    },
-                    {
-                        cmd: 'YOLO / Ultralytics',
-                        desc: 'Détection moderne avec YOLO',
-                        details: {
-                            explanation: 'YOLO (You Only Look Once) est l\'état de l\'art pour la détection d\'objets en temps réel.',
-                            syntax: 'from ultralytics import YOLO\nmodel = YOLO("yolov8n.pt")',
+                            explanation: 'YOLO (You Only Look Once) est l\'etat de l\'art pour la detection d\'objets en temps reel.',
+                            syntax: 'from ultralytics import YOLO\nmodel = YOLO("yolov8n.pt")\nresults = model(source)',
                             options: [
-                                { flag: 'yolov8n', desc: 'Nano - très rapide, moins précis' },
-                                { flag: 'yolov8s', desc: 'Small - bon compromis' },
-                                { flag: 'yolov8m', desc: 'Medium' },
-                                { flag: 'yolov8l/x', desc: 'Large/XLarge - plus précis' }
+                                { flag: 'yolov8n / yolo11n', desc: 'Nano - tres rapide, moins precis' },
+                                { flag: 'yolov8s / yolo11s', desc: 'Small - bon compromis' },
+                                { flag: 'yolov8m / yolo11m', desc: 'Medium - equilibre' },
+                                { flag: 'yolov8l/x', desc: 'Large/XLarge - plus precis' }
                             ],
                             examples: [
-                                { code: 'from ultralytics import YOLO\n\nmodel = YOLO("yolov8n.pt")\nresults = model("image.jpg")\nresults[0].show()', desc: 'Détection simple' },
-                                { code: 'for r in results:\n    for box in r.boxes:\n        print(box.xyxy, box.conf, box.cls)', desc: 'Accéder aux détections' }
+                                { code: 'from ultralytics import YOLO\n\nmodel = YOLO("yolov8n.pt")  # ou yolo11n.pt\nresults = model("image.jpg")\nresults[0].show()  # Afficher', desc: 'Detection simple' },
+                                { code: '# Acces aux detections\nfor r in results:\n    for box in r.boxes:\n        x1, y1, x2, y2 = box.xyxy[0].tolist()\n        conf = box.conf[0].item()\n        cls = int(box.cls[0])\n        label = model.names[cls]\n        print(f"{label}: {conf:.2f}")', desc: 'Extraire les boxes' },
+                                { code: '# Detection sur video\nresults = model("video.mp4", stream=True)\nfor r in results:\n    frame = r.plot()  # Frame annotee', desc: 'Detection video' }
                             ],
-                            tips: ['pip install ultralytics'],
+                            tips: ['pip install ultralytics', 'yolo11 est la derniere version (2024)'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'cv2.findContours()',
-                        desc: 'Trouver les contours',
+                        cmd: 'Utiliser RT-DETR',
+                        desc: 'Real-Time DETR, transformers-based',
                         details: {
-                            explanation: 'Trouve les contours dans une image binaire (après seuillage ou Canny).',
-                            syntax: 'contours, hierarchy = cv2.findContours(img, mode, method)',
+                            explanation: 'RT-DETR est un detecteur base sur les Transformers, rapide et precis.',
+                            syntax: 'from ultralytics import RTDETR\nmodel = RTDETR("rtdetr-l.pt")',
                             options: [
-                                { flag: 'cv2.RETR_EXTERNAL', desc: 'Contours externes uniquement' },
-                                { flag: 'cv2.RETR_TREE', desc: 'Tous les contours avec hiérarchie' },
-                                { flag: 'cv2.CHAIN_APPROX_SIMPLE', desc: 'Compresse les segments' }
+                                { flag: 'rtdetr-l', desc: 'Large - plus precis' },
+                                { flag: 'rtdetr-x', desc: 'XLarge - maximum precision' }
                             ],
                             examples: [
-                                { code: 'gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n_, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)\ncontours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)\ncv2.drawContours(img, contours, -1, (0, 255, 0), 2)', desc: 'Détection et dessin' }
+                                { code: 'from ultralytics import RTDETR\n\nmodel = RTDETR("rtdetr-l.pt")\nresults = model("image.jpg")\nresults[0].show()', desc: 'RT-DETR detection' },
+                                { code: '# Meme API que YOLO\nfor r in results:\n    boxes = r.boxes.xyxy.cpu().numpy()\n    confs = r.boxes.conf.cpu().numpy()\n    classes = r.boxes.cls.cpu().numpy()', desc: 'Extraire resultats' }
                             ],
-                            tips: ['Utilisez cv2.contourArea() pour filtrer par taille'],
+                            tips: ['RT-DETR est plus precis que YOLO sur petits objets'],
+                            warnings: ['Plus lent que YOLO sur GPU faible']
+                        }
+                    },
+                    {
+                        cmd: 'Detecter des visages',
+                        desc: 'face_recognition, MediaPipe Face',
+                        details: {
+                            explanation: 'Detection et reconnaissance de visages avec des bibliotheques specialisees.',
+                            syntax: 'import face_recognition\nimport mediapipe as mp',
+                            options: [
+                                { flag: 'face_recognition', desc: 'Simple, inclut reconnaissance' },
+                                { flag: 'MediaPipe', desc: 'Rapide, landmarks, Google' },
+                                { flag: 'RetinaFace', desc: 'Haute precision' }
+                            ],
+                            examples: [
+                                { code: 'import face_recognition\n\nimage = face_recognition.load_image_file("photo.jpg")\nface_locations = face_recognition.face_locations(image)\nprint(f"{len(face_locations)} visages detectes")', desc: 'face_recognition' },
+                                { code: 'import mediapipe as mp\n\nmp_face = mp.solutions.face_detection\nwith mp_face.FaceDetection(min_detection_confidence=0.5) as face_det:\n    results = face_det.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))\n    if results.detections:\n        for det in results.detections:\n            bbox = det.location_data.relative_bounding_box\n            print(f"Face: {bbox}")', desc: 'MediaPipe Face' }
+                            ],
+                            tips: ['MediaPipe est plus rapide, face_recognition plus simple'],
+                            warnings: ['pip install face_recognition necessite dlib (compilation)']
+                        }
+                    },
+                    {
+                        cmd: 'Detecter des poses humaines',
+                        desc: 'MediaPipe Pose, OpenPose, YOLOv8-pose',
+                        details: {
+                            explanation: 'Detection du squelette humain (keypoints) pour l\'analyse de mouvement.',
+                            syntax: 'mp.solutions.pose\nYOLO("yolov8n-pose.pt")',
+                            options: [
+                                { flag: 'MediaPipe Pose', desc: '33 keypoints, temps reel' },
+                                { flag: 'YOLOv8-pose', desc: '17 keypoints COCO, rapide' },
+                                { flag: 'OpenPose', desc: 'Reference academique' }
+                            ],
+                            examples: [
+                                { code: 'import mediapipe as mp\n\nmp_pose = mp.solutions.pose\nmp_draw = mp.solutions.drawing_utils\n\nwith mp_pose.Pose(min_detection_confidence=0.5) as pose:\n    results = pose.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))\n    if results.pose_landmarks:\n        mp_draw.draw_landmarks(img, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)', desc: 'MediaPipe Pose' },
+                                { code: 'from ultralytics import YOLO\n\nmodel = YOLO("yolov8n-pose.pt")\nresults = model("image.jpg")\n\nfor r in results:\n    keypoints = r.keypoints.xy[0]  # 17 points\n    print(f"Nez: {keypoints[0]}")', desc: 'YOLOv8 Pose' }
+                            ],
+                            tips: ['MediaPipe donne plus de keypoints (33 vs 17)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Dessiner les bounding boxes',
+                        desc: 'cv2.rectangle(), annotate results',
+                        details: {
+                            explanation: 'Dessine des rectangles et annotations sur les detections.',
+                            syntax: 'cv2.rectangle(img, pt1, pt2, color, thickness)\ncv2.putText(img, text, org, font, scale, color)',
+                            options: [
+                                { flag: 'thickness=-1', desc: 'Rectangle rempli' },
+                                { flag: 'cv2.LINE_AA', desc: 'Anti-aliasing pour texte' }
+                            ],
+                            examples: [
+                                { code: '# Dessiner une box avec label\nx1, y1, x2, y2 = 100, 100, 300, 300\nlabel = "person 0.95"\n\ncv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)\ncv2.putText(img, label, (x1, y1 - 10),\n            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)', desc: 'Box + label' },
+                                { code: '# Avec YOLO - deja integre\nresults = model("image.jpg")\nannotated = results[0].plot()  # Image avec boxes\ncv2.imwrite("result.jpg", annotated)', desc: 'YOLO auto-annotation' }
+                            ],
+                            tips: ['results[0].plot() annote automatiquement avec YOLO'],
                             warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'deeplearning',
-                title: 'Deep Learning Vision',
-                icon: 'fa-robot',
+                id: 'segmentation',
+                title: '🎭 Segmenter des Images',
+                icon: 'fa-puzzle-piece',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Segmenter avec SAM',
+                        desc: 'Segment Anything Model, prompts',
+                        details: {
+                            explanation: 'SAM (Segment Anything) de Meta peut segmenter n\'importe quel objet avec des prompts.',
+                            syntax: 'from segment_anything import sam_model_registry, SamPredictor',
+                            options: [
+                                { flag: 'vit_h', desc: 'ViT-Huge - plus precis' },
+                                { flag: 'vit_l', desc: 'ViT-Large - equilibre' },
+                                { flag: 'vit_b', desc: 'ViT-Base - plus rapide' }
+                            ],
+                            examples: [
+                                { code: 'from segment_anything import sam_model_registry, SamPredictor\n\nsam = sam_model_registry["vit_b"](checkpoint="sam_vit_b.pth")\npredictor = SamPredictor(sam)\n\npredictor.set_image(image)\n# Point prompt\nmasks, scores, _ = predictor.predict(\n    point_coords=np.array([[500, 375]]),\n    point_labels=np.array([1]),  # 1=foreground\n    multimask_output=True\n)', desc: 'SAM avec point prompt' },
+                                { code: '# Box prompt\nmasks, scores, _ = predictor.predict(\n    box=np.array([100, 100, 400, 400]),  # x1, y1, x2, y2\n    multimask_output=False\n)', desc: 'SAM avec box prompt' },
+                                { code: '# SAM2 (2024) - plus rapide\nfrom sam2 import SAM2VideoPredictor\npredictor = SAM2VideoPredictor.from_pretrained("facebook/sam2-hiera-large")', desc: 'SAM2 (2024)' }
+                            ],
+                            tips: ['SAM2 supporte les videos et est plus rapide'],
+                            warnings: ['Necessite GPU pour performances correctes']
+                        }
+                    },
+                    {
+                        cmd: 'Segmentation semantique',
+                        desc: 'DeepLabV3, SegFormer, masks',
+                        details: {
+                            explanation: 'Segmentation semantique: chaque pixel recoit une classe (route, ciel, personne...).',
+                            syntax: 'from transformers import SegformerForSemanticSegmentation\nfrom torchvision.models.segmentation import deeplabv3_resnet50',
+                            options: [
+                                { flag: 'DeepLabV3', desc: 'Classique, torchvision' },
+                                { flag: 'SegFormer', desc: 'Transformer, Hugging Face' },
+                                { flag: 'Mask2Former', desc: 'Unifie semantique/instance' }
+                            ],
+                            examples: [
+                                { code: 'from torchvision.models.segmentation import deeplabv3_resnet50\nimport torch\n\nmodel = deeplabv3_resnet50(weights="COCO_WITH_VOC_LABELS_V1")\nmodel.eval()\n\n# Preprocess\ninput_tensor = preprocess(image).unsqueeze(0)\nwith torch.no_grad():\n    output = model(input_tensor)["out"][0]\nmask = output.argmax(0).numpy()', desc: 'DeepLabV3 PyTorch' },
+                                { code: 'from transformers import SegformerForSemanticSegmentation, SegformerImageProcessor\n\nprocessor = SegformerImageProcessor.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512")\nmodel = SegformerForSemanticSegmentation.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512")\n\ninputs = processor(images=image, return_tensors="pt")\noutputs = model(**inputs)\nmask = outputs.logits.argmax(dim=1)[0]', desc: 'SegFormer Hugging Face' }
+                            ],
+                            tips: ['SegFormer est plus leger et souvent plus precis'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Segmentation d\'instance',
+                        desc: 'Mask R-CNN, YOLOv8-seg',
+                        details: {
+                            explanation: 'Segmentation d\'instance: detecte chaque objet individuellement avec son masque.',
+                            syntax: 'YOLO("yolov8n-seg.pt")\nmaskrcnn_resnet50_fpn()',
+                            options: [
+                                { flag: 'YOLOv8-seg', desc: 'Rapide, bon pour temps reel' },
+                                { flag: 'Mask R-CNN', desc: 'Plus precis, plus lent' }
+                            ],
+                            examples: [
+                                { code: 'from ultralytics import YOLO\n\nmodel = YOLO("yolov8n-seg.pt")\nresults = model("image.jpg")\n\nfor r in results:\n    if r.masks is not None:\n        masks = r.masks.data.cpu().numpy()  # N x H x W\n        for i, mask in enumerate(masks):\n            print(f"Object {i}: {mask.sum()} pixels")', desc: 'YOLOv8 Segmentation' },
+                                { code: 'from torchvision.models.detection import maskrcnn_resnet50_fpn\n\nmodel = maskrcnn_resnet50_fpn(weights="DEFAULT")\nmodel.eval()\n\nwith torch.no_grad():\n    predictions = model([input_tensor])\n\nmasks = predictions[0]["masks"]  # N x 1 x H x W\nlabels = predictions[0]["labels"]', desc: 'Mask R-CNN' }
+                            ],
+                            tips: ['YOLOv8-seg est ideal pour le temps reel'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Segmenter l\'arriere-plan',
+                        desc: 'rembg, MODNet, background removal',
+                        details: {
+                            explanation: 'Supprime l\'arriere-plan d\'une image pour isoler le sujet.',
+                            syntax: 'from rembg import remove',
+                            options: [
+                                { flag: 'rembg', desc: 'Simple, une ligne de code' },
+                                { flag: 'MODNet', desc: 'Optimise pour portraits' },
+                                { flag: 'BackgroundMattingV2', desc: 'Haute qualite, video' }
+                            ],
+                            examples: [
+                                { code: 'from rembg import remove\nfrom PIL import Image\n\ninput_img = Image.open("photo.jpg")\noutput = remove(input_img)  # RGBA avec transparence\noutput.save("no_bg.png")', desc: 'rembg simple' },
+                                { code: '# En ligne de commande\n# pip install rembg\n# rembg i input.jpg output.png', desc: 'rembg CLI' },
+                                { code: '# Avec modele specifique\nfrom rembg import remove, new_session\n\nsession = new_session("u2net_human_seg")  # Optimise humains\noutput = remove(input_img, session=session)', desc: 'rembg modele humain' }
+                            ],
+                            tips: ['pip install rembg[gpu] pour acceleration GPU'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Extraire des contours',
+                        desc: 'cv2.findContours(), drawContours()',
+                        details: {
+                            explanation: 'Trouve et dessine les contours dans une image binaire.',
+                            syntax: 'contours, hierarchy = cv2.findContours(img, mode, method)',
+                            options: [
+                                { flag: 'cv2.RETR_EXTERNAL', desc: 'Contours externes uniquement' },
+                                { flag: 'cv2.RETR_TREE', desc: 'Tous avec hierarchie' },
+                                { flag: 'cv2.CHAIN_APPROX_SIMPLE', desc: 'Compresse les segments' }
+                            ],
+                            examples: [
+                                { code: 'gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n_, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)\n\ncontours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)\n\n# Dessiner tous les contours\ncv2.drawContours(img, contours, -1, (0, 255, 0), 2)', desc: 'Trouver et dessiner' },
+                                { code: '# Filtrer par aire\nfor cnt in contours:\n    area = cv2.contourArea(cnt)\n    if area > 1000:  # Ignorer petits contours\n        x, y, w, h = cv2.boundingRect(cnt)\n        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)', desc: 'Filtrer par taille' }
+                            ],
+                            tips: ['cv2.contourArea() pour filtrer par surface'],
+                            warnings: ['L\'image doit etre binaire (seuillage)']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'video-processing',
+                title: '🎬 Traiter des Videos',
+                icon: 'fa-video',
                 color: 'border-l-4 border-red-500',
                 commands: [
                     {
-                        cmd: 'torchvision.models.resnet50()',
-                        desc: 'Modèle pré-entraîné PyTorch',
+                        cmd: 'Lire une video',
+                        desc: 'cv2.VideoCapture(), read(), frame by frame',
                         details: {
-                            explanation: 'Charge un modèle de classification d\'images pré-entraîné sur ImageNet.',
-                            syntax: 'from torchvision import models\nmodel = models.resnet50(pretrained=True)',
+                            explanation: 'Ouvre une video ou un flux camera et lit les frames une par une.',
+                            syntax: 'cap = cv2.VideoCapture(source)\nret, frame = cap.read()',
                             options: [
-                                { flag: 'resnet18/34/50/101', desc: 'ResNet de différentes tailles' },
-                                { flag: 'vgg16/19', desc: 'VGG networks' },
-                                { flag: 'efficientnet_b0-b7', desc: 'EfficientNet' }
+                                { flag: '0, 1, 2...', desc: 'Index camera (0=webcam par defaut)' },
+                                { flag: '"video.mp4"', desc: 'Chemin vers fichier video' },
+                                { flag: '"rtsp://..."', desc: 'Flux RTSP/HTTP' }
                             ],
                             examples: [
-                                { code: 'import torch\nfrom torchvision import models, transforms\n\nmodel = models.resnet50(weights="IMAGENET1K_V2")\nmodel.eval()', desc: 'Charger ResNet50' }
+                                { code: 'import cv2\n\ncap = cv2.VideoCapture("video.mp4")\n\nwhile cap.isOpened():\n    ret, frame = cap.read()\n    if not ret:\n        break\n    \n    # Traitement du frame\n    cv2.imshow("Video", frame)\n    \n    if cv2.waitKey(1) & 0xFF == ord("q"):\n        break\n\ncap.release()\ncv2.destroyAllWindows()', desc: 'Lecture video complete' },
+                                { code: '# Webcam en temps reel\ncap = cv2.VideoCapture(0)  # 0 = webcam par defaut\ncap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)\ncap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)', desc: 'Webcam HD' }
                             ],
-                            tips: ['Utilisez weights= au lieu de pretrained= (déprécié)'],
+                            tips: ['Toujours appeler cap.release() a la fin'],
+                            warnings: ['Verifiez ret avant d\'utiliser frame']
+                        }
+                    },
+                    {
+                        cmd: 'Ecrire une video',
+                        desc: 'cv2.VideoWriter(), fourcc, fps',
+                        details: {
+                            explanation: 'Enregistre des frames dans un fichier video.',
+                            syntax: 'fourcc = cv2.VideoWriter_fourcc(*"mp4v")\nout = cv2.VideoWriter(filename, fourcc, fps, (w, h))',
+                            options: [
+                                { flag: 'mp4v', desc: 'MP4 (compatible partout)' },
+                                { flag: 'XVID', desc: 'AVI (Windows)' },
+                                { flag: 'H264', desc: 'H.264 (petit fichier)' },
+                                { flag: 'MJPG', desc: 'Motion JPEG' }
+                            ],
+                            examples: [
+                                { code: 'import cv2\n\ncap = cv2.VideoCapture("input.mp4")\nfps = cap.get(cv2.CAP_PROP_FPS)\nw = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))\nh = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))\n\nfourcc = cv2.VideoWriter_fourcc(*"mp4v")\nout = cv2.VideoWriter("output.mp4", fourcc, fps, (w, h))\n\nwhile cap.isOpened():\n    ret, frame = cap.read()\n    if not ret:\n        break\n    \n    # Traitement...\n    processed = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)\n    processed = cv2.cvtColor(processed, cv2.COLOR_GRAY2BGR)\n    \n    out.write(processed)\n\ncap.release()\nout.release()', desc: 'Enregistrer video traitee' }
+                            ],
+                            tips: ['Les dimensions doivent correspondre exactement aux frames'],
+                            warnings: ['Pas de son avec OpenCV seul - utilisez moviepy']
+                        }
+                    },
+                    {
+                        cmd: 'Extraire des frames',
+                        desc: 'frame extraction, sampling',
+                        details: {
+                            explanation: 'Extrait des frames specifiques ou a intervalles reguliers.',
+                            syntax: 'cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)\ncap.set(cv2.CAP_PROP_POS_MSEC, milliseconds)',
+                            options: [
+                                { flag: 'CAP_PROP_POS_FRAMES', desc: 'Position par numero de frame' },
+                                { flag: 'CAP_PROP_POS_MSEC', desc: 'Position en millisecondes' },
+                                { flag: 'CAP_PROP_FRAME_COUNT', desc: 'Nombre total de frames' }
+                            ],
+                            examples: [
+                                { code: 'import cv2\nimport os\n\ncap = cv2.VideoCapture("video.mp4")\nfps = cap.get(cv2.CAP_PROP_FPS)\ntotal = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\n\n# Extraire 1 frame par seconde\nos.makedirs("frames", exist_ok=True)\nfor i in range(0, total, int(fps)):\n    cap.set(cv2.CAP_PROP_POS_FRAMES, i)\n    ret, frame = cap.read()\n    if ret:\n        cv2.imwrite(f"frames/frame_{i:05d}.jpg", frame)\n\ncap.release()', desc: 'Extraire 1 fps' },
+                                { code: '# Aller a un timestamp specifique\ncap.set(cv2.CAP_PROP_POS_MSEC, 30000)  # 30 secondes\nret, frame = cap.read()', desc: 'Frame a 30s' }
+                            ],
+                            tips: ['Utilisez CAP_PROP_POS_MSEC pour timestamp precis'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'transforms.Compose([...])',
-                        desc: 'Pipeline de transformations',
+                        cmd: 'Traitement en temps reel',
+                        desc: 'webcam, real-time loop, FPS',
                         details: {
-                            explanation: 'Crée une séquence de transformations pour prétraiter les images.',
-                            syntax: 'from torchvision import transforms',
-                            options: [],
-                            examples: [
-                                { code: 'transform = transforms.Compose([\n    transforms.Resize(256),\n    transforms.CenterCrop(224),\n    transforms.ToTensor(),\n    transforms.Normalize(\n        mean=[0.485, 0.456, 0.406],\n        std=[0.229, 0.224, 0.225]\n    )\n])', desc: 'Prétraitement ImageNet standard' }
+                            explanation: 'Capture et traite un flux video en temps reel avec calcul de FPS.',
+                            syntax: 'Boucle while avec calcul de temps',
+                            options: [
+                                { flag: 'cv2.waitKey(1)', desc: 'Delai minimal, max FPS' },
+                                { flag: 'time.time()', desc: 'Mesure du temps' }
                             ],
-                            tips: ['Ces valeurs de normalisation sont standard pour ImageNet'],
+                            examples: [
+                                { code: 'import cv2\nimport time\n\ncap = cv2.VideoCapture(0)\nprev_time = time.time()\n\nwhile True:\n    ret, frame = cap.read()\n    if not ret:\n        break\n    \n    # Votre traitement ici\n    # ...\n    \n    # Calcul FPS\n    curr_time = time.time()\n    fps = 1 / (curr_time - prev_time)\n    prev_time = curr_time\n    \n    cv2.putText(frame, f"FPS: {fps:.1f}", (10, 30),\n                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)\n    \n    cv2.imshow("Webcam", frame)\n    if cv2.waitKey(1) & 0xFF == ord("q"):\n        break\n\ncap.release()\ncv2.destroyAllWindows()', desc: 'Webcam avec FPS' },
+                                { code: '# Detection YOLO temps reel\nfrom ultralytics import YOLO\n\nmodel = YOLO("yolov8n.pt")\nresults = model(source=0, stream=True, show=True)  # Webcam\nfor r in results:\n    pass  # Traitement optionnel', desc: 'YOLO webcam' }
+                            ],
+                            tips: ['yolov8n.pt est le plus rapide pour temps reel'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'pipeline("image-classification")',
-                        desc: 'Classification avec Transformers',
+                        cmd: 'Obtenir les proprietes video',
+                        desc: 'CAP_PROP_*, duration, frame count',
                         details: {
-                            explanation: 'Utilise Hugging Face pour la classification d\'images avec des modèles Vision Transformer.',
-                            syntax: 'from transformers import pipeline',
+                            explanation: 'Recupere les metadonnees d\'une video (FPS, resolution, duree...).',
+                            syntax: 'cap.get(cv2.CAP_PROP_*)',
+                            options: [
+                                { flag: 'CAP_PROP_FPS', desc: 'Images par seconde' },
+                                { flag: 'CAP_PROP_FRAME_WIDTH', desc: 'Largeur en pixels' },
+                                { flag: 'CAP_PROP_FRAME_HEIGHT', desc: 'Hauteur en pixels' },
+                                { flag: 'CAP_PROP_FRAME_COUNT', desc: 'Nombre total de frames' }
+                            ],
+                            examples: [
+                                { code: 'cap = cv2.VideoCapture("video.mp4")\n\nfps = cap.get(cv2.CAP_PROP_FPS)\nwidth = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))\nheight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))\ntotal_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\nduration = total_frames / fps\n\nprint(f"Resolution: {width}x{height}")\nprint(f"FPS: {fps}")\nprint(f"Duree: {duration:.2f}s ({total_frames} frames)")', desc: 'Infos video' }
+                            ],
+                            tips: ['Duree = frame_count / fps'],
+                            warnings: ['Certaines proprietes peuvent retourner 0 pour certains codecs']
+                        }
+                    },
+                    {
+                        cmd: 'Decouper et assembler',
+                        desc: 'moviepy, ffmpeg-python, clips',
+                        details: {
+                            explanation: 'Montage video avance avec moviepy ou ffmpeg.',
+                            syntax: 'from moviepy.editor import VideoFileClip',
+                            options: [
+                                { flag: 'moviepy', desc: 'Simple, Pythonique, avec audio' },
+                                { flag: 'ffmpeg-python', desc: 'Wrapper FFmpeg, puissant' }
+                            ],
+                            examples: [
+                                { code: 'from moviepy.editor import VideoFileClip, concatenate_videoclips\n\n# Decouper\nclip = VideoFileClip("video.mp4")\nsubclip = clip.subclip(10, 30)  # 10s a 30s\nsubclip.write_videofile("extrait.mp4")', desc: 'Decouper avec moviepy' },
+                                { code: '# Concatener plusieurs videos\nfrom moviepy.editor import VideoFileClip, concatenate_videoclips\n\nclip1 = VideoFileClip("video1.mp4")\nclip2 = VideoFileClip("video2.mp4")\nfinal = concatenate_videoclips([clip1, clip2])\nfinal.write_videofile("merged.mp4")', desc: 'Concatener videos' },
+                                { code: '# ffmpeg-python - plus bas niveau\nimport ffmpeg\n\n# Extraire segment\nffmpeg.input("video.mp4", ss=10, t=20).output("clip.mp4").run()\n\n# Redimensionner\nffmpeg.input("video.mp4").filter("scale", 640, 480).output("small.mp4").run()', desc: 'ffmpeg-python' }
+                            ],
+                            tips: ['moviepy gere l\'audio automatiquement'],
+                            warnings: ['pip install moviepy ffmpeg-python']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'tracking',
+                title: '🏃 Tracker et Suivre',
+                icon: 'fa-route',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Tracker avec ByteTrack',
+                        desc: 'multi-object tracking, IDs',
+                        details: {
+                            explanation: 'ByteTrack est un tracker multi-objets performant qui assigne des IDs persistants.',
+                            syntax: 'Integre dans ultralytics YOLO',
+                            options: [
+                                { flag: 'track_thresh', desc: 'Seuil de detection pour tracking' },
+                                { flag: 'match_thresh', desc: 'Seuil d\'association IoU' },
+                                { flag: 'track_buffer', desc: 'Frames avant de perdre un track' }
+                            ],
+                            examples: [
+                                { code: 'from ultralytics import YOLO\n\nmodel = YOLO("yolov8n.pt")\n\n# Tracking sur video\nresults = model.track(\n    source="video.mp4",\n    tracker="bytetrack.yaml",  # ou botsort.yaml\n    persist=True,  # Garde les IDs entre frames\n    show=True\n)', desc: 'ByteTrack avec YOLO' },
+                                { code: '# Acces aux IDs de tracking\nfor r in results:\n    if r.boxes.id is not None:\n        ids = r.boxes.id.int().cpu().tolist()\n        boxes = r.boxes.xyxy.cpu().numpy()\n        for box, track_id in zip(boxes, ids):\n            print(f"Object {track_id}: {box}")', desc: 'Extraire IDs' }
+                            ],
+                            tips: ['persist=True garde les IDs entre les frames'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser DeepSORT',
+                        desc: 'deep association, re-identification',
+                        details: {
+                            explanation: 'DeepSORT utilise des features visuelles pour une meilleure re-identification.',
+                            syntax: 'from deep_sort_realtime.deepsort_tracker import DeepSort',
+                            options: [
+                                { flag: 'max_age', desc: 'Frames max sans detection' },
+                                { flag: 'n_init', desc: 'Detections pour confirmer track' },
+                                { flag: 'embedder', desc: 'Modele d\'embedding' }
+                            ],
+                            examples: [
+                                { code: 'from deep_sort_realtime.deepsort_tracker import DeepSort\n\ntracker = DeepSort(max_age=30, n_init=3)\n\n# Pour chaque frame avec detections YOLO\ndetections = []  # Liste de [x1, y1, x2, y2, conf, class]\nfor box in yolo_boxes:\n    x1, y1, x2, y2 = box.xyxy[0].tolist()\n    conf = box.conf[0].item()\n    detections.append(([x1, y1, x2-x1, y2-y1], conf, "person"))\n\ntracks = tracker.update_tracks(detections, frame=frame)\nfor track in tracks:\n    if not track.is_confirmed():\n        continue\n    track_id = track.track_id\n    bbox = track.to_ltrb()  # x1, y1, x2, y2', desc: 'DeepSORT standalone' },
+                                { code: '# Avec YOLO integre (botsort inclut deep features)\nresults = model.track(\n    source="video.mp4",\n    tracker="botsort.yaml",  # Inclut re-identification\n    persist=True\n)', desc: 'BotSORT (similaire)' }
+                            ],
+                            tips: ['pip install deep-sort-realtime'],
+                            warnings: ['Plus lent que ByteTrack mais meilleure re-ID']
+                        }
+                    },
+                    {
+                        cmd: 'Tracker un objet unique',
+                        desc: 'CSRT, KCF, cv2.Tracker',
+                        details: {
+                            explanation: 'Trackers OpenCV pour suivre un seul objet selectionne manuellement.',
+                            syntax: 'tracker = cv2.TrackerCSRT_create()\ntracker.init(frame, bbox)',
+                            options: [
+                                { flag: 'CSRT', desc: 'Precis, plus lent' },
+                                { flag: 'KCF', desc: 'Rapide, moins precis' },
+                                { flag: 'MOSSE', desc: 'Tres rapide, basique' }
+                            ],
+                            examples: [
+                                { code: 'import cv2\n\ntracker = cv2.TrackerCSRT_create()\ncap = cv2.VideoCapture("video.mp4")\n\nret, frame = cap.read()\nbbox = cv2.selectROI("Select", frame, False)\ntracker.init(frame, bbox)\n\nwhile True:\n    ret, frame = cap.read()\n    if not ret:\n        break\n    \n    success, bbox = tracker.update(frame)\n    if success:\n        x, y, w, h = [int(v) for v in bbox]\n        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)\n    \n    cv2.imshow("Tracking", frame)\n    if cv2.waitKey(1) & 0xFF == ord("q"):\n        break', desc: 'CSRT tracker' }
+                            ],
+                            tips: ['CSRT est le meilleur compromis precision/vitesse'],
+                            warnings: ['Peut perdre l\'objet lors d\'occlusions']
+                        }
+                    },
+                    {
+                        cmd: 'Calculer l\'optical flow',
+                        desc: 'cv2.calcOpticalFlowPyrLK(), dense flow',
+                        details: {
+                            explanation: 'L\'optical flow estime le mouvement entre deux frames consecutives.',
+                            syntax: 'cv2.calcOpticalFlowPyrLK(prev, next, points, None)\ncv2.calcOpticalFlowFarneback(prev, next, ...)',
+                            options: [
+                                { flag: 'Lucas-Kanade (LK)', desc: 'Sparse - points specifiques' },
+                                { flag: 'Farneback', desc: 'Dense - tous les pixels' }
+                            ],
+                            examples: [
+                                { code: 'import cv2\nimport numpy as np\n\ncap = cv2.VideoCapture("video.mp4")\nret, prev = cap.read()\nprev_gray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)\n\n# Detecter points a suivre\npts = cv2.goodFeaturesToTrack(prev_gray, maxCorners=100, qualityLevel=0.3, minDistance=7)\n\nwhile True:\n    ret, frame = cap.read()\n    if not ret:\n        break\n    \n    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)\n    \n    # Calculer optical flow\n    new_pts, status, _ = cv2.calcOpticalFlowPyrLK(prev_gray, gray, pts, None)\n    \n    # Dessiner les vecteurs\n    for i, (new, old) in enumerate(zip(new_pts, pts)):\n        if status[i]:\n            a, b = new.ravel().astype(int)\n            c, d = old.ravel().astype(int)\n            cv2.line(frame, (a, b), (c, d), (0, 255, 0), 2)\n            cv2.circle(frame, (a, b), 3, (0, 0, 255), -1)\n    \n    prev_gray = gray.copy()\n    pts = new_pts', desc: 'Lucas-Kanade sparse' },
+                                { code: '# Dense optical flow\nflow = cv2.calcOpticalFlowFarneback(\n    prev_gray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0\n)\nmag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])', desc: 'Farneback dense' }
+                            ],
+                            tips: ['Sparse LK est plus rapide, dense donne plus d\'infos'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Detecter le mouvement',
+                        desc: 'background subtraction, MOG2',
+                        details: {
+                            explanation: 'Detecte les objets en mouvement par soustraction d\'arriere-plan.',
+                            syntax: 'backSub = cv2.createBackgroundSubtractorMOG2()\nmask = backSub.apply(frame)',
+                            options: [
+                                { flag: 'MOG2', desc: 'Gaussian Mixture, adaptatif' },
+                                { flag: 'KNN', desc: 'K-Nearest Neighbors' },
+                                { flag: 'history', desc: 'Nombre de frames pour le modele' }
+                            ],
+                            examples: [
+                                { code: 'import cv2\n\ncap = cv2.VideoCapture("video.mp4")\nbackSub = cv2.createBackgroundSubtractorMOG2(\n    history=500, varThreshold=16, detectShadows=True\n)\n\nwhile True:\n    ret, frame = cap.read()\n    if not ret:\n        break\n    \n    # Appliquer soustraction d\'arriere-plan\n    fg_mask = backSub.apply(frame)\n    \n    # Nettoyer le masque\n    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))\n    fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN, kernel)\n    \n    # Trouver contours des objets en mouvement\n    contours, _ = cv2.findContours(fg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)\n    for cnt in contours:\n        if cv2.contourArea(cnt) > 500:\n            x, y, w, h = cv2.boundingRect(cnt)\n            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)', desc: 'Detection mouvement MOG2' }
+                            ],
+                            tips: ['detectShadows=True detecte les ombres (gris dans le masque)'],
+                            warnings: ['Necessite une camera fixe']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'ocr-text',
+                title: '📝 Extraire du Texte (OCR)',
+                icon: 'fa-font',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'OCR avec Tesseract',
+                        desc: 'pytesseract, image_to_string()',
+                        details: {
+                            explanation: 'Tesseract est le moteur OCR open-source de reference.',
+                            syntax: 'import pytesseract\ntext = pytesseract.image_to_string(image)',
+                            options: [
+                                { flag: 'lang="fra"', desc: 'Langue (fra, eng, deu...)' },
+                                { flag: 'config="--psm 6"', desc: 'Mode de segmentation' },
+                                { flag: 'image_to_data()', desc: 'Avec positions des mots' }
+                            ],
+                            examples: [
+                                { code: 'import pytesseract\nfrom PIL import Image\n\nimg = Image.open("document.png")\ntext = pytesseract.image_to_string(img, lang="fra")\nprint(text)', desc: 'OCR simple' },
+                                { code: '# Avec preprocessing\nimport cv2\n\nimg = cv2.imread("document.png")\ngray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n# Binarisation\n_, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)\n\ntext = pytesseract.image_to_string(thresh, lang="fra")', desc: 'Avec preprocessing' },
+                                { code: '# Obtenir positions des mots\ndata = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)\nfor i, word in enumerate(data["text"]):\n    if word.strip():\n        x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]\n        print(f"{word}: ({x}, {y}, {w}, {h})")', desc: 'Avec coordonnees' }
+                            ],
+                            tips: ['pip install pytesseract + installer Tesseract'],
+                            warnings: ['Tesseract doit etre installe separement']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser EasyOCR',
+                        desc: 'easyocr.Reader(), multi-langue',
+                        details: {
+                            explanation: 'EasyOCR est simple a utiliser et supporte 80+ langues.',
+                            syntax: 'import easyocr\nreader = easyocr.Reader(["fr", "en"])\nresult = reader.readtext(image)',
+                            options: [
+                                { flag: '["fr", "en"]', desc: 'Langues a detecter' },
+                                { flag: 'gpu=True', desc: 'Utiliser GPU (defaut)' },
+                                { flag: 'detail=0', desc: 'Texte seul sans positions' }
+                            ],
+                            examples: [
+                                { code: 'import easyocr\n\nreader = easyocr.Reader(["fr", "en"], gpu=True)\nresult = reader.readtext("document.png")\n\nfor (bbox, text, conf) in result:\n    print(f"{text} ({conf:.2f})")', desc: 'EasyOCR basique' },
+                                { code: '# Dessiner les detections\nimport cv2\n\nimg = cv2.imread("document.png")\nfor (bbox, text, conf) in result:\n    pts = np.array(bbox, np.int32)\n    cv2.polylines(img, [pts], True, (0, 255, 0), 2)\n    cv2.putText(img, text, tuple(pts[0]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)', desc: 'Visualiser resultats' }
+                            ],
+                            tips: ['Premier appel telecharge les modeles (peut etre long)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'OCR avec PaddleOCR',
+                        desc: 'ppocr, detection + recognition',
+                        details: {
+                            explanation: 'PaddleOCR de Baidu est tres performant, surtout pour le chinois et documents complexes.',
+                            syntax: 'from paddleocr import PaddleOCR\nocr = PaddleOCR(use_angle_cls=True, lang="fr")',
+                            options: [
+                                { flag: 'lang', desc: 'Langue (fr, en, ch, etc.)' },
+                                { flag: 'use_angle_cls', desc: 'Corrige l\'orientation' },
+                                { flag: 'use_gpu', desc: 'Activer GPU' }
+                            ],
+                            examples: [
+                                { code: 'from paddleocr import PaddleOCR\n\nocr = PaddleOCR(use_angle_cls=True, lang="fr")\nresult = ocr.ocr("document.png", cls=True)\n\nfor line in result[0]:\n    bbox, (text, conf) = line\n    print(f"{text}: {conf:.2f}")', desc: 'PaddleOCR basique' },
+                                { code: '# Extraction structuree (tableaux)\nfrom paddleocr import PPStructure\n\ntable_engine = PPStructure(show_log=False)\nresult = table_engine("table.png")\nfor item in result:\n    if item["type"] == "table":\n        print(item["res"]["html"])  # HTML du tableau', desc: 'Extraction de tableaux' }
+                            ],
+                            tips: ['pip install paddlepaddle paddleocr'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Detecter les zones de texte',
+                        desc: 'EAST, CRAFT, text detection',
+                        details: {
+                            explanation: 'Detecte ou se trouve le texte avant l\'OCR (utile pour scenes naturelles).',
+                            syntax: 'Modeles EAST, CRAFT, DB',
+                            options: [
+                                { flag: 'EAST', desc: 'Efficace, OpenCV' },
+                                { flag: 'CRAFT', desc: 'Character-level detection' },
+                                { flag: 'DB', desc: 'Differentiable Binarization' }
+                            ],
+                            examples: [
+                                { code: '# EAST avec OpenCV (modele pre-entraine)\nimport cv2\n\nnet = cv2.dnn.readNet("frozen_east_text_detection.pb")\n\nblob = cv2.dnn.blobFromImage(img, 1.0, (320, 320), (123.68, 116.78, 103.94), True, False)\nnet.setInput(blob)\nscores, geometry = net.forward(["feature_fusion/Conv_7/Sigmoid", "feature_fusion/concat_3"])\n\n# Decoder les boxes (necessite post-processing)', desc: 'EAST OpenCV' },
+                                { code: '# CRAFT via easyocr (integre)\nimport easyocr\n\nreader = easyocr.Reader(["fr"])\n# readtext utilise CRAFT pour la detection\nresult = reader.readtext("scene.jpg")', desc: 'CRAFT via EasyOCR' }
+                            ],
+                            tips: ['EasyOCR et PaddleOCR integrent la detection'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'classification',
+                title: '🧠 Classifier des Images',
+                icon: 'fa-tags',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Classifier avec modele pre-entraine',
+                        desc: 'ResNet, EfficientNet, torchvision',
+                        details: {
+                            explanation: 'Utilise des modeles CNN pre-entraines sur ImageNet pour classifier des images.',
+                            syntax: 'from torchvision import models\nmodel = models.resnet50(weights="IMAGENET1K_V2")',
+                            options: [
+                                { flag: 'resnet18/50/101', desc: 'ResNet de differentes tailles' },
+                                { flag: 'efficientnet_b0-b7', desc: 'EfficientNet (leger)' },
+                                { flag: 'convnext_tiny/base', desc: 'ConvNeXt (moderne)' }
+                            ],
+                            examples: [
+                                { code: 'import torch\nfrom torchvision import models, transforms\nfrom PIL import Image\n\n# Charger modele\nmodel = models.efficientnet_b0(weights="IMAGENET1K_V1")\nmodel.eval()\n\n# Preprocessing ImageNet\npreprocess = transforms.Compose([\n    transforms.Resize(256),\n    transforms.CenterCrop(224),\n    transforms.ToTensor(),\n    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])\n])\n\n# Inference\nimg = Image.open("photo.jpg")\ninput_tensor = preprocess(img).unsqueeze(0)\n\nwith torch.no_grad():\n    output = model(input_tensor)\n    probs = torch.nn.functional.softmax(output[0], dim=0)\n    top5 = torch.topk(probs, 5)', desc: 'EfficientNet classification' }
+                            ],
+                            tips: ['EfficientNet est plus leger que ResNet pour precision similaire'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser Vision Transformers',
+                        desc: 'ViT, DeiT, Swin, timm',
+                        details: {
+                            explanation: 'Les Vision Transformers (ViT) appliquent l\'architecture Transformer aux images.',
+                            syntax: 'import timm\nmodel = timm.create_model("vit_base_patch16_224", pretrained=True)',
+                            options: [
+                                { flag: 'vit_base_patch16_224', desc: 'ViT original' },
+                                { flag: 'deit_base_patch16_224', desc: 'DeiT (Facebook)' },
+                                { flag: 'swin_base_patch4_window7_224', desc: 'Swin Transformer' }
+                            ],
+                            examples: [
+                                { code: 'import timm\nimport torch\nfrom PIL import Image\n\n# Charger ViT\nmodel = timm.create_model("vit_base_patch16_224", pretrained=True)\nmodel.eval()\n\n# Preprocessing\ndata_config = timm.data.resolve_model_data_config(model)\ntransform = timm.data.create_transform(**data_config, is_training=False)\n\n# Inference\nimg = Image.open("photo.jpg")\ninput_tensor = transform(img).unsqueeze(0)\n\nwith torch.no_grad():\n    output = model(input_tensor)\n    probs = torch.softmax(output, dim=1)\n    top_class = probs.argmax().item()', desc: 'ViT avec timm' },
+                                { code: '# Liste des modeles disponibles\nprint(timm.list_models("*vit*", pretrained=True)[:10])', desc: 'Lister modeles ViT' }
+                            ],
+                            tips: ['pip install timm - bibliotheque de modeles vision'],
+                            warnings: ['ViT necessite plus de donnees que CNN pour fine-tuning']
+                        }
+                    },
+                    {
+                        cmd: 'Classifier avec CLIP',
+                        desc: 'zero-shot, text-image similarity',
+                        details: {
+                            explanation: 'CLIP de OpenAI permet la classification zero-shot avec des descriptions textuelles.',
+                            syntax: 'import clip\nmodel, preprocess = clip.load("ViT-B/32")',
+                            options: [
+                                { flag: 'ViT-B/32', desc: 'Base, rapide' },
+                                { flag: 'ViT-L/14', desc: 'Large, plus precis' },
+                                { flag: 'ViT-L/14@336px', desc: 'Haute resolution' }
+                            ],
+                            examples: [
+                                { code: 'import clip\nimport torch\nfrom PIL import Image\n\n# Charger CLIP\ndevice = "cuda" if torch.cuda.is_available() else "cpu"\nmodel, preprocess = clip.load("ViT-B/32", device=device)\n\n# Preparer image et textes\nimage = preprocess(Image.open("photo.jpg")).unsqueeze(0).to(device)\nlabels = ["a dog", "a cat", "a bird", "a car"]\ntext = clip.tokenize(labels).to(device)\n\n# Classification zero-shot\nwith torch.no_grad():\n    image_features = model.encode_image(image)\n    text_features = model.encode_text(text)\n    \n    similarity = (image_features @ text_features.T).softmax(dim=-1)\n    probs = similarity[0].cpu().numpy()\n\nfor label, prob in zip(labels, probs):\n    print(f"{label}: {prob:.2%}")', desc: 'CLIP zero-shot' }
+                            ],
+                            tips: ['pip install git+https://github.com/openai/CLIP.git'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Fine-tuner un classifieur',
+                        desc: 'transfer learning, head replacement',
+                        details: {
+                            explanation: 'Adapte un modele pre-entraine a vos propres classes.',
+                            syntax: 'Remplacer la couche finale et entrainer',
+                            options: [
+                                { flag: 'Freeze backbone', desc: 'N\'entraine que la tete' },
+                                { flag: 'Unfreeze all', desc: 'Fine-tune complet' },
+                                { flag: 'Learning rate scheduling', desc: 'LR plus bas pour backbone' }
+                            ],
+                            examples: [
+                                { code: 'import torch\nimport torch.nn as nn\nfrom torchvision import models\n\n# Charger modele pre-entraine\nmodel = models.resnet50(weights="IMAGENET1K_V2")\n\n# Geler le backbone\nfor param in model.parameters():\n    param.requires_grad = False\n\n# Remplacer la tete pour 10 classes\nnum_classes = 10\nmodel.fc = nn.Linear(model.fc.in_features, num_classes)\n\n# Seule la nouvelle couche sera entrainee\noptimizer = torch.optim.Adam(model.fc.parameters(), lr=0.001)', desc: 'Transfer learning simple' },
+                                { code: '# Fine-tuning complet avec LR differentiel\nfor param in model.parameters():\n    param.requires_grad = True\n\noptimizer = torch.optim.Adam([\n    {"params": model.fc.parameters(), "lr": 1e-3},\n    {"params": model.layer4.parameters(), "lr": 1e-4},\n    {"params": model.layer3.parameters(), "lr": 1e-5},\n], lr=1e-5)', desc: 'Fine-tuning avec LR differentiel' }
+                            ],
+                            tips: ['Commencez par geler le backbone, puis degel progressif'],
+                            warnings: ['Fine-tuning complet necessite plus de donnees']
+                        }
+                    },
+                    {
+                        cmd: 'Extraire des features',
+                        desc: 'feature extraction, embeddings',
+                        details: {
+                            explanation: 'Utilise un modele comme extracteur de features pour d\'autres taches.',
+                            syntax: 'Retirer la couche finale ou utiliser intermediate layers',
+                            options: [
+                                { flag: 'Penultimate layer', desc: 'Avant softmax' },
+                                { flag: 'Feature pyramid', desc: 'Multi-scale features' }
+                            ],
+                            examples: [
+                                { code: 'import torch\nfrom torchvision import models\n\n# Charger modele sans la tete\nmodel = models.resnet50(weights="IMAGENET1K_V2")\nmodel = torch.nn.Sequential(*list(model.children())[:-1])  # Retire fc\nmodel.eval()\n\n# Extraire features\nwith torch.no_grad():\n    features = model(input_tensor)  # Shape: (batch, 2048, 1, 1)\n    features = features.flatten(1)   # Shape: (batch, 2048)', desc: 'ResNet feature extraction' },
+                                { code: '# Avec timm - plus simple\nimport timm\n\nmodel = timm.create_model("resnet50", pretrained=True, num_classes=0)  # num_classes=0 retire la tete\nmodel.eval()\n\nwith torch.no_grad():\n    features = model(input_tensor)  # (batch, feature_dim)', desc: 'timm feature extraction' }
+                            ],
+                            tips: ['num_classes=0 dans timm retire automatiquement la tete'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'generative',
+                title: '🎨 Generer et Transformer',
+                icon: 'fa-magic',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Generer avec Stable Diffusion',
+                        desc: 'diffusers, text-to-image',
+                        details: {
+                            explanation: 'Stable Diffusion genere des images a partir de descriptions textuelles.',
+                            syntax: 'from diffusers import StableDiffusionPipeline',
+                            options: [
+                                { flag: 'stable-diffusion-xl', desc: 'SDXL - haute qualite' },
+                                { flag: 'stable-diffusion-3', desc: 'SD3 - derniere version' },
+                                { flag: 'guidance_scale', desc: 'Adherence au prompt (7-15)' }
+                            ],
+                            examples: [
+                                { code: 'from diffusers import StableDiffusionXLPipeline\nimport torch\n\npipe = StableDiffusionXLPipeline.from_pretrained(\n    "stabilityai/stable-diffusion-xl-base-1.0",\n    torch_dtype=torch.float16\n).to("cuda")\n\nimage = pipe(\n    prompt="A serene mountain landscape at sunset, digital art",\n    negative_prompt="blurry, low quality",\n    num_inference_steps=30,\n    guidance_scale=7.5\n).images[0]\n\nimage.save("generated.png")', desc: 'SDXL text-to-image' },
+                                { code: '# SD3 (2024)\nfrom diffusers import StableDiffusion3Pipeline\n\npipe = StableDiffusion3Pipeline.from_pretrained(\n    "stabilityai/stable-diffusion-3-medium-diffusers",\n    torch_dtype=torch.float16\n).to("cuda")\n\nimage = pipe("A cat astronaut").images[0]', desc: 'Stable Diffusion 3' }
+                            ],
+                            tips: ['torch.float16 reduit la memoire GPU'],
+                            warnings: ['Necessite GPU avec 8GB+ VRAM']
+                        }
+                    },
+                    {
+                        cmd: 'Inpainting et outpainting',
+                        desc: 'fill missing regions, extend',
+                        details: {
+                            explanation: 'Remplit ou etend des regions d\'une image de maniere coherente.',
+                            syntax: 'from diffusers import StableDiffusionInpaintPipeline',
+                            options: [
+                                { flag: 'inpainting', desc: 'Remplir zones masquees' },
+                                { flag: 'outpainting', desc: 'Etendre les bords' }
+                            ],
+                            examples: [
+                                { code: 'from diffusers import StableDiffusionInpaintPipeline\nimport torch\nfrom PIL import Image\n\npipe = StableDiffusionInpaintPipeline.from_pretrained(\n    "runwayml/stable-diffusion-inpainting",\n    torch_dtype=torch.float16\n).to("cuda")\n\nimage = Image.open("photo.png")\nmask = Image.open("mask.png")  # Blanc = zones a remplir\n\nresult = pipe(\n    prompt="a beautiful garden",\n    image=image,\n    mask_image=mask\n).images[0]', desc: 'Inpainting' },
+                                { code: '# Outpainting - etendre l\'image\nimport numpy as np\n\n# Creer une image plus grande avec padding\noriginal = Image.open("photo.png")\nw, h = original.size\n\n# Nouvelle image avec padding\nextended = Image.new("RGB", (w + 200, h), (255, 255, 255))\nextended.paste(original, (100, 0))\n\n# Masque pour les bords\nmask = Image.new("L", extended.size, 0)\nmask.paste(255, (0, 0, 100, h))  # Gauche\nmask.paste(255, (w + 100, 0, w + 200, h))  # Droite', desc: 'Outpainting setup' }
+                            ],
+                            tips: ['Le masque doit etre blanc (255) pour les zones a modifier'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Super-resolution',
+                        desc: 'Real-ESRGAN, upscaling',
+                        details: {
+                            explanation: 'Augmente la resolution d\'une image tout en ajoutant des details.',
+                            syntax: 'from realesrgan import RealESRGANer',
+                            options: [
+                                { flag: 'Real-ESRGAN', desc: 'General purpose, x4' },
+                                { flag: 'ESRGAN', desc: 'Original, plus lent' },
+                                { flag: 'SwinIR', desc: 'Transformer-based' }
+                            ],
+                            examples: [
+                                { code: '# Real-ESRGAN (recommande)\nfrom basicsr.archs.rrdbnet_arch import RRDBNet\nfrom realesrgan import RealESRGANer\nimport cv2\n\nmodel = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)\n\nupsampler = RealESRGANer(\n    scale=4,\n    model_path="RealESRGAN_x4plus.pth",\n    model=model,\n    half=True  # FP16\n)\n\nimg = cv2.imread("low_res.jpg", cv2.IMREAD_UNCHANGED)\noutput, _ = upsampler.enhance(img, outscale=4)\ncv2.imwrite("high_res.jpg", output)', desc: 'Real-ESRGAN' },
+                                { code: '# CLI simple\n# pip install realesrgan\n# python -m realesrgan.inference_realesrgan -i input.jpg -o output.jpg -s 4', desc: 'Real-ESRGAN CLI' }
+                            ],
+                            tips: ['pip install realesrgan basicsr'],
+                            warnings: ['Le traitement peut etre long sur CPU']
+                        }
+                    },
+                    {
+                        cmd: 'Style transfer',
+                        desc: 'neural style, AdaIN',
+                        details: {
+                            explanation: 'Applique le style artistique d\'une image sur une autre.',
+                            syntax: 'Plusieurs methodes: NST, AdaIN, etc.',
+                            options: [
+                                { flag: 'Neural Style Transfer', desc: 'Optimisation iterative' },
+                                { flag: 'AdaIN', desc: 'Rapide, feed-forward' },
+                                { flag: 'Arbitrary style', desc: 'N\'importe quel style' }
+                            ],
+                            examples: [
+                                { code: '# AdaIN style transfer (rapide)\nimport torch\nfrom torchvision import transforms\nfrom PIL import Image\n\n# Charger modele AdaIN pre-entraine\n# (necessite implementation ou lib)\n\ndef style_transfer(content_img, style_img, model):\n    content = preprocess(content_img)\n    style = preprocess(style_img)\n    \n    with torch.no_grad():\n        output = model(content, style)\n    \n    return output', desc: 'AdaIN concept' },
+                                { code: '# Avec diffusers (style via prompt)\nfrom diffusers import StableDiffusionImg2ImgPipeline\n\npipe = StableDiffusionImg2ImgPipeline.from_pretrained(\n    "runwayml/stable-diffusion-v1-5",\n    torch_dtype=torch.float16\n).to("cuda")\n\nimage = Image.open("photo.jpg")\nresult = pipe(\n    prompt="in the style of Van Gogh, oil painting",\n    image=image,\n    strength=0.7,  # 0-1, plus haut = plus de changement\n    guidance_scale=7.5\n).images[0]', desc: 'Style via Stable Diffusion' }
+                            ],
+                            tips: ['Stable Diffusion img2img est plus flexible'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Image-to-image',
+                        desc: 'ControlNet, img2img, conditioning',
+                        details: {
+                            explanation: 'Transforme une image en utilisant des conditions (pose, edges, depth...).',
+                            syntax: 'from diffusers import ControlNetModel, StableDiffusionControlNetPipeline',
+                            options: [
+                                { flag: 'canny', desc: 'Condition sur les edges' },
+                                { flag: 'openpose', desc: 'Condition sur la pose' },
+                                { flag: 'depth', desc: 'Condition sur la profondeur' },
+                                { flag: 'scribble', desc: 'Condition sur croquis' }
+                            ],
+                            examples: [
+                                { code: 'from diffusers import ControlNetModel, StableDiffusionControlNetPipeline\nimport torch\nimport cv2\nfrom PIL import Image\n\n# Charger ControlNet Canny\ncontrolnet = ControlNetModel.from_pretrained(\n    "lllyasviel/sd-controlnet-canny",\n    torch_dtype=torch.float16\n)\n\npipe = StableDiffusionControlNetPipeline.from_pretrained(\n    "runwayml/stable-diffusion-v1-5",\n    controlnet=controlnet,\n    torch_dtype=torch.float16\n).to("cuda")\n\n# Preparer condition (edges)\nimg = cv2.imread("photo.jpg")\nedges = cv2.Canny(img, 100, 200)\ncanny_image = Image.fromarray(edges)\n\n# Generer\nresult = pipe(\n    prompt="a beautiful landscape, high quality",\n    image=canny_image\n).images[0]', desc: 'ControlNet Canny' },
+                                { code: '# ControlNet avec pose\nfrom controlnet_aux import OpenposeDetector\n\npose_detector = OpenposeDetector.from_pretrained("lllyasviel/ControlNet")\npose_image = pose_detector(image)', desc: 'ControlNet Pose' }
+                            ],
+                            tips: ['pip install controlnet-aux pour les detecteurs'],
+                            warnings: ['ControlNet double la memoire GPU necessaire']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'deploy-optimize',
+                title: '🚀 Optimiser et Deployer',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-lime-500',
+                commands: [
+                    {
+                        cmd: 'Exporter en ONNX',
+                        desc: 'torch.onnx.export(), onnxruntime',
+                        details: {
+                            explanation: 'ONNX est un format portable pour deployer des modeles sur differentes plateformes.',
+                            syntax: 'torch.onnx.export(model, dummy_input, "model.onnx")',
+                            options: [
+                                { flag: 'opset_version', desc: 'Version ONNX (13+)' },
+                                { flag: 'dynamic_axes', desc: 'Axes dynamiques (batch)' },
+                                { flag: 'input_names/output_names', desc: 'Noms des I/O' }
+                            ],
+                            examples: [
+                                { code: 'import torch\nimport onnxruntime as ort\n\n# Exporter PyTorch vers ONNX\nmodel.eval()\ndummy_input = torch.randn(1, 3, 224, 224)\n\ntorch.onnx.export(\n    model,\n    dummy_input,\n    "model.onnx",\n    opset_version=13,\n    input_names=["input"],\n    output_names=["output"],\n    dynamic_axes={"input": {0: "batch"}, "output": {0: "batch"}}\n)', desc: 'Export ONNX' },
+                                { code: '# Inference ONNX\nimport onnxruntime as ort\nimport numpy as np\n\nsession = ort.InferenceSession("model.onnx")\ninput_name = session.get_inputs()[0].name\n\n# Inference\nresult = session.run(None, {input_name: input_array.astype(np.float32)})', desc: 'Inference ONNX' }
+                            ],
+                            tips: ['ONNX permet le deploiement cross-platform'],
+                            warnings: ['Verifiez la compatibilite des operateurs']
+                        }
+                    },
+                    {
+                        cmd: 'Quantizer un modele',
+                        desc: 'int8, dynamic quantization',
+                        details: {
+                            explanation: 'La quantization reduit la taille du modele et accelere l\'inference.',
+                            syntax: 'torch.quantization.quantize_dynamic(model, {nn.Linear}, dtype=torch.qint8)',
+                            options: [
+                                { flag: 'Dynamic', desc: 'Quantize a l\'inference' },
+                                { flag: 'Static', desc: 'Quantize avec calibration' },
+                                { flag: 'QAT', desc: 'Quantization-Aware Training' }
+                            ],
+                            examples: [
+                                { code: 'import torch\n\n# Quantization dynamique (simple)\nmodel_quantized = torch.quantization.quantize_dynamic(\n    model,\n    {torch.nn.Linear, torch.nn.Conv2d},\n    dtype=torch.qint8\n)\n\n# Comparer tailles\noriginal_size = sum(p.numel() * p.element_size() for p in model.parameters())\nquantized_size = sum(p.numel() * p.element_size() for p in model_quantized.parameters())\nprint(f"Reduction: {original_size/quantized_size:.1f}x")', desc: 'Quantization dynamique' },
+                                { code: '# ONNX quantization\nfrom onnxruntime.quantization import quantize_dynamic, QuantType\n\nquantize_dynamic(\n    "model.onnx",\n    "model_quantized.onnx",\n    weight_type=QuantType.QUInt8\n)', desc: 'ONNX quantization' }
+                            ],
+                            tips: ['Dynamic est le plus simple, static est plus precis'],
+                            warnings: ['Peut reduire legerement la precision']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser TensorRT',
+                        desc: 'NVIDIA optimization, inference',
+                        details: {
+                            explanation: 'TensorRT optimise les modeles pour les GPU NVIDIA.',
+                            syntax: 'via ONNX ou torch-tensorrt',
+                            options: [
+                                { flag: 'FP16', desc: 'Half precision (2x speedup)' },
+                                { flag: 'INT8', desc: 'Max speedup, needs calibration' },
+                                { flag: 'Dynamic batching', desc: 'Batch size variable' }
+                            ],
+                            examples: [
+                                { code: '# Via torch-tensorrt\nimport torch_tensorrt\n\nmodel = model.eval().cuda()\n\n# Compiler avec TensorRT\ntrt_model = torch_tensorrt.compile(\n    model,\n    inputs=[torch_tensorrt.Input((1, 3, 224, 224))],\n    enabled_precisions={torch.float16}\n)\n\n# Inference\nwith torch.no_grad():\n    output = trt_model(input_tensor.cuda())', desc: 'torch-tensorrt' },
+                                { code: '# Ultralytics YOLO avec TensorRT\nfrom ultralytics import YOLO\n\nmodel = YOLO("yolov8n.pt")\nmodel.export(format="engine")  # Exporte en TensorRT\n\n# Utiliser le modele TensorRT\ntrt_model = YOLO("yolov8n.engine")\nresults = trt_model("image.jpg")', desc: 'YOLO TensorRT' }
+                            ],
+                            tips: ['FP16 donne souvent 2x speedup sans perte de precision'],
+                            warnings: ['Necessite GPU NVIDIA et CUDA']
+                        }
+                    },
+                    {
+                        cmd: 'Deployer avec Gradio',
+                        desc: 'demo interface, share',
+                        details: {
+                            explanation: 'Gradio cree des interfaces web pour vos modeles en quelques lignes.',
+                            syntax: 'import gradio as gr\ninterface = gr.Interface(fn, inputs, outputs)',
+                            options: [
+                                { flag: 'gr.Image()', desc: 'Input/output image' },
+                                { flag: 'gr.Video()', desc: 'Input/output video' },
+                                { flag: 'share=True', desc: 'URL publique temporaire' }
+                            ],
+                            examples: [
+                                { code: 'import gradio as gr\nfrom ultralytics import YOLO\n\nmodel = YOLO("yolov8n.pt")\n\ndef detect(image):\n    results = model(image)\n    return results[0].plot()\n\ndemo = gr.Interface(\n    fn=detect,\n    inputs=gr.Image(type="numpy"),\n    outputs=gr.Image(),\n    title="YOLO Object Detection"\n)\n\ndemo.launch(share=True)  # URL publique', desc: 'Gradio YOLO demo' },
+                                { code: '# Interface plus complexe\nwith gr.Blocks() as demo:\n    gr.Markdown("# Image Classifier")\n    with gr.Row():\n        input_img = gr.Image(type="pil")\n        output_label = gr.Label(num_top_classes=5)\n    \n    btn = gr.Button("Classify")\n    btn.click(fn=classify, inputs=input_img, outputs=output_label)\n\ndemo.launch()', desc: 'Gradio Blocks' }
+                            ],
+                            tips: ['pip install gradio'],
+                            warnings: ['share=True cree une URL publique temporaire']
+                        }
+                    },
+                    {
+                        cmd: 'Batch processing',
+                        desc: 'DataLoader, parallel processing',
+                        details: {
+                            explanation: 'Traite plusieurs images en batch pour maximiser l\'utilisation GPU.',
+                            syntax: 'DataLoader(dataset, batch_size=32, num_workers=4)',
+                            options: [
+                                { flag: 'batch_size', desc: 'Images par batch' },
+                                { flag: 'num_workers', desc: 'Processus de chargement' },
+                                { flag: 'pin_memory', desc: 'Accelere transfert GPU' }
+                            ],
+                            examples: [
+                                { code: 'from torch.utils.data import DataLoader, Dataset\nfrom torchvision import transforms\nfrom PIL import Image\nimport os\n\nclass ImageFolder(Dataset):\n    def __init__(self, folder, transform):\n        self.files = [os.path.join(folder, f) for f in os.listdir(folder)]\n        self.transform = transform\n    \n    def __len__(self):\n        return len(self.files)\n    \n    def __getitem__(self, idx):\n        img = Image.open(self.files[idx]).convert("RGB")\n        return self.transform(img), self.files[idx]\n\ndataset = ImageFolder("images/", transform)\nloader = DataLoader(dataset, batch_size=32, num_workers=4, pin_memory=True)\n\nmodel.eval()\nwith torch.no_grad():\n    for batch, paths in loader:\n        outputs = model(batch.cuda())\n        # Traiter outputs...', desc: 'Batch inference PyTorch' },
+                                { code: '# YOLO batch inference\nfrom ultralytics import YOLO\nimport os\n\nmodel = YOLO("yolov8n.pt")\n\n# Liste d\'images\nimages = [f"images/{f}" for f in os.listdir("images/")]\n\n# Inference batch\nresults = model(images, batch=16)  # 16 images a la fois', desc: 'YOLO batch' }
+                            ],
+                            tips: ['num_workers = nombre de CPU cores'],
+                            warnings: ['Ajustez batch_size selon la memoire GPU']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-video',
+                title: '🎯 Projet: Pipeline Video',
+                icon: 'fa-project-diagram',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Etape 1: Capture et configuration',
+                        desc: 'VideoCapture, resolution, FPS',
+                        details: {
+                            explanation: 'Configure la capture video avec les parametres optimaux.',
+                            syntax: 'Configuration initiale du pipeline',
                             options: [],
                             examples: [
-                                { code: 'from transformers import pipeline\n\nclassifier = pipeline("image-classification")\nresult = classifier("image.jpg")\nprint(result)', desc: 'Classification simple' },
-                                { code: 'classifier = pipeline("image-classification", model="google/vit-base-patch16-224")', desc: 'Avec ViT spécifique' }
+                                { code: 'import cv2\nfrom ultralytics import YOLO\nimport time\n\n# Configuration\nSOURCE = "video.mp4"  # ou 0 pour webcam\nOUTPUT = "output.mp4"\nCONF_THRESHOLD = 0.5\n\n# Initialisation\ncap = cv2.VideoCapture(SOURCE)\nfps = cap.get(cv2.CAP_PROP_FPS)\nwidth = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))\nheight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))\n\nprint(f"Video: {width}x{height} @ {fps} FPS")\n\n# VideoWriter pour output\nfourcc = cv2.VideoWriter_fourcc(*"mp4v")\nout = cv2.VideoWriter(OUTPUT, fourcc, fps, (width, height))\n\n# Charger modele\nmodel = YOLO("yolov8n.pt")', desc: 'Setup complet' }
                             ],
-                            tips: ['Vision Transformers (ViT) rivalisent avec les CNNs'],
+                            tips: ['Verifiez que la source existe avant de continuer'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Etape 2: Detection par frame',
+                        desc: 'YOLO, batch inference',
+                        details: {
+                            explanation: 'Applique la detection d\'objets sur chaque frame.',
+                            syntax: 'Boucle de detection',
+                            options: [],
+                            examples: [
+                                { code: '# Boucle principale\nframe_count = 0\nstart_time = time.time()\n\nwhile cap.isOpened():\n    ret, frame = cap.read()\n    if not ret:\n        break\n    \n    frame_count += 1\n    \n    # Detection YOLO\n    results = model(frame, conf=CONF_THRESHOLD, verbose=False)\n    \n    # Extraire detections\n    detections = []\n    for r in results:\n        for box in r.boxes:\n            x1, y1, x2, y2 = box.xyxy[0].tolist()\n            conf = box.conf[0].item()\n            cls = int(box.cls[0])\n            label = model.names[cls]\n            detections.append({\n                "bbox": [x1, y1, x2, y2],\n                "conf": conf,\n                "class": label\n            })\n    \n    print(f"Frame {frame_count}: {len(detections)} objets")', desc: 'Detection loop' }
+                            ],
+                            tips: ['verbose=False reduit les logs YOLO'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Etape 3: Tracking multi-objets',
+                        desc: 'ByteTrack, IDs persistence',
+                        details: {
+                            explanation: 'Ajoute le tracking pour suivre les objets entre les frames.',
+                            syntax: 'Utiliser model.track() au lieu de model()',
+                            options: [],
+                            examples: [
+                                { code: '# Avec tracking integre\nresults = model.track(\n    frame,\n    conf=CONF_THRESHOLD,\n    tracker="bytetrack.yaml",\n    persist=True,  # Garde les IDs\n    verbose=False\n)\n\n# Extraire avec IDs\ntracked_objects = []\nfor r in results:\n    if r.boxes.id is not None:\n        ids = r.boxes.id.int().cpu().tolist()\n        boxes = r.boxes.xyxy.cpu().numpy()\n        confs = r.boxes.conf.cpu().numpy()\n        classes = r.boxes.cls.int().cpu().tolist()\n        \n        for track_id, box, conf, cls in zip(ids, boxes, confs, classes):\n            tracked_objects.append({\n                "id": track_id,\n                "bbox": box.tolist(),\n                "conf": conf,\n                "class": model.names[cls]\n            })', desc: 'Tracking avec IDs' }
+                            ],
+                            tips: ['persist=True est crucial pour la continuite des IDs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Etape 4: Annotations et overlay',
+                        desc: 'draw boxes, trails, counters',
+                        details: {
+                            explanation: 'Dessine les annotations visuelles sur les frames.',
+                            syntax: 'cv2.rectangle(), cv2.putText(), trails',
+                            options: [],
+                            examples: [
+                                { code: '# Dictionnaire pour stocker les trails\ntrails = {}  # {id: [(x, y), ...]}\nMAX_TRAIL_LENGTH = 30\n\n# Dessiner annotations\nfor obj in tracked_objects:\n    x1, y1, x2, y2 = [int(v) for v in obj["bbox"]]\n    track_id = obj["id"]\n    label = f\'{obj["class"]} #{track_id}\'\n    \n    # Box\n    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)\n    \n    # Label avec fond\n    (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)\n    cv2.rectangle(frame, (x1, y1 - th - 10), (x1 + tw, y1), (0, 255, 0), -1)\n    cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1)\n    \n    # Trail (centre de la box)\n    cx, cy = (x1 + x2) // 2, (y1 + y2) // 2\n    if track_id not in trails:\n        trails[track_id] = []\n    trails[track_id].append((cx, cy))\n    if len(trails[track_id]) > MAX_TRAIL_LENGTH:\n        trails[track_id].pop(0)\n    \n    # Dessiner trail\n    points = trails[track_id]\n    for i in range(1, len(points)):\n        cv2.line(frame, points[i-1], points[i], (255, 0, 0), 2)\n\n# Compteur\ncv2.putText(frame, f"Objects: {len(tracked_objects)}", (10, 30),\n            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)', desc: 'Annotations completes' }
+                            ],
+                            tips: ['Les trails aident a visualiser les trajectoires'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Etape 5: Export et analytics',
+                        desc: 'VideoWriter, statistics, CSV',
+                        details: {
+                            explanation: 'Finalise le pipeline avec export video et statistiques.',
+                            syntax: 'Export et cleanup',
+                            options: [],
+                            examples: [
+                                { code: '# Dans la boucle - ecrire frame\nout.write(frame)\n\n# Affichage optionnel\ncv2.imshow("Tracking", frame)\nif cv2.waitKey(1) & 0xFF == ord("q"):\n    break\n\n# Apres la boucle - statistiques\nend_time = time.time()\ntotal_time = end_time - start_time\navg_fps = frame_count / total_time\n\nprint(f"\\n=== Statistiques ===")\nprint(f"Frames traites: {frame_count}")\nprint(f"Temps total: {total_time:.2f}s")\nprint(f"FPS moyen: {avg_fps:.2f}")\nprint(f"IDs uniques: {len(trails)}")\n\n# Cleanup\ncap.release()\nout.release()\ncv2.destroyAllWindows()\n\nprint(f"\\nVideo sauvegardee: {OUTPUT}")', desc: 'Export et stats' },
+                                { code: '# Export CSV des detections\nimport csv\n\nall_detections = []  # Collecter pendant la boucle\n\n# Dans la boucle:\nfor obj in tracked_objects:\n    all_detections.append({\n        "frame": frame_count,\n        "id": obj["id"],\n        "class": obj["class"],\n        "x1": obj["bbox"][0],\n        "y1": obj["bbox"][1],\n        "x2": obj["bbox"][2],\n        "y2": obj["bbox"][3],\n        "conf": obj["conf"]\n    })\n\n# Apres la boucle:\nwith open("detections.csv", "w", newline="") as f:\n    writer = csv.DictWriter(f, fieldnames=all_detections[0].keys())\n    writer.writeheader()\n    writer.writerows(all_detections)', desc: 'Export CSV' }
+                            ],
+                            tips: ['Le CSV permet l\'analyse post-traitement'],
                             warnings: []
                         }
                     }

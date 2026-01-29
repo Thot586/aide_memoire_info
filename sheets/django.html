@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire Django : gestion de projet, migrations, modèles et commandes manage.py.">
+    <meta name="description" content="Aide-mémoire Django Framework : workflows pratiques pour le développement web Python.">
     <title>Django Framework - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,14 @@
                     <i class="fab fa-python text-3xl text-emerald-400"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">Django Framework</h1>
-                <p class="text-slate-400">Gestion de projet : startproject, migrations, runserver et shell</p>
+                <p class="text-slate-400">Workflows pratiques pour le développement web Python</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -53,659 +53,852 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'project',
-                title: 'Gestion de projet',
-                icon: 'fa-folder-plus',
-                color: 'border-l-4 border-emerald-500',
+                id: 'start-project',
+                title: 'Démarrer un Projet',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'django-admin startproject nom_projet',
-                        desc: 'Créer un nouveau projet Django',
+                        cmd: 'Créer un nouveau projet Django',
+                        desc: 'django-admin startproject',
                         details: {
-                            explanation: 'Crée la structure de base d\'un projet Django avec les fichiers de configuration (settings.py, urls.py, etc.).',
+                            explanation: 'Crée la structure de base d\'un projet Django avec les fichiers de configuration essentiels.',
                             syntax: 'django-admin startproject nom_projet [directory]',
-                            options: [],
+                            options: [
+                                { flag: 'nom_projet', desc: 'Nom du projet (crée un dossier)' },
+                                { flag: '.', desc: 'Crée dans le dossier courant' }
+                            ],
                             examples: [
                                 { code: 'django-admin startproject monsite', desc: 'Crée le dossier monsite/' },
-                                { code: 'django-admin startproject config .', desc: 'Crée dans le dossier courant (config/)' }
+                                { code: 'django-admin startproject config .', desc: 'Crée dans le dossier courant' },
+                                { code: 'mkdir monprojet && cd monprojet\ndjango-admin startproject config .', desc: 'Structure recommandée' }
                             ],
-                            tips: ['Utilisez "config" comme nom si vous créez dans le dossier courant'],
-                            warnings: ['Le nom ne doit pas être un mot réservé Python (test, django, etc.)']
+                            tips: ['Utilisez "config" comme nom si vous créez dans le dossier courant pour éviter la confusion'],
+                            warnings: ['Le nom ne doit pas être un mot réservé Python (test, django, site, etc.)']
                         }
                     },
                     {
-                        cmd: 'python manage.py startapp nom_app',
-                        desc: 'Créer une nouvelle application',
+                        cmd: 'Créer une nouvelle application',
+                        desc: 'python manage.py startapp',
                         details: {
-                            explanation: 'Crée une application Django (models, views, etc.) au sein du projet.',
+                            explanation: 'Crée une application Django (models, views, urls, etc.) au sein du projet.',
                             syntax: 'python manage.py startapp nom_app',
-                            options: [],
-                            examples: [
-                                { code: 'python manage.py startapp blog', desc: 'Crée l\'app blog/' },
-                                { code: 'python manage.py startapp accounts', desc: 'App pour l\'authentification' }
+                            options: [
+                                { flag: 'nom_app', desc: 'Nom de l\'application à créer' }
                             ],
-                            tips: ['N\'oubliez pas d\'ajouter l\'app dans INSTALLED_APPS de settings.py'],
-                            warnings: []
+                            examples: [
+                                { code: 'python manage.py startapp blog', desc: 'Application blog' },
+                                { code: 'python manage.py startapp accounts', desc: 'Application authentification' },
+                                { code: 'python manage.py startapp api', desc: 'Application API' }
+                            ],
+                            tips: ['Ajoutez immédiatement l\'app dans INSTALLED_APPS de settings.py'],
+                            warnings: ['Noms au pluriel déconseillés (utilisez "blog" pas "blogs")']
                         }
                     },
                     {
-                        cmd: 'python manage.py runserver',
-                        desc: 'Lancer le serveur de développement',
+                        cmd: 'Lancer le serveur de développement',
+                        desc: 'python manage.py runserver',
                         details: {
-                            explanation: 'Démarre le serveur web de développement Django sur localhost:8000.',
+                            explanation: 'Démarre le serveur web de développement Django avec rechargement automatique.',
                             syntax: 'python manage.py runserver [adresse:port]',
                             options: [
-                                { flag: '8080', desc: 'Utiliser un port différent' },
-                                { flag: '0.0.0.0:8000', desc: 'Écouter sur toutes les interfaces' }
+                                { flag: '8000', desc: 'Port par défaut' },
+                                { flag: '8080', desc: 'Utiliser un autre port' },
+                                { flag: '0.0.0.0:8000', desc: 'Accessible depuis le réseau' }
                             ],
                             examples: [
-                                { code: 'python manage.py runserver', desc: 'Serveur sur 127.0.0.1:8000' },
-                                { code: 'python manage.py runserver 0.0.0.0:8080', desc: 'Accessible en réseau, port 8080' }
+                                { code: 'python manage.py runserver', desc: 'http://127.0.0.1:8000/' },
+                                { code: 'python manage.py runserver 8080', desc: 'Port 8080' },
+                                { code: 'python manage.py runserver 0.0.0.0:8000', desc: 'Accessible en réseau' }
                             ],
-                            tips: ['Le serveur redémarre automatiquement à chaque modification'],
-                            warnings: ['Ne pas utiliser en production !']
+                            tips: ['Le serveur redémarre automatiquement lors des modifications de code'],
+                            warnings: ['Ne pas utiliser en production ! Utilisez gunicorn ou uwsgi']
+                        }
+                    },
+                    {
+                        cmd: 'Configurer templates et fichiers statiques',
+                        desc: 'TEMPLATES et STATICFILES_DIRS',
+                        details: {
+                            explanation: 'Configure les chemins pour les templates HTML et les fichiers statiques (CSS, JS, images).',
+                            syntax: 'settings.py configuration',
+                            options: [
+                                { flag: 'TEMPLATES', desc: 'Configuration des templates' },
+                                { flag: 'STATICFILES_DIRS', desc: 'Dossiers de fichiers statiques' },
+                                { flag: 'STATIC_URL', desc: 'URL de base pour les statiques' }
+                            ],
+                            examples: [
+                                { code: '# settings.py\nTEMPLATES = [{\n    "BACKEND": "django.template.backends.django.DjangoTemplates",\n    "DIRS": [BASE_DIR / "templates"],\n    "APP_DIRS": True,\n    ...\n}]', desc: 'Configuration des templates' },
+                                { code: '# settings.py\nSTATIC_URL = "/static/"\nSTATICFILES_DIRS = [BASE_DIR / "static"]\nSTATIC_ROOT = BASE_DIR / "staticfiles"', desc: 'Configuration des statiques' }
+                            ],
+                            tips: ['Créez un dossier templates/ à la racine pour les templates partagés'],
+                            warnings: ['N\'oubliez pas STATIC_ROOT pour collectstatic en production']
+                        }
+                    },
+                    {
+                        cmd: 'Vérifier la configuration du projet',
+                        desc: 'python manage.py check',
+                        details: {
+                            explanation: 'Vérifie la configuration du projet Django pour détecter les problèmes potentiels.',
+                            syntax: 'python manage.py check [options]',
+                            options: [
+                                { flag: '--deploy', desc: 'Vérifications pour la production' },
+                                { flag: '--tag security', desc: 'Vérifications de sécurité' },
+                                { flag: '--database default', desc: 'Vérifier la connexion DB' }
+                            ],
+                            examples: [
+                                { code: 'python manage.py check', desc: 'Vérification de base' },
+                                { code: 'python manage.py check --deploy', desc: 'Avant déploiement' },
+                                { code: 'python manage.py check --tag security', desc: 'Audit sécurité' }
+                            ],
+                            tips: ['Lancez check --deploy avant chaque mise en production'],
+                            warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'database',
-                title: 'Base de données',
+                id: 'manage-database',
+                title: 'Gérer la Base de Données',
                 icon: 'fa-database',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'python manage.py makemigrations',
-                        desc: 'Créer les fichiers de migration',
+                        cmd: 'Créer/modifier la structure de la base',
+                        desc: 'makemigrations pour générer les fichiers de migration',
                         details: {
-                            explanation: 'Analyse les changements dans les modèles et crée les fichiers de migration correspondants.',
+                            explanation: 'Analyse les changements dans vos modèles et génère les fichiers de migration correspondants.',
                             syntax: 'python manage.py makemigrations [app_name]',
                             options: [
-                                { flag: '--name', desc: 'Nom personnalisé pour la migration' },
-                                { flag: '--empty', desc: 'Créer une migration vide' }
+                                { flag: 'app_name', desc: 'Créer pour une app spécifique' },
+                                { flag: '--name nom', desc: 'Nommer la migration' },
+                                { flag: '--empty', desc: 'Créer une migration vide' },
+                                { flag: '--dry-run', desc: 'Prévisualiser sans créer' }
                             ],
                             examples: [
-                                { code: 'python manage.py makemigrations', desc: 'Migrations pour toutes les apps' },
-                                { code: 'python manage.py makemigrations blog', desc: 'Migrations pour l\'app blog seulement' }
+                                { code: 'python manage.py makemigrations', desc: 'Toutes les apps' },
+                                { code: 'python manage.py makemigrations blog', desc: 'App blog uniquement' },
+                                { code: 'python manage.py makemigrations --name add_status_field', desc: 'Migration nommée' }
                             ],
-                            tips: ['Vérifiez toujours le contenu des migrations générées'],
-                            warnings: ['Ne modifiez pas les migrations après les avoir appliquées en production']
+                            tips: ['Commitez toujours vos fichiers de migration avec votre code'],
+                            warnings: ['Vérifiez les migrations générées avant de les appliquer']
                         }
                     },
                     {
-                        cmd: 'python manage.py migrate',
-                        desc: 'Appliquer les migrations',
+                        cmd: 'Appliquer les migrations',
+                        desc: 'migrate pour exécuter les migrations',
                         details: {
-                            explanation: 'Exécute les migrations en attente pour mettre à jour la structure de la base de données.',
+                            explanation: 'Applique les migrations en attente pour synchroniser la base de données avec vos modèles.',
                             syntax: 'python manage.py migrate [app_name] [migration_name]',
                             options: [
-                                { flag: '--fake', desc: 'Marquer comme appliqué sans exécuter' },
-                                { flag: '--plan', desc: 'Afficher le plan sans exécuter' }
+                                { flag: 'app_name', desc: 'Migrer une app spécifique' },
+                                { flag: '--fake', desc: 'Marquer comme appliquée sans exécuter' },
+                                { flag: '--plan', desc: 'Voir les migrations à appliquer' }
                             ],
                             examples: [
                                 { code: 'python manage.py migrate', desc: 'Appliquer toutes les migrations' },
-                                { code: 'python manage.py migrate blog 0001', desc: 'Migrer vers une version spécifique' },
-                                { code: 'python manage.py migrate blog zero', desc: 'Annuler toutes les migrations de blog' }
+                                { code: 'python manage.py migrate blog', desc: 'Migrer l\'app blog' },
+                                { code: 'python manage.py migrate --plan', desc: 'Voir le plan d\'exécution' }
                             ],
-                            tips: ['Faites un backup avant de migrer en production'],
-                            warnings: []
+                            tips: ['Faites un backup de la DB avant de migrer en production'],
+                            warnings: ['Certaines migrations sont irréversibles (perte de données)']
                         }
                     },
                     {
-                        cmd: 'python manage.py shell',
-                        desc: 'Ouvrir le shell Django',
+                        cmd: 'Annuler une migration',
+                        desc: 'migrate vers une migration antérieure',
                         details: {
-                            explanation: 'Lance un interpréteur Python avec l\'environnement Django chargé.',
-                            syntax: 'python manage.py shell',
+                            explanation: 'Revient à un état antérieur de la base de données en annulant les migrations.',
+                            syntax: 'python manage.py migrate app_name migration_number',
                             options: [
-                                { flag: '-i ipython', desc: 'Utiliser IPython si disponible' }
+                                { flag: '0001', desc: 'Revenir à la migration 0001' },
+                                { flag: 'zero', desc: 'Annuler toutes les migrations de l\'app' }
                             ],
                             examples: [
-                                { code: 'python manage.py shell', desc: 'Shell basique' },
-                                { code: '>>> from blog.models import Article', desc: 'Dans le shell: importer un modèle' },
-                                { code: '>>> Article.objects.all()', desc: 'Requête sur les articles' }
+                                { code: 'python manage.py migrate blog 0001', desc: 'Revenir à 0001_initial' },
+                                { code: 'python manage.py migrate blog zero', desc: 'Annuler toutes les migrations blog' },
+                                { code: 'python manage.py showmigrations', desc: 'Voir l\'état des migrations' }
                             ],
-                            tips: ['Idéal pour tester des requêtes ORM rapidement'],
-                            warnings: []
+                            tips: ['Utilisez showmigrations pour voir quelles migrations sont appliquées'],
+                            warnings: ['Les migrations d\'annulation peuvent échouer si les données ne sont pas compatibles']
+                        }
+                    },
+                    {
+                        cmd: 'Tester des requêtes ORM rapidement',
+                        desc: 'python manage.py shell',
+                        details: {
+                            explanation: 'Ouvre un shell Python interactif avec l\'environnement Django chargé.',
+                            syntax: 'python manage.py shell [options]',
+                            options: [
+                                { flag: '-i ipython', desc: 'Utiliser IPython' },
+                                { flag: '-i bpython', desc: 'Utiliser bpython' }
+                            ],
+                            examples: [
+                                { code: 'python manage.py shell\n>>> from blog.models import Post\n>>> Post.objects.all()', desc: 'Requête simple' },
+                                { code: '>>> Post.objects.filter(status="published").count()', desc: 'Filtrer et compter' },
+                                { code: '>>> Post.objects.create(title="Test", content="...")', desc: 'Créer un objet' }
+                            ],
+                            tips: ['Installez django-extensions pour shell_plus avec auto-import'],
+                            warnings: ['Les modifications sont persistées en base !']
                         }
                     }
                 ]
             },
             {
-                id: 'admin',
-                title: 'Administration',
-                icon: 'fa-user-shield',
-                color: 'border-l-4 border-purple-500',
-                commands: [
-                    {
-                        cmd: 'python manage.py createsuperuser',
-                        desc: 'Créer un super-utilisateur',
-                        details: {
-                            explanation: 'Crée un compte administrateur avec tous les droits pour accéder à /admin/.',
-                            syntax: 'python manage.py createsuperuser',
-                            options: [
-                                { flag: '--username', desc: 'Nom d\'utilisateur' },
-                                { flag: '--email', desc: 'Adresse email' }
-                            ],
-                            examples: [
-                                { code: 'python manage.py createsuperuser', desc: 'Mode interactif' },
-                                { code: 'python manage.py createsuperuser --username admin --email admin@test.com', desc: 'Avec options' }
-                            ],
-                            tips: ['Utilisez un mot de passe fort même en développement'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'python manage.py collectstatic',
-                        desc: 'Collecter les fichiers statiques',
-                        details: {
-                            explanation: 'Copie tous les fichiers statiques dans STATIC_ROOT pour le déploiement.',
-                            syntax: 'python manage.py collectstatic',
-                            options: [
-                                { flag: '--noinput', desc: 'Ne pas demander de confirmation' },
-                                { flag: '--clear', desc: 'Vider le dossier avant de copier' }
-                            ],
-                            examples: [
-                                { code: 'python manage.py collectstatic', desc: 'Collecter les statiques' },
-                                { code: 'python manage.py collectstatic --noinput', desc: 'Sans confirmation (CI/CD)' }
-                            ],
-                            tips: ['Nécessaire avant le déploiement en production'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'testing',
-                title: 'Tests & Debug',
-                icon: 'fa-bug',
-                color: 'border-l-4 border-red-500',
-                commands: [
-                    {
-                        cmd: 'python manage.py test',
-                        desc: 'Lancer les tests',
-                        details: {
-                            explanation: 'Exécute les tests unitaires Django définis dans les fichiers tests.py.',
-                            syntax: 'python manage.py test [app_name]',
-                            options: [
-                                { flag: '-v 2', desc: 'Mode verbeux' },
-                                { flag: '--keepdb', desc: 'Réutiliser la base de test' }
-                            ],
-                            examples: [
-                                { code: 'python manage.py test', desc: 'Tous les tests' },
-                                { code: 'python manage.py test blog.tests.ArticleTests', desc: 'Classe de test spécifique' }
-                            ],
-                            tips: ['Utilisez --keepdb pour accélérer les tests répétés'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'python manage.py check',
-                        desc: 'Vérifier le projet',
-                        details: {
-                            explanation: 'Vérifie la configuration du projet pour détecter les problèmes courants.',
-                            syntax: 'python manage.py check [--deploy]',
-                            options: [
-                                { flag: '--deploy', desc: 'Vérifications supplémentaires pour la production' }
-                            ],
-                            examples: [
-                                { code: 'python manage.py check', desc: 'Vérification basique' },
-                                { code: 'python manage.py check --deploy', desc: 'Vérification de déploiement' }
-                            ],
-                            tips: ['Lancez check --deploy avant de déployer'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'models-advanced',
-                title: 'Modèles avancés',
+                id: 'define-models',
+                title: 'Définir mes Modèles',
                 icon: 'fa-layer-group',
                 color: 'border-l-4 border-cyan-500',
                 commands: [
                     {
-                        cmd: 'ForeignKey / OneToOneField / ManyToManyField',
-                        desc: 'Relations entre modèles',
+                        cmd: 'Créer des relations entre modèles',
+                        desc: 'ForeignKey, ManyToMany, OneToOne',
                         details: {
-                            explanation: 'Django propose trois types de relations : ForeignKey (N-1), OneToOneField (1-1), et ManyToManyField (N-N).',
-                            syntax: 'field = models.ForeignKey(Model, on_delete=..., related_name="...")',
+                            explanation: 'Définit les relations entre vos modèles Django : un-à-plusieurs, plusieurs-à-plusieurs, un-à-un.',
+                            syntax: 'models.ForeignKey(Model, on_delete=...)',
                             options: [
-                                { flag: 'on_delete=CASCADE', desc: 'Supprimer les objets liés' },
-                                { flag: 'on_delete=PROTECT', desc: 'Empêcher la suppression' },
-                                { flag: 'on_delete=SET_NULL', desc: 'Mettre à NULL (null=True requis)' },
-                                { flag: 'related_name', desc: 'Nom de la relation inverse' }
+                                { flag: 'ForeignKey', desc: 'Relation un-à-plusieurs (N:1)' },
+                                { flag: 'ManyToManyField', desc: 'Relation plusieurs-à-plusieurs (N:N)' },
+                                { flag: 'OneToOneField', desc: 'Relation un-à-un (1:1)' },
+                                { flag: 'on_delete', desc: 'Comportement à la suppression' }
                             ],
                             examples: [
-                                { code: 'author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")', desc: 'Relation article → auteur' },
-                                { code: 'profile = models.OneToOneField(User, on_delete=models.CASCADE)', desc: 'Profil unique par user' },
-                                { code: 'tags = models.ManyToManyField(Tag, blank=True)', desc: 'Tags multiples' }
+                                { code: 'class Post(models.Model):\n    author = models.ForeignKey(\n        User,\n        on_delete=models.CASCADE,\n        related_name="posts"\n    )', desc: 'ForeignKey (auteur -> posts)' },
+                                { code: 'class Post(models.Model):\n    tags = models.ManyToManyField(\n        Tag,\n        related_name="posts",\n        blank=True\n    )', desc: 'ManyToMany (posts <-> tags)' },
+                                { code: 'class Profile(models.Model):\n    user = models.OneToOneField(\n        User,\n        on_delete=models.CASCADE\n    )', desc: 'OneToOne (user <-> profile)' }
                             ],
-                            tips: ['Utilisez related_name pour accéder aux objets liés : user.articles.all()'],
-                            warnings: ['Choisissez on_delete avec soin pour éviter les suppressions en cascade non voulues']
+                            tips: ['Utilisez related_name pour des requêtes inverses claires'],
+                            warnings: ['CASCADE supprime les objets liés, utilisez PROTECT pour éviter']
                         }
                     },
                     {
-                        cmd: 'Model.objects.filter() / exclude() / annotate()',
-                        desc: 'QuerySet avancé',
+                        cmd: 'Filtrer et requêter mes données',
+                        desc: 'QuerySet API (filter, exclude, annotate)',
                         details: {
-                            explanation: 'Les QuerySets permettent de chaîner des filtres et d\'agréger des données de façon lazy.',
-                            syntax: 'Model.objects.filter(**kwargs).exclude(**kwargs).annotate(...)',
+                            explanation: 'Utilise l\'ORM Django pour filtrer, exclure et annoter vos données.',
+                            syntax: 'Model.objects.filter(**kwargs)',
                             options: [
-                                { flag: '__exact / __iexact', desc: 'Égalité exacte (case insensitive)' },
-                                { flag: '__contains / __icontains', desc: 'Contient (case insensitive)' },
-                                { flag: '__gt / __gte / __lt / __lte', desc: 'Comparaisons numériques' },
-                                { flag: '__in', desc: 'Dans une liste de valeurs' }
+                                { flag: 'filter()', desc: 'Filtrer les résultats' },
+                                { flag: 'exclude()', desc: 'Exclure des résultats' },
+                                { flag: 'annotate()', desc: 'Ajouter des calculs' },
+                                { flag: 'aggregate()', desc: 'Calculs globaux' }
                             ],
                             examples: [
-                                { code: 'Article.objects.filter(status="published", author__username="john")', desc: 'Filtre avec relation' },
-                                { code: 'Article.objects.exclude(draft=True).order_by("-created")', desc: 'Exclure et trier' },
-                                { code: 'Author.objects.annotate(article_count=Count("articles"))', desc: 'Compter les articles par auteur' }
+                                { code: '# Filtres de base\nPost.objects.filter(status="published")\nPost.objects.filter(created__year=2024)\nPost.objects.filter(title__icontains="django")', desc: 'Filtres simples' },
+                                { code: '# Filtres avancés\nfrom django.db.models import Q, Count\nPost.objects.filter(\n    Q(status="published") | Q(author=user)\n)', desc: 'Filtres avec Q objects' },
+                                { code: '# Annotations\nfrom django.db.models import Count\nCategory.objects.annotate(\n    post_count=Count("posts")\n)', desc: 'Compter les posts par catégorie' }
                             ],
-                            tips: ['Les QuerySets sont lazy : la requête ne s\'exécute qu\'à l\'évaluation'],
-                            warnings: ['Évitez les requêtes N+1 : utilisez select_related() et prefetch_related()']
+                            tips: ['Les QuerySets sont lazy : évalués seulement quand nécessaire'],
+                            warnings: ['Évitez les requêtes dans les boucles (problème N+1)']
                         }
                     },
                     {
-                        cmd: 'select_related() / prefetch_related()',
-                        desc: 'Optimiser les requêtes',
+                        cmd: 'Optimiser mes requêtes',
+                        desc: 'select_related et prefetch_related',
                         details: {
-                            explanation: 'Évite les requêtes N+1 en chargeant les relations en une seule requête SQL.',
-                            syntax: 'Model.objects.select_related("fk_field").prefetch_related("m2m_field")',
+                            explanation: 'Optimise les requêtes en préchargeant les relations pour éviter les requêtes N+1.',
+                            syntax: 'QuerySet.select_related("relation")',
                             options: [
-                                { flag: 'select_related', desc: 'JOIN SQL pour ForeignKey/OneToOne' },
-                                { flag: 'prefetch_related', desc: 'Requête séparée pour ManyToMany' }
+                                { flag: 'select_related', desc: 'Pour ForeignKey et OneToOne (JOIN)' },
+                                { flag: 'prefetch_related', desc: 'Pour ManyToMany et reverse FK' }
                             ],
                             examples: [
-                                { code: 'Article.objects.select_related("author", "category")', desc: 'Charger auteur et catégorie en JOIN' },
-                                { code: 'Article.objects.prefetch_related("tags")', desc: 'Précharger les tags M2M' },
-                                { code: 'Article.objects.select_related("author").prefetch_related("comments__user")', desc: 'Combinaison' }
+                                { code: '# select_related pour ForeignKey\nPost.objects.select_related("author", "category")\n# Génère 1 seule requête avec JOIN', desc: 'Précharger author et category' },
+                                { code: '# prefetch_related pour ManyToMany\nPost.objects.prefetch_related("tags")\n# Génère 2 requêtes (posts + tags)', desc: 'Précharger les tags' },
+                                { code: '# Combinaison\nPost.objects.select_related("author").prefetch_related("tags", "comments")', desc: 'Optimisation complète' }
                             ],
-                            tips: ['Utilisez django-debug-toolbar pour visualiser les requêtes SQL'],
+                            tips: ['Utilisez django-debug-toolbar pour visualiser les requêtes'],
                             warnings: ['select_related ne fonctionne pas avec ManyToMany']
                         }
                     },
                     {
-                        cmd: 'class Meta / Manager personnalisé',
-                        desc: 'Configuration du modèle',
+                        cmd: 'Configurer un modèle',
+                        desc: 'class Meta (ordering, verbose_name)',
                         details: {
-                            explanation: 'La classe Meta configure le comportement du modèle. Un Manager personnalisé ajoute des méthodes de requête réutilisables.',
-                            syntax: 'class Meta: / class CustomManager(models.Manager):',
+                            explanation: 'Configure le comportement du modèle via la classe Meta interne.',
+                            syntax: 'class Meta: ...',
                             options: [
-                                { flag: 'ordering', desc: 'Ordre par défaut des résultats' },
-                                { flag: 'verbose_name', desc: 'Nom affiché dans l\'admin' },
-                                { flag: 'unique_together', desc: 'Contrainte d\'unicité multi-champs' },
+                                { flag: 'ordering', desc: 'Tri par défaut' },
+                                { flag: 'verbose_name', desc: 'Nom lisible singulier' },
+                                { flag: 'verbose_name_plural', desc: 'Nom lisible pluriel' },
+                                { flag: 'unique_together', desc: 'Contrainte d\'unicité' },
                                 { flag: 'indexes', desc: 'Index de base de données' }
                             ],
                             examples: [
-                                { code: 'class Meta:\\n    ordering = ["-created"]\\n    verbose_name = "Article"', desc: 'Configuration Meta' },
-                                { code: 'class PublishedManager(models.Manager):\\n    def get_queryset(self):\\n        return super().get_queryset().filter(status="published")', desc: 'Manager pour articles publiés' },
-                                { code: 'published = PublishedManager()  # Article.published.all()', desc: 'Utilisation du manager' }
+                                { code: 'class Post(models.Model):\n    title = models.CharField(max_length=200)\n    created = models.DateTimeField(auto_now_add=True)\n    \n    class Meta:\n        ordering = ["-created"]\n        verbose_name = "Article"\n        verbose_name_plural = "Articles"', desc: 'Configuration de base' },
+                                { code: 'class Meta:\n    unique_together = [["author", "slug"]]\n    indexes = [\n        models.Index(fields=["status", "-created"])\n    ]', desc: 'Contraintes et index' }
                             ],
-                            tips: ['Gardez objects comme manager par défaut et ajoutez des managers spécialisés'],
+                            tips: ['L\'ordering affecte toutes les requêtes par défaut'],
+                            warnings: ['unique_together est déprécié, utilisez UniqueConstraint']
+                        }
+                    },
+                    {
+                        cmd: 'Créer un Manager personnalisé',
+                        desc: 'objects = CustomManager()',
+                        details: {
+                            explanation: 'Crée un Manager personnalisé pour ajouter des méthodes de requête réutilisables.',
+                            syntax: 'class CustomManager(models.Manager): ...',
+                            options: [
+                                { flag: 'get_queryset()', desc: 'Personnaliser le QuerySet de base' },
+                                { flag: 'méthodes custom', desc: 'Ajouter des raccourcis de requête' }
+                            ],
+                            examples: [
+                                { code: 'class PublishedManager(models.Manager):\n    def get_queryset(self):\n        return super().get_queryset().filter(\n            status="published"\n        )\n\nclass Post(models.Model):\n    ...\n    objects = models.Manager()  # Manager par défaut\n    published = PublishedManager()  # Custom manager', desc: 'Manager pour les posts publiés' },
+                                { code: '# Utilisation\nPost.objects.all()  # Tous les posts\nPost.published.all()  # Seulement les publiés', desc: 'Utilisation du manager' }
+                            ],
+                            tips: ['Gardez objects comme manager par défaut pour l\'admin'],
                             warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'templates',
-                title: 'Templates',
-                icon: 'fa-file-code',
-                color: 'border-l-4 border-yellow-500',
-                commands: [
-                    {
-                        cmd: '{{ variable }} / {% tag %}',
-                        desc: 'Syntaxe de base des templates',
-                        details: {
-                            explanation: 'Django utilise {{ }} pour afficher des variables et {% %} pour la logique (tags).',
-                            syntax: '{{ variable }} / {% tag %} ... {% endtag %}',
-                            options: [
-                                { flag: '{{ var }}', desc: 'Afficher une variable' },
-                                { flag: '{{ var|filter }}', desc: 'Appliquer un filtre' },
-                                { flag: '{% tag %}', desc: 'Tag de template' },
-                                { flag: '{# comment #}', desc: 'Commentaire' }
-                            ],
-                            examples: [
-                                { code: '{{ article.title }}', desc: 'Afficher le titre' },
-                                { code: '{{ article.content|truncatewords:50 }}', desc: 'Tronquer à 50 mots' },
-                                { code: '{% if user.is_authenticated %}Bonjour {{ user.username }}{% endif %}', desc: 'Condition' }
-                            ],
-                            tips: ['Les variables sont automatiquement échappées (sécurité XSS)'],
-                            warnings: ['Utilisez {{ var|safe }} avec précaution pour le HTML non échappé']
-                        }
-                    },
-                    {
-                        cmd: '{% for %} / {% if %} / {% with %}',
-                        desc: 'Tags de contrôle',
-                        details: {
-                            explanation: 'Tags pour les boucles, conditions et assignation de variables temporaires.',
-                            syntax: '{% for item in list %} ... {% endfor %}',
-                            options: [
-                                { flag: 'forloop.counter', desc: 'Index à partir de 1' },
-                                { flag: 'forloop.first/last', desc: 'Premier/dernier élément' },
-                                { flag: '{% empty %}', desc: 'Bloc si liste vide' }
-                            ],
-                            examples: [
-                                { code: '{% for article in articles %}\\n  <h2>{{ article.title }}</h2>\\n{% empty %}\\n  <p>Aucun article</p>\\n{% endfor %}', desc: 'Boucle avec fallback' },
-                                { code: '{% if article.is_published and article.author == user %}\\n  <a href="{% url \\'edit\\' article.pk %}">Modifier</a>\\n{% endif %}', desc: 'Condition complexe' },
-                                { code: '{% with total=articles.count %}{{ total }} article{{ total|pluralize }}{% endwith %}', desc: 'Variable temporaire' }
-                            ],
-                            tips: ['Utilisez {% empty %} plutôt qu\'un {% if %} séparé pour les listes vides'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: '{% extends %} / {% block %} / {% include %}',
-                        desc: 'Héritage de templates',
-                        details: {
-                            explanation: 'Système d\'héritage pour éviter la duplication : un template de base avec des blocs remplaçables.',
-                            syntax: '{% extends "base.html" %} {% block name %}...{% endblock %}',
-                            options: [
-                                { flag: '{% extends %}', desc: 'Hériter d\'un template parent' },
-                                { flag: '{% block %}', desc: 'Définir un bloc remplaçable' },
-                                { flag: '{{ block.super }}', desc: 'Contenu du bloc parent' },
-                                { flag: '{% include %}', desc: 'Inclure un template partiel' }
-                            ],
-                            examples: [
-                                { code: '<!-- base.html -->\\n<!DOCTYPE html>\\n<html>\\n<body>{% block content %}{% endblock %}</body>\\n</html>', desc: 'Template de base' },
-                                { code: '{% extends "base.html" %}\\n{% block content %}\\n  <h1>{{ article.title }}</h1>\\n{% endblock %}', desc: 'Template enfant' },
-                                { code: '{% include "partials/_card.html" with article=item %}', desc: 'Inclure avec contexte' }
-                            ],
-                            tips: ['Structurez vos templates : base.html → layout/*.html → pages/*.html'],
-                            warnings: ['{% include %} peut impacter les performances si surutilisé']
-                        }
-                    },
-                    {
-                        cmd: '{% url %} / {% static %} / {% csrf_token %}',
-                        desc: 'Tags utilitaires',
-                        details: {
-                            explanation: 'Tags essentiels pour les URLs, fichiers statiques et la protection CSRF.',
-                            syntax: '{% url "name" args %} / {% static "path" %}',
-                            options: [
-                                { flag: '{% url %}', desc: 'Générer une URL depuis son nom' },
-                                { flag: '{% static %}', desc: 'URL vers un fichier statique' },
-                                { flag: '{% csrf_token %}', desc: 'Token CSRF pour les formulaires' }
-                            ],
-                            examples: [
-                                { code: '<a href="{% url \\'article_detail\\' article.pk %}">Lire</a>', desc: 'URL avec argument' },
-                                { code: '<link rel="stylesheet" href="{% static \\'css/style.css\\' %}">', desc: 'Fichier CSS statique' },
-                                { code: '<form method="post">\\n  {% csrf_token %}\\n  {{ form.as_p }}\\n  <button type="submit">Envoyer</button>\\n</form>', desc: 'Formulaire sécurisé' }
-                            ],
-                            tips: ['{% load static %} est requis en haut du template pour utiliser {% static %}'],
-                            warnings: ['Oubliez jamais {% csrf_token %} dans les formulaires POST']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'forms',
-                title: 'Formulaires',
-                icon: 'fa-edit',
-                color: 'border-l-4 border-pink-500',
-                commands: [
-                    {
-                        cmd: 'class MyForm(forms.Form / forms.ModelForm)',
-                        desc: 'Créer un formulaire',
-                        details: {
-                            explanation: 'Django Forms gère la validation et le rendu HTML. ModelForm génère automatiquement les champs depuis un modèle.',
-                            syntax: 'class MyForm(forms.Form): / class MyForm(forms.ModelForm):',
-                            options: [
-                                { flag: 'forms.CharField', desc: 'Champ texte' },
-                                { flag: 'forms.EmailField', desc: 'Email validé' },
-                                { flag: 'forms.ChoiceField', desc: 'Liste déroulante' },
-                                { flag: 'forms.FileField', desc: 'Upload de fichier' }
-                            ],
-                            examples: [
-                                { code: 'class ContactForm(forms.Form):\\n    email = forms.EmailField()\\n    message = forms.CharField(widget=forms.Textarea)', desc: 'Form simple' },
-                                { code: 'class ArticleForm(forms.ModelForm):\\n    class Meta:\\n        model = Article\\n        fields = ["title", "content", "category"]', desc: 'ModelForm' },
-                                { code: 'class ArticleForm(forms.ModelForm):\\n    class Meta:\\n        model = Article\\n        exclude = ["author", "created"]', desc: 'Exclure des champs' }
-                            ],
-                            tips: ['Préférez ModelForm pour les formulaires liés à un modèle'],
-                            warnings: ['Listez explicitement les fields pour éviter d\'exposer des champs sensibles']
-                        }
-                    },
-                    {
-                        cmd: 'form.is_valid() / form.cleaned_data / form.save()',
-                        desc: 'Valider et sauvegarder',
-                        details: {
-                            explanation: 'is_valid() déclenche la validation. cleaned_data contient les données nettoyées. save() persiste un ModelForm.',
-                            syntax: 'if form.is_valid(): data = form.cleaned_data',
-                            options: [
-                                { flag: 'is_valid()', desc: 'Retourne True si valide' },
-                                { flag: 'cleaned_data', desc: 'Dict des données validées' },
-                                { flag: 'errors', desc: 'Dict des erreurs par champ' },
-                                { flag: 'save(commit=False)', desc: 'Créer l\'objet sans sauvegarder' }
-                            ],
-                            examples: [
-                                { code: 'def contact_view(request):\\n    if request.method == "POST":\\n        form = ContactForm(request.POST)\\n        if form.is_valid():\\n            send_email(form.cleaned_data["email"], form.cleaned_data["message"])\\n            return redirect("success")\\n    else:\\n        form = ContactForm()\\n    return render(request, "contact.html", {"form": form})', desc: 'Pattern complet' },
-                                { code: 'article = form.save(commit=False)\\narticle.author = request.user\\narticle.save()', desc: 'Ajouter l\'auteur avant save' }
-                            ],
-                            tips: ['Utilisez commit=False pour modifier l\'objet avant sauvegarde'],
-                            warnings: ['N\'oubliez pas form.save_m2m() après commit=False si vous avez des ManyToMany']
-                        }
-                    },
-                    {
-                        cmd: 'def clean_field() / def clean()',
-                        desc: 'Validation personnalisée',
-                        details: {
-                            explanation: 'clean_<field>() valide un champ spécifique. clean() valide le formulaire entier (validation croisée).',
-                            syntax: 'def clean_field(self): / def clean(self):',
-                            options: [
-                                { flag: 'clean_<field>()', desc: 'Validation d\'un champ' },
-                                { flag: 'clean()', desc: 'Validation globale' },
-                                { flag: 'ValidationError', desc: 'Lever une erreur de validation' }
-                            ],
-                            examples: [
-                                { code: 'def clean_email(self):\\n    email = self.cleaned_data["email"]\\n    if not email.endswith("@company.com"):\\n        raise forms.ValidationError("Email entreprise requis")\\n    return email', desc: 'Valider l\'email' },
-                                { code: 'def clean(self):\\n    cleaned_data = super().clean()\\n    start = cleaned_data.get("start_date")\\n    end = cleaned_data.get("end_date")\\n    if start and end and start > end:\\n        raise forms.ValidationError("La date de fin doit être après le début")\\n    return cleaned_data', desc: 'Validation croisée' }
-                            ],
-                            tips: ['Retournez toujours la valeur nettoyée dans clean_<field>()'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'widget= / attrs={}',
-                        desc: 'Personnaliser le rendu',
-                        details: {
-                            explanation: 'Les widgets contrôlent le rendu HTML des champs. attrs ajoute des attributs HTML.',
-                            syntax: 'forms.CharField(widget=forms.Textarea(attrs={...}))',
-                            options: [
-                                { flag: 'forms.TextInput', desc: 'Input text' },
-                                { flag: 'forms.Textarea', desc: 'Zone de texte' },
-                                { flag: 'forms.Select', desc: 'Liste déroulante' },
-                                { flag: 'forms.CheckboxInput', desc: 'Case à cocher' }
-                            ],
-                            examples: [
-                                { code: 'message = forms.CharField(\\n    widget=forms.Textarea(attrs={\\n        "class": "form-control",\\n        "rows": 5,\\n        "placeholder": "Votre message..."\\n    })\\n)', desc: 'Textarea avec classes CSS' },
-                                { code: 'class Meta:\\n    widgets = {\\n        "content": forms.Textarea(attrs={"class": "editor"}),\\n        "published_date": forms.DateInput(attrs={"type": "date"})\\n    }', desc: 'Widgets dans ModelForm' }
-                            ],
-                            tips: ['Utilisez django-crispy-forms pour un rendu Bootstrap/Tailwind automatique'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'middleware-signals',
-                title: 'Middleware & Signals',
-                icon: 'fa-plug',
-                color: 'border-l-4 border-orange-500',
-                commands: [
-                    {
-                        cmd: 'class CustomMiddleware',
-                        desc: 'Créer un middleware',
-                        details: {
-                            explanation: 'Un middleware intercepte chaque requête/réponse. Utilisé pour l\'authentification, le logging, la modification des headers, etc.',
-                            syntax: 'class CustomMiddleware: def __init__(self, get_response): ...',
-                            options: [
-                                { flag: '__init__', desc: 'Configuration initiale (une fois)' },
-                                { flag: '__call__', desc: 'Exécuté à chaque requête' },
-                                { flag: 'process_view', desc: 'Avant l\'exécution de la vue' },
-                                { flag: 'process_exception', desc: 'En cas d\'exception' }
-                            ],
-                            examples: [
-                                { code: 'class TimingMiddleware:\\n    def __init__(self, get_response):\\n        self.get_response = get_response\\n\\n    def __call__(self, request):\\n        import time\\n        start = time.time()\\n        response = self.get_response(request)\\n        duration = time.time() - start\\n        response["X-Request-Duration"] = str(duration)\\n        return response', desc: 'Mesurer le temps de réponse' },
-                                { code: '# settings.py\\nMIDDLEWARE = [\\n    ...\\n    "myapp.middleware.TimingMiddleware",\\n]', desc: 'Enregistrer le middleware' }
-                            ],
-                            tips: ['L\'ordre des middlewares compte : ils s\'exécutent de haut en bas (requête) puis de bas en haut (réponse)'],
-                            warnings: ['Un middleware lent impacte TOUTES les requêtes']
-                        }
-                    },
-                    {
-                        cmd: '@receiver(signal) / signal.connect()',
-                        desc: 'Écouter des signaux',
-                        details: {
-                            explanation: 'Les signaux permettent de découpler le code en réagissant à des événements (save, delete, login...).',
-                            syntax: '@receiver(post_save, sender=Model)',
-                            options: [
-                                { flag: 'pre_save / post_save', desc: 'Avant/après sauvegarde' },
-                                { flag: 'pre_delete / post_delete', desc: 'Avant/après suppression' },
-                                { flag: 'm2m_changed', desc: 'Changement ManyToMany' },
-                                { flag: 'user_logged_in/out', desc: 'Connexion/déconnexion' }
-                            ],
-                            examples: [
-                                { code: 'from django.db.models.signals import post_save\\nfrom django.dispatch import receiver\\n\\n@receiver(post_save, sender=User)\\ndef create_profile(sender, instance, created, **kwargs):\\n    if created:\\n        Profile.objects.create(user=instance)', desc: 'Créer un profil automatiquement' },
-                                { code: '@receiver(post_delete, sender=Article)\\ndef delete_image(sender, instance, **kwargs):\\n    if instance.image:\\n        instance.image.delete(save=False)', desc: 'Supprimer l\'image associée' }
-                            ],
-                            tips: ['Placez les receivers dans un fichier signals.py et importez-le dans apps.py ready()'],
-                            warnings: ['Évitez la logique métier complexe dans les signaux : difficile à débugger']
-                        }
-                    },
-                    {
-                        cmd: 'apps.py ready() / dispatch_uid',
-                        desc: 'Configuration des signaux',
-                        details: {
-                            explanation: 'Les signaux doivent être enregistrés au démarrage. La méthode ready() de AppConfig est l\'endroit idéal.',
-                            syntax: 'def ready(self): import myapp.signals',
-                            options: [
-                                { flag: 'dispatch_uid', desc: 'ID unique pour éviter les doublons' }
-                            ],
-                            examples: [
-                                { code: '# myapp/apps.py\\nclass MyappConfig(AppConfig):\\n    name = "myapp"\\n\\n    def ready(self):\\n        import myapp.signals  # noqa', desc: 'Charger les signaux' },
-                                { code: '@receiver(post_save, sender=User, dispatch_uid="create_profile_once")\\ndef create_profile(sender, instance, created, **kwargs):\\n    ...', desc: 'Éviter les doublons' }
-                            ],
-                            tips: ['Le dispatch_uid évite que le signal soit enregistré plusieurs fois en dev (auto-reload)'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'views-advanced',
-                title: 'Vues avancées',
+                id: 'create-views',
+                title: 'Créer mes Vues',
                 icon: 'fa-eye',
                 color: 'border-l-4 border-indigo-500',
                 commands: [
                     {
-                        cmd: 'class MyView(View / TemplateView / ListView)',
-                        desc: 'Class-Based Views (CBV)',
+                        cmd: 'Créer une vue fonction simple',
+                        desc: 'def view(request): return HttpResponse',
                         details: {
-                            explanation: 'Les CBV utilisent l\'héritage pour réutiliser la logique. Django fournit des vues génériques pour les cas courants.',
-                            syntax: 'class MyView(ListView): model = Article',
+                            explanation: 'Crée une vue basée sur une fonction qui traite la requête et retourne une réponse.',
+                            syntax: 'def ma_vue(request): return HttpResponse(...)',
                             options: [
-                                { flag: 'View', desc: 'Vue de base (get, post...)' },
-                                { flag: 'TemplateView', desc: 'Rendu de template simple' },
-                                { flag: 'ListView', desc: 'Liste d\'objets' },
-                                { flag: 'DetailView', desc: 'Détail d\'un objet' },
-                                { flag: 'CreateView / UpdateView', desc: 'Formulaire création/édition' },
-                                { flag: 'DeleteView', desc: 'Suppression avec confirmation' }
+                                { flag: 'HttpResponse', desc: 'Réponse HTTP simple' },
+                                { flag: 'render()', desc: 'Rendre un template' },
+                                { flag: 'redirect()', desc: 'Rediriger vers une URL' },
+                                { flag: 'JsonResponse', desc: 'Réponse JSON' }
                             ],
                             examples: [
-                                { code: 'class ArticleListView(ListView):\\n    model = Article\\n    template_name = "blog/article_list.html"\\n    context_object_name = "articles"\\n    paginate_by = 10', desc: 'Liste paginée' },
-                                { code: 'class ArticleDetailView(DetailView):\\n    model = Article\\n    slug_field = "slug"\\n    slug_url_kwarg = "article_slug"', desc: 'Détail par slug' },
-                                { code: 'class ArticleCreateView(LoginRequiredMixin, CreateView):\\n    model = Article\\n    fields = ["title", "content"]\\n    success_url = reverse_lazy("article_list")\\n\\n    def form_valid(self, form):\\n        form.instance.author = self.request.user\\n        return super().form_valid(form)', desc: 'Création avec auteur' }
+                                { code: 'from django.shortcuts import render\n\ndef post_list(request):\n    posts = Post.objects.filter(status="published")\n    return render(request, "blog/post_list.html", {\n        "posts": posts\n    })', desc: 'Vue avec template' },
+                                { code: 'from django.http import JsonResponse\n\ndef api_posts(request):\n    posts = list(Post.objects.values("id", "title"))\n    return JsonResponse({"posts": posts})', desc: 'Vue JSON' },
+                                { code: 'from django.shortcuts import redirect\n\ndef my_redirect(request):\n    return redirect("blog:post_list")', desc: 'Redirection' }
                             ],
-                            tips: ['Utilisez les mixins comme LoginRequiredMixin pour les permissions'],
-                            warnings: ['Les CBV peuvent être complexes : préférez les FBV pour la logique simple']
+                            tips: ['Utilisez render() pour combiner template et contexte'],
+                            warnings: ['N\'oubliez pas de gérer les méthodes HTTP (GET, POST)']
                         }
                     },
                     {
-                        cmd: 'get_queryset() / get_context_data()',
-                        desc: 'Personnaliser les CBV',
+                        cmd: 'Utiliser une vue générique',
+                        desc: 'ListView, DetailView',
                         details: {
-                            explanation: 'Surcharger ces méthodes permet de filtrer les données et d\'ajouter du contexte au template.',
-                            syntax: 'def get_queryset(self): / def get_context_data(self, **kwargs):',
+                            explanation: 'Utilise les Class-Based Views génériques pour les opérations CRUD courantes.',
+                            syntax: 'class MyView(ListView): model = MyModel',
                             options: [
-                                { flag: 'get_queryset()', desc: 'Filtrer les objets affichés' },
-                                { flag: 'get_context_data()', desc: 'Ajouter des variables au contexte' },
-                                { flag: 'get_object()', desc: 'Récupérer l\'objet (DetailView)' }
+                                { flag: 'ListView', desc: 'Liste d\'objets' },
+                                { flag: 'DetailView', desc: 'Détail d\'un objet' },
+                                { flag: 'TemplateView', desc: 'Template simple' }
                             ],
                             examples: [
-                                { code: 'def get_queryset(self):\\n    return Article.objects.filter(\\n        status="published"\\n    ).select_related("author")', desc: 'Filtrer et optimiser' },
-                                { code: 'def get_context_data(self, **kwargs):\\n    context = super().get_context_data(**kwargs)\\n    context["categories"] = Category.objects.all()\\n    context["popular"] = Article.objects.order_by("-views")[:5]\\n    return context', desc: 'Ajouter du contexte' }
+                                { code: 'from django.views.generic import ListView\n\nclass PostListView(ListView):\n    model = Post\n    template_name = "blog/post_list.html"\n    context_object_name = "posts"\n    paginate_by = 10', desc: 'Liste paginée' },
+                                { code: 'from django.views.generic import DetailView\n\nclass PostDetailView(DetailView):\n    model = Post\n    template_name = "blog/post_detail.html"\n    context_object_name = "post"', desc: 'Détail d\'un post' }
                             ],
-                            tips: ['Toujours appeler super() pour conserver le comportement par défaut'],
+                            tips: ['context_object_name rend le template plus lisible'],
+                            warnings: ['Le template par défaut est app/model_list.html']
+                        }
+                    },
+                    {
+                        cmd: 'Créer une vue de formulaire',
+                        desc: 'CreateView, UpdateView, DeleteView',
+                        details: {
+                            explanation: 'Utilise les vues génériques pour créer, modifier et supprimer des objets.',
+                            syntax: 'class MyCreateView(CreateView): model = ...',
+                            options: [
+                                { flag: 'CreateView', desc: 'Créer un objet' },
+                                { flag: 'UpdateView', desc: 'Modifier un objet' },
+                                { flag: 'DeleteView', desc: 'Supprimer un objet' }
+                            ],
+                            examples: [
+                                { code: 'from django.views.generic.edit import CreateView\nfrom django.urls import reverse_lazy\n\nclass PostCreateView(CreateView):\n    model = Post\n    fields = ["title", "content", "status"]\n    template_name = "blog/post_form.html"\n    success_url = reverse_lazy("blog:post_list")', desc: 'Créer un post' },
+                                { code: 'class PostUpdateView(UpdateView):\n    model = Post\n    fields = ["title", "content", "status"]\n    template_name = "blog/post_form.html"\n    \n    def get_success_url(self):\n        return reverse("blog:post_detail", args=[self.object.pk])', desc: 'Modifier un post' },
+                                { code: 'class PostDeleteView(DeleteView):\n    model = Post\n    template_name = "blog/post_confirm_delete.html"\n    success_url = reverse_lazy("blog:post_list")', desc: 'Supprimer un post' }
+                            ],
+                            tips: ['Utilisez reverse_lazy() pour les attributs de classe'],
+                            warnings: ['DeleteView nécessite une confirmation POST']
+                        }
+                    },
+                    {
+                        cmd: 'Personnaliser queryset et contexte',
+                        desc: 'get_queryset() et get_context_data()',
+                        details: {
+                            explanation: 'Surcharge les méthodes des CBV pour personnaliser les données.',
+                            syntax: 'def get_queryset(self): ...',
+                            options: [
+                                { flag: 'get_queryset()', desc: 'Personnaliser les objets retournés' },
+                                { flag: 'get_context_data()', desc: 'Ajouter des variables au contexte' },
+                                { flag: 'get_object()', desc: 'Personnaliser la récupération d\'objet' }
+                            ],
+                            examples: [
+                                { code: 'class PostListView(ListView):\n    model = Post\n    \n    def get_queryset(self):\n        queryset = super().get_queryset()\n        return queryset.filter(\n            status="published"\n        ).select_related("author")', desc: 'Filtrer et optimiser' },
+                                { code: 'def get_context_data(self, **kwargs):\n    context = super().get_context_data(**kwargs)\n    context["categories"] = Category.objects.all()\n    context["popular_posts"] = Post.objects.order_by(\n        "-views"\n    )[:5]\n    return context', desc: 'Ajouter au contexte' }
+                            ],
+                            tips: ['Appelez toujours super() pour conserver le comportement de base'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: '@login_required / @permission_required',
-                        desc: 'Décorateurs de permissions',
+                        cmd: 'Protéger une vue',
+                        desc: '@login_required, @permission_required',
                         details: {
-                            explanation: 'Protégez vos vues avec des décorateurs qui vérifient l\'authentification et les permissions.',
-                            syntax: '@login_required(login_url="...") / @permission_required("app.permission")',
+                            explanation: 'Restreint l\'accès aux vues selon l\'authentification ou les permissions.',
+                            syntax: '@login_required / LoginRequiredMixin',
                             options: [
-                                { flag: '@login_required', desc: 'Utilisateur connecté requis' },
-                                { flag: '@permission_required', desc: 'Permission spécifique requise' },
-                                { flag: '@user_passes_test', desc: 'Test personnalisé' }
+                                { flag: '@login_required', desc: 'Requiert une connexion (FBV)' },
+                                { flag: 'LoginRequiredMixin', desc: 'Requiert une connexion (CBV)' },
+                                { flag: '@permission_required', desc: 'Requiert une permission (FBV)' },
+                                { flag: 'PermissionRequiredMixin', desc: 'Requiert une permission (CBV)' }
                             ],
                             examples: [
-                                { code: '@login_required\\ndef profile_view(request):\\n    return render(request, "profile.html")', desc: 'Vue protégée (FBV)' },
-                                { code: '@permission_required("blog.change_article", raise_exception=True)\\ndef edit_article(request, pk):\\n    ...', desc: 'Permission requise' },
-                                { code: '@user_passes_test(lambda u: u.is_staff)\\ndef admin_dashboard(request):\\n    ...', desc: 'Test personnalisé' }
+                                { code: 'from django.contrib.auth.decorators import login_required\n\n@login_required\ndef my_view(request):\n    return render(request, "private.html")', desc: 'Vue fonction protégée' },
+                                { code: 'from django.contrib.auth.mixins import LoginRequiredMixin\n\nclass PostCreateView(LoginRequiredMixin, CreateView):\n    model = Post\n    login_url = "/login/"', desc: 'CBV avec login requis' },
+                                { code: 'from django.contrib.auth.mixins import PermissionRequiredMixin\n\nclass PostDeleteView(PermissionRequiredMixin, DeleteView):\n    model = Post\n    permission_required = "blog.delete_post"', desc: 'Permission requise' }
                             ],
-                            tips: ['Pour les CBV, utilisez LoginRequiredMixin comme premier parent'],
-                            warnings: ['raise_exception=True renvoie 403, sinon redirige vers login']
+                            tips: ['Mettez les Mixins AVANT la vue générique dans l\'héritage'],
+                            warnings: ['Configurez LOGIN_URL dans settings.py']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'build-templates',
+                title: 'Construire mes Templates',
+                icon: 'fa-file-code',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Afficher variables et appliquer filtres',
+                        desc: '{{ var }} et {{ var|filter }}',
+                        details: {
+                            explanation: 'Affiche des variables et applique des filtres pour transformer les données.',
+                            syntax: '{{ variable|filter:argument }}',
+                            options: [
+                                { flag: 'lower/upper', desc: 'Minuscules/majuscules' },
+                                { flag: 'date', desc: 'Formater une date' },
+                                { flag: 'default', desc: 'Valeur par défaut' },
+                                { flag: 'truncatewords', desc: 'Tronquer le texte' },
+                                { flag: 'safe', desc: 'Ne pas échapper le HTML' }
+                            ],
+                            examples: [
+                                { code: '{{ post.title }}\n{{ post.title|upper }}\n{{ post.title|truncatewords:10 }}', desc: 'Affichage et filtres texte' },
+                                { code: '{{ post.created|date:"d/m/Y H:i" }}\n{{ post.created|timesince }}', desc: 'Formatage de date' },
+                                { code: '{{ post.content|default:"Pas de contenu" }}\n{{ post.content|safe }}', desc: 'Valeur par défaut et HTML' }
+                            ],
+                            tips: ['Chaînez les filtres : {{ var|lower|truncatewords:5 }}'],
+                            warnings: ['N\'utilisez |safe que pour du HTML de confiance']
+                        }
+                    },
+                    {
+                        cmd: 'Faire des boucles et conditions',
+                        desc: '{% for %} et {% if %}',
+                        details: {
+                            explanation: 'Utilise les tags de contrôle pour les boucles et conditions.',
+                            syntax: '{% for item in list %}...{% endfor %}',
+                            options: [
+                                { flag: 'forloop.counter', desc: 'Index de la boucle (1-based)' },
+                                { flag: 'forloop.first/last', desc: 'Premier/dernier élément' },
+                                { flag: '{% empty %}', desc: 'Si la liste est vide' }
+                            ],
+                            examples: [
+                                { code: '{% for post in posts %}\\n    \\x3Carticle>\\n        \\x3Ch2>{{ post.title }}\\x3C/h2>\\n        \\x3Cp>{{ post.content|truncatewords:30 }}\\x3C/p>\\n    \\x3C/article>\\n{% empty %}\\n    \\x3Cp>Aucun article.\\x3C/p>\\n{% endfor %}', desc: 'Boucle avec empty' },
+                                { code: '{% if user.is_authenticated %}\\n    \\x3Cp>Bonjour {{ user.username }}\\x3C/p>\\n{% elif user.is_staff %}\\n    \\x3Cp>Bienvenue admin\\x3C/p>\\n{% else %}\\n    \\x3Ca href="{% url \'login\' %}">Connexion\\x3C/a>\\n{% endif %}', desc: 'Conditions' }
+                            ],
+                            tips: ['Utilisez {% empty %} plutôt qu\'un {% if %} séparé'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Hériter d\'un template de base',
+                        desc: '{% extends %} et {% block %}',
+                        details: {
+                            explanation: 'Utilise l\'héritage de templates pour réutiliser une structure commune.',
+                            syntax: '{% extends "base.html" %}',
+                            options: [
+                                { flag: '{% extends %}', desc: 'Hériter d\'un template parent' },
+                                { flag: '{% block %}', desc: 'Définir une zone remplaçable' },
+                                { flag: '{{ block.super }}', desc: 'Inclure le contenu parent' }
+                            ],
+                            examples: [
+                                { code: '\\x3C!-- base.html -->\\n\\x3C!DOCTYPE html>\\n\\x3Chtml>\\n\\x3Chead>\\n    \\x3Ctitle>{% block title %}Mon Site{% endblock %}\\x3C/title>\\n\\x3C/head>\\n\\x3Cbody>\\n    \\x3Cnav>...\\x3C/nav>\\n    \\x3Cmain>\\n        {% block content %}{% endblock %}\\n    \\x3C/main>\\n    \\x3Cfooter>...\\x3C/footer>\\n\\x3C/body>\\n\\x3C/html>', desc: 'Template de base' },
+                                { code: '\\x3C!-- blog/post_list.html -->\\n{% extends "base.html" %}\\n\\n{% block title %}Blog - {{ block.super }}{% endblock %}\\n\\n{% block content %}\\n    \\x3Ch1>Articles\\x3C/h1>\\n    {% for post in posts %}\\n        ...\\n    {% endfor %}\\n{% endblock %}', desc: 'Template enfant' }
+                            ],
+                            tips: ['{% extends %} doit être la première ligne du template'],
+                            warnings: ['Tout contenu hors des blocks est ignoré dans un template enfant']
+                        }
+                    },
+                    {
+                        cmd: 'Générer URLs et inclure statiques',
+                        desc: '{% url %} et {% static %}',
+                        details: {
+                            explanation: 'Génère des URLs dynamiques et inclut des fichiers statiques.',
+                            syntax: '{% url "name" %} / {% static "path" %}',
+                            options: [
+                                { flag: '{% url %}', desc: 'Générer une URL par son nom' },
+                                { flag: '{% static %}', desc: 'URL vers fichier statique' },
+                                { flag: '{% load static %}', desc: 'Charger le tag static' }
+                            ],
+                            examples: [
+                                { code: '{% load static %}\n\n\\x3Clink rel="stylesheet" href="{% static \'css/style.css\' %}">\\n\\x3Cimg src="{% static \'images/logo.png\' %}" alt="Logo">\\n\\x3Cscript src="{% static \'js/main.js\' %}">\\x3C/script>', desc: 'Fichiers statiques' },
+                                { code: '\\x3Ca href="{% url \'blog:post_list\' %}">Blog\\x3C/a>\\n\\x3Ca href="{% url \'blog:post_detail\' post.pk %}">{{ post.title }}\\x3C/a>\\n\\x3Ca href="{% url \'blog:post_detail\' pk=post.pk %}">Détail\\x3C/a>', desc: 'URLs dynamiques' }
+                            ],
+                            tips: ['Utilisez les namespaces (app:name) pour éviter les conflits'],
+                            warnings: ['{% load static %} est requis dans chaque template']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'handle-forms',
+                title: 'Gérer les Formulaires',
+                icon: 'fa-edit',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Créer un formulaire',
+                        desc: 'Form et ModelForm',
+                        details: {
+                            explanation: 'Crée un formulaire Django pour la saisie et validation de données.',
+                            syntax: 'class MyForm(forms.Form/ModelForm): ...',
+                            options: [
+                                { flag: 'Form', desc: 'Formulaire personnalisé' },
+                                { flag: 'ModelForm', desc: 'Formulaire lié à un modèle' }
+                            ],
+                            examples: [
+                                { code: 'from django import forms\n\nclass ContactForm(forms.Form):\n    name = forms.CharField(max_length=100)\n    email = forms.EmailField()\n    message = forms.CharField(widget=forms.Textarea)', desc: 'Form personnalisé' },
+                                { code: 'from django import forms\nfrom .models import Post\n\nclass PostForm(forms.ModelForm):\n    class Meta:\n        model = Post\n        fields = ["title", "content", "status"]\n        # ou exclude = ["author", "created"]', desc: 'ModelForm' }
+                            ],
+                            tips: ['Préférez ModelForm pour les formulaires liés à un modèle'],
+                            warnings: ['Utilisez fields explicitement, pas __all__']
+                        }
+                    },
+                    {
+                        cmd: 'Valider et sauvegarder les données',
+                        desc: 'is_valid() et save()',
+                        details: {
+                            explanation: 'Valide les données soumises et sauvegarde en base de données.',
+                            syntax: 'form.is_valid() / form.save()',
+                            options: [
+                                { flag: 'is_valid()', desc: 'Valider le formulaire' },
+                                { flag: 'cleaned_data', desc: 'Données validées' },
+                                { flag: 'save()', desc: 'Sauvegarder (ModelForm)' },
+                                { flag: 'save(commit=False)', desc: 'Créer sans sauvegarder' }
+                            ],
+                            examples: [
+                                { code: 'def post_create(request):\n    if request.method == "POST":\n        form = PostForm(request.POST)\n        if form.is_valid():\n            post = form.save(commit=False)\n            post.author = request.user\n            post.save()\n            return redirect("blog:post_detail", pk=post.pk)\n    else:\n        form = PostForm()\n    return render(request, "blog/post_form.html", {"form": form})', desc: 'Vue complète' },
+                                { code: '# Accéder aux données validées\nemail = form.cleaned_data["email"]\nmessage = form.cleaned_data["message"]', desc: 'cleaned_data' }
+                            ],
+                            tips: ['commit=False permet d\'ajouter des champs avant save()'],
+                            warnings: ['Vérifiez toujours is_valid() avant d\'accéder à cleaned_data']
+                        }
+                    },
+                    {
+                        cmd: 'Ajouter une validation personnalisée',
+                        desc: 'clean_field() et clean()',
+                        details: {
+                            explanation: 'Ajoute des règles de validation personnalisées au formulaire.',
+                            syntax: 'def clean_field(self): ... / def clean(self): ...',
+                            options: [
+                                { flag: 'clean_<field>()', desc: 'Valider un champ spécifique' },
+                                { flag: 'clean()', desc: 'Validation globale' }
+                            ],
+                            examples: [
+                                { code: 'class PostForm(forms.ModelForm):\n    class Meta:\n        model = Post\n        fields = ["title", "content"]\n    \n    def clean_title(self):\n        title = self.cleaned_data["title"]\n        if "spam" in title.lower():\n            raise forms.ValidationError("Titre invalide")\n        return title', desc: 'Validation d\'un champ' },
+                                { code: 'def clean(self):\n    cleaned_data = super().clean()\n    start = cleaned_data.get("start_date")\n    end = cleaned_data.get("end_date")\n    if start and end and start > end:\n        raise forms.ValidationError(\n            "La date de fin doit être après la date de début"\n        )\n    return cleaned_data', desc: 'Validation croisée' }
+                            ],
+                            tips: ['clean_field() doit retourner la valeur nettoyée'],
+                            warnings: ['Utilisez ValidationError pour les erreurs']
+                        }
+                    },
+                    {
+                        cmd: 'Personnaliser le rendu des champs',
+                        desc: 'widgets et attrs',
+                        details: {
+                            explanation: 'Personnalise l\'apparence des champs de formulaire.',
+                            syntax: 'widgets = {"field": forms.Widget(attrs={...})}',
+                            options: [
+                                { flag: 'widgets', desc: 'Définir les widgets' },
+                                { flag: 'attrs', desc: 'Attributs HTML' },
+                                { flag: 'labels', desc: 'Labels personnalisés' },
+                                { flag: 'help_texts', desc: 'Textes d\'aide' }
+                            ],
+                            examples: [
+                                { code: 'class PostForm(forms.ModelForm):\n    class Meta:\n        model = Post\n        fields = ["title", "content"]\n        widgets = {\n            "title": forms.TextInput(attrs={\n                "class": "form-control",\n                "placeholder": "Titre de l\'article"\n            }),\n            "content": forms.Textarea(attrs={\n                "class": "form-control",\n                "rows": 10\n            })\n        }', desc: 'Widgets avec classes CSS' },
+                                { code: '# Dans le template\\n\\x3Cform method="post">\\n    {% csrf_token %}\\n    {{ form.as_p }}\\n    \\x3C!-- ou champ par champ -->\\n    {{ form.title.label_tag }}\\n    {{ form.title }}\\n    {{ form.title.errors }}\\n    \\x3Cbutton type="submit">Envoyer\\x3C/button>\\n\\x3C/form>', desc: 'Rendu dans template' }
+                            ],
+                            tips: ['Utilisez django-crispy-forms pour un rendu Bootstrap'],
+                            warnings: ['N\'oubliez jamais {% csrf_token %}']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'admin-site',
+                title: 'Administrer mon Site',
+                icon: 'fa-user-shield',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Créer un super-utilisateur',
+                        desc: 'createsuperuser',
+                        details: {
+                            explanation: 'Crée un compte administrateur avec tous les droits.',
+                            syntax: 'python manage.py createsuperuser',
+                            options: [
+                                { flag: '--username', desc: 'Nom d\'utilisateur' },
+                                { flag: '--email', desc: 'Adresse email' },
+                                { flag: '--noinput', desc: 'Mode non-interactif' }
+                            ],
+                            examples: [
+                                { code: 'python manage.py createsuperuser', desc: 'Mode interactif' },
+                                { code: 'python manage.py createsuperuser --username admin --email admin@example.com', desc: 'Avec options' },
+                                { code: '# En script (CI/CD)\nexport DJANGO_SUPERUSER_PASSWORD=secret\npython manage.py createsuperuser --noinput --username admin --email admin@test.com', desc: 'Non-interactif' }
+                            ],
+                            tips: ['Accédez à l\'admin via /admin/'],
+                            warnings: ['Utilisez un mot de passe fort en production']
+                        }
+                    },
+                    {
+                        cmd: 'Personnaliser l\'interface admin',
+                        desc: 'ModelAdmin, list_display, search_fields',
+                        details: {
+                            explanation: 'Configure l\'affichage et les fonctionnalités de l\'admin Django.',
+                            syntax: 'class MyModelAdmin(admin.ModelAdmin): ...',
+                            options: [
+                                { flag: 'list_display', desc: 'Colonnes à afficher' },
+                                { flag: 'list_filter', desc: 'Filtres latéraux' },
+                                { flag: 'search_fields', desc: 'Champs de recherche' },
+                                { flag: 'ordering', desc: 'Tri par défaut' },
+                                { flag: 'readonly_fields', desc: 'Champs en lecture seule' }
+                            ],
+                            examples: [
+                                { code: 'from django.contrib import admin\nfrom .models import Post\n\n@admin.register(Post)\nclass PostAdmin(admin.ModelAdmin):\n    list_display = ["title", "author", "status", "created"]\n    list_filter = ["status", "created", "author"]\n    search_fields = ["title", "content"]\n    ordering = ["-created"]\n    date_hierarchy = "created"', desc: 'Configuration de base' },
+                                { code: '@admin.register(Post)\nclass PostAdmin(admin.ModelAdmin):\n    list_display = ["title", "author", "status", "word_count"]\n    \n    @admin.display(description="Nombre de mots")\n    def word_count(self, obj):\n        return len(obj.content.split())', desc: 'Champ calculé' }
+                            ],
+                            tips: ['Utilisez @admin.register au lieu de admin.site.register'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Préparer les fichiers statiques pour production',
+                        desc: 'collectstatic',
+                        details: {
+                            explanation: 'Rassemble tous les fichiers statiques dans STATIC_ROOT pour le déploiement.',
+                            syntax: 'python manage.py collectstatic',
+                            options: [
+                                { flag: '--noinput', desc: 'Pas de confirmation' },
+                                { flag: '--clear', desc: 'Effacer avant de collecter' },
+                                { flag: '--dry-run', desc: 'Simuler sans copier' }
+                            ],
+                            examples: [
+                                { code: '# settings.py\nSTATIC_ROOT = BASE_DIR / "staticfiles"\n\n# Terminal\npython manage.py collectstatic', desc: 'Collecte de base' },
+                                { code: 'python manage.py collectstatic --noinput --clear', desc: 'Pour CI/CD' }
+                            ],
+                            tips: ['Configurez whitenoise pour servir les statiques en production'],
+                            warnings: ['Ne servez jamais les statiques avec Django en production']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'extend-behavior',
+                title: 'Étendre le Comportement',
+                icon: 'fa-plug',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Intercepter les requêtes',
+                        desc: 'Middleware personnalisé',
+                        details: {
+                            explanation: 'Crée un middleware pour intercepter et traiter les requêtes/réponses.',
+                            syntax: 'class MyMiddleware: def __call__(self, request): ...',
+                            options: [
+                                { flag: '__call__()', desc: 'Traitement principal' },
+                                { flag: 'process_view()', desc: 'Avant l\'appel de la vue' },
+                                { flag: 'process_exception()', desc: 'En cas d\'exception' }
+                            ],
+                            examples: [
+                                { code: '# myapp/middleware.py\nclass TimingMiddleware:\n    def __init__(self, get_response):\n        self.get_response = get_response\n    \n    def __call__(self, request):\n        import time\n        start = time.time()\n        response = self.get_response(request)\n        duration = time.time() - start\n        response["X-Request-Duration"] = str(duration)\n        return response', desc: 'Middleware de timing' },
+                                { code: '# settings.py\nMIDDLEWARE = [\n    ...\n    "myapp.middleware.TimingMiddleware",\n]', desc: 'Activation' }
+                            ],
+                            tips: ['L\'ordre des middlewares est important (LIFO)'],
+                            warnings: ['Un middleware lent affecte toutes les requêtes']
+                        }
+                    },
+                    {
+                        cmd: 'Réagir aux événements',
+                        desc: 'Signaux pre_save, post_save, pre_delete',
+                        details: {
+                            explanation: 'Utilise les signaux Django pour exécuter du code lors d\'événements.',
+                            syntax: '@receiver(signal, sender=Model)',
+                            options: [
+                                { flag: 'pre_save', desc: 'Avant la sauvegarde' },
+                                { flag: 'post_save', desc: 'Après la sauvegarde' },
+                                { flag: 'pre_delete', desc: 'Avant la suppression' },
+                                { flag: 'post_delete', desc: 'Après la suppression' },
+                                { flag: 'm2m_changed', desc: 'Modification ManyToMany' }
+                            ],
+                            examples: [
+                                { code: '# signals.py\nfrom django.db.models.signals import post_save\nfrom django.dispatch import receiver\nfrom .models import User, Profile\n\n@receiver(post_save, sender=User)\ndef create_profile(sender, instance, created, **kwargs):\n    if created:\n        Profile.objects.create(user=instance)', desc: 'Créer un profil automatiquement' },
+                                { code: '@receiver(pre_save, sender=Post)\ndef generate_slug(sender, instance, **kwargs):\n    if not instance.slug:\n        from django.utils.text import slugify\n        instance.slug = slugify(instance.title)', desc: 'Générer un slug' }
+                            ],
+                            tips: ['Créez un fichier signals.py dédié pour l\'organisation'],
+                            warnings: ['Les signaux peuvent rendre le code difficile à suivre']
+                        }
+                    },
+                    {
+                        cmd: 'Configurer les signaux',
+                        desc: 'apps.py ready()',
+                        details: {
+                            explanation: 'Configure l\'import des signaux dans apps.py pour qu\'ils soient actifs.',
+                            syntax: 'def ready(self): import app.signals',
+                            options: [
+                                { flag: 'ready()', desc: 'Méthode appelée au démarrage' }
+                            ],
+                            examples: [
+                                { code: '# myapp/apps.py\nfrom django.apps import AppConfig\n\nclass MyappConfig(AppConfig):\n    default_auto_field = "django.db.models.BigAutoField"\n    name = "myapp"\n    \n    def ready(self):\n        import myapp.signals  # noqa', desc: 'Configuration apps.py' },
+                                { code: '# myapp/__init__.py\ndefault_app_config = "myapp.apps.MyappConfig"', desc: 'Alternative __init__.py' }
+                            ],
+                            tips: ['Le # noqa évite les warnings d\'import inutilisé'],
+                            warnings: ['Sans ready(), les signaux ne sont pas connectés']
+                        }
+                    },
+                    {
+                        cmd: 'Créer des commandes personnalisées',
+                        desc: 'management/commands/',
+                        details: {
+                            explanation: 'Crée des commandes manage.py personnalisées.',
+                            syntax: 'class Command(BaseCommand): def handle(self, *args, **options): ...',
+                            options: [
+                                { flag: 'add_arguments()', desc: 'Définir les arguments' },
+                                { flag: 'handle()', desc: 'Logique de la commande' },
+                                { flag: 'self.stdout.write()', desc: 'Afficher des messages' }
+                            ],
+                            examples: [
+                                { code: '# myapp/management/commands/cleanup_old_posts.py\nfrom django.core.management.base import BaseCommand\nfrom datetime import timedelta\nfrom django.utils import timezone\nfrom blog.models import Post\n\nclass Command(BaseCommand):\n    help = "Supprime les brouillons de plus de 30 jours"\n    \n    def add_arguments(self, parser):\n        parser.add_argument("--days", type=int, default=30)\n    \n    def handle(self, *args, **options):\n        days = options["days"]\n        cutoff = timezone.now() - timedelta(days=days)\n        deleted, _ = Post.objects.filter(\n            status="draft", created__lt=cutoff\n        ).delete()\n        self.stdout.write(\n            self.style.SUCCESS(f"{deleted} brouillons supprimés")\n        )', desc: 'Commande de nettoyage' },
+                                { code: '# Utilisation\npython manage.py cleanup_old_posts --days 60', desc: 'Exécution' }
+                            ],
+                            tips: ['Utilisez self.style.SUCCESS/ERROR pour les couleurs'],
+                            warnings: ['Créez le dossier management/commands/ avec __init__.py']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'test-debug',
+                title: 'Tester et Déboguer',
+                icon: 'fa-bug',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Lancer mes tests unitaires',
+                        desc: 'python manage.py test',
+                        details: {
+                            explanation: 'Exécute les tests Django avec le test runner intégré.',
+                            syntax: 'python manage.py test [app_name]',
+                            options: [
+                                { flag: 'app_name', desc: 'Tester une app spécifique' },
+                                { flag: '-v 2', desc: 'Mode verbeux' },
+                                { flag: '--keepdb', desc: 'Garder la DB de test' },
+                                { flag: '-k pattern', desc: 'Filtrer par nom' }
+                            ],
+                            examples: [
+                                { code: 'python manage.py test', desc: 'Tous les tests' },
+                                { code: 'python manage.py test blog', desc: 'Tests de l\'app blog' },
+                                { code: 'python manage.py test blog.tests.test_views', desc: 'Module spécifique' },
+                                { code: 'python manage.py test -v 2 --keepdb', desc: 'Verbeux avec DB persistante' }
+                            ],
+                            tips: ['Utilisez --keepdb pour accélérer les tests répétés'],
+                            warnings: ['Les tests utilisent une DB séparée (test_*)']
+                        }
+                    },
+                    {
+                        cmd: 'Vérifier la configuration avant déploiement',
+                        desc: 'python manage.py check --deploy',
+                        details: {
+                            explanation: 'Vérifie les paramètres de sécurité et de production.',
+                            syntax: 'python manage.py check --deploy',
+                            options: [
+                                { flag: '--deploy', desc: 'Vérifications de production' },
+                                { flag: '--fail-level WARNING', desc: 'Échouer sur les warnings' }
+                            ],
+                            examples: [
+                                { code: 'python manage.py check --deploy', desc: 'Vérification déploiement' },
+                                { code: '# Points vérifiés :\n# - DEBUG = False\n# - ALLOWED_HOSTS configuré\n# - SECURE_SSL_REDIRECT\n# - SESSION_COOKIE_SECURE\n# - CSRF_COOKIE_SECURE\n# - SECRET_KEY sécurisé', desc: 'Éléments vérifiés' }
+                            ],
+                            tips: ['Intégrez cette commande dans votre CI/CD'],
+                            warnings: ['Corrigez tous les warnings avant le déploiement']
+                        }
+                    },
+                    {
+                        cmd: 'Déboguer avec django-debug-toolbar',
+                        desc: 'Installation et configuration',
+                        details: {
+                            explanation: 'Installe la toolbar de débogage pour analyser les requêtes, SQL, templates.',
+                            syntax: 'pip install django-debug-toolbar',
+                            options: [
+                                { flag: 'SQL', desc: 'Voir les requêtes SQL' },
+                                { flag: 'Templates', desc: 'Variables de contexte' },
+                                { flag: 'Cache', desc: 'Opérations de cache' },
+                                { flag: 'Signals', desc: 'Signaux émis' }
+                            ],
+                            examples: [
+                                { code: '# Installation\npip install django-debug-toolbar\n\n# settings.py\nINSTALLED_APPS = [\n    ...\n    "debug_toolbar",\n]\n\nMIDDLEWARE = [\n    "debug_toolbar.middleware.DebugToolbarMiddleware",\n    ...\n]\n\nINTERNAL_IPS = ["127.0.0.1"]', desc: 'Configuration de base' },
+                                { code: '# urls.py\nfrom django.conf import settings\n\nif settings.DEBUG:\n    import debug_toolbar\n    urlpatterns = [\n        path("__debug__/", include(debug_toolbar.urls)),\n    ] + urlpatterns', desc: 'Configuration URLs' }
+                            ],
+                            tips: ['Analysez le panneau SQL pour détecter les requêtes N+1'],
+                            warnings: ['Ne jamais activer en production !']
                         }
                     }
                 ]
             },
             {
                 id: 'project-blog',
-                title: '🚀 Projet: Blog Django',
-                icon: 'fa-rocket',
-                color: 'border-l-4 border-gradient-to-r from-emerald-500 to-cyan-500',
+                title: 'Projet: Blog Django Complet',
+                icon: 'fa-newspaper',
+                color: 'border-l-4 border-emerald-500',
                 commands: [
                     {
                         cmd: 'Étape 1: Initialisation du projet',
-                        desc: 'Structure et configuration',
+                        desc: 'Structure et configuration de base',
                         details: {
-                            explanation: 'Créer la structure du projet avec une application blog et configurer les settings.',
-                            syntax: 'django-admin startproject config . && python manage.py startapp blog',
+                            explanation: 'Crée la structure du projet Django avec une application blog.',
+                            syntax: 'django-admin startproject / python manage.py startapp',
                             options: [],
                             examples: [
-                                { code: '# Créer le projet\\ndjango-admin startproject config .\\npython manage.py startapp blog\\n\\n# config/settings.py\\nINSTALLED_APPS = [\\n    ...\\n    "blog.apps.BlogConfig",\\n]\\n\\n# Configurer les templates\\nTEMPLATES = [{\\n    "DIRS": [BASE_DIR / "templates"],\\n    ...\\n}]\\n\\n# Fichiers statiques\\nSTATIC_URL = "/static/"\\nSTATICFILES_DIRS = [BASE_DIR / "static"]\\nMEDIA_URL = "/media/"\\nMEDIA_ROOT = BASE_DIR / "media"', desc: 'Configuration initiale' }
+                                { code: '# Création du projet\nmkdir mon_blog && cd mon_blog\npython -m venv venv\nsource venv/bin/activate  # ou venv\\Scripts\\activate (Windows)\npip install django\n\ndjango-admin startproject config .\npython manage.py startapp blog', desc: 'Structure initiale' },
+                                { code: '# settings.py\nINSTALLED_APPS = [\n    ...\n    "blog",\n]\n\nTEMPLATES = [{\n    ...\n    "DIRS": [BASE_DIR / "templates"],\n}]\n\nSTATIC_URL = "/static/"\nSTATICFILES_DIRS = [BASE_DIR / "static"]', desc: 'Configuration settings.py' }
                             ],
-                            tips: ['Créez les dossiers templates/ et static/ à la racine du projet'],
+                            tips: ['Créez les dossiers templates/ et static/ à la racine'],
                             warnings: []
                         }
                     },
                     {
                         cmd: 'Étape 2: Modèles de données',
-                        desc: 'Article, Catégorie, Commentaire',
+                        desc: 'Post et Category',
                         details: {
-                            explanation: 'Définir les modèles avec leurs relations et managers personnalisés.',
-                            syntax: 'class Article(models.Model):',
+                            explanation: 'Définit les modèles pour les articles et catégories.',
+                            syntax: 'class Post(models.Model): ...',
                             options: [],
                             examples: [
-                                { code: '# blog/models.py\\nfrom django.db import models\\nfrom django.contrib.auth.models import User\\nfrom django.urls import reverse\\n\\nclass Category(models.Model):\\n    name = models.CharField(max_length=100)\\n    slug = models.SlugField(unique=True)\\n\\n    def __str__(self):\\n        return self.name\\n\\nclass PublishedManager(models.Manager):\\n    def get_queryset(self):\\n        return super().get_queryset().filter(status="published")\\n\\nclass Article(models.Model):\\n    STATUS_CHOICES = [(\"draft\", \"Brouillon\"), (\"published\", \"Publié\")]\\n    \\n    title = models.CharField(max_length=200)\\n    slug = models.SlugField(unique=True)\\n    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")\\n    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)\\n    content = models.TextField()\\n    image = models.ImageField(upload_to="articles/", blank=True)\\n    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft")\\n    created = models.DateTimeField(auto_now_add=True)\\n    updated = models.DateTimeField(auto_now=True)\\n\\n    objects = models.Manager()\\n    published = PublishedManager()\\n\\n    class Meta:\\n        ordering = [\"-created\"]\\n\\n    def get_absolute_url(self):\\n        return reverse("article_detail", kwargs={"slug": self.slug})\\n\\nclass Comment(models.Model):\\n    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="comments")\\n    author = models.ForeignKey(User, on_delete=models.CASCADE)\\n    content = models.TextField()\\n    created = models.DateTimeField(auto_now_add=True)\\n    approved = models.BooleanField(default=False)', desc: 'Modèles complets' }
+                                { code: '# blog/models.py\nfrom django.db import models\nfrom django.contrib.auth.models import User\nfrom django.urls import reverse\n\nclass Category(models.Model):\n    name = models.CharField(max_length=100)\n    slug = models.SlugField(unique=True)\n    \n    class Meta:\n        verbose_name_plural = "Categories"\n    \n    def __str__(self):\n        return self.name', desc: 'Modèle Category' },
+                                { code: 'class Post(models.Model):\n    STATUS_CHOICES = [\n        ("draft", "Brouillon"),\n        ("published", "Publié"),\n    ]\n    \n    title = models.CharField(max_length=200)\n    slug = models.SlugField(unique=True)\n    author = models.ForeignKey(User, on_delete=models.CASCADE)\n    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)\n    content = models.TextField()\n    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft")\n    created = models.DateTimeField(auto_now_add=True)\n    updated = models.DateTimeField(auto_now=True)\n    \n    class Meta:\n        ordering = ["-created"]\n    \n    def __str__(self):\n        return self.title\n    \n    def get_absolute_url(self):\n        return reverse("blog:post_detail", args=[self.slug])', desc: 'Modèle Post' },
+                                { code: '# Migrations\npython manage.py makemigrations\npython manage.py migrate', desc: 'Créer les tables' }
                             ],
-                            tips: ['Utilisez SlugField pour des URLs lisibles et SEO-friendly'],
-                            warnings: ['pip install Pillow pour ImageField']
+                            tips: ['get_absolute_url() est utilisé par l\'admin et les redirections'],
+                            warnings: []
                         }
                     },
                     {
                         cmd: 'Étape 3: Administration',
-                        desc: 'Configurer l\'interface admin',
+                        desc: 'Interface admin personnalisée',
                         details: {
-                            explanation: 'Personnaliser l\'admin Django pour une gestion efficace du contenu.',
+                            explanation: 'Configure l\'interface d\'administration pour gérer les articles.',
                             syntax: '@admin.register(Model)',
                             options: [],
                             examples: [
-                                { code: '# blog/admin.py\\nfrom django.contrib import admin\\nfrom .models import Article, Category, Comment\\n\\n@admin.register(Category)\\nclass CategoryAdmin(admin.ModelAdmin):\\n    list_display = ["name", "slug"]\\n    prepopulated_fields = {"slug": ("name",)}\\n\\n@admin.register(Article)\\nclass ArticleAdmin(admin.ModelAdmin):\\n    list_display = ["title", "author", "category", "status", "created"]\\n    list_filter = ["status", "category", "created"]\\n    search_fields = ["title", "content"]\\n    prepopulated_fields = {"slug": ("title",)}\\n    raw_id_fields = ["author"]\\n    date_hierarchy = "created"\\n    ordering = ["-created"]\\n    \\n    fieldsets = (\\n        (None, {"fields": ("title", "slug", "author")}),\\n        ("Contenu", {"fields": ("category", "content", "image")}),\\n        ("Publication", {"fields": ("status",), "classes": ("collapse",)}),\\n    )\\n\\n@admin.register(Comment)\\nclass CommentAdmin(admin.ModelAdmin):\\n    list_display = ["author", "article", "created", "approved"]\\n    list_filter = ["approved", "created"]\\n    actions = ["approve_comments"]\\n\\n    @admin.action(description="Approuver les commentaires")\\n    def approve_comments(self, request, queryset):\\n        queryset.update(approved=True)', desc: 'Admin personnalisé' }
+                                { code: '# blog/admin.py\nfrom django.contrib import admin\nfrom .models import Post, Category\n\n@admin.register(Category)\nclass CategoryAdmin(admin.ModelAdmin):\n    list_display = ["name", "slug"]\n    prepopulated_fields = {"slug": ("name",)}\n\n@admin.register(Post)\nclass PostAdmin(admin.ModelAdmin):\n    list_display = ["title", "author", "category", "status", "created"]\n    list_filter = ["status", "created", "category"]\n    search_fields = ["title", "content"]\n    prepopulated_fields = {"slug": ("title",)}\n    raw_id_fields = ["author"]\n    date_hierarchy = "created"\n    ordering = ["-created"]', desc: 'Configuration admin' },
+                                { code: '# Créer un superuser\npython manage.py createsuperuser', desc: 'Accès admin' }
                             ],
-                            tips: ['prepopulated_fields génère automatiquement le slug depuis le titre'],
+                            tips: ['prepopulated_fields génère le slug automatiquement'],
                             warnings: []
                         }
                     },
@@ -713,62 +906,62 @@
                         cmd: 'Étape 4: URLs et Vues',
                         desc: 'Routing et Class-Based Views',
                         details: {
-                            explanation: 'Configurer les URLs et créer des vues génériques pour la liste et le détail des articles.',
-                            syntax: 'path("article/<slug:slug>/", ArticleDetailView.as_view())',
+                            explanation: 'Configure les URLs et les vues pour afficher les articles.',
+                            syntax: 'path() et ListView/DetailView',
                             options: [],
                             examples: [
-                                { code: '# config/urls.py\\nfrom django.contrib import admin\\nfrom django.urls import path, include\\nfrom django.conf import settings\\nfrom django.conf.urls.static import static\\n\\nurlpatterns = [\\n    path("admin/", admin.site.urls),\\n    path("", include("blog.urls")),\\n] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)\\n\\n# blog/urls.py\\nfrom django.urls import path\\nfrom . import views\\n\\nurlpatterns = [\\n    path("", views.ArticleListView.as_view(), name="article_list"),\\n    path("category/<slug:slug>/", views.CategoryArticleListView.as_view(), name="category_articles"),\\n    path("article/<slug:slug>/", views.ArticleDetailView.as_view(), name="article_detail"),\\n    path("article/new/", views.ArticleCreateView.as_view(), name="article_create"),\\n]', desc: 'Configuration URLs' },
-                                { code: '# blog/views.py\\nfrom django.views.generic import ListView, DetailView, CreateView\\nfrom django.contrib.auth.mixins import LoginRequiredMixin\\nfrom django.urls import reverse_lazy\\nfrom .models import Article, Category, Comment\\nfrom .forms import CommentForm\\n\\nclass ArticleListView(ListView):\\n    model = Article\\n    queryset = Article.published.select_related("author", "category")\\n    template_name = "blog/article_list.html"\\n    context_object_name = "articles"\\n    paginate_by = 10\\n\\nclass CategoryArticleListView(ListView):\\n    template_name = "blog/article_list.html"\\n    context_object_name = "articles"\\n    paginate_by = 10\\n\\n    def get_queryset(self):\\n        self.category = get_object_or_404(Category, slug=self.kwargs["slug"])\\n        return Article.published.filter(category=self.category)\\n\\n    def get_context_data(self, **kwargs):\\n        context = super().get_context_data(**kwargs)\\n        context["category"] = self.category\\n        return context\\n\\nclass ArticleDetailView(DetailView):\\n    model = Article\\n    template_name = "blog/article_detail.html"\\n    slug_field = "slug"\\n\\n    def get_context_data(self, **kwargs):\\n        context = super().get_context_data(**kwargs)\\n        context["comments"] = self.object.comments.filter(approved=True)\\n        context["comment_form"] = CommentForm()\\n        return context', desc: 'Vues génériques' }
+                                { code: '# blog/urls.py\nfrom django.urls import path\nfrom . import views\n\napp_name = "blog"\n\nurlpatterns = [\n    path("", views.PostListView.as_view(), name="post_list"),\n    path("post/<slug:slug>/", views.PostDetailView.as_view(), name="post_detail"),\n    path("category/<slug:slug>/", views.CategoryPostListView.as_view(), name="category_posts"),\n]', desc: 'URLs du blog' },
+                                { code: '# blog/views.py\nfrom django.views.generic import ListView, DetailView\nfrom .models import Post, Category\n\nclass PostListView(ListView):\n    queryset = Post.objects.filter(status="published")\n    template_name = "blog/post_list.html"\n    context_object_name = "posts"\n    paginate_by = 10\n\nclass PostDetailView(DetailView):\n    model = Post\n    template_name = "blog/post_detail.html"\n    context_object_name = "post"\n\nclass CategoryPostListView(ListView):\n    template_name = "blog/post_list.html"\n    context_object_name = "posts"\n    paginate_by = 10\n    \n    def get_queryset(self):\n        self.category = Category.objects.get(slug=self.kwargs["slug"])\n        return Post.objects.filter(category=self.category, status="published")', desc: 'Vues' },
+                                { code: '# config/urls.py\nfrom django.contrib import admin\nfrom django.urls import path, include\n\nurlpatterns = [\n    path("admin/", admin.site.urls),\n    path("", include("blog.urls")),\n]', desc: 'URLs principales' }
                             ],
-                            tips: ['select_related évite les requêtes N+1 pour author et category'],
+                            tips: ['app_name crée un namespace pour les URLs'],
                             warnings: []
                         }
                     },
                     {
                         cmd: 'Étape 5: Templates',
-                        desc: 'Base template et pages',
+                        desc: 'Base et templates de liste/détail',
                         details: {
-                            explanation: 'Créer un système de templates avec héritage pour un design cohérent.',
-                            syntax: '{% extends "base.html" %}',
+                            explanation: 'Crée les templates avec héritage pour le blog.',
+                            syntax: '{% extends %} et {% block %}',
                             options: [],
                             examples: [
-                                { code: '<!-- templates/base.html -->\\n{% load static %}\\n<!DOCTYPE html>\\n<html lang="fr">\\n<head>\\n    <meta charset="UTF-8">\\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\\n    <title>{% block title %}Mon Blog{% endblock %}</title>\\n    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">\\n</head>\\n<body class="bg-gray-100">\\n    <nav class="bg-white shadow mb-8">\\n        <div class="max-w-4xl mx-auto px-4 py-4">\\n            <a href="{% url \\'article_list\\' %}" class="text-xl font-bold">Mon Blog</a>\\n            {% if user.is_authenticated %}\\n                <a href="{% url \\'article_create\\' %}" class="ml-4">Nouvel article</a>\\n            {% endif %}\\n        </div>\\n    </nav>\\n    <main class="max-w-4xl mx-auto px-4">\\n        {% block content %}{% endblock %}\\n    </main>\\n</body>\\n</html>', desc: 'Template de base' },
-                                { code: '<!-- templates/blog/article_list.html -->\\n{% extends "base.html" %}\\n\\n{% block title %}Articles{% if category %} - {{ category.name }}{% endif %}{% endblock %}\\n\\n{% block content %}\\n<h1 class="text-3xl font-bold mb-8">\\n    {% if category %}{{ category.name }}{% else %}Tous les articles{% endif %}\\n</h1>\\n\\n<div class="grid gap-6">\\n{% for article in articles %}\\n    <article class="bg-white rounded-lg shadow p-6">\\n        <h2 class="text-xl font-bold mb-2">\\n            <a href="{{ article.get_absolute_url }}" class="hover:text-blue-600">\\n                {{ article.title }}\\n            </a>\\n        </h2>\\n        <p class="text-gray-500 text-sm mb-2">\\n            Par {{ article.author }} | {{ article.created|date:"d F Y" }}\\n            {% if article.category %}| {{ article.category }}{% endif %}\\n        </p>\\n        <p>{{ article.content|truncatewords:30 }}</p>\\n    </article>\\n{% empty %}\\n    <p class="text-gray-500">Aucun article publié.</p>\\n{% endfor %}\\n</div>\\n\\n{% if page_obj.has_other_pages %}\\n<nav class="mt-8 flex justify-center gap-2">\\n    {% if page_obj.has_previous %}\\n        <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-blue-500 text-white rounded">Précédent</a>\\n    {% endif %}\\n    <span class="px-4 py-2">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>\\n    {% if page_obj.has_next %}\\n        <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-blue-500 text-white rounded">Suivant</a>\\n    {% endif %}\\n</nav>\\n{% endif %}\\n{% endblock %}', desc: 'Liste des articles avec pagination' }
+                                { code: '\\x3C!-- templates/base.html -->\\n{% load static %}\\n\\x3C!DOCTYPE html>\\n\\x3Chtml lang="fr">\\n\\x3Chead>\\n    \\x3Cmeta charset="UTF-8">\\n    \\x3Ctitle>{% block title %}Mon Blog{% endblock %}\\x3C/title>\\n    \\x3Clink rel="stylesheet" href="{% static \'css/style.css\' %}">\\n\\x3C/head>\\n\\x3Cbody>\\n    \\x3Cheader>\\n        \\x3Cnav>\\n            \\x3Ca href="{% url \'blog:post_list\' %}">Accueil\\x3C/a>\\n        \\x3C/nav>\\n    \\x3C/header>\\n    \\x3Cmain>\\n        {% block content %}{% endblock %}\\n    \\x3C/main>\\n    \\x3Cfooter>\\n        \\x3Cp>© 2024 Mon Blog\\x3C/p>\\n    \\x3C/footer>\\n\\x3C/body>\\n\\x3C/html>', desc: 'Template de base' },
+                                { code: '\\x3C!-- templates/blog/post_list.html -->\\n{% extends "base.html" %}\\n\\n{% block title %}Articles - {{ block.super }}{% endblock %}\\n\\n{% block content %}\\n\\x3Ch1>Articles\\x3C/h1>\\n{% for post in posts %}\\n    \\x3Carticle>\\n        \\x3Ch2>\\x3Ca href="{{ post.get_absolute_url }}">{{ post.title }}\\x3C/a>\\x3C/h2>\\n        \\x3Cp class="meta">Par {{ post.author }} le {{ post.created|date:"d/m/Y" }}\\x3C/p>\\n        \\x3Cp>{{ post.content|truncatewords:30 }}\\x3C/p>\\n    \\x3C/article>\\n{% empty %}\\n    \\x3Cp>Aucun article.\\x3C/p>\\n{% endfor %}\\n\\n{% if page_obj.has_other_pages %}\\n\\x3Cnav class="pagination">\\n    {% if page_obj.has_previous %}\\n        \\x3Ca href="?page={{ page_obj.previous_page_number }}">Précédent\\x3C/a>\\n    {% endif %}\\n    \\x3Cspan>Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}\\x3C/span>\\n    {% if page_obj.has_next %}\\n        \\x3Ca href="?page={{ page_obj.next_page_number }}">Suivant\\x3C/a>\\n    {% endif %}\\n\\x3C/nav>\\n{% endif %}\\n{% endblock %}', desc: 'Liste des articles' }
                             ],
-                            tips: ['Utilisez get_absolute_url() pour les liens vers les articles'],
+                            tips: ['Utilisez page_obj pour la pagination'],
                             warnings: []
                         }
                     },
                     {
                         cmd: 'Étape 6: Formulaires et Commentaires',
-                        desc: 'Système de commentaires',
+                        desc: 'Ajout de commentaires',
                         details: {
-                            explanation: 'Implémenter un formulaire de commentaire avec validation et modération.',
-                            syntax: 'class CommentForm(forms.ModelForm):',
+                            explanation: 'Ajoute un système de commentaires avec formulaire.',
+                            syntax: 'ModelForm et CreateView',
                             options: [],
                             examples: [
-                                { code: '# blog/forms.py\\nfrom django import forms\\nfrom .models import Comment, Article\\n\\nclass CommentForm(forms.ModelForm):\\n    class Meta:\\n        model = Comment\\n        fields = ["content"]\\n        widgets = {\\n            "content": forms.Textarea(attrs={\\n                "class": "w-full p-3 border rounded",\\n                "rows": 4,\\n                "placeholder": "Votre commentaire..."\\n            })\\n        }\\n\\nclass ArticleForm(forms.ModelForm):\\n    class Meta:\\n        model = Article\\n        fields = ["title", "category", "content", "image", "status"]\\n        widgets = {\\n            "title": forms.TextInput(attrs={"class": "w-full p-2 border rounded"}),\\n            "content": forms.Textarea(attrs={"class": "w-full p-3 border rounded", "rows": 10}),\\n        }', desc: 'Formulaires' },
-                                { code: '# blog/views.py (ajout)\\nfrom django.shortcuts import get_object_or_404, redirect\\nfrom django.contrib.auth.decorators import login_required\\nfrom .forms import CommentForm\\n\\n@login_required\\ndef add_comment(request, slug):\\n    article = get_object_or_404(Article, slug=slug)\\n    if request.method == "POST":\\n        form = CommentForm(request.POST)\\n        if form.is_valid():\\n            comment = form.save(commit=False)\\n            comment.article = article\\n            comment.author = request.user\\n            comment.save()\\n            return redirect("article_detail", slug=slug)\\n    return redirect("article_detail", slug=slug)\\n\\n# blog/urls.py (ajout)\\npath("article/<slug:slug>/comment/", views.add_comment, name="add_comment"),', desc: 'Vue de commentaire' },
-                                { code: '<!-- Dans article_detail.html -->\\n<section class="mt-8">\\n    <h3 class="text-xl font-bold mb-4">Commentaires ({{ comments|length }})</h3>\\n    \\n    {% for comment in comments %}\\n    <div class="bg-gray-50 rounded p-4 mb-4">\\n        <p class="font-semibold">{{ comment.author }} <span class="text-gray-500 text-sm">{{ comment.created|date:"d/m/Y H:i" }}</span></p>\\n        <p class="mt-2">{{ comment.content }}</p>\\n    </div>\\n    {% empty %}\\n    <p class="text-gray-500">Aucun commentaire.</p>\\n    {% endfor %}\\n    \\n    {% if user.is_authenticated %}\\n    <form method="post" action="{% url \\'add_comment\\' article.slug %}" class="mt-6">\\n        {% csrf_token %}\\n        {{ comment_form.content }}\\n        <button type="submit" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Commenter</button>\\n    </form>\\n    {% else %}\\n    <p class="mt-4"><a href="{% url \\'login\\' %}" class="text-blue-500">Connectez-vous</a> pour commenter.</p>\\n    {% endif %}\\n</section>', desc: 'Affichage des commentaires' }
+                                { code: '# blog/models.py (ajouter)\nclass Comment(models.Model):\n    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")\n    author = models.ForeignKey(User, on_delete=models.CASCADE)\n    content = models.TextField()\n    created = models.DateTimeField(auto_now_add=True)\n    \n    class Meta:\n        ordering = ["created"]\n    \n    def __str__(self):\n        return f"Commentaire de {self.author} sur {self.post}"', desc: 'Modèle Comment' },
+                                { code: '# blog/forms.py\nfrom django import forms\nfrom .models import Comment\n\nclass CommentForm(forms.ModelForm):\n    class Meta:\n        model = Comment\n        fields = ["content"]\n        widgets = {\n            "content": forms.Textarea(attrs={\n                "rows": 4,\n                "placeholder": "Votre commentaire..."\n            })\n        }', desc: 'Formulaire commentaire' },
+                                { code: '# blog/views.py (modifier PostDetailView)\nfrom django.views.generic import DetailView\nfrom django.views.generic.edit import FormMixin\nfrom .forms import CommentForm\n\nclass PostDetailView(FormMixin, DetailView):\n    model = Post\n    template_name = "blog/post_detail.html"\n    context_object_name = "post"\n    form_class = CommentForm\n    \n    def get_success_url(self):\n        return self.object.get_absolute_url()\n    \n    def post(self, request, *args, **kwargs):\n        self.object = self.get_object()\n        form = self.get_form()\n        if form.is_valid():\n            comment = form.save(commit=False)\n            comment.post = self.object\n            comment.author = request.user\n            comment.save()\n            return self.form_valid(form)\n        return self.form_invalid(form)', desc: 'Vue avec formulaire' }
                             ],
-                            tips: ['Les commentaires sont en attente de modération par défaut (approved=False)'],
+                            tips: ['Utilisez LoginRequiredMixin pour les commentaires authentifiés'],
                             warnings: []
                         }
                     },
                     {
                         cmd: 'Étape 7: Déploiement',
-                        desc: 'Production avec Gunicorn et Nginx',
+                        desc: 'Préparation pour la production',
                         details: {
-                            explanation: 'Préparer l\'application pour la production : sécurité, performances et serveur web.',
-                            syntax: 'gunicorn config.wsgi:application',
+                            explanation: 'Configure les paramètres pour le déploiement en production.',
+                            syntax: 'settings.py production',
                             options: [],
                             examples: [
-                                { code: '# requirements.txt\\nDjango>=4.2\\ngunicorn\\npsycopg2-binary  # PostgreSQL\\npillow\\ndjango-environ  # Variables d\\'environnement\\nwhitenoise  # Fichiers statiques\\n\\n# .env (NE PAS COMMIT)\\nDEBUG=False\\nSECRET_KEY=votre-cle-secrete-tres-longue\\nDATABASE_URL=postgres://user:pass@localhost/blog\\nALLOWED_HOSTS=monblog.com,www.monblog.com', desc: 'Dépendances' },
-                                { code: '# config/settings.py (production)\\nimport environ\\nenv = environ.Env()\\nenviron.Env.read_env()\\n\\nDEBUG = env.bool("DEBUG", False)\\nSECRET_KEY = env("SECRET_KEY")\\nALLOWED_HOSTS = env.list("ALLOWED_HOSTS")\\n\\n# Base de données PostgreSQL\\nDATABASES = {\\n    "default": env.db()\\n}\\n\\n# Sécurité\\nSECURE_BROWSER_XSS_FILTER = True\\nSECURE_CONTENT_TYPE_NOSNIFF = True\\nSESSION_COOKIE_SECURE = True\\nCSRF_COOKIE_SECURE = True\\n\\n# WhiteNoise pour les statiques\\nMIDDLEWARE = [\\n    "django.middleware.security.SecurityMiddleware",\\n    "whitenoise.middleware.WhiteNoiseMiddleware",\\n    ...\\n]\\nSTATIC_ROOT = BASE_DIR / "staticfiles"\\nSTATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"', desc: 'Settings production' },
-                                { code: '# Commandes de déploiement\\npython manage.py check --deploy\\npython manage.py collectstatic --noinput\\npython manage.py migrate\\ngunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3', desc: 'Lancer en production' }
+                                { code: '# settings.py - Production\nimport os\nfrom pathlib import Path\n\nDEBUG = False\nALLOWED_HOSTS = ["mondomaine.com", "www.mondomaine.com"]\n\n# Sécurité\nSECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")\nSECURE_SSL_REDIRECT = True\nSESSION_COOKIE_SECURE = True\nCSRF_COOKIE_SECURE = True\nSECURE_HSTS_SECONDS = 31536000\n\n# Statiques\nSTATIC_ROOT = BASE_DIR / "staticfiles"\n\n# Base de données\nDATABASES = {\n    "default": {\n        "ENGINE": "django.db.backends.postgresql",\n        "NAME": os.environ.get("DB_NAME"),\n        "USER": os.environ.get("DB_USER"),\n        "PASSWORD": os.environ.get("DB_PASSWORD"),\n        "HOST": os.environ.get("DB_HOST"),\n        "PORT": "5432",\n    }\n}', desc: 'Settings production' },
+                                { code: '# requirements.txt\nDjango>=4.2\ngunicorn\npsycopg2-binary\nwhitenoise\n\n# Commandes de déploiement\npip install -r requirements.txt\npython manage.py collectstatic --noinput\npython manage.py migrate\ngunicorn config.wsgi:application', desc: 'Déploiement' }
                             ],
-                            tips: ['Utilisez python manage.py check --deploy pour vérifier la sécurité'],
-                            warnings: ['Ne jamais commit le fichier .env avec les secrets !']
+                            tips: ['Utilisez des variables d\'environnement pour les secrets'],
+                            warnings: ['Ne commitez jamais SECRET_KEY ou les credentials DB']
                         }
                     }
                 ]

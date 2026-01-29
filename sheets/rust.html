@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire Rust : syntaxe de base, ownership, borrowing, cargo et patterns courants.">
+    <meta name="description" content="Aide-mémoire Rust : workflows pratiques pour Web, Data Engineering, ML, NLP et IA Multimodale.">
     <title>Rust - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,14 @@
                     <i class="fab fa-rust text-3xl text-orange-400"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">Rust</h1>
-                <p class="text-slate-400">Syntaxe, ownership, borrowing et Cargo</p>
+                <p class="text-slate-400">Workflows pratiques pour Web, Data, ML et IA</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -53,968 +53,1174 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'cargo',
-                title: 'Cargo (Gestionnaire)',
-                icon: 'fa-box',
+                id: 'web-api',
+                title: '🌐 Infrastructure Web & API',
+                icon: 'fa-server',
                 color: 'border-l-4 border-orange-500',
                 commands: [
                     {
-                        cmd: 'cargo new mon_projet',
-                        desc: 'Créer un nouveau projet',
+                        cmd: 'Créer une API REST avec Axum',
+                        desc: 'Setup complet d\'une API production-ready',
                         details: {
-                            explanation: 'Crée un nouveau projet Rust avec la structure de fichiers standard et un fichier Cargo.toml.',
-                            syntax: 'cargo new <nom> [options]',
+                            explanation: 'Axum est le framework web moderne recommandé pour Rust. Il utilise Tower pour les middlewares et s\'intègre parfaitement avec Tokio.',
+                            syntax: 'cargo add axum tokio --features full serde --features derive',
                             options: [
-                                { flag: '--bin', desc: 'Créer un exécutable (par défaut)' },
-                                { flag: '--lib', desc: 'Créer une bibliothèque' },
-                                { flag: '--vcs none', desc: 'Sans initialisation git' }
+                                { flag: 'axum', desc: 'Framework web async' },
+                                { flag: 'tower-http', desc: 'Middlewares HTTP (CORS, compression)' },
+                                { flag: 'serde', desc: 'Sérialisation JSON' }
                             ],
                             examples: [
-                                { code: 'cargo new mon_app', desc: 'Nouveau projet exécutable' },
-                                { code: 'cargo new ma_lib --lib', desc: 'Nouvelle bibliothèque' }
+                                { code: 'use axum::{routing::{get, post}, Json, Router};\nuse serde::{Deserialize, Serialize};\n\n#[derive(Serialize)]\nstruct User { id: u32, name: String }\n\n#[derive(Deserialize)]\nstruct CreateUser { name: String }\n\nasync fn get_users() -> Json<Vec<User>> {\n    Json(vec![User { id: 1, name: "Alice".into() }])\n}\n\nasync fn create_user(Json(payload): Json<CreateUser>) -> Json<User> {\n    Json(User { id: 2, name: payload.name })\n}\n\n#[tokio::main]\nasync fn main() {\n    let app = Router::new()\n        .route("/users", get(get_users).post(create_user));\n    \n    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();\n    axum::serve(listener, app).await.unwrap();\n}', desc: 'API CRUD basique' }
                             ],
-                            tips: ['Cargo initialise automatiquement un dépôt git'],
+                            tips: ['Utilisez extractors (Json, Path, Query) pour parser les requêtes'],
+                            warnings: ['Axum 0.7+ requiert Tokio 1.x']
+                        }
+                    },
+                    {
+                        cmd: 'Gérer l\'authentification JWT',
+                        desc: 'jsonwebtoken et middleware auth',
+                        details: {
+                            explanation: 'Implémente l\'authentification JWT avec validation de tokens et middleware de protection des routes.',
+                            syntax: 'cargo add jsonwebtoken chrono',
+                            options: [
+                                { flag: 'Algorithm::HS256', desc: 'Algorithme HMAC SHA-256' },
+                                { flag: 'Validation', desc: 'Configuration de validation' }
+                            ],
+                            examples: [
+                                { code: 'use jsonwebtoken::{encode, decode, Header, Validation, EncodingKey, DecodingKey};\nuse serde::{Deserialize, Serialize};\nuse chrono::{Utc, Duration};\n\n#[derive(Serialize, Deserialize)]\nstruct Claims {\n    sub: String,\n    exp: usize,\n}\n\nfn create_token(user_id: &str, secret: &[u8]) -> String {\n    let expiration = Utc::now() + Duration::hours(24);\n    let claims = Claims {\n        sub: user_id.to_owned(),\n        exp: expiration.timestamp() as usize,\n    };\n    encode(&Header::default(), &claims, &EncodingKey::from_secret(secret)).unwrap()\n}\n\nfn verify_token(token: &str, secret: &[u8]) -> Result<Claims, _> {\n    decode::<Claims>(token, &DecodingKey::from_secret(secret), &Validation::default())\n        .map(|data| data.claims)\n}', desc: 'Création et validation JWT' }
+                            ],
+                            tips: ['Stockez le secret dans une variable d\'environnement'],
+                            warnings: ['Ne jamais exposer le secret JWT']
+                        }
+                    },
+                    {
+                        cmd: 'Connecter PostgreSQL',
+                        desc: 'sqlx avec connection pool et migrations',
+                        details: {
+                            explanation: 'SQLx fournit des requêtes SQL vérifiées à la compilation et un pool de connexions async.',
+                            syntax: 'cargo add sqlx --features runtime-tokio,postgres,macros',
+                            options: [
+                                { flag: 'PgPool', desc: 'Pool de connexions PostgreSQL' },
+                                { flag: 'query!', desc: 'Macro pour requêtes vérifiées' },
+                                { flag: 'migrate!', desc: 'Migrations embarquées' }
+                            ],
+                            examples: [
+                                { code: 'use sqlx::postgres::PgPoolOptions;\n\n#[tokio::main]\nasync fn main() -> Result<(), sqlx::Error> {\n    let pool = PgPoolOptions::new()\n        .max_connections(5)\n        .connect("postgres://user:pass@localhost/db").await?;\n    \n    // Requête vérifiée à la compilation\n    let users = sqlx::query!("SELECT id, name FROM users WHERE active = $1", true)\n        .fetch_all(&pool)\n        .await?;\n    \n    for user in users {\n        println!("{}: {}", user.id, user.name);\n    }\n    Ok(())\n}', desc: 'Pool et requêtes typées' },
+                                { code: '# Migrations\nsqlx migrate add create_users\nsqlx migrate run\n\n# Dans migrations/XXX_create_users.sql\nCREATE TABLE users (\n    id SERIAL PRIMARY KEY,\n    name VARCHAR(255) NOT NULL,\n    email VARCHAR(255) UNIQUE NOT NULL,\n    created_at TIMESTAMP DEFAULT NOW()\n);', desc: 'Migrations SQLx' }
+                            ],
+                            tips: ['Utilisez DATABASE_URL pour la vérification à la compilation'],
+                            warnings: ['sqlx-cli requis: cargo install sqlx-cli']
+                        }
+                    },
+                    {
+                        cmd: 'Valider les données entrantes',
+                        desc: 'validator crate pour validation',
+                        details: {
+                            explanation: 'Le crate validator permet de valider les données avec des attributs déclaratifs.',
+                            syntax: 'cargo add validator --features derive',
+                            options: [
+                                { flag: '#[validate(email)]', desc: 'Valide un email' },
+                                { flag: '#[validate(length)]', desc: 'Valide la longueur' },
+                                { flag: '#[validate(range)]', desc: 'Valide une plage' }
+                            ],
+                            examples: [
+                                { code: 'use validator::Validate;\nuse serde::Deserialize;\n\n#[derive(Deserialize, Validate)]\nstruct CreateUser {\n    #[validate(length(min = 2, max = 50))]\n    name: String,\n    \n    #[validate(email)]\n    email: String,\n    \n    #[validate(range(min = 18, max = 120))]\n    age: u8,\n}\n\nasync fn create_user(Json(payload): Json<CreateUser>) -> Result<Json<User>, StatusCode> {\n    payload.validate().map_err(|_| StatusCode::BAD_REQUEST)?;\n    // Création user...\n}', desc: 'Validation avec attributs' }
+                            ],
+                            tips: ['Combinez avec serde pour désérialisation + validation'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'cargo build',
-                        desc: 'Compiler le projet',
+                        cmd: 'Documenter l\'API avec OpenAPI',
+                        desc: 'utoipa et swagger-ui',
                         details: {
-                            explanation: 'Compile le projet et ses dépendances. Le binaire est dans target/debug/.',
-                            syntax: 'cargo build [options]',
+                            explanation: 'Utoipa génère automatiquement la documentation OpenAPI à partir de vos types et routes.',
+                            syntax: 'cargo add utoipa --features axum_extras\ncargo add utoipa-swagger-ui --features axum',
                             options: [
-                                { flag: '--release', desc: 'Compilation optimisée (target/release/)' },
-                                { flag: '--target', desc: 'Cross-compilation' }
+                                { flag: '#[utoipa::path]', desc: 'Documenter un endpoint' },
+                                { flag: '#[derive(ToSchema)]', desc: 'Schéma pour types' }
                             ],
                             examples: [
-                                { code: 'cargo build', desc: 'Compilation debug' },
-                                { code: 'cargo build --release', desc: 'Compilation production' }
+                                { code: 'use utoipa::{OpenApi, ToSchema};\nuse utoipa_swagger_ui::SwaggerUi;\n\n#[derive(ToSchema, Serialize)]\nstruct User {\n    #[schema(example = 1)]\n    id: u32,\n    #[schema(example = "Alice")]\n    name: String,\n}\n\n#[utoipa::path(\n    get,\n    path = "/users",\n    responses((status = 200, body = Vec<User>))\n)]\nasync fn get_users() -> Json<Vec<User>> { /* ... */ }\n\n#[derive(OpenApi)]\n#[openapi(paths(get_users), components(schemas(User)))]\nstruct ApiDoc;\n\nlet app = Router::new()\n    .route("/users", get(get_users))\n    .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()));', desc: 'Documentation Swagger' }
                             ],
-                            tips: ['--release active les optimisations et désactive les assertions debug'],
+                            tips: ['Swagger UI disponible à /swagger-ui'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'cargo run',
-                        desc: 'Compiler et exécuter',
+                        cmd: 'Ajouter du rate limiting',
+                        desc: 'tower middleware et governor',
                         details: {
-                            explanation: 'Compile (si nécessaire) et exécute le projet en une seule commande.',
-                            syntax: 'cargo run [options] [-- args]',
+                            explanation: 'Governor implémente le rate limiting avec l\'algorithme GCRA (Generic Cell Rate Algorithm).',
+                            syntax: 'cargo add tower-governor',
                             options: [
-                                { flag: '--release', desc: 'Exécuter en mode release' },
-                                { flag: '-- args', desc: 'Arguments passés au programme' }
+                                { flag: 'per_second', desc: 'Limite par seconde' },
+                                { flag: 'per_minute', desc: 'Limite par minute' },
+                                { flag: 'burst_size', desc: 'Rafale autorisée' }
                             ],
                             examples: [
-                                { code: 'cargo run', desc: 'Exécution simple' },
-                                { code: 'cargo run -- arg1 arg2', desc: 'Avec arguments' },
-                                { code: 'cargo run --release', desc: 'Mode production' }
+                                { code: 'use tower_governor::{GovernorLayer, GovernorConfigBuilder};\nuse std::time::Duration;\n\nlet governor_conf = GovernorConfigBuilder::default()\n    .per_second(2)  // 2 req/sec\n    .burst_size(5)  // Burst de 5\n    .finish()\n    .unwrap();\n\nlet app = Router::new()\n    .route("/api/resource", get(handler))\n    .layer(GovernorLayer {\n        config: governor_conf,\n    });', desc: 'Rate limiting global' }
                             ],
-                            tips: ['Idéal pour le développement rapide'],
-                            warnings: []
+                            tips: ['Utilisez des limites différentes par route si nécessaire'],
+                            warnings: ['Configurez selon votre infrastructure']
                         }
                     },
                     {
-                        cmd: 'cargo test',
-                        desc: 'Lancer les tests',
+                        cmd: 'Déployer avec Docker',
+                        desc: 'Multi-stage builds optimisés',
                         details: {
-                            explanation: 'Compile et exécute tous les tests unitaires et d\'intégration.',
-                            syntax: 'cargo test [nom_test] [options]',
+                            explanation: 'Un Dockerfile multi-stage permet de créer des images minimales avec seulement le binaire.',
+                            syntax: 'docker build -t myapp .',
                             options: [
-                                { flag: '-- --nocapture', desc: 'Afficher les println! des tests' },
-                                { flag: '--test nom', desc: 'Exécuter un test spécifique' }
+                                { flag: 'rust:slim', desc: 'Image de build légère' },
+                                { flag: 'debian:bookworm-slim', desc: 'Image runtime minimale' },
+                                { flag: 'scratch', desc: 'Image vide (binaire statique)' }
                             ],
                             examples: [
-                                { code: 'cargo test', desc: 'Tous les tests' },
-                                { code: 'cargo test mon_test', desc: 'Tests contenant "mon_test"' },
-                                { code: 'cargo test -- --nocapture', desc: 'Avec output visible' }
+                                { code: '# Dockerfile\nFROM rust:1.75-slim AS builder\nWORKDIR /app\nCOPY . .\nRUN cargo build --release\n\nFROM debian:bookworm-slim\nRUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*\nCOPY --from=builder /app/target/release/myapp /usr/local/bin/\nEXPOSE 3000\nCMD ["myapp"]', desc: 'Dockerfile multi-stage' }
                             ],
-                            tips: ['Les tests sont des fonctions annotées avec #[test]'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'cargo add <crate>',
-                        desc: 'Ajouter une dépendance',
-                        details: {
-                            explanation: 'Ajoute une dépendance au Cargo.toml (disponible depuis Rust 1.62).',
-                            syntax: 'cargo add <crate> [options]',
-                            options: [
-                                { flag: '--dev', desc: 'Dépendance de développement uniquement' },
-                                { flag: '--features', desc: 'Activer des features' },
-                                { flag: '--version', desc: 'Version spécifique' }
-                            ],
-                            examples: [
-                                { code: 'cargo add serde', desc: 'Ajouter serde' },
-                                { code: 'cargo add serde --features derive', desc: 'Avec feature derive' },
-                                { code: 'cargo add tokio --features full', desc: 'Tokio avec toutes les features' }
-                            ],
-                            tips: ['Consultez crates.io pour trouver des bibliothèques'],
-                            warnings: []
+                            tips: ['Utilisez .dockerignore pour exclure target/'],
+                            warnings: ['Image finale ~50MB vs ~1GB avec rust:latest']
                         }
                     }
                 ]
             },
             {
-                id: 'variables',
-                title: 'Variables & Types',
-                icon: 'fa-cube',
+                id: 'data-engineering',
+                title: '📊 Data Engineering & ETL',
+                icon: 'fa-database',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'let x = 5;',
-                        desc: 'Déclarer une variable immutable',
+                        cmd: 'Traiter des CSV volumineux avec Polars',
+                        desc: 'LazyFrame pour fichiers multi-GB',
                         details: {
-                            explanation: 'En Rust, les variables sont immutables par défaut. Cela garantit la sécurité mémoire.',
-                            syntax: 'let nom: Type = valeur;',
-                            options: [],
-                            examples: [
-                                { code: 'let x = 5;', desc: 'Inférence de type (i32)' },
-                                { code: 'let x: i64 = 5;', desc: 'Type explicite' },
-                                { code: 'let s = "hello";', desc: 'String slice (&str)' },
-                                { code: 'let s = String::from("hello");', desc: 'String owned' }
-                            ],
-                            tips: ['Le type est souvent inféré automatiquement'],
-                            warnings: ['Tenter de modifier une variable immutable cause une erreur de compilation']
-                        }
-                    },
-                    {
-                        cmd: 'let mut x = 5;',
-                        desc: 'Déclarer une variable mutable',
-                        details: {
-                            explanation: 'Le mot-clé mut permet de modifier la variable après sa déclaration.',
-                            syntax: 'let mut nom = valeur;',
-                            options: [],
-                            examples: [
-                                { code: 'let mut count = 0;\ncount += 1;', desc: 'Compteur mutable' },
-                                { code: 'let mut vec = Vec::new();\nvec.push(1);', desc: 'Vecteur modifiable' }
-                            ],
-                            tips: ['Utilisez mut uniquement quand nécessaire'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'const MAX: u32 = 100;',
-                        desc: 'Constante compile-time',
-                        details: {
-                            explanation: 'Les constantes sont évaluées à la compilation et doivent avoir un type explicite.',
-                            syntax: 'const NOM: Type = valeur;',
-                            options: [],
-                            examples: [
-                                { code: 'const PI: f64 = 3.14159;', desc: 'Constante flottante' },
-                                { code: 'const MAX_USERS: usize = 1000;', desc: 'Limite maximale' }
-                            ],
-                            tips: ['Convention : SCREAMING_SNAKE_CASE pour les constantes'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'i32, u64, f64, bool, char',
-                        desc: 'Types primitifs',
-                        details: {
-                            explanation: 'Rust a des types primitifs avec taille explicite pour un contrôle précis de la mémoire.',
-                            syntax: 'Type',
+                            explanation: 'Polars est une alternative à Pandas 10-100x plus rapide. LazyFrame permet l\'optimisation automatique des requêtes.',
+                            syntax: 'cargo add polars --features lazy,csv',
                             options: [
-                                { flag: 'i8, i16, i32, i64, i128', desc: 'Entiers signés' },
-                                { flag: 'u8, u16, u32, u64, u128', desc: 'Entiers non signés' },
-                                { flag: 'f32, f64', desc: 'Flottants' },
-                                { flag: 'bool', desc: 'Booléen (true/false)' },
-                                { flag: 'char', desc: 'Caractère Unicode (4 bytes)' },
-                                { flag: 'isize, usize', desc: 'Taille dépend de l\'architecture' }
+                                { flag: 'lazy', desc: 'Évaluation paresseuse' },
+                                { flag: 'csv', desc: 'Support CSV' },
+                                { flag: 'parquet', desc: 'Support Parquet' }
                             ],
                             examples: [
-                                { code: 'let a: i32 = -42;', desc: 'Entier signé 32 bits' },
-                                { code: 'let b: u8 = 255;', desc: 'Entier non signé 8 bits' },
-                                { code: 'let c: f64 = 3.14;', desc: 'Flottant 64 bits' }
+                                { code: 'use polars::prelude::*;\n\nfn main() -> Result<(), PolarsError> {\n    // Lecture lazy (scan, pas load)\n    let lf = LazyCsvReader::new("data.csv")\n        .has_header(true)\n        .finish()?;\n    \n    // Pipeline ETL optimisé\n    let result = lf\n        .filter(col("amount").gt(lit(100)))\n        .group_by([col("category")])\n        .agg([\n            col("amount").sum().alias("total"),\n            col("amount").mean().alias("avg"),\n            col("id").count().alias("count"),\n        ])\n        .sort("total", SortOptions::default().with_order_descending(true))\n        .limit(10)\n        .collect()?;  // Exécute ici\n    \n    println!("{}", result);\n    Ok(())\n}', desc: 'Pipeline ETL complet' }
                             ],
-                            tips: ['i32 est le type par défaut pour les entiers'],
+                            tips: ['scan_csv > read_csv pour fichiers volumineux'],
+                            warnings: ['collect() exécute le plan optimisé']
+                        }
+                    },
+                    {
+                        cmd: 'Construire un pipeline ETL async',
+                        desc: 'tokio streams avec backpressure',
+                        details: {
+                            explanation: 'Utilisez les streams async pour traiter des données en flux avec contrôle de backpressure.',
+                            syntax: 'cargo add tokio-stream futures',
+                            options: [
+                                { flag: 'StreamExt', desc: 'Méthodes d\'extension stream' },
+                                { flag: 'buffer_unordered', desc: 'Parallélisation avec limite' }
+                            ],
+                            examples: [
+                                { code: 'use tokio_stream::{StreamExt, wrappers::ReceiverStream};\nuse futures::stream;\n\nasync fn process_batch(items: Vec<Record>) -> Vec<ProcessedRecord> {\n    // Traitement async\n}\n\n#[tokio::main]\nasync fn main() {\n    let records: Vec<Record> = load_records();\n    \n    // Pipeline avec backpressure (max 10 en parallèle)\n    let results: Vec<_> = stream::iter(records)\n        .chunks(100)  // Batch de 100\n        .map(|batch| process_batch(batch))\n        .buffer_unordered(10)  // 10 batches en parallèle\n        .collect()\n        .await;\n}', desc: 'Pipeline avec backpressure' }
+                            ],
+                            tips: ['buffer_unordered pour parallélisme contrôlé'],
+                            warnings: ['Attention à la consommation mémoire']
+                        }
+                    },
+                    {
+                        cmd: 'Lire/écrire du Parquet',
+                        desc: 'Format columnar haute performance',
+                        details: {
+                            explanation: 'Parquet est le format standard pour le Big Data. Polars le supporte nativement avec compression.',
+                            syntax: 'cargo add polars --features parquet',
+                            options: [
+                                { flag: 'CompressionMethod::Snappy', desc: 'Compression rapide' },
+                                { flag: 'CompressionMethod::Zstd', desc: 'Meilleure compression' }
+                            ],
+                            examples: [
+                                { code: 'use polars::prelude::*;\n\nfn main() -> Result<(), PolarsError> {\n    // Lecture Parquet\n    let df = LazyFrame::scan_parquet("data.parquet", Default::default())?\n        .filter(col("date").gt(lit("2024-01-01")))\n        .collect()?;\n    \n    // Écriture Parquet avec compression\n    let mut file = std::fs::File::create("output.parquet")?;\n    ParquetWriter::new(&mut file)\n        .with_compression(ParquetCompression::Zstd(None))\n        .finish(&mut df.clone())?;\n    \n    Ok(())\n}', desc: 'Lecture/écriture Parquet' }
+                            ],
+                            tips: ['Parquet = 10x moins d\'espace que CSV'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Connecter Kafka pour streaming',
+                        desc: 'rdkafka consumer/producer',
+                        details: {
+                            explanation: 'rdkafka est le binding Rust officiel pour librdkafka, utilisé pour Kafka en production.',
+                            syntax: 'cargo add rdkafka --features cmake-build',
+                            options: [
+                                { flag: 'StreamConsumer', desc: 'Consumer async' },
+                                { flag: 'FutureProducer', desc: 'Producer async' }
+                            ],
+                            examples: [
+                                { code: 'use rdkafka::config::ClientConfig;\nuse rdkafka::consumer::{StreamConsumer, Consumer};\nuse rdkafka::Message;\nuse tokio_stream::StreamExt;\n\n#[tokio::main]\nasync fn main() {\n    let consumer: StreamConsumer = ClientConfig::new()\n        .set("bootstrap.servers", "localhost:9092")\n        .set("group.id", "my-group")\n        .create()\n        .expect("Consumer creation failed");\n    \n    consumer.subscribe(&["my-topic"]).unwrap();\n    \n    let mut stream = consumer.stream();\n    while let Some(message) = stream.next().await {\n        match message {\n            Ok(m) => {\n                let payload = m.payload_view::<str>().unwrap().unwrap();\n                println!("Received: {}", payload);\n            }\n            Err(e) => eprintln!("Error: {}", e),\n        }\n    }\n}', desc: 'Consumer Kafka async' }
+                            ],
+                            tips: ['Utilisez tokio::spawn pour consumer parallèle'],
+                            warnings: ['Requiert librdkafka installé']
+                        }
+                    },
+                    {
+                        cmd: 'Paralléliser avec Rayon',
+                        desc: 'par_iter pour CPU-bound tasks',
+                        details: {
+                            explanation: 'Rayon transforme les itérateurs séquentiels en parallèles avec une API simple.',
+                            syntax: 'cargo add rayon',
+                            options: [
+                                { flag: 'par_iter()', desc: 'Itérateur parallèle' },
+                                { flag: 'par_chunks()', desc: 'Chunks parallèles' }
+                            ],
+                            examples: [
+                                { code: 'use rayon::prelude::*;\n\nfn main() {\n    let data: Vec<i32> = (0..1_000_000).collect();\n    \n    // Transformation parallèle\n    let results: Vec<i32> = data\n        .par_iter()\n        .map(|x| expensive_computation(*x))\n        .filter(|x| *x > 100)\n        .collect();\n    \n    // Réduction parallèle\n    let sum: i64 = data\n        .par_iter()\n        .map(|x| (*x as i64).pow(2))\n        .sum();\n}', desc: 'Map/reduce parallèle' }
+                            ],
+                            tips: ['Rayon choisit automatiquement le nombre de threads'],
+                            warnings: ['Évitez pour I/O-bound (utilisez tokio)']
+                        }
+                    },
+                    {
+                        cmd: 'Gérer des fichiers JSON volumineux',
+                        desc: 'serde_json streaming',
+                        details: {
+                            explanation: 'Pour les fichiers JSON trop gros pour la mémoire, utilisez le streaming avec serde_json.',
+                            syntax: 'cargo add serde_json',
+                            options: [
+                                { flag: 'Deserializer::from_reader', desc: 'Lecture streaming' },
+                                { flag: 'StreamDeserializer', desc: 'Flux d\'objets' }
+                            ],
+                            examples: [
+                                { code: 'use serde::{Deserialize, Serialize};\nuse serde_json::Deserializer;\nuse std::fs::File;\nuse std::io::BufReader;\n\n#[derive(Deserialize)]\nstruct Record { id: u32, value: String }\n\nfn main() -> std::io::Result<()> {\n    let file = File::open("large.json")?;\n    let reader = BufReader::new(file);\n    \n    // Stream d\'objets JSON (un par ligne - JSONL)\n    let stream = Deserializer::from_reader(reader)\n        .into_iter::<Record>();\n    \n    for result in stream {\n        match result {\n            Ok(record) => println!("{}: {}", record.id, record.value),\n            Err(e) => eprintln!("Error: {}", e),\n        }\n    }\n    Ok(())\n}', desc: 'Streaming JSONL' }
+                            ],
+                            tips: ['Utilisez JSONL (JSON Lines) pour streaming'],
                             warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'ownership',
-                title: 'Ownership & Borrowing',
-                icon: 'fa-key',
-                color: 'border-l-4 border-red-500',
-                commands: [
-                    {
-                        cmd: 'let s2 = s1;  // Move',
-                        desc: 'Transfert de propriété (move)',
-                        details: {
-                            explanation: 'En Rust, assigner une valeur transfère la propriété. L\'ancienne variable devient invalide.',
-                            syntax: 'let nouvelle = ancienne;',
-                            options: [],
-                            examples: [
-                                { code: 'let s1 = String::from("hello");\nlet s2 = s1;  // s1 n\'est plus valide\nprintln!("{}", s2);  // OK', desc: 'Move d\'un String' },
-                                { code: 'let x = 5;\nlet y = x;  // Copy, pas move (types primitifs)\nprintln!("{} {}", x, y);  // OK', desc: 'Copy pour les primitifs' }
-                            ],
-                            tips: ['Les types qui implémentent Copy (comme i32) sont copiés, pas déplacés'],
-                            warnings: ['Utiliser une variable après un move cause une erreur de compilation']
-                        }
-                    },
-                    {
-                        cmd: '&variable',
-                        desc: 'Référence immutable (borrow)',
-                        details: {
-                            explanation: 'Une référence permet d\'accéder à une valeur sans en prendre la propriété.',
-                            syntax: '&variable',
-                            options: [],
-                            examples: [
-                                { code: 'let s = String::from("hello");\nlet len = calculate_length(&s);  // Emprunte s\nprintln!("{} a {} caractères", s, len);  // s toujours valide', desc: 'Passer par référence' },
-                                { code: 'fn calculate_length(s: &String) -> usize {\n    s.len()\n}', desc: 'Fonction avec référence' }
-                            ],
-                            tips: ['Vous pouvez avoir plusieurs références immutables simultanément'],
-                            warnings: ['Une référence ne peut pas modifier la valeur']
-                        }
-                    },
-                    {
-                        cmd: '&mut variable',
-                        desc: 'Référence mutable',
-                        details: {
-                            explanation: 'Une référence mutable permet de modifier la valeur empruntée.',
-                            syntax: '&mut variable',
-                            options: [],
-                            examples: [
-                                { code: 'let mut s = String::from("hello");\nchange(&mut s);\n\nfn change(s: &mut String) {\n    s.push_str(" world");\n}', desc: 'Modifier via référence mutable' }
-                            ],
-                            tips: ['Une seule référence mutable à la fois est autorisée'],
-                            warnings: ['Pas de référence mutable si des références immutables existent']
-                        }
-                    },
-                    {
-                        cmd: 'variable.clone()',
-                        desc: 'Cloner une valeur',
-                        details: {
-                            explanation: 'Crée une copie profonde de la valeur, évitant le move.',
-                            syntax: 'variable.clone()',
-                            options: [],
-                            examples: [
-                                { code: 'let s1 = String::from("hello");\nlet s2 = s1.clone();  // Copie profonde\nprintln!("{} {}", s1, s2);  // Les deux sont valides', desc: 'Cloner un String' }
-                            ],
-                            tips: ['clone() peut être coûteux en performance'],
-                            warnings: ['Utilisez clone() avec parcimonie']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'structs',
-                title: 'Structs & Enums',
-                icon: 'fa-sitemap',
+                id: 'ml-embedded',
+                title: '🧠 ML Embarqué & Inference',
+                icon: 'fa-microchip',
                 color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'struct NomStruct { ... }',
-                        desc: 'Définir une structure',
+                        cmd: 'Charger un modèle ONNX',
+                        desc: 'onnxruntime ou tract pour inference',
                         details: {
-                            explanation: 'Les structs regroupent des données liées sous un même type.',
-                            syntax: 'struct Nom {\n    champ: Type,\n}',
-                            options: [],
-                            examples: [
-                                { code: 'struct User {\n    username: String,\n    email: String,\n    active: bool,\n}', desc: 'Définition de struct' },
-                                { code: 'let user = User {\n    username: String::from("alice"),\n    email: String::from("alice@example.com"),\n    active: true,\n};', desc: 'Instanciation' }
-                            ],
-                            tips: ['Utilisez #[derive(Debug)] pour pouvoir afficher avec {:?}'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'impl Struct { ... }',
-                        desc: 'Implémenter des méthodes',
-                        details: {
-                            explanation: 'Le bloc impl définit les méthodes associées à une struct.',
-                            syntax: 'impl NomStruct {\n    fn methode(&self) { ... }\n}',
+                            explanation: 'ONNX est le format standard pour l\'échange de modèles ML. Tract et onnxruntime permettent l\'inférence en Rust.',
+                            syntax: 'cargo add tract-onnx',
                             options: [
-                                { flag: '&self', desc: 'Méthode avec référence immutable' },
-                                { flag: '&mut self', desc: 'Méthode qui modifie' },
-                                { flag: 'self', desc: 'Prend ownership' },
-                                { flag: 'pas de self', desc: 'Fonction associée (constructeur)' }
+                                { flag: 'tract-onnx', desc: 'Pure Rust, portable' },
+                                { flag: 'ort', desc: 'Bindings onnxruntime (plus rapide)' }
                             ],
                             examples: [
-                                { code: 'impl User {\n    fn new(username: String) -> Self {\n        Self {\n            username,\n            email: String::new(),\n            active: true,\n        }\n    }\n\n    fn is_active(&self) -> bool {\n        self.active\n    }\n}', desc: 'Constructeur et méthode' }
+                                { code: 'use tract_onnx::prelude::*;\n\nfn main() -> TractResult<()> {\n    // Charger le modèle\n    let model = tract_onnx::onnx()\n        .model_for_path("model.onnx")?\n        .with_input_fact(0, f32::fact([1, 3, 224, 224]).into())?\n        .into_optimized()?\n        .into_runnable()?;\n    \n    // Préparer l\'entrée\n    let input: Tensor = tract_ndarray::Array4::<f32>::zeros((1, 3, 224, 224)).into();\n    \n    // Inférence\n    let result = model.run(tvec!(input.into()))?;\n    let output = result[0].to_array_view::<f32>()?;\n    \n    println!("Output shape: {:?}", output.shape());\n    Ok(())\n}', desc: 'Inference avec Tract' }
                             ],
-                            tips: ['Self est un alias pour le type de la struct'],
-                            warnings: []
+                            tips: ['Tract est pure Rust = pas de dépendances C'],
+                            warnings: ['Convertissez vos modèles PyTorch/TF en ONNX']
                         }
                     },
                     {
-                        cmd: 'enum NomEnum { ... }',
-                        desc: 'Définir une énumération',
+                        cmd: 'Exécuter une inférence sur edge',
+                        desc: 'Optimisation mémoire et performance',
                         details: {
-                            explanation: 'Les enums peuvent avoir des variantes avec ou sans données associées.',
-                            syntax: 'enum Nom {\n    Variante1,\n    Variante2(Type),\n}',
-                            options: [],
-                            examples: [
-                                { code: 'enum Message {\n    Quit,\n    Move { x: i32, y: i32 },\n    Write(String),\n    ChangeColor(i32, i32, i32),\n}', desc: 'Enum avec variantes diverses' },
-                                { code: 'let msg = Message::Write(String::from("hello"));', desc: 'Création d\'une variante' }
-                            ],
-                            tips: ['Option<T> et Result<T, E> sont des enums standards très utilisés'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Option<T> / Result<T, E>',
-                        desc: 'Types pour gérer absence/erreurs',
-                        details: {
-                            explanation: 'Option représente une valeur optionnelle, Result représente succès ou erreur.',
-                            syntax: 'Option<T>: Some(T) | None\nResult<T, E>: Ok(T) | Err(E)',
-                            options: [],
-                            examples: [
-                                { code: 'fn divide(a: f64, b: f64) -> Option<f64> {\n    if b == 0.0 {\n        None\n    } else {\n        Some(a / b)\n    }\n}', desc: 'Fonction retournant Option' },
-                                { code: 'fn read_file(path: &str) -> Result<String, std::io::Error> {\n    std::fs::read_to_string(path)\n}', desc: 'Fonction retournant Result' }
-                            ],
-                            tips: ['Utilisez ? pour propager les erreurs automatiquement'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'control',
-                title: 'Contrôle de flux',
-                icon: 'fa-code-branch',
-                color: 'border-l-4 border-purple-500',
-                commands: [
-                    {
-                        cmd: 'match expression { ... }',
-                        desc: 'Pattern matching',
-                        details: {
-                            explanation: 'Match permet de comparer une valeur contre plusieurs patterns et exécuter du code.',
-                            syntax: 'match value {\n    pattern => result,\n    _ => default,\n}',
-                            options: [],
-                            examples: [
-                                { code: 'match x {\n    1 => println!("un"),\n    2 | 3 => println!("deux ou trois"),\n    4..=10 => println!("entre 4 et 10"),\n    _ => println!("autre"),\n}', desc: 'Match sur entier' },
-                                { code: 'match option {\n    Some(value) => println!("{}", value),\n    None => println!("pas de valeur"),\n}', desc: 'Match sur Option' }
-                            ],
-                            tips: ['Match doit être exhaustif (couvrir tous les cas)'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'if let Some(x) = option { ... }',
-                        desc: 'Pattern matching simplifié',
-                        details: {
-                            explanation: 'if let est un raccourci pour un match avec un seul pattern qui nous intéresse.',
-                            syntax: 'if let pattern = expression { ... }',
-                            options: [],
-                            examples: [
-                                { code: 'if let Some(value) = my_option {\n    println!("Valeur: {}", value);\n}', desc: 'Extraire de Option' },
-                                { code: 'if let Ok(file) = File::open("test.txt") {\n    // utiliser file\n}', desc: 'Extraire de Result' }
-                            ],
-                            tips: ['Plus concis que match quand on ne gère qu\'un cas'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'for item in collection { ... }',
-                        desc: 'Boucle for',
-                        details: {
-                            explanation: 'Itère sur les éléments d\'une collection ou d\'un itérateur.',
-                            syntax: 'for element in iterable { ... }',
-                            options: [],
-                            examples: [
-                                { code: 'for i in 0..5 {\n    println!("{}", i);  // 0, 1, 2, 3, 4\n}', desc: 'Range exclusif' },
-                                { code: 'for i in 0..=5 {\n    println!("{}", i);  // 0, 1, 2, 3, 4, 5\n}', desc: 'Range inclusif' },
-                                { code: 'let vec = vec![1, 2, 3];\nfor (i, val) in vec.iter().enumerate() {\n    println!("{}: {}", i, val);\n}', desc: 'Avec index' }
-                            ],
-                            tips: ['Utilisez .iter() pour emprunter, .into_iter() pour consommer'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'loop { ... break; }',
-                        desc: 'Boucle infinie',
-                        details: {
-                            explanation: 'loop crée une boucle infinie qui peut être interrompue avec break.',
-                            syntax: 'loop { ... break value; }',
-                            options: [],
-                            examples: [
-                                { code: 'let result = loop {\n    counter += 1;\n    if counter == 10 {\n        break counter * 2;  // Retourne 20\n    }\n};', desc: 'Loop avec valeur de retour' }
-                            ],
-                            tips: ['loop peut retourner une valeur via break'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'errors',
-                title: 'Gestion des erreurs',
-                icon: 'fa-exclamation-triangle',
-                color: 'border-l-4 border-yellow-500',
-                commands: [
-                    {
-                        cmd: 'result?',
-                        desc: 'Opérateur ? (propagation)',
-                        details: {
-                            explanation: 'L\'opérateur ? propage automatiquement les erreurs vers la fonction appelante.',
-                            syntax: 'expression?',
-                            options: [],
-                            examples: [
-                                { code: 'fn read_username() -> Result<String, io::Error> {\n    let mut file = File::open("username.txt")?;\n    let mut username = String::new();\n    file.read_to_string(&mut username)?;\n    Ok(username)\n}', desc: 'Propagation d\'erreurs' }
-                            ],
-                            tips: ['? ne fonctionne que dans les fonctions retournant Result ou Option'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: '.unwrap()',
-                        desc: 'Extraire la valeur ou paniquer',
-                        details: {
-                            explanation: 'Extrait la valeur d\'un Result/Option ou provoque un panic si erreur/None.',
-                            syntax: 'result.unwrap()',
+                            explanation: 'Pour l\'edge computing, optimisez la mémoire et utilisez des modèles quantifiés.',
+                            syntax: 'cargo add tract-onnx --features pulse',
                             options: [
-                                { flag: '.unwrap()', desc: 'Panique avec message par défaut' },
-                                { flag: '.expect("msg")', desc: 'Panique avec message personnalisé' },
-                                { flag: '.unwrap_or(default)', desc: 'Valeur par défaut si erreur' },
-                                { flag: '.unwrap_or_else(|| ...)', desc: 'Closure pour calculer le défaut' }
+                                { flag: 'into_optimized()', desc: 'Optimisation du graphe' },
+                                { flag: 'concretize_symbols()', desc: 'Forcer dimensions statiques' }
                             ],
                             examples: [
-                                { code: 'let file = File::open("test.txt").unwrap();', desc: 'Panique si erreur' },
-                                { code: 'let file = File::open("test.txt")\n    .expect("Impossible d\'ouvrir le fichier");', desc: 'Avec message' },
-                                { code: 'let port = env::var("PORT").unwrap_or("8080".to_string());', desc: 'Avec défaut' }
+                                { code: 'use tract_onnx::prelude::*;\n\nfn main() -> TractResult<()> {\n    // Optimisations pour edge\n    let model = tract_onnx::onnx()\n        .model_for_path("model.onnx")?\n        .with_input_fact(0, f32::fact([1, 3, 224, 224]).into())?\n        .into_optimized()?  // Fusionne opérations\n        .into_runnable()?;\n    \n    // Pré-allouer le buffer de sortie\n    let mut output_buffer = vec![0f32; 1000];\n    \n    // Boucle d\'inférence optimisée\n    for frame in camera_frames() {\n        let input = preprocess(frame);\n        let result = model.run(tvec!(input.into()))?;\n        // Copie directe sans allocation\n        result[0].as_slice::<f32>()?.iter()\n            .zip(output_buffer.iter_mut())\n            .for_each(|(src, dst)| *dst = *src);\n    }\n    Ok(())\n}', desc: 'Boucle d\'inférence optimisée' }
                             ],
-                            tips: ['Préférez expect() à unwrap() pour des messages d\'erreur clairs'],
-                            warnings: ['unwrap() en production peut causer des crashes inattendus']
+                            tips: ['Réutilisez les buffers pour éviter allocations'],
+                            warnings: []
                         }
                     },
                     {
-                        cmd: 'panic!("message")',
-                        desc: 'Arrêt immédiat du programme',
+                        cmd: 'Déployer sur Raspberry Pi',
+                        desc: 'Cross-compilation ARM',
                         details: {
-                            explanation: 'Provoque un panic qui arrête le programme avec un message d\'erreur.',
-                            syntax: 'panic!("message")',
-                            options: [],
-                            examples: [
-                                { code: 'panic!("Erreur fatale !");', desc: 'Panic simple' },
-                                { code: 'panic!("Index {} hors limites", index);', desc: 'Avec formatage' }
+                            explanation: 'Cross-compilez pour ARM Linux (Raspberry Pi) depuis votre machine de développement.',
+                            syntax: 'rustup target add aarch64-unknown-linux-gnu',
+                            options: [
+                                { flag: 'aarch64-unknown-linux-gnu', desc: 'RPi 64-bit' },
+                                { flag: 'armv7-unknown-linux-gnueabihf', desc: 'RPi 32-bit' }
                             ],
-                            tips: ['Utilisez panic! uniquement pour les erreurs irrécupérables'],
-                            warnings: ['Préférez Result pour les erreurs gérables']
+                            examples: [
+                                { code: '# Installation cross-compiler\nsudo apt install gcc-aarch64-linux-gnu\n\n# .cargo/config.toml\n[target.aarch64-unknown-linux-gnu]\nlinker = "aarch64-linux-gnu-gcc"\n\n# Compilation\ncargo build --release --target aarch64-unknown-linux-gnu\n\n# Copier sur RPi\nscp target/aarch64-unknown-linux-gnu/release/myapp pi@raspberrypi:~/', desc: 'Cross-compilation ARM' },
+                                { code: '# Avec cross (plus simple)\ncargo install cross\ncross build --release --target aarch64-unknown-linux-gnu', desc: 'Avec l\'outil cross' }
+                            ],
+                            tips: ['cross utilise Docker pour simplifier'],
+                            warnings: ['Vérifiez la compatibilité des crates natifs']
+                        }
+                    },
+                    {
+                        cmd: 'Optimiser pour contraintes mémoire',
+                        desc: 'heapless et buffers statiques',
+                        details: {
+                            explanation: 'Pour l\'embarqué sans allocateur, utilisez heapless pour des structures à taille fixe.',
+                            syntax: 'cargo add heapless',
+                            options: [
+                                { flag: 'Vec', desc: 'Vecteur à capacité fixe' },
+                                { flag: 'String', desc: 'String à capacité fixe' },
+                                { flag: 'FnvIndexMap', desc: 'HashMap sans alloc' }
+                            ],
+                            examples: [
+                                { code: 'use heapless::{Vec, String};\n\n// Vec avec capacité max de 32 éléments\nlet mut vec: Vec<u8, 32> = Vec::new();\nvec.push(1).unwrap();\nvec.push(2).unwrap();\n\n// String avec max 64 caractères\nlet mut s: String<64> = String::new();\ns.push_str("Hello").unwrap();\n\n// Buffer statique pour données sensor\nstatic mut BUFFER: [f32; 256] = [0.0; 256];\n\nfn process_sensor_data(data: &[f32]) {\n    // Utilise le buffer statique\n    unsafe {\n        BUFFER[..data.len()].copy_from_slice(data);\n    }\n}', desc: 'Structures sans allocation' }
+                            ],
+                            tips: ['Préférez les types génériques const N'],
+                            warnings: ['push() retourne Err si capacité atteinte']
+                        }
+                    },
+                    {
+                        cmd: 'Intégrer TensorFlow Lite',
+                        desc: 'tflite-rs pour modèles quantifiés',
+                        details: {
+                            explanation: 'TensorFlow Lite est optimisé pour les modèles quantifiés INT8 sur appareils mobiles/embarqués.',
+                            syntax: 'cargo add tflitec',
+                            options: [
+                                { flag: 'Interpreter', desc: 'Exécuteur TFLite' },
+                                { flag: 'with_threads', desc: 'Multi-threading' }
+                            ],
+                            examples: [
+                                { code: 'use tflitec::interpreter::{Interpreter, Options};\nuse tflitec::tensor::Tensor;\n\nfn main() -> Result<(), Box<dyn std::error::Error>> {\n    let options = Options::default();\n    let interpreter = Interpreter::with_model_path("model.tflite", Some(options))?;\n    \n    interpreter.allocate_tensors()?;\n    \n    // Remplir l\'entrée\n    let input = interpreter.input(0)?;\n    // input.data_mut() pour modifier les données\n    \n    // Inférence\n    interpreter.invoke()?;\n    \n    // Récupérer la sortie\n    let output = interpreter.output(0)?;\n    let data = output.data::<f32>();\n    \n    Ok(())\n}', desc: 'Inference TFLite' }
+                            ],
+                            tips: ['Modèles INT8 = 4x plus petits, souvent plus rapides'],
+                            warnings: ['Nécessite le runtime TFLite C']
                         }
                     }
                 ]
             },
             {
-                id: 'traits',
-                title: 'Traits & Generics',
-                icon: 'fa-puzzle-piece',
+                id: 'data-science',
+                title: '📈 Data Science avec Polars',
+                icon: 'fa-chart-line',
                 color: 'border-l-4 border-cyan-500',
                 commands: [
                     {
-                        cmd: 'trait NomTrait { ... }',
-                        desc: 'Définir un trait',
+                        cmd: 'Créer et manipuler des DataFrames',
+                        desc: 'DataFrame, Series, select',
                         details: {
-                            explanation: 'Un trait définit un comportement partagé entre types. Similaire aux interfaces dans d\'autres langages.',
-                            syntax: 'trait NomTrait {\n    fn methode(&self) -> Type;\n    fn avec_defaut(&self) { /* impl */ }\n}',
-                            options: [],
-                            examples: [
-                                { code: 'trait Summary {\n    fn summarize(&self) -> String;\n    \n    // Méthode avec implémentation par défaut\n    fn preview(&self) -> String {\n        format!("En savoir plus: {}", self.summarize())\n    }\n}', desc: 'Trait avec méthode par défaut' },
-                                { code: 'trait Drawable {\n    fn draw(&self);\n    fn area(&self) -> f64;\n}', desc: 'Trait avec plusieurs méthodes' }
-                            ],
-                            tips: ['Les traits peuvent avoir des méthodes avec implémentation par défaut'],
-                            warnings: ['Un trait ne peut être implémenté que si le trait OU le type est défini localement']
-                        }
-                    },
-                    {
-                        cmd: 'impl Trait for Type { ... }',
-                        desc: 'Implémenter un trait',
-                        details: {
-                            explanation: 'Implémente les méthodes d\'un trait pour un type spécifique.',
-                            syntax: 'impl NomTrait for NomType {\n    fn methode(&self) -> Type { ... }\n}',
-                            options: [],
-                            examples: [
-                                { code: 'struct Article {\n    title: String,\n    content: String,\n}\n\nimpl Summary for Article {\n    fn summarize(&self) -> String {\n        format!("{}: {}", self.title, &self.content[..50])\n    }\n}', desc: 'Implémenter Summary pour Article' },
-                                { code: '#[derive(Debug, Clone, PartialEq)]\nstruct Point {\n    x: f64,\n    y: f64,\n}', desc: 'Dériver des traits automatiquement' }
-                            ],
-                            tips: ['#[derive(...)] génère automatiquement l\'implémentation de traits courants'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'fn fonction<T>(param: T)',
-                        desc: 'Fonction générique',
-                        details: {
-                            explanation: 'Les generics permettent d\'écrire du code qui fonctionne avec plusieurs types.',
-                            syntax: 'fn nom<T>(param: T) -> T { ... }',
-                            options: [],
-                            examples: [
-                                { code: 'fn largest<T: PartialOrd>(list: &[T]) -> &T {\n    let mut largest = &list[0];\n    for item in list {\n        if item > largest {\n            largest = item;\n        }\n    }\n    largest\n}', desc: 'Fonction générique avec contrainte' },
-                                { code: 'fn print_debug<T: std::fmt::Debug>(item: T) {\n    println!("{:?}", item);\n}', desc: 'Generic avec trait bound Debug' }
-                            ],
-                            tips: ['T est conventionnel, mais tout nom est valide'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'T: Trait + Trait2',
-                        desc: 'Contraintes de traits (bounds)',
-                        details: {
-                            explanation: 'Les trait bounds spécifient les capacités requises pour un type générique.',
-                            syntax: 'fn nom<T: Trait1 + Trait2>(param: T)\nfn nom<T>(param: T) where T: Trait1 + Trait2',
+                            explanation: 'Polars offre une API similaire à Pandas mais optimisée pour la performance.',
+                            syntax: 'cargo add polars --features lazy',
                             options: [
-                                { flag: 'T: Clone', desc: 'T doit implémenter Clone' },
-                                { flag: 'T: Clone + Debug', desc: 'Multiple traits' },
-                                { flag: 'where T: ...', desc: 'Syntaxe alternative plus lisible' }
+                                { flag: 'df!', desc: 'Macro pour créer DataFrame' },
+                                { flag: 'Series', desc: 'Colonne typée' }
                             ],
                             examples: [
-                                { code: 'fn clone_and_print<T: Clone + Debug>(item: T) {\n    let cloned = item.clone();\n    println!("{:?}", cloned);\n}', desc: 'Multiple trait bounds' },
-                                { code: 'fn process<T, U>(t: T, u: U) -> i32\nwhere\n    T: Display + Clone,\n    U: Clone + Debug,\n{\n    // ...\n}', desc: 'Clause where pour lisibilité' }
+                                { code: 'use polars::prelude::*;\n\nfn main() -> Result<(), PolarsError> {\n    // Créer un DataFrame\n    let df = df! [\n        "name" => ["Alice", "Bob", "Charlie"],\n        "age" => [25, 30, 35],\n        "salary" => [50000.0, 60000.0, 70000.0]\n    ]?;\n    \n    // Sélectionner colonnes\n    let selected = df.select(["name", "age"])?;\n    \n    // Accéder à une colonne\n    let ages = df.column("age")?;\n    println!("Mean age: {}", ages.mean().unwrap());\n    \n    // Ajouter une colonne calculée\n    let df = df.lazy()\n        .with_column((col("salary") * lit(1.1)).alias("new_salary"))\n        .collect()?;\n    \n    println!("{}", df);\n    Ok(())\n}', desc: 'Opérations DataFrame basiques' }
                             ],
-                            tips: ['Utilisez where pour des bounds complexes'],
+                            tips: ['Utilisez lazy() pour chaîner les opérations'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Filtrer et transformer les données',
+                        desc: 'filter, with_columns, apply',
+                        details: {
+                            explanation: 'Polars permet des filtres et transformations expressifs avec une syntaxe déclarative.',
+                            syntax: 'col("column").filter(...).with_columns(...)',
+                            options: [
+                                { flag: 'filter()', desc: 'Filtrer les lignes' },
+                                { flag: 'with_columns()', desc: 'Ajouter/modifier colonnes' },
+                                { flag: 'apply()', desc: 'Fonction personnalisée' }
+                            ],
+                            examples: [
+                                { code: 'use polars::prelude::*;\n\nfn main() -> Result<(), PolarsError> {\n    let df = df! [\n        "product" => ["A", "B", "A", "C", "B"],\n        "quantity" => [10, 20, 15, 5, 25],\n        "price" => [100.0, 200.0, 100.0, 300.0, 200.0]\n    ]?;\n    \n    let result = df.lazy()\n        // Filtrer\n        .filter(col("quantity").gt(lit(10)))\n        // Ajouter colonnes\n        .with_columns([\n            (col("quantity") * col("price")).alias("total"),\n            col("product").str().to_uppercase().alias("product_upper"),\n        ])\n        // Trier\n        .sort("total", SortOptions::default().with_order_descending(true))\n        .collect()?;\n    \n    println!("{}", result);\n    Ok(())\n}', desc: 'Filtrage et transformation' }
+                            ],
+                            tips: ['Chaînez lazy operations avant collect()'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Agréger et grouper',
+                        desc: 'group_by, agg, pivot',
+                        details: {
+                            explanation: 'Les agrégations Polars sont hautement optimisées avec parallélisation automatique.',
+                            syntax: 'df.group_by([cols]).agg([aggregations])',
+                            options: [
+                                { flag: 'sum()', desc: 'Somme' },
+                                { flag: 'mean()', desc: 'Moyenne' },
+                                { flag: 'count()', desc: 'Comptage' },
+                                { flag: 'first()/last()', desc: 'Premier/dernier' }
+                            ],
+                            examples: [
+                                { code: 'use polars::prelude::*;\n\nfn main() -> Result<(), PolarsError> {\n    let df = df! [\n        "category" => ["A", "B", "A", "B", "A"],\n        "value" => [10, 20, 30, 40, 50]\n    ]?;\n    \n    // Group by avec agrégations multiples\n    let result = df.lazy()\n        .group_by([col("category")])\n        .agg([\n            col("value").sum().alias("total"),\n            col("value").mean().alias("average"),\n            col("value").count().alias("count"),\n            col("value").std(1).alias("std_dev"),\n        ])\n        .collect()?;\n    \n    println!("{}", result);\n    Ok(())\n}', desc: 'Agrégations multiples' }
+                            ],
+                            tips: ['Polars parallélise automatiquement les agrégations'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Joindre des datasets',
+                        desc: 'join, concat, merge',
+                        details: {
+                            explanation: 'Polars supporte tous les types de jointures avec optimisation automatique.',
+                            syntax: 'df1.join(&df2, [on], [on], JoinType)',
+                            options: [
+                                { flag: 'JoinType::Inner', desc: 'Inner join' },
+                                { flag: 'JoinType::Left', desc: 'Left join' },
+                                { flag: 'JoinType::Outer', desc: 'Full outer join' }
+                            ],
+                            examples: [
+                                { code: 'use polars::prelude::*;\n\nfn main() -> Result<(), PolarsError> {\n    let users = df! [\n        "user_id" => [1, 2, 3],\n        "name" => ["Alice", "Bob", "Charlie"]\n    ]?;\n    \n    let orders = df! [\n        "order_id" => [101, 102, 103],\n        "user_id" => [1, 1, 2],\n        "amount" => [100.0, 150.0, 200.0]\n    ]?;\n    \n    // Left join\n    let result = users.lazy()\n        .join(\n            orders.lazy(),\n            [col("user_id")],\n            [col("user_id")],\n            JoinArgs::new(JoinType::Left)\n        )\n        .collect()?;\n    \n    // Concat vertical\n    let df1 = df!["a" => [1, 2]]?;\n    let df2 = df!["a" => [3, 4]]?;\n    let combined = concat([df1.lazy(), df2.lazy()], UnionArgs::default())?.collect()?;\n    \n    Ok(())\n}', desc: 'Jointures et concaténation' }
+                            ],
+                            tips: ['Utilisez lazy joins pour optimisation'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Visualiser avec Plotters',
+                        desc: 'Charts et export PNG/SVG',
+                        details: {
+                            explanation: 'Plotters est la bibliothèque de visualisation principale en Rust, pure Rust sans dépendances.',
+                            syntax: 'cargo add plotters',
+                            options: [
+                                { flag: 'BitMapBackend', desc: 'Export PNG' },
+                                { flag: 'SVGBackend', desc: 'Export SVG' },
+                                { flag: 'LineSeries', desc: 'Graphique ligne' }
+                            ],
+                            examples: [
+                                { code: 'use plotters::prelude::*;\n\nfn main() -> Result<(), Box<dyn std::error::Error>> {\n    let root = BitMapBackend::new("chart.png", (800, 600)).into_drawing_area();\n    root.fill(&WHITE)?;\n    \n    let mut chart = ChartBuilder::on(&root)\n        .caption("Sales Over Time", ("sans-serif", 40))\n        .margin(10)\n        .x_label_area_size(40)\n        .y_label_area_size(50)\n        .build_cartesian_2d(0..12, 0..100)?;\n    \n    chart.configure_mesh().draw()?;\n    \n    let data = vec![(1, 20), (2, 35), (3, 45), (4, 60), (5, 55)];\n    \n    chart.draw_series(LineSeries::new(data.clone(), &RED))?\n        .label("Product A")\n        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));\n    \n    chart.configure_series_labels()\n        .border_style(&BLACK)\n        .draw()?;\n    \n    root.present()?;\n    Ok(())\n}', desc: 'Line chart avec légende' }
+                            ],
+                            tips: ['SVGBackend pour graphiques web'],
                             warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'lifetimes',
-                title: 'Lifetimes',
-                icon: 'fa-hourglass-half',
+                id: 'nlp-pipeline',
+                title: '📝 Pipeline NLP',
+                icon: 'fa-language',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Tokenizer avec HuggingFace',
+                        desc: 'tokenizers crate pour BPE, WordPiece',
+                        details: {
+                            explanation: 'Le crate tokenizers de HuggingFace offre des tokenizers ultra-rapides en Rust pur.',
+                            syntax: 'cargo add tokenizers',
+                            options: [
+                                { flag: 'BPE', desc: 'Byte-Pair Encoding' },
+                                { flag: 'WordPiece', desc: 'WordPiece (BERT)' },
+                                { flag: 'Unigram', desc: 'Unigram (SentencePiece)' }
+                            ],
+                            examples: [
+                                { code: 'use tokenizers::tokenizer::Tokenizer;\n\nfn main() -> Result<(), Box<dyn std::error::Error>> {\n    // Charger tokenizer pré-entraîné\n    let tokenizer = Tokenizer::from_file("tokenizer.json")?;\n    \n    let text = "Hello, how are you?";\n    let encoding = tokenizer.encode(text, false)?;\n    \n    println!("Tokens: {:?}", encoding.get_tokens());\n    println!("IDs: {:?}", encoding.get_ids());\n    println!("Attention mask: {:?}", encoding.get_attention_mask());\n    \n    // Batch encoding\n    let texts = vec!["Hello world", "Rust is fast"];\n    let encodings = tokenizer.encode_batch(texts, false)?;\n    \n    Ok(())\n}', desc: 'Tokenization basique' }
+                            ],
+                            tips: ['Téléchargez tokenizer.json depuis HuggingFace Hub'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Générer des embeddings',
+                        desc: 'rust-bert pour sentence embeddings',
+                        details: {
+                            explanation: 'rust-bert permet d\'exécuter des modèles BERT et dérivés pour générer des embeddings.',
+                            syntax: 'cargo add rust-bert',
+                            options: [
+                                { flag: 'SentenceEmbeddingsModel', desc: 'Modèle sentence embeddings' },
+                                { flag: 'all-MiniLM-L6-v2', desc: 'Modèle léger recommandé' }
+                            ],
+                            examples: [
+                                { code: 'use rust_bert::pipelines::sentence_embeddings::{\n    SentenceEmbeddingsBuilder, SentenceEmbeddingsModelType\n};\n\nfn main() -> anyhow::Result<()> {\n    let model = SentenceEmbeddingsBuilder::remote(\n        SentenceEmbeddingsModelType::AllMiniLmL6V2\n    ).create_model()?;\n    \n    let sentences = [\n        "This is an example sentence",\n        "Each sentence is converted to a vector",\n    ];\n    \n    let embeddings = model.encode(&sentences)?;\n    \n    // embeddings: Vec<Vec<f32>>\n    println!("Dimension: {}", embeddings[0].len());\n    \n    Ok(())\n}', desc: 'Sentence embeddings' }
+                            ],
+                            tips: ['all-MiniLM-L6-v2 est rapide et bon pour la similarité'],
+                            warnings: ['Premier appel télécharge le modèle (~90MB)']
+                        }
+                    },
+                    {
+                        cmd: 'Classification de texte',
+                        desc: 'Sentiment analysis et classification',
+                        details: {
+                            explanation: 'Utilisez des modèles pré-entraînés pour classifier des textes (sentiment, catégorie, etc.).',
+                            syntax: 'cargo add rust-bert',
+                            options: [
+                                { flag: 'SentimentModel', desc: 'Analyse de sentiment' },
+                                { flag: 'ZeroShotClassificationModel', desc: 'Classification zero-shot' }
+                            ],
+                            examples: [
+                                { code: 'use rust_bert::pipelines::sentiment::SentimentModel;\n\nfn main() -> anyhow::Result<()> {\n    let model = SentimentModel::new(Default::default())?;\n    \n    let texts = [\n        "I love this product!",\n        "This is terrible.",\n        "It is okay, nothing special."\n    ];\n    \n    let sentiments = model.predict(&texts);\n    \n    for (text, sentiment) in texts.iter().zip(sentiments.iter()) {\n        println!("{}: {:?} (score: {:.2})",\n            text, sentiment.polarity, sentiment.score);\n    }\n    \n    Ok(())\n}', desc: 'Analyse de sentiment' }
+                            ],
+                            tips: ['Zero-shot permet de classifier sans entraînement'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Extraction d\'entités nommées',
+                        desc: 'NER avec modèles pré-entraînés',
+                        details: {
+                            explanation: 'NER (Named Entity Recognition) identifie les personnes, organisations, lieux, etc. dans un texte.',
+                            syntax: 'cargo add rust-bert',
+                            options: [
+                                { flag: 'NERModel', desc: 'Modèle NER' },
+                                { flag: 'Entity', desc: 'Entité détectée' }
+                            ],
+                            examples: [
+                                { code: 'use rust_bert::pipelines::ner::NERModel;\n\nfn main() -> anyhow::Result<()> {\n    let model = NERModel::new(Default::default())?;\n    \n    let texts = [\n        "Apple Inc. was founded by Steve Jobs in California.",\n        "The Eiffel Tower is located in Paris, France."\n    ];\n    \n    let entities = model.predict(&texts);\n    \n    for (text, text_entities) in texts.iter().zip(entities.iter()) {\n        println!("Text: {}", text);\n        for entity in text_entities {\n            println!("  {} [{}]: {} (score: {:.2})",\n                entity.word, entity.label, entity.score);\n        }\n    }\n    \n    Ok(())\n}', desc: 'Extraction NER' }
+                            ],
+                            tips: ['Labels: PER (personne), ORG (organisation), LOC (lieu)'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Recherche sémantique',
+                        desc: 'Embeddings + cosine similarity',
+                        details: {
+                            explanation: 'Trouvez des documents similaires en comparant leurs embeddings avec la similarité cosinus.',
+                            syntax: 'Embeddings + calcul similarité',
+                            options: [
+                                { flag: 'cosine_similarity', desc: 'Similarité cosinus' },
+                                { flag: 'dot_product', desc: 'Produit scalaire' }
+                            ],
+                            examples: [
+                                { code: 'fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {\n    let dot: f32 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();\n    let norm_a: f32 = a.iter().map(|x| x * x).sum::<f32>().sqrt();\n    let norm_b: f32 = b.iter().map(|x| x * x).sum::<f32>().sqrt();\n    dot / (norm_a * norm_b)\n}\n\nfn semantic_search(\n    query_embedding: &[f32],\n    doc_embeddings: &[Vec<f32>],\n    top_k: usize\n) -> Vec<(usize, f32)> {\n    let mut scores: Vec<_> = doc_embeddings.iter()\n        .enumerate()\n        .map(|(i, emb)| (i, cosine_similarity(query_embedding, emb)))\n        .collect();\n    \n    scores.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());\n    scores.truncate(top_k);\n    scores\n}\n\n// Usage avec rust-bert embeddings\nlet results = semantic_search(&query_emb, &doc_embeddings, 5);', desc: 'Recherche sémantique' }
+                            ],
+                            tips: ['Pré-calculez les embeddings des documents'],
+                            warnings: ['Pour de gros corpus, utilisez une DB vectorielle']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'multimodal-ai',
+                title: '🖼️ IA Multimodale',
+                icon: 'fa-images',
                 color: 'border-l-4 border-pink-500',
                 commands: [
                     {
-                        cmd: '\'a (annotation de lifetime)',
-                        desc: 'Déclarer une durée de vie',
+                        cmd: 'Charger et prétraiter des images',
+                        desc: 'image crate pour manipulation',
                         details: {
-                            explanation: 'Les lifetimes garantissent que les références sont valides aussi longtemps que nécessaire.',
-                            syntax: '&\'a Type',
+                            explanation: 'Le crate image permet de charger, redimensionner et transformer des images pour l\'inférence.',
+                            syntax: 'cargo add image',
                             options: [
-                                { flag: '\'a', desc: 'Lifetime nommé (convention)' },
-                                { flag: '\'_', desc: 'Lifetime anonyme/inféré' },
-                                { flag: '\'static', desc: 'Durée de vie du programme entier' }
+                                { flag: 'DynamicImage', desc: 'Image dynamique' },
+                                { flag: 'ImageBuffer', desc: 'Buffer typé' },
+                                { flag: 'resize', desc: 'Redimensionnement' }
                             ],
                             examples: [
-                                { code: 'fn longest<\'a>(x: &\'a str, y: &\'a str) -> &\'a str {\n    if x.len() > y.len() { x } else { y }\n}', desc: 'Fonction avec lifetime explicite' },
-                                { code: 'let result;\n{\n    let s1 = String::from("long");\n    let s2 = "short";\n    result = longest(&s1, s2);\n}  // ERREUR: s1 ne vit pas assez longtemps', desc: 'Erreur de lifetime' }
+                                { code: 'use image::{DynamicImage, GenericImageView, imageops::FilterType};\n\nfn preprocess_for_model(path: &str) -> Vec<f32> {\n    let img = image::open(path).unwrap();\n    \n    // Redimensionner à 224x224\n    let resized = img.resize_exact(224, 224, FilterType::Triangle);\n    \n    // Convertir en RGB\n    let rgb = resized.to_rgb8();\n    \n    // Normaliser et convertir en tensor [C, H, W]\n    let mean = [0.485, 0.456, 0.406];\n    let std = [0.229, 0.224, 0.225];\n    \n    let mut tensor = vec![0f32; 3 * 224 * 224];\n    for (x, y, pixel) in rgb.enumerate_pixels() {\n        let idx = (y * 224 + x) as usize;\n        for c in 0..3 {\n            let val = pixel[c] as f32 / 255.0;\n            tensor[c * 224 * 224 + idx] = (val - mean[c]) / std[c];\n        }\n    }\n    tensor\n}', desc: 'Prétraitement pour CNN' }
                             ],
-                            tips: ['Le compilateur infère souvent les lifetimes automatiquement'],
-                            warnings: ['Les erreurs de lifetime peuvent être déroutantes au début']
-                        }
-                    },
-                    {
-                        cmd: 'struct Nom<\'a> { ref: &\'a str }',
-                        desc: 'Struct avec lifetime',
-                        details: {
-                            explanation: 'Une struct contenant des références doit déclarer leurs lifetimes.',
-                            syntax: 'struct Nom<\'a> {\n    champ: &\'a Type,\n}',
-                            options: [],
-                            examples: [
-                                { code: 'struct ImportantExcerpt<\'a> {\n    part: &\'a str,\n}\n\nimpl<\'a> ImportantExcerpt<\'a> {\n    fn level(&self) -> i32 {\n        3\n    }\n    \n    fn announce(&self, msg: &str) -> &str {\n        println!("Attention: {}", msg);\n        self.part\n    }\n}', desc: 'Struct et impl avec lifetime' },
-                                { code: 'let novel = String::from("Call me Ishmael. Some years ago...");\nlet first_sentence = novel.split(\'.\').next().unwrap();\nlet excerpt = ImportantExcerpt {\n    part: first_sentence,\n};', desc: 'Utilisation de la struct' }
-                            ],
-                            tips: ['Les méthodes qui retournent &self n\'ont pas besoin d\'annoter le lifetime'],
+                            tips: ['Utilisez ImageNet mean/std pour modèles pré-entraînés'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: '\'static',
-                        desc: 'Lifetime statique',
+                        cmd: 'Inférence vision avec Candle',
+                        desc: 'Framework ML de HuggingFace en Rust',
                         details: {
-                            explanation: '\'static signifie que la référence peut vivre pour toute la durée du programme.',
-                            syntax: '&\'static Type',
-                            options: [],
-                            examples: [
-                                { code: 'let s: &\'static str = "Hello, world!";  // String literals sont \'static', desc: 'String literal' },
-                                { code: 'static HELLO_WORLD: &str = "Hello, world!";  // Constante globale', desc: 'Variable statique' },
-                                { code: '// Erreur courante à éviter:\n// fn return_static() -> &\'static str {\n//     let s = String::from("hello");\n//     &s  // ERREUR: s ne vit pas assez longtemps\n// }', desc: 'Mauvaise utilisation' }
+                            explanation: 'Candle est le framework ML de HuggingFace en Rust, optimisé pour l\'inférence.',
+                            syntax: 'cargo add candle-core candle-nn candle-transformers',
+                            options: [
+                                { flag: 'candle-core', desc: 'Tenseurs et opérations' },
+                                { flag: 'candle-nn', desc: 'Couches neuronales' },
+                                { flag: 'candle-transformers', desc: 'Modèles pré-entraînés' }
                             ],
-                            tips: ['Les string literals (&str) ont toujours un lifetime \'static'],
-                            warnings: ['N\'utilisez pas \'static pour contourner les erreurs de lifetime']
+                            examples: [
+                                { code: 'use candle_core::{Device, Tensor};\nuse candle_nn::VarBuilder;\n\nfn main() -> candle_core::Result<()> {\n    let device = Device::Cpu; // ou Device::new_cuda(0)?\n    \n    // Charger les poids\n    let vb = VarBuilder::from_pth("model.pth", candle_core::DType::F32, &device)?;\n    \n    // Créer un tensor d\'entrée [batch, channels, height, width]\n    let input = Tensor::zeros((1, 3, 224, 224), candle_core::DType::F32, &device)?;\n    \n    // Inférence (exemple simplifié)\n    let output = model.forward(&input)?;\n    \n    let logits = output.to_vec2::<f32>()?;\n    println!("Output shape: {:?}", output.shape());\n    \n    Ok(())\n}', desc: 'Inférence avec Candle' }
+                            ],
+                            tips: ['Candle supporte CUDA pour accélération GPU'],
+                            warnings: ['API encore en évolution']
                         }
                     },
                     {
-                        cmd: 'Élision de lifetime',
-                        desc: 'Règles d\'inférence automatique',
+                        cmd: 'Pipeline image → texte',
+                        desc: 'CLIP pour vision-langage',
                         details: {
-                            explanation: 'Le compilateur applique des règles pour inférer les lifetimes automatiquement.',
-                            syntax: 'fn func(s: &str) -> &str  // équivaut à fn func<\'a>(s: &\'a str) -> &\'a str',
+                            explanation: 'CLIP (Contrastive Language-Image Pre-training) lie images et texte dans un espace commun.',
+                            syntax: 'cargo add candle-transformers',
                             options: [
-                                { flag: 'Règle 1', desc: 'Chaque référence en entrée obtient son propre lifetime' },
-                                { flag: 'Règle 2', desc: 'Si une seule entrée, son lifetime est assigné aux sorties' },
-                                { flag: 'Règle 3', desc: 'Si &self existe, son lifetime est assigné aux sorties' }
+                                { flag: 'ClipModel', desc: 'Modèle CLIP' },
+                                { flag: 'encode_image', desc: 'Encoder une image' },
+                                { flag: 'encode_text', desc: 'Encoder du texte' }
                             ],
                             examples: [
-                                { code: '// Ces deux signatures sont équivalentes:\nfn first_word(s: &str) -> &str { ... }\nfn first_word<\'a>(s: &\'a str) -> &\'a str { ... }', desc: 'Élision simple' },
-                                { code: '// Annotation requise (2 entrées, ambigu):\nfn longest<\'a>(x: &\'a str, y: &\'a str) -> &\'a str', desc: 'Annotation nécessaire' }
+                                { code: '// Pseudo-code CLIP avec Candle\nuse candle_transformers::models::clip;\n\nfn image_text_similarity(\n    image_embeddings: &Tensor,\n    text_embeddings: &Tensor,\n) -> candle_core::Result<Tensor> {\n    // Normaliser les embeddings\n    let image_norm = image_embeddings.normalize(2, 1)?;\n    let text_norm = text_embeddings.normalize(2, 1)?;\n    \n    // Similarité cosinus via matmul\n    let similarity = image_norm.matmul(&text_norm.t()?)?;\n    \n    // Softmax pour probabilités\n    let logits = (similarity * 100.0)?; // temperature scaling\n    candle_nn::ops::softmax(&logits, 1)\n}\n\n// Usage: trouver quelle description correspond à l\'image\nlet labels = ["a photo of a cat", "a photo of a dog", "a photo of a car"];\nlet probs = image_text_similarity(&img_emb, &text_embs)?;', desc: 'Similarité image-texte CLIP' }
                             ],
-                            tips: ['Commencez sans annotations, le compilateur vous dira si elles sont nécessaires'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'collections',
-                title: 'Collections avancées',
-                icon: 'fa-layer-group',
-                color: 'border-l-4 border-amber-500',
-                commands: [
-                    {
-                        cmd: 'Vec<T>',
-                        desc: 'Vecteur dynamique',
-                        details: {
-                            explanation: 'Vec est un tableau dynamique qui peut grandir ou rétrécir.',
-                            syntax: 'let v: Vec<Type> = Vec::new();\nlet v = vec![1, 2, 3];',
-                            options: [
-                                { flag: 'vec![]', desc: 'Macro pour créer avec valeurs' },
-                                { flag: 'Vec::new()', desc: 'Vecteur vide' },
-                                { flag: 'Vec::with_capacity(n)', desc: 'Pré-allouer n éléments' }
-                            ],
-                            examples: [
-                                { code: 'let mut v = vec![1, 2, 3];\nv.push(4);\nv.pop();  // Retourne Some(4)\nlet third = &v[2];  // Accès par index (panique si hors limites)\nlet third = v.get(2);  // Retourne Option<&T>', desc: 'Opérations de base' },
-                                { code: 'for i in &v {\n    println!("{}", i);\n}\n\nfor i in &mut v {\n    *i += 10;\n}', desc: 'Itération' },
-                                { code: 'v.extend([5, 6, 7]);\nv.retain(|x| *x > 2);\nv.sort();\nv.dedup();', desc: 'Méthodes avancées' }
-                            ],
-                            tips: ['Utilisez get() pour un accès sécurisé sans panic'],
-                            warnings: ['Ne pas modifier un Vec pendant qu\'on itère dessus avec une référence']
+                            tips: ['CLIP excellent pour zero-shot classification'],
+                            warnings: ['Modèles CLIP volumineux (~400MB+)']
                         }
                     },
                     {
-                        cmd: 'HashMap<K, V>',
-                        desc: 'Table de hachage',
+                        cmd: 'Traitement audio',
+                        desc: 'symphonia pour décodage, mel spectrograms',
                         details: {
-                            explanation: 'HashMap stocke des paires clé-valeur avec accès O(1).',
-                            syntax: 'use std::collections::HashMap;\nlet mut map: HashMap<K, V> = HashMap::new();',
+                            explanation: 'Symphonia décode l\'audio, puis convertissez en spectrogrammes mel pour les modèles audio.',
+                            syntax: 'cargo add symphonia --features mp3,wav',
                             options: [
-                                { flag: '.insert(k, v)', desc: 'Insérer ou remplacer' },
-                                { flag: '.get(&k)', desc: 'Obtenir Option<&V>' },
-                                { flag: '.entry(k).or_insert(v)', desc: 'Insérer si absent' },
-                                { flag: '.remove(&k)', desc: 'Supprimer une entrée' }
+                                { flag: 'Decoder', desc: 'Décodeur audio' },
+                                { flag: 'SampleBuffer', desc: 'Buffer d\'échantillons' }
                             ],
                             examples: [
-                                { code: 'use std::collections::HashMap;\n\nlet mut scores = HashMap::new();\nscores.insert(String::from("Blue"), 10);\nscores.insert(String::from("Red"), 50);\n\nlet team = String::from("Blue");\nlet score = scores.get(&team).copied().unwrap_or(0);', desc: 'Utilisation basique' },
-                                { code: '// Compter les occurrences\nlet text = "hello world hello";\nlet mut count = HashMap::new();\n\nfor word in text.split_whitespace() {\n    let counter = count.entry(word).or_insert(0);\n    *counter += 1;\n}', desc: 'Pattern entry()' },
-                                { code: '// Créer depuis des tuples\nlet teams = vec!["Blue", "Red"];\nlet scores = vec![10, 50];\nlet map: HashMap<_, _> = teams.into_iter().zip(scores).collect();', desc: 'Créer depuis iterators' }
+                                { code: 'use symphonia::core::codecs::DecoderOptions;\nuse symphonia::core::formats::FormatOptions;\nuse symphonia::core::io::MediaSourceStream;\nuse symphonia::core::probe::Hint;\n\nfn load_audio(path: &str) -> Vec<f32> {\n    let file = std::fs::File::open(path).unwrap();\n    let mss = MediaSourceStream::new(Box::new(file), Default::default());\n    \n    let probed = symphonia::default::get_probe()\n        .format(&Hint::new(), mss, &FormatOptions::default(), &Default::default())\n        .unwrap();\n    \n    let mut format = probed.format;\n    let track = format.default_track().unwrap();\n    let mut decoder = symphonia::default::get_codecs()\n        .make(&track.codec_params, &DecoderOptions::default())\n        .unwrap();\n    \n    let mut samples = Vec::new();\n    while let Ok(packet) = format.next_packet() {\n        let decoded = decoder.decode(&packet).unwrap();\n        // Extraire les samples...\n    }\n    samples\n}\n\n// Mel spectrogram (simplifié)\nfn to_mel_spectrogram(samples: &[f32], sr: u32) -> Vec<Vec<f32>> {\n    // FFT + filterbank mel\n    todo!()\n}', desc: 'Chargement et traitement audio' }
                             ],
-                            tips: ['entry() est idéal pour le pattern get-or-insert'],
-                            warnings: ['Les clés doivent implémenter Hash et Eq']
+                            tips: ['Pour Whisper, utilisez 16kHz mono'],
+                            warnings: ['Mel spectrograms nécessitent rustfft']
                         }
                     },
                     {
-                        cmd: 'HashSet<T>',
-                        desc: 'Ensemble sans doublons',
+                        cmd: 'Combiner vision et texte',
+                        desc: 'Embeddings multimodaux',
                         details: {
-                            explanation: 'HashSet stocke des valeurs uniques avec lookup O(1).',
-                            syntax: 'use std::collections::HashSet;\nlet mut set: HashSet<T> = HashSet::new();',
+                            explanation: 'Fusionnez les embeddings d\'image et de texte pour des tâches multimodales.',
+                            syntax: 'Concaténation ou projection commune',
                             options: [
-                                { flag: '.insert(v)', desc: 'Ajouter (retourne false si existe)' },
-                                { flag: '.contains(&v)', desc: 'Vérifier présence' },
-                                { flag: '.remove(&v)', desc: 'Supprimer' },
-                                { flag: '.intersection(&other)', desc: 'Éléments communs' }
+                                { flag: 'Early fusion', desc: 'Fusion des entrées' },
+                                { flag: 'Late fusion', desc: 'Fusion des embeddings' },
+                                { flag: 'Cross-attention', desc: 'Attention croisée' }
                             ],
                             examples: [
-                                { code: 'use std::collections::HashSet;\n\nlet mut books = HashSet::new();\nbooks.insert("A Game of Thrones");\nbooks.insert("A Clash of Kings");\nbooks.insert("A Game of Thrones");  // Ignoré (doublon)\n\nprintln!("Nombre de livres: {}", books.len());  // 2', desc: 'Éliminer les doublons' },
-                                { code: 'let a: HashSet<_> = [1, 2, 3].into_iter().collect();\nlet b: HashSet<_> = [3, 4, 5].into_iter().collect();\n\nlet intersection: HashSet<_> = a.intersection(&b).copied().collect();\nlet union: HashSet<_> = a.union(&b).copied().collect();\nlet difference: HashSet<_> = a.difference(&b).copied().collect();', desc: 'Opérations ensemblistes' }
+                                { code: '// Late fusion: concaténer les embeddings\nfn fuse_embeddings(\n    image_emb: &[f32],  // dim: 512\n    text_emb: &[f32],   // dim: 768\n) -> Vec<f32> {\n    // Simple concaténation\n    let mut fused = Vec::with_capacity(image_emb.len() + text_emb.len());\n    fused.extend_from_slice(image_emb);\n    fused.extend_from_slice(text_emb);\n    fused  // dim: 1280\n}\n\n// Projection dans espace commun\nfn project_to_common_space(\n    emb: &[f32],\n    projection_matrix: &[Vec<f32>],  // [original_dim, target_dim]\n    target_dim: usize,\n) -> Vec<f32> {\n    let mut projected = vec![0f32; target_dim];\n    for (i, row) in projection_matrix.iter().enumerate() {\n        for (j, &w) in row.iter().enumerate() {\n            projected[j] += emb[i] * w;\n        }\n    }\n    projected\n}', desc: 'Fusion d\'embeddings' }
                             ],
-                            tips: ['Parfait pour vérifier rapidement l\'appartenance'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'String vs &str',
-                        desc: 'Chaînes de caractères',
-                        details: {
-                            explanation: 'String est une chaîne owned et mutable, &str est une vue immuable.',
-                            syntax: 'let s = String::from("hello");\nlet slice: &str = "hello";',
-                            options: [
-                                { flag: 'String::from()', desc: 'Créer depuis &str' },
-                                { flag: '.to_string()', desc: 'Convertir en String' },
-                                { flag: '&s[..]', desc: 'String vers &str' },
-                                { flag: 'format!()', desc: 'Concaténation complexe' }
-                            ],
-                            examples: [
-                                { code: 'let mut s = String::from("Hello");\ns.push_str(", world!");\ns.push(\'!\');\n\nlet s2 = String::from("foo");\nlet s3 = s + &s2;  // s est moved', desc: 'Manipulation de String' },
-                                { code: 'let s = format!("{} {} {}", "Hello", "World", 2024);\n\n// Itérer sur les caractères\nfor c in "नमस्ते".chars() {\n    println!("{}", c);\n}\n\n// Itérer sur les bytes\nfor b in "hello".bytes() {\n    println!("{}", b);\n}', desc: 'Formatage et itération' },
-                                { code: '// Slicing (attention aux caractères multi-byte)\nlet hello = "Здравствуйте";\nlet s = &hello[0..4];  // "Зд" (4 bytes = 2 caractères cyrilliques)', desc: 'Slicing UTF-8' }
-                            ],
-                            tips: ['Préférez &str pour les paramètres de fonction'],
-                            warnings: ['Le slicing par index peut paniquer si on coupe un caractère UTF-8']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'iterators',
-                title: 'Iterators & Closures',
-                icon: 'fa-repeat',
-                color: 'border-l-4 border-indigo-500',
-                commands: [
-                    {
-                        cmd: '.iter() / .into_iter() / .iter_mut()',
-                        desc: 'Créer un itérateur',
-                        details: {
-                            explanation: 'Trois façons de créer un itérateur selon le type d\'accès souhaité.',
-                            syntax: 'collection.iter()\ncollection.into_iter()\ncollection.iter_mut()',
-                            options: [
-                                { flag: '.iter()', desc: 'Itère sur &T (emprunte)' },
-                                { flag: '.into_iter()', desc: 'Itère sur T (consomme)' },
-                                { flag: '.iter_mut()', desc: 'Itère sur &mut T (modifie)' }
-                            ],
-                            examples: [
-                                { code: 'let v = vec![1, 2, 3];\n\n// Emprunter les éléments\nfor val in v.iter() {\n    println!("{}", val);\n}\nprintln!("{:?}", v);  // v toujours utilisable', desc: 'iter() - emprunte' },
-                                { code: 'let v = vec![1, 2, 3];\n\n// Consommer le vecteur\nfor val in v.into_iter() {\n    println!("{}", val);\n}\n// v n\'est plus utilisable ici', desc: 'into_iter() - consomme' },
-                                { code: 'let mut v = vec![1, 2, 3];\n\n// Modifier les éléments\nfor val in v.iter_mut() {\n    *val *= 2;\n}\nprintln!("{:?}", v);  // [2, 4, 6]', desc: 'iter_mut() - modifie' }
-                            ],
-                            tips: ['for x in &collection équivaut à for x in collection.iter()'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: '.map() / .filter() / .collect()',
-                        desc: 'Adaptateurs d\'itérateur',
-                        details: {
-                            explanation: 'Les adaptateurs transforment un itérateur en un autre. Ils sont paresseux (lazy).',
-                            syntax: 'iter.map(|x| ...).filter(|x| ...).collect()',
-                            options: [
-                                { flag: '.map(f)', desc: 'Transforme chaque élément' },
-                                { flag: '.filter(p)', desc: 'Garde si prédicat vrai' },
-                                { flag: '.collect()', desc: 'Consomme en collection' },
-                                { flag: '.take(n)', desc: 'Prend n premiers éléments' },
-                                { flag: '.skip(n)', desc: 'Ignore n premiers éléments' }
-                            ],
-                            examples: [
-                                { code: 'let v = vec![1, 2, 3, 4, 5];\n\nlet squared: Vec<i32> = v.iter()\n    .map(|x| x * x)\n    .collect();\n// [1, 4, 9, 16, 25]', desc: 'map() - transformer' },
-                                { code: 'let v = vec![1, 2, 3, 4, 5, 6];\n\nlet evens: Vec<_> = v.into_iter()\n    .filter(|x| x % 2 == 0)\n    .collect();\n// [2, 4, 6]', desc: 'filter() - filtrer' },
-                                { code: 'let v = vec![1, 2, 3, 4, 5];\n\nlet result: Vec<i32> = v.iter()\n    .filter(|&x| x > &2)\n    .map(|x| x * 10)\n    .collect();\n// [30, 40, 50]', desc: 'Chaînage' }
-                            ],
-                            tips: ['Les adaptateurs sont lazy - rien ne s\'exécute sans un consommateur comme collect()'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: '|args| expression',
-                        desc: 'Closures (fonctions anonymes)',
-                        details: {
-                            explanation: 'Les closures capturent leur environnement et peuvent être passées comme arguments.',
-                            syntax: '|param1, param2| expression\n|param| { statements; expression }',
-                            options: [
-                                { flag: '|x|', desc: 'Capture par référence' },
-                                { flag: 'move |x|', desc: 'Prend ownership' }
-                            ],
-                            examples: [
-                                { code: '// Closure simple\nlet add = |a, b| a + b;\nprintln!("{}", add(2, 3));  // 5\n\n// Avec annotation de type\nlet add: fn(i32, i32) -> i32 = |a, b| a + b;', desc: 'Closures basiques' },
-                                { code: '// Capture de l\'environnement\nlet x = 4;\nlet equal_to_x = |z| z == x;  // Capture x par référence\nassert!(equal_to_x(4));', desc: 'Capture d\'environnement' },
-                                { code: '// move pour prendre ownership\nlet s = String::from("hello");\nlet closure = move || {\n    println!("{}", s);\n};\nclosure();\n// s n\'est plus utilisable ici', desc: 'Closure avec move' }
-                            ],
-                            tips: ['Les closures sont souvent utilisées avec les itérateurs'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: '.fold() / .reduce() / .find()',
-                        desc: 'Consommateurs d\'itérateur',
-                        details: {
-                            explanation: 'Les consommateurs terminent la chaîne d\'itération et produisent une valeur.',
-                            syntax: 'iter.fold(init, |acc, x| ...) \niter.find(|x| ...)',
-                            options: [
-                                { flag: '.fold(init, f)', desc: 'Accumule avec valeur initiale' },
-                                { flag: '.reduce(f)', desc: 'Accumule sans valeur initiale' },
-                                { flag: '.find(p)', desc: 'Premier élément satisfaisant p' },
-                                { flag: '.sum()', desc: 'Somme des éléments' },
-                                { flag: '.count()', desc: 'Nombre d\'éléments' },
-                                { flag: '.any(p) / .all(p)', desc: 'Prédicats existentiel/universel' }
-                            ],
-                            examples: [
-                                { code: 'let numbers = vec![1, 2, 3, 4, 5];\n\n// fold avec valeur initiale\nlet sum = numbers.iter().fold(0, |acc, x| acc + x);  // 15\n\n// reduce sans valeur initiale\nlet product = numbers.iter().copied().reduce(|acc, x| acc * x);  // Some(120)', desc: 'fold et reduce' },
-                                { code: 'let numbers = vec![1, 2, 3, 4, 5];\n\nlet first_even = numbers.iter().find(|&&x| x % 2 == 0);  // Some(&2)\n\nlet has_negative = numbers.iter().any(|&x| x < 0);  // false\nlet all_positive = numbers.iter().all(|&x| x > 0);  // true', desc: 'find, any, all' },
-                                { code: 'let v: Vec<i32> = vec![1, 2, 3];\n\nlet sum: i32 = v.iter().sum();  // 6\nlet count = v.iter().count();   // 3\nlet max = v.iter().max();       // Some(&3)', desc: 'Raccourcis courants' }
-                            ],
-                            tips: ['fold est plus flexible que reduce mais requiert une valeur initiale'],
+                            tips: ['CLIP projette déjà dans un espace commun'],
                             warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'async',
-                title: 'Async Rust',
+                id: 'async-concurrency',
+                title: '⚡ Async & Concurrence',
                 icon: 'fa-bolt',
                 color: 'border-l-4 border-violet-500',
                 commands: [
                     {
-                        cmd: 'async fn / .await',
-                        desc: 'Fonction asynchrone',
+                        cmd: 'Configurer Tokio correctement',
+                        desc: 'Runtime flavors et features',
                         details: {
-                            explanation: 'async/await permet d\'écrire du code asynchrone de manière séquentielle.',
-                            syntax: 'async fn nom() -> Type { ... }\nresult.await',
-                            options: [],
-                            examples: [
-                                { code: 'async fn fetch_data() -> String {\n    // Simule une opération asynchrone\n    "données".to_string()\n}\n\nasync fn process() {\n    let data = fetch_data().await;\n    println!("{}", data);\n}', desc: 'Fonction async basique' },
-                                { code: '// Une fonction async retourne un Future\nasync fn get_number() -> i32 {\n    42\n}\n\n// Équivalent à:\nfn get_number_explicit() -> impl Future<Output = i32> {\n    async { 42 }\n}', desc: 'Future implicite' }
-                            ],
-                            tips: ['async fn retourne un Future qui doit être .await ou exécuté'],
-                            warnings: ['Nécessite un runtime async comme tokio ou async-std']
-                        }
-                    },
-                    {
-                        cmd: 'tokio::main',
-                        desc: 'Runtime Tokio',
-                        details: {
-                            explanation: 'Tokio est le runtime async le plus populaire pour Rust.',
-                            syntax: '#[tokio::main]\nasync fn main() { ... }',
+                            explanation: 'Tokio offre différentes configurations de runtime selon vos besoins de performance.',
+                            syntax: 'cargo add tokio --features full',
                             options: [
-                                { flag: '#[tokio::main]', desc: 'Runtime multi-thread' },
-                                { flag: '#[tokio::main(flavor = "current_thread")]', desc: 'Single thread' },
-                                { flag: '#[tokio::test]', desc: 'Pour les tests async' }
+                                { flag: 'rt-multi-thread', desc: 'Runtime multi-threadé' },
+                                { flag: 'rt', desc: 'Runtime single-thread' },
+                                { flag: 'macros', desc: '#[tokio::main] et #[tokio::test]' }
                             ],
                             examples: [
-                                { code: '// Cargo.toml:\n// [dependencies]\n// tokio = { version = "1", features = ["full"] }\n\n#[tokio::main]\nasync fn main() {\n    println!("Hello depuis async!");\n    \n    let result = async_operation().await;\n    println!("Résultat: {}", result);\n}', desc: 'Point d\'entrée Tokio' },
-                                { code: 'use tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    println!("Début");\n    sleep(Duration::from_secs(1)).await;\n    println!("1 seconde plus tard");\n}', desc: 'Sleep async' }
+                                { code: '// Multi-thread (défaut avec #[tokio::main])\n#[tokio::main]\nasync fn main() {\n    // Utilise tous les cores\n}\n\n// Single-thread (moins d\'overhead)\n#[tokio::main(flavor = "current_thread")]\nasync fn main() {\n    // Un seul thread\n}\n\n// Configuration manuelle\nuse tokio::runtime::Builder;\n\nfn main() {\n    let runtime = Builder::new_multi_thread()\n        .worker_threads(4)\n        .enable_all()\n        .build()\n        .unwrap();\n    \n    runtime.block_on(async {\n        // Code async\n    });\n}', desc: 'Configurations Tokio' }
                             ],
-                            tips: ['Utilisez features = ["full"] pour toutes les fonctionnalités'],
-                            warnings: ['Ne pas mélanger code blocking et async sans spawn_blocking']
+                            tips: ['current_thread pour CLI simples, multi_thread pour serveurs'],
+                            warnings: []
                         }
                     },
                     {
-                        cmd: 'tokio::spawn',
-                        desc: 'Exécuter une tâche en parallèle',
+                        cmd: 'Exécuter des tâches en parallèle',
+                        desc: 'spawn, JoinSet, select!',
                         details: {
-                            explanation: 'spawn lance une tâche async qui s\'exécute en parallèle.',
-                            syntax: 'tokio::spawn(async { ... })',
-                            options: [],
-                            examples: [
-                                { code: 'use tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    let handle = tokio::spawn(async {\n        sleep(Duration::from_secs(1)).await;\n        "Tâche terminée"\n    });\n\n    println!("Tâche lancée...");\n    \n    let result = handle.await.unwrap();\n    println!("{}", result);\n}', desc: 'Spawn basique' },
-                                { code: '// Exécuter plusieurs tâches en parallèle\nlet handles: Vec<_> = (0..5).map(|i| {\n    tokio::spawn(async move {\n        sleep(Duration::from_millis(100 * i)).await;\n        i * 2\n    })\n}).collect();\n\nfor handle in handles {\n    let result = handle.await.unwrap();\n    println!("Résultat: {}", result);\n}', desc: 'Multiple spawns' }
+                            explanation: 'Lancez plusieurs tâches async en parallèle et récupérez leurs résultats.',
+                            syntax: 'tokio::spawn / JoinSet / select!',
+                            options: [
+                                { flag: 'spawn', desc: 'Lance une tâche' },
+                                { flag: 'JoinSet', desc: 'Groupe de tâches' },
+                                { flag: 'join!', desc: 'Attendre plusieurs futures' }
                             ],
-                            tips: ['Les tâches spawn doivent être \'static (utiliser move)'],
-                            warnings: ['Gérez les erreurs de JoinHandle avec .await.unwrap() ou ?']
+                            examples: [
+                                { code: 'use tokio::task::JoinSet;\n\n#[tokio::main]\nasync fn main() {\n    // Méthode 1: join! pour quelques tâches\n    let (a, b, c) = tokio::join!(\n        fetch_data("url1"),\n        fetch_data("url2"),\n        fetch_data("url3"),\n    );\n    \n    // Méthode 2: JoinSet pour n tâches\n    let mut set = JoinSet::new();\n    \n    for url in urls {\n        set.spawn(fetch_data(url));\n    }\n    \n    // Récupérer les résultats au fur et à mesure\n    while let Some(result) = set.join_next().await {\n        match result {\n            Ok(data) => println!("Got: {:?}", data),\n            Err(e) => eprintln!("Task failed: {}", e),\n        }\n    }\n}', desc: 'Parallélisme avec JoinSet' }
+                            ],
+                            tips: ['JoinSet permet d\'annuler toutes les tâches'],
+                            warnings: ['spawn retourne JoinHandle, n\'oubliez pas await']
                         }
                     },
                     {
-                        cmd: 'tokio::select!',
-                        desc: 'Attendre la première tâche',
+                        cmd: 'Communiquer entre tâches',
+                        desc: 'mpsc, broadcast, watch channels',
                         details: {
-                            explanation: 'select! attend que l\'une des branches se complète en premier.',
-                            syntax: 'tokio::select! {\n    result = future1 => { ... }\n    result = future2 => { ... }\n}',
-                            options: [],
-                            examples: [
-                                { code: 'use tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    tokio::select! {\n        _ = sleep(Duration::from_secs(1)) => {\n            println!("1 seconde écoulée");\n        }\n        _ = sleep(Duration::from_secs(2)) => {\n            println!("2 secondes écoulées");\n        }\n    }\n    // Seul "1 seconde écoulée" s\'affiche\n}', desc: 'Race entre deux timers' },
-                                { code: 'use tokio::sync::mpsc;\n\nasync fn with_timeout<T>(future: impl Future<Output = T>, timeout: Duration) -> Option<T> {\n    tokio::select! {\n        result = future => Some(result),\n        _ = sleep(timeout) => None,\n    }\n}', desc: 'Pattern timeout' }
+                            explanation: 'Les channels permettent la communication sûre entre tâches async.',
+                            syntax: 'tokio::sync::{mpsc, broadcast, watch}',
+                            options: [
+                                { flag: 'mpsc', desc: 'Multi-producer, single-consumer' },
+                                { flag: 'broadcast', desc: 'Multi-producer, multi-consumer' },
+                                { flag: 'watch', desc: 'Single value, multi-consumer' }
                             ],
-                            tips: ['Les branches non sélectionnées sont annulées'],
-                            warnings: ['Attention à la cancellation des futures non complétées']
+                            examples: [
+                                { code: 'use tokio::sync::{mpsc, broadcast, watch};\n\n#[tokio::main]\nasync fn main() {\n    // MPSC: plusieurs producteurs, un consommateur\n    let (tx, mut rx) = mpsc::channel::<String>(100);\n    \n    tokio::spawn(async move {\n        tx.send("Hello".into()).await.unwrap();\n    });\n    \n    while let Some(msg) = rx.recv().await {\n        println!("Received: {}", msg);\n    }\n    \n    // Broadcast: tous les consumers reçoivent\n    let (tx, _) = broadcast::channel::<String>(100);\n    let mut rx1 = tx.subscribe();\n    let mut rx2 = tx.subscribe();\n    \n    tx.send("Broadcast!".into()).unwrap();\n    \n    // Watch: valeur observable\n    let (tx, mut rx) = watch::channel("initial");\n    tx.send("updated").unwrap();\n    println!("Current: {}", *rx.borrow());\n}', desc: 'Types de channels' }
+                            ],
+                            tips: ['watch parfait pour config dynamique'],
+                            warnings: ['broadcast drop les messages si buffer plein']
+                        }
+                    },
+                    {
+                        cmd: 'Gérer timeouts et annulations',
+                        desc: 'tokio::select!, cancellation tokens',
+                        details: {
+                            explanation: 'Gérez les timeouts et annulez proprement les tâches en cours.',
+                            syntax: 'tokio::select! / tokio::time::timeout',
+                            options: [
+                                { flag: 'timeout', desc: 'Timeout simple' },
+                                { flag: 'select!', desc: 'Attendre le premier' },
+                                { flag: 'CancellationToken', desc: 'Annulation coopérative' }
+                            ],
+                            examples: [
+                                { code: 'use tokio::time::{timeout, Duration};\nuse tokio_util::sync::CancellationToken;\n\n#[tokio::main]\nasync fn main() {\n    // Timeout simple\n    match timeout(Duration::from_secs(5), slow_operation()).await {\n        Ok(result) => println!("Success: {:?}", result),\n        Err(_) => println!("Timeout!"),\n    }\n    \n    // select! pour le premier qui termine\n    tokio::select! {\n        result = operation_a() => println!("A finished: {:?}", result),\n        result = operation_b() => println!("B finished: {:?}", result),\n        _ = tokio::time::sleep(Duration::from_secs(10)) => {\n            println!("Global timeout");\n        }\n    }\n    \n    // Cancellation token\n    let token = CancellationToken::new();\n    let token_clone = token.clone();\n    \n    tokio::spawn(async move {\n        tokio::select! {\n            _ = long_running_task() => {},\n            _ = token_clone.cancelled() => {\n                println!("Task cancelled");\n            }\n        }\n    });\n    \n    // Plus tard: annuler\n    token.cancel();\n}', desc: 'Timeouts et annulation' }
+                            ],
+                            tips: ['CancellationToken est coopératif, la tâche doit vérifier'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Limiter la concurrence',
+                        desc: 'Semaphore, buffer_unordered',
+                        details: {
+                            explanation: 'Contrôlez le nombre de tâches simultanées pour éviter la surcharge.',
+                            syntax: 'tokio::sync::Semaphore',
+                            options: [
+                                { flag: 'Semaphore', desc: 'Limite de concurrence' },
+                                { flag: 'acquire', desc: 'Obtenir un permit' },
+                                { flag: 'buffer_unordered', desc: 'Pour streams' }
+                            ],
+                            examples: [
+                                { code: 'use tokio::sync::Semaphore;\nuse std::sync::Arc;\n\n#[tokio::main]\nasync fn main() {\n    let semaphore = Arc::new(Semaphore::new(10)); // Max 10 concurrent\n    let mut handles = vec![];\n    \n    for i in 0..100 {\n        let permit = semaphore.clone().acquire_owned().await.unwrap();\n        handles.push(tokio::spawn(async move {\n            // Le permit est détenu pendant l\'opération\n            let result = expensive_operation(i).await;\n            drop(permit); // Libère explicitement (ou automatique à la fin)\n            result\n        }));\n    }\n    \n    for handle in handles {\n        let _ = handle.await;\n    }\n}\n\n// Avec streams\nuse futures::stream::{self, StreamExt};\n\nlet results: Vec<_> = stream::iter(items)\n    .map(|item| process(item))\n    .buffer_unordered(10)  // Max 10 en parallèle\n    .collect()\n    .await;', desc: 'Limitation de concurrence' }
+                            ],
+                            tips: ['buffer_unordered pour streams, Semaphore pour tâches spawn'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Déboguer du code async',
+                        desc: 'tokio-console et tracing',
+                        details: {
+                            explanation: 'tokio-console permet de visualiser les tâches async en temps réel.',
+                            syntax: 'cargo add console-subscriber',
+                            options: [
+                                { flag: 'console-subscriber', desc: 'Instrumenter pour tokio-console' },
+                                { flag: 'tracing', desc: 'Logging structuré' }
+                            ],
+                            examples: [
+                                { code: '// Cargo.toml\n// tokio = { version = "1", features = ["full", "tracing"] }\n// console-subscriber = "0.2"\n\nuse console_subscriber;\n\n#[tokio::main]\nasync fn main() {\n    // Activer tokio-console\n    console_subscriber::init();\n    \n    // Votre code...\n    run_server().await;\n}\n\n// Lancer tokio-console dans un autre terminal:\n// $ tokio-console\n\n// Avec tracing pour logs structurés\nuse tracing::{info, instrument};\n\n#[instrument]\nasync fn process_request(id: u32) {\n    info!("Processing request");\n    // ...\n}', desc: 'Setup tokio-console' }
+                            ],
+                            tips: ['tokio-console montre les tâches bloquées'],
+                            warnings: ['Overhead en production, utilisez feature flags']
                         }
                     }
                 ]
             },
             {
-                id: 'projet-cli',
-                title: '🚀 Projet: CLI App',
-                icon: 'fa-rocket',
-                color: 'border-l-4 border-gradient-to-r from-orange-500 to-red-500',
+                id: 'cli-tools',
+                title: '🔧 CLI & Outils Système',
+                icon: 'fa-terminal',
+                color: 'border-l-4 border-amber-500',
                 commands: [
                     {
-                        cmd: 'Étape 1: Setup projet',
-                        desc: 'Créer la structure du projet',
+                        cmd: 'Créer un CLI avec Clap',
+                        desc: 'derive macro et subcommands',
                         details: {
-                            explanation: 'Créer un outil CLI qui gère une liste de tâches TODO avec stockage JSON.',
-                            syntax: 'cargo new todo_cli && cd todo_cli',
-                            options: [],
-                            examples: [
-                                { code: 'cargo new todo_cli\ncd todo_cli\n\n# Ajouter les dépendances\ncargo add clap --features derive\ncargo add serde --features derive\ncargo add serde_json\ncargo add chrono --features serde\ncargo add colored', desc: 'Créer le projet et dépendances' },
-                                { code: '// Structure du projet:\n// todo_cli/\n// ├── Cargo.toml\n// └── src/\n//     ├── main.rs      (point d\'entrée CLI)\n//     ├── lib.rs       (logique métier)\n//     ├── task.rs      (struct Task)\n//     └── storage.rs   (persistence JSON)', desc: 'Architecture des fichiers' }
-                            ],
-                            tips: ['clap avec derive simplifie énormément le parsing des arguments'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 2: Modèle de données',
-                        desc: 'Définir la struct Task',
-                        details: {
-                            explanation: 'Créer les structures de données avec serde pour la sérialisation.',
-                            syntax: 'src/task.rs',
-                            options: [],
-                            examples: [
-                                { code: '// src/task.rs\nuse chrono::{DateTime, Utc};\nuse serde::{Deserialize, Serialize};\n\n#[derive(Debug, Clone, Serialize, Deserialize)]\npub struct Task {\n    pub id: u32,\n    pub title: String,\n    pub completed: bool,\n    pub created_at: DateTime<Utc>,\n    pub completed_at: Option<DateTime<Utc>>,\n}\n\nimpl Task {\n    pub fn new(id: u32, title: String) -> Self {\n        Self {\n            id,\n            title,\n            completed: false,\n            created_at: Utc::now(),\n            completed_at: None,\n        }\n    }\n\n    pub fn complete(&mut self) {\n        self.completed = true;\n        self.completed_at = Some(Utc::now());\n    }\n}', desc: 'Structure Task complète' },
-                                { code: '#[derive(Debug, Serialize, Deserialize, Default)]\npub struct TaskList {\n    pub tasks: Vec<Task>,\n    next_id: u32,\n}\n\nimpl TaskList {\n    pub fn add(&mut self, title: String) -> &Task {\n        let task = Task::new(self.next_id, title);\n        self.next_id += 1;\n        self.tasks.push(task);\n        self.tasks.last().unwrap()\n    }\n\n    pub fn remove(&mut self, id: u32) -> Option<Task> {\n        self.tasks.iter().position(|t| t.id == id)\n            .map(|i| self.tasks.remove(i))\n    }\n\n    pub fn complete(&mut self, id: u32) -> Option<&Task> {\n        self.tasks.iter_mut()\n            .find(|t| t.id == id)\n            .map(|t| { t.complete(); &*t })\n    }\n}', desc: 'Gestionnaire de tâches' }
-                            ],
-                            tips: ['derive(Serialize, Deserialize) permet la conversion JSON automatique'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 3: Persistence JSON',
-                        desc: 'Sauvegarder et charger les données',
-                        details: {
-                            explanation: 'Implémenter le stockage persistant en JSON.',
-                            syntax: 'src/storage.rs',
-                            options: [],
-                            examples: [
-                                { code: '// src/storage.rs\nuse crate::task::TaskList;\nuse std::fs;\nuse std::io::{self, ErrorKind};\nuse std::path::Path;\n\nconst DATA_FILE: &str = "todos.json";\n\npub fn load() -> io::Result<TaskList> {\n    match fs::read_to_string(DATA_FILE) {\n        Ok(content) => {\n            serde_json::from_str(&content)\n                .map_err(|e| io::Error::new(ErrorKind::InvalidData, e))\n        }\n        Err(e) if e.kind() == ErrorKind::NotFound => {\n            Ok(TaskList::default())\n        }\n        Err(e) => Err(e),\n    }\n}\n\npub fn save(list: &TaskList) -> io::Result<()> {\n    let json = serde_json::to_string_pretty(list)\n        .map_err(|e| io::Error::new(ErrorKind::InvalidData, e))?;\n    fs::write(DATA_FILE, json)\n}', desc: 'Module storage complet' },
-                                { code: '// Alternative avec directories pour un path standard\nuse directories::ProjectDirs;\n\npub fn get_data_path() -> PathBuf {\n    if let Some(proj_dirs) = ProjectDirs::from("com", "myapp", "todo_cli") {\n        let data_dir = proj_dirs.data_dir();\n        fs::create_dir_all(data_dir).ok();\n        data_dir.join("todos.json")\n    } else {\n        PathBuf::from("todos.json")\n    }\n}', desc: 'Path XDG-compliant (optionnel)' }
-                            ],
-                            tips: ['Utilisez serde_json::to_string_pretty pour un JSON lisible'],
-                            warnings: ['Gérez le cas où le fichier n\'existe pas encore']
-                        }
-                    },
-                    {
-                        cmd: 'Étape 4: Parser CLI avec Clap',
-                        desc: 'Définir les commandes et arguments',
-                        details: {
-                            explanation: 'Utiliser clap derive pour parser les arguments de ligne de commande.',
-                            syntax: 'src/main.rs',
-                            options: [],
-                            examples: [
-                                { code: '// src/main.rs\nuse clap::{Parser, Subcommand};\n\n#[derive(Parser)]\n#[command(name = "todo")]\n#[command(about = "Gestionnaire de tâches en ligne de commande", long_about = None)]\nstruct Cli {\n    #[command(subcommand)]\n    command: Commands,\n}\n\n#[derive(Subcommand)]\nenum Commands {\n    /// Ajouter une nouvelle tâche\n    Add {\n        /// Titre de la tâche\n        title: String,\n    },\n    /// Lister toutes les tâches\n    List {\n        /// Afficher uniquement les tâches complétées\n        #[arg(short, long)]\n        completed: bool,\n        \n        /// Afficher uniquement les tâches en attente\n        #[arg(short, long)]\n        pending: bool,\n    },\n    /// Marquer une tâche comme complétée\n    Done {\n        /// ID de la tâche\n        id: u32,\n    },\n    /// Supprimer une tâche\n    Remove {\n        /// ID de la tâche\n        id: u32,\n    },\n}', desc: 'Définition CLI avec Clap' }
-                            ],
-                            tips: ['Les doc comments (///) deviennent l\'aide --help automatiquement'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 5: Logique principale',
-                        desc: 'Implémenter les handlers',
-                        details: {
-                            explanation: 'Connecter le CLI aux fonctions métier.',
-                            syntax: 'src/main.rs (suite)',
-                            options: [],
-                            examples: [
-                                { code: 'mod task;\nmod storage;\n\nuse colored::Colorize;\nuse task::TaskList;\n\nfn main() -> Result<(), Box<dyn std::error::Error>> {\n    let cli = Cli::parse();\n    let mut tasks = storage::load()?;\n\n    match cli.command {\n        Commands::Add { title } => {\n            let task = tasks.add(title);\n            println!("{} Tâche #{} ajoutée: {}", \n                "✓".green(), task.id, task.title);\n        }\n        Commands::List { completed, pending } => {\n            list_tasks(&tasks, completed, pending);\n        }\n        Commands::Done { id } => {\n            match tasks.complete(id) {\n                Some(task) => println!("{} Tâche #{} complétée!", "✓".green(), task.id),\n                None => println!("{} Tâche #{} non trouvée", "✗".red(), id),\n            }\n        }\n        Commands::Remove { id } => {\n            match tasks.remove(id) {\n                Some(task) => println!("{} Tâche supprimée: {}", "✓".green(), task.title),\n                None => println!("{} Tâche #{} non trouvée", "✗".red(), id),\n            }\n        }\n    }\n\n    storage::save(&tasks)?;\n    Ok(())\n}', desc: 'Main avec dispatch des commandes' },
-                                { code: 'fn list_tasks(tasks: &TaskList, show_completed: bool, show_pending: bool) {\n    let filtered: Vec<_> = tasks.tasks.iter()\n        .filter(|t| {\n            if show_completed && !show_pending { t.completed }\n            else if show_pending && !show_completed { !t.completed }\n            else { true }\n        })\n        .collect();\n\n    if filtered.is_empty() {\n        println!("{}", "Aucune tâche trouvée.".dimmed());\n        return;\n    }\n\n    println!("\\n{}", "=== Liste des tâches ===".bold());\n    for task in filtered {\n        let status = if task.completed {\n            "✓".green()\n        } else {\n            "○".yellow()\n        };\n        let title = if task.completed {\n            task.title.strikethrough().dimmed().to_string()\n        } else {\n            task.title.clone()\n        };\n        println!("  {} [#{}] {}", status, task.id, title);\n    }\n    println!();\n}', desc: 'Affichage coloré des tâches' }
-                            ],
-                            tips: ['Le crate colored rend la sortie terminal plus lisible'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 6: Tests et build',
-                        desc: 'Tester et compiler en release',
-                        details: {
-                            explanation: 'Ajouter des tests unitaires et compiler pour distribution.',
-                            syntax: 'cargo test && cargo build --release',
-                            options: [],
-                            examples: [
-                                { code: '// Dans src/task.rs, ajouter:\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_add_task() {\n        let mut list = TaskList::default();\n        let task = list.add("Test task".to_string());\n        assert_eq!(task.id, 0);\n        assert_eq!(task.title, "Test task");\n        assert!(!task.completed);\n    }\n\n    #[test]\n    fn test_complete_task() {\n        let mut list = TaskList::default();\n        list.add("Task".to_string());\n        \n        let completed = list.complete(0);\n        assert!(completed.is_some());\n        assert!(completed.unwrap().completed);\n    }\n\n    #[test]\n    fn test_remove_nonexistent() {\n        let mut list = TaskList::default();\n        assert!(list.remove(999).is_none());\n    }\n}', desc: 'Tests unitaires' },
-                                { code: '# Lancer les tests\ncargo test\n\n# Build release optimisé\ncargo build --release\n\n# Le binaire est dans target/release/todo_cli\n\n# Utilisation:\n./target/release/todo_cli add "Apprendre Rust"\n./target/release/todo_cli list\n./target/release/todo_cli done 0\n./target/release/todo_cli remove 0', desc: 'Build et utilisation' },
-                                { code: '# Installation globale (optionnel)\ncargo install --path .\n\n# Maintenant disponible partout:\ntodo_cli add "Nouvelle tâche"\ntodo_cli list --pending\ntodo_cli done 1', desc: 'Installation système' }
-                            ],
-                            tips: ['cargo install place le binaire dans ~/.cargo/bin/'],
-                            warnings: ['Testez toujours les edge cases (liste vide, ID invalide, etc.)']
-                        }
-                    },
-                    {
-                        cmd: 'Étape 7: Distribution',
-                        desc: 'Cross-compilation et packaging',
-                        details: {
-                            explanation: 'Compiler pour différentes plateformes et publier.',
-                            syntax: 'cargo build --release --target <target>',
+                            explanation: 'Clap est la bibliothèque standard pour créer des CLI en Rust avec parsing automatique.',
+                            syntax: 'cargo add clap --features derive',
                             options: [
-                                { flag: 'x86_64-unknown-linux-gnu', desc: 'Linux 64-bit' },
-                                { flag: 'x86_64-pc-windows-msvc', desc: 'Windows 64-bit' },
-                                { flag: 'x86_64-apple-darwin', desc: 'macOS Intel' },
-                                { flag: 'aarch64-apple-darwin', desc: 'macOS Apple Silicon' }
+                                { flag: '#[command]', desc: 'Configure la commande' },
+                                { flag: '#[arg]', desc: 'Configure un argument' },
+                                { flag: 'Subcommand', desc: 'Sous-commandes' }
                             ],
                             examples: [
-                                { code: '# Installer cross pour la cross-compilation simplifiée\ncargo install cross\n\n# Compiler pour Linux depuis n\'importe quelle plateforme\ncross build --release --target x86_64-unknown-linux-gnu\n\n# Compiler pour Windows\ncross build --release --target x86_64-pc-windows-gnu', desc: 'Cross-compilation avec cross' },
-                                { code: '# Créer un release GitHub avec les binaires\n# .github/workflows/release.yml\nname: Release\non:\n  push:\n    tags: [\'v*\']\n\njobs:\n  build:\n    runs-on: ${{ matrix.os }}\n    strategy:\n      matrix:\n        include:\n          - os: ubuntu-latest\n            target: x86_64-unknown-linux-gnu\n          - os: windows-latest\n            target: x86_64-pc-windows-msvc\n          - os: macos-latest\n            target: x86_64-apple-darwin\n    steps:\n      - uses: actions/checkout@v3\n      - run: cargo build --release --target ${{ matrix.target }}\n      - uses: actions/upload-artifact@v3\n        with:\n          name: todo_cli-${{ matrix.target }}\n          path: target/${{ matrix.target }}/release/todo_cli*', desc: 'CI/CD GitHub Actions' },
-                                { code: '# Publier sur crates.io (optionnel)\ncargo login\ncargo publish --dry-run  # Vérifier d\'abord\ncargo publish', desc: 'Publication crates.io' }
+                                { code: 'use clap::{Parser, Subcommand};\n\n#[derive(Parser)]\n#[command(name = "myapp", version, about = "My awesome CLI")]\nstruct Cli {\n    /// Verbose output\n    #[arg(short, long)]\n    verbose: bool,\n    \n    /// Config file path\n    #[arg(short, long, default_value = "config.toml")]\n    config: String,\n    \n    #[command(subcommand)]\n    command: Commands,\n}\n\n#[derive(Subcommand)]\nenum Commands {\n    /// Initialize a new project\n    Init {\n        #[arg(short, long)]\n        name: String,\n    },\n    /// Run the server\n    Run {\n        #[arg(short, long, default_value = "8080")]\n        port: u16,\n    },\n}\n\nfn main() {\n    let cli = Cli::parse();\n    \n    match cli.command {\n        Commands::Init { name } => init_project(&name),\n        Commands::Run { port } => run_server(port),\n    }\n}', desc: 'CLI avec subcommands' }
                             ],
-                            tips: ['cross utilise Docker pour cross-compiler facilement'],
-                            warnings: ['Testez sur chaque plateforme cible avant distribution']
+                            tips: ['/// comments deviennent l\'aide automatique'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Afficher une sortie colorée',
+                        desc: 'colored et indicatif progress bars',
+                        details: {
+                            explanation: 'Améliorez l\'UX de votre CLI avec des couleurs et barres de progression.',
+                            syntax: 'cargo add colored indicatif',
+                            options: [
+                                { flag: 'colored', desc: 'Texte coloré' },
+                                { flag: 'ProgressBar', desc: 'Barre de progression' },
+                                { flag: 'MultiProgress', desc: 'Plusieurs barres' }
+                            ],
+                            examples: [
+                                { code: 'use colored::*;\nuse indicatif::{ProgressBar, ProgressStyle};\n\nfn main() {\n    // Couleurs\n    println!("{}", "Success!".green().bold());\n    println!("{}", "Warning!".yellow());\n    println!("{}", "Error!".red().bold());\n    \n    // Progress bar\n    let pb = ProgressBar::new(100);\n    pb.set_style(ProgressStyle::default_bar()\n        .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} {msg}")\n        .unwrap());\n    \n    for i in 0..100 {\n        pb.set_message(format!("Processing item {}", i));\n        pb.inc(1);\n        std::thread::sleep(std::time::Duration::from_millis(50));\n    }\n    pb.finish_with_message("Done!");\n}', desc: 'Couleurs et progress' }
+                            ],
+                            tips: ['indicatif gère automatiquement le terminal'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Lire/écrire des fichiers de config',
+                        desc: 'serde + toml/yaml',
+                        details: {
+                            explanation: 'Gérez la configuration de votre application avec des fichiers TOML ou YAML.',
+                            syntax: 'cargo add serde toml --features serde/derive',
+                            options: [
+                                { flag: 'toml', desc: 'Format TOML' },
+                                { flag: 'serde_yaml', desc: 'Format YAML' },
+                                { flag: 'directories', desc: 'Chemins standard OS' }
+                            ],
+                            examples: [
+                                { code: 'use serde::{Deserialize, Serialize};\n\n#[derive(Serialize, Deserialize, Default)]\nstruct Config {\n    server: ServerConfig,\n    database: DatabaseConfig,\n}\n\n#[derive(Serialize, Deserialize, Default)]\nstruct ServerConfig {\n    host: String,\n    port: u16,\n}\n\n#[derive(Serialize, Deserialize, Default)]\nstruct DatabaseConfig {\n    url: String,\n}\n\nfn load_config(path: &str) -> Config {\n    let content = std::fs::read_to_string(path)\n        .unwrap_or_default();\n    toml::from_str(&content).unwrap_or_default()\n}\n\nfn save_config(config: &Config, path: &str) {\n    let content = toml::to_string_pretty(config).unwrap();\n    std::fs::write(path, content).unwrap();\n}\n\n// config.toml:\n// [server]\n// host = "localhost"\n// port = 8080\n// [database]\n// url = "postgres://..."', desc: 'Config TOML' }
+                            ],
+                            tips: ['Utilisez directories crate pour ~/.config/app/'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Exécuter des commandes externes',
+                        desc: 'std::process::Command',
+                        details: {
+                            explanation: 'Lancez des processus externes et capturez leur sortie.',
+                            syntax: 'std::process::Command',
+                            options: [
+                                { flag: 'output()', desc: 'Capture stdout/stderr' },
+                                { flag: 'status()', desc: 'Juste le code retour' },
+                                { flag: 'spawn()', desc: 'Processus en arrière-plan' }
+                            ],
+                            examples: [
+                                { code: 'use std::process::{Command, Stdio};\n\nfn main() -> std::io::Result<()> {\n    // Capturer la sortie\n    let output = Command::new("git")\n        .args(["status", "--short"])\n        .output()?;\n    \n    if output.status.success() {\n        let stdout = String::from_utf8_lossy(&output.stdout);\n        println!("Git status:\\n{}", stdout);\n    } else {\n        let stderr = String::from_utf8_lossy(&output.stderr);\n        eprintln!("Error: {}", stderr);\n    }\n    \n    // Pipe entre commandes\n    let ls = Command::new("ls")\n        .stdout(Stdio::piped())\n        .spawn()?;\n    \n    let grep = Command::new("grep")\n        .arg(".rs")\n        .stdin(ls.stdout.unwrap())\n        .output()?;\n    \n    println!("Rust files: {}", String::from_utf8_lossy(&grep.stdout));\n    \n    Ok(())\n}', desc: 'Exécution et pipes' }
+                            ],
+                            tips: ['Utilisez which crate pour trouver les binaires'],
+                            warnings: ['Attention aux injections de commandes!']
+                        }
+                    },
+                    {
+                        cmd: 'Surveiller des fichiers (watch)',
+                        desc: 'notify-rs avec debouncing',
+                        details: {
+                            explanation: 'Surveillez les modifications de fichiers en temps réel.',
+                            syntax: 'cargo add notify',
+                            options: [
+                                { flag: 'RecommendedWatcher', desc: 'Watcher optimal par OS' },
+                                { flag: 'RecursiveMode', desc: 'Surveiller récursivement' }
+                            ],
+                            examples: [
+                                { code: 'use notify::{Watcher, RecommendedWatcher, RecursiveMode, Event};\nuse std::sync::mpsc::channel;\nuse std::time::Duration;\n\nfn main() -> notify::Result<()> {\n    let (tx, rx) = channel();\n    \n    let mut watcher = RecommendedWatcher::new(\n        move |res: Result<Event, _>| {\n            if let Ok(event) = res {\n                tx.send(event).unwrap();\n            }\n        },\n        notify::Config::default()\n            .with_poll_interval(Duration::from_secs(1)),\n    )?;\n    \n    watcher.watch("./src".as_ref(), RecursiveMode::Recursive)?;\n    \n    println!("Watching ./src for changes...");\n    \n    loop {\n        match rx.recv() {\n            Ok(event) => {\n                println!("Change detected: {:?}", event.paths);\n                // Rebuild, restart, etc.\n            }\n            Err(e) => println!("Watch error: {:?}", e),\n        }\n    }\n}', desc: 'File watcher' }
+                            ],
+                            tips: ['Ajoutez debouncing pour éviter les triggers multiples'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Distribuer multi-plateforme',
+                        desc: 'cross-compilation et cargo-dist',
+                        details: {
+                            explanation: 'Créez des binaires pour Windows, macOS et Linux depuis une seule machine.',
+                            syntax: 'cargo install cargo-dist',
+                            options: [
+                                { flag: 'cargo-dist', desc: 'Distribution automatisée' },
+                                { flag: 'cross', desc: 'Cross-compilation Docker' }
+                            ],
+                            examples: [
+                                { code: '# Setup cargo-dist\ncargo dist init\n\n# Générer les builds pour toutes les plateformes\ncargo dist build\n\n# Dans GitHub Actions (.github/workflows/release.yml)\nname: Release\non:\n  push:\n    tags: ["v*"]\njobs:\n  dist:\n    uses: axodotdev/cargo-dist/.github/workflows/cargo-dist.yml@v0.5.0\n    with:\n      plan: ""\n\n# Targets supportés:\n# - x86_64-unknown-linux-gnu\n# - x86_64-apple-darwin\n# - aarch64-apple-darwin\n# - x86_64-pc-windows-msvc', desc: 'CI/CD avec cargo-dist' },
+                                { code: '# Cross-compilation manuelle\ncargo install cross\n\n# Build pour Linux depuis macOS/Windows\ncross build --release --target x86_64-unknown-linux-gnu\n\n# Build pour Windows depuis Linux/macOS\ncross build --release --target x86_64-pc-windows-gnu', desc: 'Cross-compilation avec cross' }
+                            ],
+                            tips: ['cargo-dist génère aussi les installers'],
+                            warnings: ['Certaines crates natives ne cross-compilent pas']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'performance',
+                title: '🚀 Performance & Optimisation',
+                icon: 'fa-tachometer-alt',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Profiler avec Flamegraph',
+                        desc: 'cargo-flamegraph pour visualiser',
+                        details: {
+                            explanation: 'Les flamegraphs montrent où votre programme passe son temps.',
+                            syntax: 'cargo install flamegraph',
+                            options: [
+                                { flag: 'flamegraph', desc: 'Génère un SVG interactif' },
+                                { flag: '--release', desc: 'Profiler le build optimisé' }
+                            ],
+                            examples: [
+                                { code: '# Installation\ncargo install flamegraph\n\n# Sur Linux, autoriser perf\necho -1 | sudo tee /proc/sys/kernel/perf_event_paranoid\n\n# Générer le flamegraph\ncargo flamegraph --bin myapp -- arg1 arg2\n\n# Résultat: flamegraph.svg\n# Ouvrir dans un navigateur pour explorer interactivement\n\n# Pour un binaire existant\nflamegraph -o output.svg ./target/release/myapp', desc: 'Générer un flamegraph' }
+                            ],
+                            tips: ['Les barres larges = temps passé, cherchez-les'],
+                            warnings: ['Compilez avec debug symbols: profile.release.debug = true']
+                        }
+                    },
+                    {
+                        cmd: 'Benchmarker avec Criterion',
+                        desc: 'Benchmarks statistiques fiables',
+                        details: {
+                            explanation: 'Criterion fournit des benchmarks avec analyse statistique et détection de régression.',
+                            syntax: 'cargo add criterion --dev',
+                            options: [
+                                { flag: 'black_box', desc: 'Évite l\'optimisation du compilateur' },
+                                { flag: 'criterion_group!', desc: 'Groupe de benchmarks' }
+                            ],
+                            examples: [
+                                { code: '// benches/my_benchmark.rs\nuse criterion::{black_box, criterion_group, criterion_main, Criterion};\n\nfn fibonacci(n: u64) -> u64 {\n    match n {\n        0 => 1,\n        1 => 1,\n        n => fibonacci(n-1) + fibonacci(n-2),\n    }\n}\n\nfn criterion_benchmark(c: &mut Criterion) {\n    c.bench_function("fib 20", |b| {\n        b.iter(|| fibonacci(black_box(20)))\n    });\n    \n    // Comparaison de plusieurs implémentations\n    let mut group = c.benchmark_group("fibonacci");\n    for size in [10, 15, 20].iter() {\n        group.bench_with_input(\n            format!("recursive_{}", size),\n            size,\n            |b, &s| b.iter(|| fibonacci(s))\n        );\n    }\n    group.finish();\n}\n\ncriterion_group!(benches, criterion_benchmark);\ncriterion_main!(benches);\n\n// Cargo.toml:\n// [[bench]]\n// name = "my_benchmark"\n// harness = false', desc: 'Benchmark avec Criterion' }
+                            ],
+                            tips: ['cargo bench génère des rapports HTML'],
+                            warnings: ['Utilisez black_box pour éviter l\'élimination de code']
+                        }
+                    },
+                    {
+                        cmd: 'Réduire les allocations',
+                        desc: 'Cow, SmallVec, arena allocators',
+                        details: {
+                            explanation: 'Minimisez les allocations heap pour améliorer les performances.',
+                            syntax: 'cargo add smallvec bumpalo',
+                            options: [
+                                { flag: 'Cow', desc: 'Clone-on-write' },
+                                { flag: 'SmallVec', desc: 'Vec sur la stack si petit' },
+                                { flag: 'Bump', desc: 'Arena allocator' }
+                            ],
+                            examples: [
+                                { code: 'use std::borrow::Cow;\nuse smallvec::{SmallVec, smallvec};\nuse bumpalo::Bump;\n\n// Cow: évite le clone si pas de modification\nfn process(input: Cow<str>) -> Cow<str> {\n    if input.contains("bad") {\n        // Clone seulement si nécessaire\n        Cow::Owned(input.replace("bad", "good"))\n    } else {\n        input // Pas de clone\n    }\n}\n\n// SmallVec: sur la stack si <= 8 éléments\nlet mut vec: SmallVec<[i32; 8]> = smallvec![1, 2, 3];\nvec.push(4); // Toujours sur la stack\n\n// Arena: allocations groupées, libération en bloc\nlet bump = Bump::new();\nlet x = bump.alloc(42);\nlet s = bump.alloc_str("hello");\nlet v = bump.alloc_slice_copy(&[1, 2, 3]);\n// Tout libéré quand bump est dropped', desc: 'Techniques d\'optimisation mémoire' }
+                            ],
+                            tips: ['SmallVec excellent pour petites collections temporaires'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Optimiser les itérations',
+                        desc: 'iter vs into_iter, collect tips',
+                        details: {
+                            explanation: 'Choisissez le bon type d\'itérateur et évitez les allocations inutiles.',
+                            syntax: 'iter() / into_iter() / iter_mut()',
+                            options: [
+                                { flag: 'iter()', desc: 'Emprunte les éléments' },
+                                { flag: 'into_iter()', desc: 'Consomme le conteneur' },
+                                { flag: 'iter_mut()', desc: 'Emprunte mutablement' }
+                            ],
+                            examples: [
+                                { code: '// Préférez into_iter si vous n\'avez plus besoin du Vec\nlet sum: i32 = vec.into_iter().sum();\n\n// Chaînez sans collect intermédiaire\n// ❌ Mauvais:\nlet temp: Vec<_> = data.iter().filter(|x| x > &10).collect();\nlet result: Vec<_> = temp.iter().map(|x| x * 2).collect();\n\n// ✅ Bon:\nlet result: Vec<_> = data.iter()\n    .filter(|x| **x > 10)\n    .map(|x| x * 2)\n    .collect();\n\n// Utilisez fold au lieu de collect + reduce\nlet sum = data.iter().fold(0, |acc, x| acc + x);\n\n// extend au lieu de multiple push\nlet mut result = Vec::with_capacity(1000);\nresult.extend(data.iter().map(|x| x * 2));\n\n// Réutilisez les buffers\nlet mut buffer = String::with_capacity(1024);\nfor item in items {\n    buffer.clear(); // Garde la capacité\n    write!(&mut buffer, "{}", item).unwrap();\n    process(&buffer);\n}', desc: 'Patterns d\'itération optimaux' }
+                            ],
+                            tips: ['with_capacity évite les réallocations'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Compiler pour la performance',
+                        desc: 'LTO, codegen-units, target-cpu',
+                        details: {
+                            explanation: 'Configurez Cargo pour des builds optimisés en production.',
+                            syntax: 'Cargo.toml [profile.release]',
+                            options: [
+                                { flag: 'lto', desc: 'Link-Time Optimization' },
+                                { flag: 'codegen-units', desc: 'Parallélisme compilation' },
+                                { flag: 'target-cpu', desc: 'Optimiser pour CPU spécifique' }
+                            ],
+                            examples: [
+                                { code: '# Cargo.toml\n[profile.release]\nopt-level = 3          # Optimisation maximale\nlto = "fat"            # LTO cross-crate complet\ncodegen-units = 1      # Meilleure optimisation (plus lent à compiler)\npanic = "abort"        # Pas de stack unwinding\nstrip = true           # Supprime les symboles\n\n# Profile personnalisé pour bench\n[profile.bench]\ninherits = "release"\ndebug = true           # Symboles pour profiling\n\n# Optimiser pour le CPU local\n# RUSTFLAGS="-C target-cpu=native" cargo build --release\n\n# Ou dans .cargo/config.toml\n[build]\nrustflags = ["-C", "target-cpu=native"]\n\n# Vérifier les optimisations appliquées\n# cargo rustc --release -- --print cfg', desc: 'Configuration release optimale' }
+                            ],
+                            tips: ['lto="fat" + codegen-units=1 = binaire le plus rapide'],
+                            warnings: ['Compilation beaucoup plus lente']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser SIMD (vectorisation)',
+                        desc: 'std::simd pour calculs parallèles',
+                        details: {
+                            explanation: 'SIMD (Single Instruction Multiple Data) traite plusieurs données en parallèle.',
+                            syntax: '#![feature(portable_simd)]',
+                            options: [
+                                { flag: 'std::simd', desc: 'SIMD portable (nightly)' },
+                                { flag: 'packed_simd', desc: 'Crate stable' }
+                            ],
+                            examples: [
+                                { code: '// Avec std::simd (nightly)\n#![feature(portable_simd)]\nuse std::simd::*;\n\nfn dot_product_simd(a: &[f32], b: &[f32]) -> f32 {\n    assert_eq!(a.len(), b.len());\n    let (a_chunks, a_remainder) = a.as_simd::<8>();\n    let (b_chunks, b_remainder) = b.as_simd::<8>();\n    \n    let mut sum = f32x8::splat(0.0);\n    for (a_chunk, b_chunk) in a_chunks.iter().zip(b_chunks.iter()) {\n        sum += *a_chunk * *b_chunk;\n    }\n    \n    let mut result = sum.reduce_sum();\n    for (a, b) in a_remainder.iter().zip(b_remainder.iter()) {\n        result += a * b;\n    }\n    result\n}\n\n// Stable alternative: laisser le compilateur vectoriser\n#[inline]\nfn dot_product(a: &[f32], b: &[f32]) -> f32 {\n    a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()\n}\n// Compilez avec: RUSTFLAGS="-C target-cpu=native"', desc: 'SIMD pour calculs vectoriels' }
+                            ],
+                            tips: ['Souvent le compilateur auto-vectorise avec -C target-cpu=native'],
+                            warnings: ['std::simd est unstable, utilisez packed_simd pour stable']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'error-handling',
+                title: '🛡️ Erreurs & Robustesse',
+                icon: 'fa-shield-alt',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Définir des erreurs métier',
+                        desc: 'thiserror pour enum errors',
+                        details: {
+                            explanation: 'thiserror génère automatiquement les implémentations Error pour vos types d\'erreur.',
+                            syntax: 'cargo add thiserror',
+                            options: [
+                                { flag: '#[error]', desc: 'Message d\'erreur' },
+                                { flag: '#[from]', desc: 'Conversion automatique' },
+                                { flag: '#[source]', desc: 'Erreur source' }
+                            ],
+                            examples: [
+                                { code: 'use thiserror::Error;\n\n#[derive(Error, Debug)]\npub enum AppError {\n    #[error("User not found: {0}")]\n    UserNotFound(String),\n    \n    #[error("Invalid input: {field} - {message}")]\n    ValidationError {\n        field: String,\n        message: String,\n    },\n    \n    #[error("Database error")]\n    DatabaseError(#[from] sqlx::Error),\n    \n    #[error("IO error")]\n    IoError(#[from] std::io::Error),\n    \n    #[error("Internal error: {0}")]\n    Internal(#[source] anyhow::Error),\n}\n\n// Usage\nfn find_user(id: &str) -> Result<User, AppError> {\n    let user = db.find(id)\n        .ok_or_else(|| AppError::UserNotFound(id.to_string()))?;\n    Ok(user)\n}', desc: 'Erreurs avec thiserror' }
+                            ],
+                            tips: ['#[from] permet l\'utilisation de ?'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Propager avec contexte',
+                        desc: 'anyhow pour context()',
+                        details: {
+                            explanation: 'anyhow ajoute du contexte aux erreurs pour un meilleur debugging.',
+                            syntax: 'cargo add anyhow',
+                            options: [
+                                { flag: 'context()', desc: 'Ajouter du contexte' },
+                                { flag: 'with_context()', desc: 'Contexte lazy' },
+                                { flag: 'bail!', desc: 'Retourner une erreur' }
+                            ],
+                            examples: [
+                                { code: 'use anyhow::{Context, Result, bail};\n\nfn load_config(path: &str) -> Result<Config> {\n    let content = std::fs::read_to_string(path)\n        .with_context(|| format!("Failed to read config from {}", path))?;\n    \n    let config: Config = toml::from_str(&content)\n        .context("Failed to parse config file")?;\n    \n    if config.port == 0 {\n        bail!("Port cannot be 0");\n    }\n    \n    Ok(config)\n}\n\nfn main() -> Result<()> {\n    let config = load_config("config.toml")?;\n    \n    // L\'erreur affiche toute la chaîne:\n    // Error: Failed to read config from config.toml\n    //\n    // Caused by:\n    //     No such file or directory (os error 2)\n    \n    Ok(())\n}', desc: 'Contexte avec anyhow' }
+                            ],
+                            tips: ['anyhow pour apps, thiserror pour bibliothèques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Logger les erreurs structurées',
+                        desc: 'tracing avec span context',
+                        details: {
+                            explanation: 'tracing permet du logging structuré avec contexte de span.',
+                            syntax: 'cargo add tracing tracing-subscriber',
+                            options: [
+                                { flag: '#[instrument]', desc: 'Auto-instrument une fonction' },
+                                { flag: 'span', desc: 'Contexte nommé' },
+                                { flag: 'event', desc: 'Log un événement' }
+                            ],
+                            examples: [
+                                { code: 'use tracing::{info, error, instrument, span, Level};\nuse tracing_subscriber;\n\n#[instrument(skip(password))]\nasync fn login(username: &str, password: &str) -> Result<User, AuthError> {\n    info!("Attempting login");\n    \n    let user = find_user(username).await?;\n    \n    if !verify_password(&user, password) {\n        error!(username, "Invalid password");\n        return Err(AuthError::InvalidCredentials);\n    }\n    \n    info!(user_id = %user.id, "Login successful");\n    Ok(user)\n}\n\nfn main() {\n    // Setup subscriber\n    tracing_subscriber::fmt()\n        .with_max_level(Level::DEBUG)\n        .json() // Format JSON pour production\n        .init();\n    \n    // Span manuel\n    let span = span!(Level::INFO, "request", id = 42);\n    let _guard = span.enter();\n    \n    // Tous les logs dans ce scope ont request.id = 42\n}', desc: 'Logging structuré' }
+                            ],
+                            tips: ['#[instrument] capture automatiquement les arguments'],
+                            warnings: ['skip les données sensibles comme passwords']
+                        }
+                    },
+                    {
+                        cmd: 'Implémenter des retries intelligents',
+                        desc: 'backoff avec exponential retry',
+                        details: {
+                            explanation: 'Réessayez les opérations avec backoff exponentiel pour gérer les erreurs transitoires.',
+                            syntax: 'cargo add backoff --features tokio',
+                            options: [
+                                { flag: 'ExponentialBackoff', desc: 'Backoff exponentiel' },
+                                { flag: 'retry', desc: 'Fonction retry' }
+                            ],
+                            examples: [
+                                { code: 'use backoff::{ExponentialBackoff, retry, Error};\nuse std::time::Duration;\n\n// Sync\nfn fetch_with_retry() -> Result<Data, MyError> {\n    let backoff = ExponentialBackoff {\n        initial_interval: Duration::from_millis(100),\n        max_interval: Duration::from_secs(10),\n        max_elapsed_time: Some(Duration::from_secs(60)),\n        ..Default::default()\n    };\n    \n    retry(backoff, || {\n        match fetch_data() {\n            Ok(data) => Ok(data),\n            Err(e) if e.is_transient() => Err(Error::transient(e)),\n            Err(e) => Err(Error::permanent(e)),\n        }\n    })\n}\n\n// Async\nuse backoff::future::retry;\n\nasync fn fetch_with_retry_async() -> Result<Data, MyError> {\n    retry(ExponentialBackoff::default(), || async {\n        fetch_data_async().await.map_err(Error::transient)\n    }).await\n}', desc: 'Retry avec backoff' }
+                            ],
+                            tips: ['Distinguez erreurs transient vs permanent'],
+                            warnings: ['Attention aux opérations non-idempotentes']
+                        }
+                    },
+                    {
+                        cmd: 'Valider les entrées utilisateur',
+                        desc: 'validator crate pour règles',
+                        details: {
+                            explanation: 'Validez les entrées utilisateur avec des règles déclaratives.',
+                            syntax: 'cargo add validator --features derive',
+                            options: [
+                                { flag: '#[validate]', desc: 'Active la validation' },
+                                { flag: 'custom', desc: 'Validation personnalisée' }
+                            ],
+                            examples: [
+                                { code: 'use validator::{Validate, ValidationError};\n\nfn validate_username(username: &str) -> Result<(), ValidationError> {\n    if username.contains("admin") {\n        return Err(ValidationError::new("reserved_word"));\n    }\n    Ok(())\n}\n\n#[derive(Validate)]\nstruct CreateUser {\n    #[validate(length(min = 3, max = 20), custom = "validate_username")]\n    username: String,\n    \n    #[validate(email)]\n    email: String,\n    \n    #[validate(range(min = 0, max = 150))]\n    age: u8,\n    \n    #[validate(url)]\n    website: Option<String>,\n    \n    #[validate(nested)]\n    address: Address,\n}\n\n#[derive(Validate)]\nstruct Address {\n    #[validate(length(min = 1))]\n    street: String,\n    #[validate(length(equal = 5))]\n    zip: String,\n}\n\nfn process_user(input: CreateUser) -> Result<(), ValidationErrors> {\n    input.validate()?;\n    // Input is valid\n    Ok(())\n}', desc: 'Validation complète' }
+                            ],
+                            tips: ['nested pour valider les structs imbriquées'],
+                            warnings: ['Validez TOUJOURS les entrées utilisateur']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-ml-api',
+                title: '🎯 Projet: API ML Pipeline',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-gradient-to-r from-orange-500 to-pink-500',
+                commands: [
+                    {
+                        cmd: 'Étape 1: Setup projet workspace',
+                        desc: 'Structure Cargo workspace',
+                        details: {
+                            explanation: 'Organisez votre projet avec un Cargo workspace pour séparer API, workers et libs.',
+                            syntax: 'cargo new ml-api --lib',
+                            options: [],
+                            examples: [
+                                { code: '# Structure du projet\nml-pipeline/\n├── Cargo.toml           # Workspace root\n├── api/                  # Service API REST\n│   ├── Cargo.toml\n│   └── src/main.rs\n├── worker/               # Worker ML async\n│   ├── Cargo.toml\n│   └── src/main.rs\n├── core/                 # Logique métier partagée\n│   ├── Cargo.toml\n│   └── src/lib.rs\n└── models/               # Fichiers de modèles ML\n    └── model.onnx\n\n# Cargo.toml (root)\n[workspace]\nmembers = ["api", "worker", "core"]\nresolver = "2"\n\n[workspace.dependencies]\ntokio = { version = "1", features = ["full"] }\nserde = { version = "1", features = ["derive"] }\naxum = "0.7"\ntracing = "0.1"', desc: 'Structure workspace' }
+                            ],
+                            tips: ['workspace.dependencies pour versions unifiées'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 2: API REST avec Axum',
+                        desc: 'Endpoints et middleware',
+                        details: {
+                            explanation: 'Créez l\'API REST pour soumettre des jobs ML et récupérer les résultats.',
+                            syntax: 'api/src/main.rs',
+                            options: [],
+                            examples: [
+                                { code: '// api/src/main.rs\nuse axum::{routing::{get, post}, Json, Router, extract::State};\nuse serde::{Deserialize, Serialize};\nuse std::sync::Arc;\nuse tokio::sync::mpsc;\n\n#[derive(Clone)]\nstruct AppState {\n    job_sender: mpsc::Sender<Job>,\n}\n\n#[derive(Deserialize)]\nstruct PredictRequest {\n    data: Vec<f32>,\n}\n\n#[derive(Serialize)]\nstruct PredictResponse {\n    job_id: String,\n    status: String,\n}\n\nasync fn submit_job(\n    State(state): State<Arc<AppState>>,\n    Json(req): Json<PredictRequest>,\n) -> Json<PredictResponse> {\n    let job_id = uuid::Uuid::new_v4().to_string();\n    let job = Job { id: job_id.clone(), data: req.data };\n    \n    state.job_sender.send(job).await.unwrap();\n    \n    Json(PredictResponse {\n        job_id,\n        status: "queued".into(),\n    })\n}\n\nasync fn get_result(/* ... */) -> Json<ResultResponse> {\n    // Récupérer depuis Redis/DB\n}\n\n#[tokio::main]\nasync fn main() {\n    let (tx, rx) = mpsc::channel(100);\n    let state = Arc::new(AppState { job_sender: tx });\n    \n    let app = Router::new()\n        .route("/predict", post(submit_job))\n        .route("/result/:job_id", get(get_result))\n        .with_state(state);\n    \n    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();\n    axum::serve(listener, app).await.unwrap();\n}', desc: 'API avec job queue' }
+                            ],
+                            tips: ['Utilisez Redis pour les résultats en production'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 3: Intégration Polars',
+                        desc: 'Prétraitement des données',
+                        details: {
+                            explanation: 'Utilisez Polars pour le prétraitement des données avant l\'inférence.',
+                            syntax: 'core/src/preprocessing.rs',
+                            options: [],
+                            examples: [
+                                { code: '// core/src/preprocessing.rs\nuse polars::prelude::*;\n\npub fn preprocess_input(data: Vec<f32>) -> Result<Vec<f32>, PolarsError> {\n    // Créer un DataFrame\n    let df = df! [\n        "features" => &data\n    ]?;\n    \n    // Normalisation\n    let normalized = df.lazy()\n        .with_column(\n            ((col("features") - col("features").mean()) / col("features").std(1))\n                .alias("normalized")\n        )\n        .collect()?;\n    \n    // Extraire les valeurs normalisées\n    let result: Vec<f32> = normalized\n        .column("normalized")?\n        .f32()?\n        .into_no_null_iter()\n        .collect();\n    \n    Ok(result)\n}\n\npub fn batch_preprocess(inputs: Vec<Vec<f32>>) -> Result<Vec<Vec<f32>>, PolarsError> {\n    inputs.into_iter()\n        .map(preprocess_input)\n        .collect()\n}', desc: 'Prétraitement Polars' }
+                            ],
+                            tips: ['Pré-calculez mean/std sur les données d\'entraînement'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 4: Worker ML async',
+                        desc: 'Inference queue avec Tract',
+                        details: {
+                            explanation: 'Le worker consomme les jobs de la queue et exécute l\'inférence.',
+                            syntax: 'worker/src/main.rs',
+                            options: [],
+                            examples: [
+                                { code: '// worker/src/main.rs\nuse tract_onnx::prelude::*;\nuse tokio::sync::mpsc;\n\nstruct MLWorker {\n    model: SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>,\n}\n\nimpl MLWorker {\n    fn new(model_path: &str) -> TractResult<Self> {\n        let model = tract_onnx::onnx()\n            .model_for_path(model_path)?\n            .with_input_fact(0, f32::fact([1, 10]).into())?\n            .into_optimized()?\n            .into_runnable()?;\n        \n        Ok(Self { model })\n    }\n    \n    fn predict(&self, input: Vec<f32>) -> TractResult<Vec<f32>> {\n        let input_tensor: Tensor = tract_ndarray::Array2::from_shape_vec(\n            (1, input.len()),\n            input\n        )?.into();\n        \n        let result = self.model.run(tvec!(input_tensor.into()))?;\n        let output = result[0].to_array_view::<f32>()?;\n        \n        Ok(output.iter().cloned().collect())\n    }\n}\n\n#[tokio::main]\nasync fn main() {\n    let worker = MLWorker::new("models/model.onnx").unwrap();\n    \n    // Recevoir les jobs (depuis Redis/channel)\n    while let Some(job) = receive_job().await {\n        let preprocessed = core::preprocess_input(job.data).unwrap();\n        let prediction = worker.predict(preprocessed).unwrap();\n        \n        // Stocker le résultat\n        store_result(job.id, prediction).await;\n    }\n}', desc: 'Worker ML' }
+                            ],
+                            tips: ['Réutilisez le modèle chargé pour toutes les inférences'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 5: Observabilité',
+                        desc: 'Tracing, metrics, health checks',
+                        details: {
+                            explanation: 'Ajoutez l\'observabilité pour monitorer votre service en production.',
+                            syntax: 'Tracing + Prometheus metrics',
+                            options: [],
+                            examples: [
+                                { code: '// api/src/main.rs\nuse axum::{routing::get, Router};\nuse metrics_exporter_prometheus::PrometheusBuilder;\nuse tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};\n\nasync fn health() -> &\'static str {\n    "OK"\n}\n\nasync fn ready() -> &\'static str {\n    // Vérifier connexions DB, modèle chargé, etc.\n    "OK"\n}\n\n#[tokio::main]\nasync fn main() {\n    // Setup tracing\n    tracing_subscriber::registry()\n        .with(tracing_subscriber::fmt::layer().json())\n        .init();\n    \n    // Setup Prometheus metrics\n    let prometheus_handle = PrometheusBuilder::new()\n        .install_recorder()\n        .unwrap();\n    \n    let app = Router::new()\n        .route("/health", get(health))\n        .route("/ready", get(ready))\n        .route("/metrics", get(move || {\n            std::future::ready(prometheus_handle.render())\n        }))\n        // ... autres routes\n        ;\n    \n    // Métriques personnalisées\n    metrics::counter!("predictions_total").increment(1);\n    metrics::histogram!("prediction_duration_seconds").record(duration);\n}', desc: 'Observabilité complète' }
+                            ],
+                            tips: ['/health pour liveness, /ready pour readiness'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 6: Containerisation Docker',
+                        desc: 'Multi-stage build optimisé',
+                        details: {
+                            explanation: 'Créez des images Docker optimisées pour le déploiement.',
+                            syntax: 'Dockerfile',
+                            options: [],
+                            examples: [
+                                { code: '# Dockerfile\n# Stage 1: Build\nFROM rust:1.75-slim AS builder\n\nWORKDIR /app\n\n# Cache des dépendances\nCOPY Cargo.toml Cargo.lock ./\nCOPY api/Cargo.toml api/\nCOPY worker/Cargo.toml worker/\nCOPY core/Cargo.toml core/\n\nRUN mkdir -p api/src worker/src core/src && \\\n    echo "fn main() {}" > api/src/main.rs && \\\n    echo "fn main() {}" > worker/src/main.rs && \\\n    echo "" > core/src/lib.rs && \\\n    cargo build --release && \\\n    rm -rf api/src worker/src core/src\n\n# Build réel\nCOPY . .\nRUN cargo build --release\n\n# Stage 2: Runtime\nFROM debian:bookworm-slim\n\nRUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*\n\nCOPY --from=builder /app/target/release/api /usr/local/bin/\nCOPY --from=builder /app/target/release/worker /usr/local/bin/\nCOPY models/ /app/models/\n\nEXPOSE 3000\nCMD ["api"]', desc: 'Dockerfile multi-stage' }
+                            ],
+                            tips: ['Copiez Cargo.toml d\'abord pour cacher les deps'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Étape 7: Déploiement production',
+                        desc: 'Kubernetes et scaling',
+                        details: {
+                            explanation: 'Déployez sur Kubernetes avec scaling automatique.',
+                            syntax: 'kubectl apply -f k8s/',
+                            options: [],
+                            examples: [
+                                { code: '# k8s/deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: ml-api\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: ml-api\n  template:\n    metadata:\n      labels:\n        app: ml-api\n    spec:\n      containers:\n      - name: api\n        image: myregistry/ml-api:latest\n        ports:\n        - containerPort: 3000\n        resources:\n          requests:\n            memory: "256Mi"\n            cpu: "250m"\n          limits:\n            memory: "512Mi"\n            cpu: "500m"\n        livenessProbe:\n          httpGet:\n            path: /health\n            port: 3000\n        readinessProbe:\n          httpGet:\n            path: /ready\n            port: 3000\n---\napiVersion: autoscaling/v2\nkind: HorizontalPodAutoscaler\nmetadata:\n  name: ml-api-hpa\nspec:\n  scaleTargetRef:\n    apiVersion: apps/v1\n    kind: Deployment\n    name: ml-api\n  minReplicas: 2\n  maxReplicas: 10\n  metrics:\n  - type: Resource\n    resource:\n      name: cpu\n      target:\n        type: Utilization\n        averageUtilization: 70', desc: 'Kubernetes deployment' }
+                            ],
+                            tips: ['Utilisez HPA pour auto-scaling'],
+                            warnings: ['Configurez les ressources selon vos modèles ML']
                         }
                     }
                 ]

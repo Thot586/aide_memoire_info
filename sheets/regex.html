@@ -322,7 +322,8 @@
                         desc: 'Lookahead positif et négatif',
                         details: {
                             explanation: 'Vérifie ce qui suit sans l\'inclure dans le match. "Regarde devant".',
-                            syntax: '(?=pattern) - positif\n(?!pattern) - négatif',
+                            syntax: '(?=pattern) - positif
+(?!pattern) - négatif',
                             options: [
                                 { flag: '(?=...)', desc: 'Suivi par... (positif)' },
                                 { flag: '(?!...)', desc: 'NON suivi par... (négatif)' }
@@ -342,7 +343,8 @@
                         desc: 'Lookbehind positif et négatif',
                         details: {
                             explanation: 'Vérifie ce qui précède sans l\'inclure dans le match. "Regarde derrière".',
-                            syntax: '(?<=pattern) - positif\n(?<!pattern) - négatif',
+                            syntax: '(?<=pattern) - positif
+(?<!pattern) - négatif',
                             options: [
                                 { flag: '(?<=...)', desc: 'Précédé par... (positif)' },
                                 { flag: '(?<!...)', desc: 'NON précédé par... (négatif)' }
@@ -392,7 +394,7 @@
                                 { flag: 'i', desc: 'Case insensitive (ignore majuscules/minuscules)' },
                                 { flag: 'g', desc: 'Global (toutes les occurrences)' },
                                 { flag: 'm', desc: 'Multiline (^ et $ matchent les lignes)' },
-                                { flag: 's', desc: 'Dotall (. matche aussi \\n)' }
+                                { flag: 's', desc: 'Dotall (. matche aussi \n)' }
                             ],
                             examples: [
                                 { code: '/hello/i', desc: 'Match "hello", "HELLO", "HeLLo"...' },
@@ -416,7 +418,13 @@
                                 { flag: 'y', desc: 'Sticky (match depuis lastIndex seulement)' }
                             ],
                             examples: [
-                                { code: '/\n  \\d{4}  # année\n  -\n  \\d{2}  # mois\n  -\n  \\d{2}  # jour\n/x', desc: 'Regex commentée (mode étendu)' },
+                                { code: '/
+  \\d{4}  # année
+  -
+  \\d{2}  # mois
+  -
+  \\d{2}  # jour
+/x', desc: 'Regex commentée (mode étendu)' },
                                 { code: '/\\p{L}+/u', desc: 'Lettres Unicode (accents, cyrillique, etc.)' },
                                 { code: '/[\\u0600-\\u06FF]+/u', desc: 'Caractères arabes' },
                                 { code: '/^\\p{Script=Greek}+$/u', desc: 'Texte grec seulement' }
@@ -492,8 +500,10 @@
                             examples: [
                                 { code: '(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})', desc: 'Date avec noms' },
                                 { code: 's/(?<first>\\w+) (?<last>\\w+)/$<last>, $<first>/', desc: 'Reformater nom: "Jean Dupont" → "Dupont, Jean"' },
-                                { code: "# Python\nmatch.group('year')", desc: 'Accès par nom en Python' },
-                                { code: '// JavaScript\nmatch.groups.year', desc: 'Accès par nom en JS (ES2018)' }
+                                { code: "# Python
+match.group('year')", desc: 'Accès par nom en Python' },
+                                { code: '// JavaScript
+match.groups.year', desc: 'Accès par nom en JS (ES2018)' }
                             ],
                             tips: ['Les groupes nommés rendent le code plus lisible et maintenable'],
                             warnings: []
@@ -507,10 +517,14 @@
                             syntax: 'str.replace(regex, function)',
                             options: [],
                             examples: [
-                                { code: '// JavaScript\ntext.replace(/\\d+/g, match => parseInt(match) * 2)', desc: 'Doubler tous les nombres' },
-                                { code: '// JavaScript\ntext.replace(/\\b\\w/g, c => c.toUpperCase())', desc: 'Première lettre en majuscule' },
-                                { code: '# Python\nre.sub(r"\\d+", lambda m: str(int(m.group()) * 2), text)', desc: 'Doubler les nombres (Python)' },
-                                { code: '# Python\nre.sub(r"(?P<n>\\d+)", lambda m: f\'[{m.group("n")}]\', text)', desc: 'Avec groupe nommé' }
+                                { code: '// JavaScript
+text.replace(/\\d+/g, match => parseInt(match) * 2)', desc: 'Doubler tous les nombres' },
+                                { code: '// JavaScript
+text.replace(/\\b\\w/g, c => c.toUpperCase())', desc: 'Première lettre en majuscule' },
+                                { code: '# Python
+re.sub(r"\\d+", lambda m: str(int(m.group()) * 2), text)', desc: 'Doubler les nombres (Python)' },
+                                { code: '# Python
+re.sub(r"(?P<n>\\d+)", lambda m: f\'[{m.group("n")}]\', text)', desc: 'Avec groupe nommé' }
                             ],
                             tips: ['Les callbacks permettent des transformations complexes impossibles avec des patterns simples'],
                             warnings: []
@@ -541,7 +555,9 @@
                                 { code: '/\\d+/.test("abc123")  // true', desc: 'Test de correspondance' },
                                 { code: '"abc123def456".match(/\\d+/g)  // ["123", "456"]', desc: 'Trouver toutes les occurrences' },
                                 { code: '"hello world".replace(/\\w+/g, s => s.toUpperCase())', desc: 'Remplacement avec fonction' },
-                                { code: 'const regex = /(?<year>\\d{4})-(?<month>\\d{2})/\nconst {groups} = regex.exec("2024-01")\nconsole.log(groups.year)  // "2024"', desc: 'Groupes nommés (ES2018)' }
+                                { code: 'const regex = /(?<year>\\d{4})-(?<month>\\d{2})/
+const {groups} = regex.exec("2024-01")
+console.log(groups.year)  // "2024"', desc: 'Groupes nommés (ES2018)' }
                             ],
                             tips: ['Utilisez /pattern/g pour matchAll ou replace global'],
                             warnings: ['new RegExp() nécessite d\'échapper les backslashes']
@@ -552,7 +568,8 @@
                         desc: 'Module re en Python',
                         details: {
                             explanation: 'Le module re pour les expressions régulières en Python.',
-                            syntax: 'import re\nre.search(pattern, string)',
+                            syntax: 'import re
+re.search(pattern, string)',
                             options: [
                                 { flag: 're.search()', desc: 'Première correspondance' },
                                 { flag: 're.match()', desc: 'Match au début seulement' },
@@ -561,10 +578,13 @@
                                 { flag: 're.compile()', desc: 'Compiler pour réutilisation' }
                             ],
                             examples: [
-                                { code: 'import re\nre.search(r"\\d+", "abc123").group()  # "123"', desc: 'Recherche basique' },
+                                { code: 'import re
+re.search(r"\\d+", "abc123").group()  # "123"', desc: 'Recherche basique' },
                                 { code: 're.findall(r"\\d+", "a1b2c3")  # ["1", "2", "3"]', desc: 'Toutes les occurrences' },
                                 { code: 're.sub(r"(\\w+)", r"[\\1]", "hello world")  # "[hello] [world]"', desc: 'Remplacement avec groupe' },
-                                { code: 'pattern = re.compile(r"(?P<name>\\w+)@(?P<domain>\\w+\\.\\w+)")\nmatch = pattern.search("email@example.com")\nmatch.group("name")  # "email"', desc: 'Pattern compilé avec groupes nommés' }
+                                { code: 'pattern = re.compile(r"(?P<name>\\w+)@(?P<domain>\\w+\\.\\w+)")
+match = pattern.search("email@example.com")
+match.group("name")  # "email"', desc: 'Pattern compilé avec groupes nommés' }
                             ],
                             tips: ['Utilisez r"..." pour les raw strings (évite d\'échapper les backslashes)'],
                             warnings: ['re.match() ne matche que le début, utilisez re.search() pour chercher partout']
@@ -584,10 +604,21 @@
                                 { flag: 'Matcher.find()', desc: 'Java: trouver les matches' }
                             ],
                             examples: [
-                                { code: '// PHP\npreg_match(\'/\\d+/\', "abc123", $matches);\necho $matches[0];  // "123"', desc: 'Match PHP' },
-                                { code: '// PHP\n$result = preg_replace(\'/(\\w+)/\', \'[$1]\', "hello world");\n// "[hello] [world]"', desc: 'Remplacement PHP' },
-                                { code: '// Java\nPattern pattern = Pattern.compile("\\\\d+");\nMatcher matcher = pattern.matcher("abc123");\nif (matcher.find()) {\n    System.out.println(matcher.group());  // "123"\n}', desc: 'Match Java' },
-                                { code: '// Java\nString result = "hello world".replaceAll("(\\\\w+)", "[$1]");\n// "[hello] [world]"', desc: 'Remplacement Java' }
+                                { code: '// PHP
+preg_match(\'/\\d+/\', "abc123", $matches);
+echo $matches[0];  // "123"', desc: 'Match PHP' },
+                                { code: '// PHP
+$result = preg_replace(\'/(\\w+)/\', \'[$1]\', "hello world");
+// "[hello] [world]"', desc: 'Remplacement PHP' },
+                                { code: '// Java
+Pattern pattern = Pattern.compile("\\\\d+");
+Matcher matcher = pattern.matcher("abc123");
+if (matcher.find()) {
+    System.out.println(matcher.group());  // "123"
+}', desc: 'Match Java' },
+                                { code: '// Java
+String result = "hello world".replaceAll("(\\\\w+)", "[$1]");
+// "[hello] [world]"', desc: 'Remplacement Java' }
                             ],
                             tips: ['PHP: délimiteurs requis (/pattern/). Java: doubles backslashes dans les strings'],
                             warnings: []
@@ -598,7 +629,8 @@
                         desc: 'Regex en ligne de commande',
                         details: {
                             explanation: 'Utiliser les regex avec grep, sed et dans Bash.',
-                            syntax: 'grep -E "pattern"\nsed -E "s/pattern/replace/"',
+                            syntax: 'grep -E "pattern"
+sed -E "s/pattern/replace/"',
                             options: [
                                 { flag: 'grep -E', desc: 'Extended regex (ERE)' },
                                 { flag: 'grep -P', desc: 'Perl-compatible regex (PCRE)' },
@@ -609,7 +641,9 @@
                                 { code: 'grep -E "\\b[A-Z]{2,}\\b" file.txt', desc: 'Mots en majuscules (2+ lettres)' },
                                 { code: 'grep -oP "(?<=email: )\\S+" file.txt', desc: 'Extraire après "email: " (PCRE)' },
                                 { code: 'sed -E \'s/([0-9]+)/[\\1]/g\' file.txt', desc: 'Entourer les nombres de crochets' },
-                                { code: 'if [[ "$email" =~ ^[a-z]+@[a-z]+\\.[a-z]+$ ]]; then\n  echo "Email valide"\nfi', desc: 'Validation en Bash' }
+                                { code: 'if [[ "$email" =~ ^[a-z]+@[a-z]+\\.[a-z]+$ ]]; then
+  echo "Email valide"
+fi', desc: 'Validation en Bash' }
                             ],
                             tips: ['grep -P offre plus de fonctionnalités (lookahead, etc.)'],
                             warnings: ['La syntaxe varie selon les outils (BRE vs ERE vs PCRE)']
@@ -635,9 +669,20 @@
                                 { flag: '.*.*', desc: 'SUSPECT: multiples .* consécutifs' }
                             ],
                             examples: [
-                                { code: '# ❌ Pattern vulnérable au ReDoS\n(a+)+$\n\n# Avec "aaaaaaaaaaaaaaaaaaaaX" → catastrophique!', desc: 'Exemple ReDoS' },
-                                { code: '# ❌ Mauvais: email vulnérable\n^([a-zA-Z0-9]+)*@\n\n# ✅ Mieux: pas d\'imbrication\n^[a-zA-Z0-9]+@', desc: 'Correction' },
-                                { code: '# ❌ Lent: gourmand puis backtrack\n.*foo.*bar\n\n# ✅ Plus rapide: non-gourmand\n.*?foo.*?bar', desc: 'Utiliser non-gourmand' }
+                                { code: '# ❌ Pattern vulnérable au ReDoS
+(a+)+$
+
+# Avec "aaaaaaaaaaaaaaaaaaaaX" → catastrophique!', desc: 'Exemple ReDoS' },
+                                { code: '# ❌ Mauvais: email vulnérable
+^([a-zA-Z0-9]+)*@
+
+# ✅ Mieux: pas d\'imbrication
+^[a-zA-Z0-9]+@', desc: 'Correction' },
+                                { code: '# ❌ Lent: gourmand puis backtrack
+.*foo.*bar
+
+# ✅ Plus rapide: non-gourmand
+.*?foo.*?bar', desc: 'Utiliser non-gourmand' }
                             ],
                             tips: ['Testez vos regex avec des entrées longues et malformées'],
                             warnings: ['Les regex vulnérables peuvent être exploitées pour des attaques DoS']
@@ -656,8 +701,16 @@
                                 { flag: '.{2,5}?', desc: 'Entre 2 et 5, mais préfère 2' }
                             ],
                             examples: [
-                                { code: '# Chaîne: "<div>foo</div><div>bar</div>"\n\n<div>.*</div>   # Match TOUT (gourmand)\n# → "<div>foo</div><div>bar</div>"\n\n<div>.*?</div>  # Match minimum (paresseux)\n# → "<div>foo</div>" (premier seulement)', desc: 'Différence gourmand/paresseux' },
-                                { code: '# Extraire le contenu entre guillemets\n".*"   # Gourmand: "foo" et "bar" → "foo" et "bar"\n".*?"  # Paresseux: "foo" → "foo", puis "bar" → "bar"', desc: 'Guillemets' }
+                                { code: '# Chaîne: "<div>foo</div><div>bar</div>"
+
+<div>.*</div>   # Match TOUT (gourmand)
+# → "<div>foo</div><div>bar</div>"
+
+<div>.*?</div>  # Match minimum (paresseux)
+# → "<div>foo</div>" (premier seulement)', desc: 'Différence gourmand/paresseux' },
+                                { code: '# Extraire le contenu entre guillemets
+".*"   # Gourmand: "foo" et "bar" → "foo" et "bar"
+".*?"  # Paresseux: "foo" → "foo", puis "bar" → "bar"', desc: 'Guillemets' }
                             ],
                             tips: ['Pour le HTML/XML, préférez un parser dédié plutôt que regex'],
                             warnings: []
@@ -675,9 +728,15 @@
                                 { flag: 'a*+', desc: 'Possessif: comme a* mais sans backtrack' }
                             ],
                             examples: [
-                                { code: '# Avec (?>...) - pas de backtracking\n(?>\\d+)X   # Match "123X" mais PAS "123" seul', desc: 'Groupe atomique' },
-                                { code: '# Équivalent possessif\n\\d++X      # Même comportement, syntaxe plus courte', desc: 'Quantificateur possessif' },
-                                { code: '# ❌ Lent: peut backtracker\n\\d+:\\d+\n\n# ✅ Rapide: pas de backtrack possible\n\\d++:\\d++', desc: 'Optimisation avec possessif' }
+                                { code: '# Avec (?>...) - pas de backtracking
+(?>\\d+)X   # Match "123X" mais PAS "123" seul', desc: 'Groupe atomique' },
+                                { code: '# Équivalent possessif
+\\d++X      # Même comportement, syntaxe plus courte', desc: 'Quantificateur possessif' },
+                                { code: '# ❌ Lent: peut backtracker
+\\d+:\\d+
+
+# ✅ Rapide: pas de backtrack possible
+\\d++:\\d++', desc: 'Optimisation avec possessif' }
                             ],
                             tips: ['Les possessifs sont plus rapides mais peuvent échouer sur des matches valides'],
                             warnings: ['Non supporté par tous les moteurs (pas en JavaScript natif)']
@@ -696,9 +755,26 @@
                                 { flag: 'Tests', desc: 'Tester avec des cas limites' }
                             ],
                             examples: [
-                                { code: '# ❌ Trop générique\n.*@.*\n\n# ✅ Plus spécifique\n[^@]+@[^@]+', desc: 'Être spécifique' },
-                                { code: '# ❌ Sans ancres\n\\d{4}-\\d{2}-\\d{2}\n\n# ✅ Avec ancres\n^\\d{4}-\\d{2}-\\d{2}$', desc: 'Utiliser les ancres' },
-                                { code: '# ❌ Illisible\n^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$\n\n# ✅ Mode étendu\n(?x)\n^(?=.*[A-Z])     # Au moins une majuscule\n (?=.*[a-z])     # Au moins une minuscule\n (?=.*\\d)        # Au moins un chiffre\n (?=.*[@$!%*?&]) # Au moins un spécial\n [A-Za-z\\d@$!%*?&]{8,}$  # 8+ caractères', desc: 'Mode étendu pour lisibilité' }
+                                { code: '# ❌ Trop générique
+.*@.*
+
+# ✅ Plus spécifique
+[^@]+@[^@]+', desc: 'Être spécifique' },
+                                { code: '# ❌ Sans ancres
+\\d{4}-\\d{2}-\\d{2}
+
+# ✅ Avec ancres
+^\\d{4}-\\d{2}-\\d{2}$', desc: 'Utiliser les ancres' },
+                                { code: '# ❌ Illisible
+^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$
+
+# ✅ Mode étendu
+(?x)
+^(?=.*[A-Z])     # Au moins une majuscule
+ (?=.*[a-z])     # Au moins une minuscule
+ (?=.*\\d)        # Au moins un chiffre
+ (?=.*[@$!%*?&]) # Au moins un spécial
+ [A-Za-z\\d@$!%*?&]{8,}$  # 8+ caractères', desc: 'Mode étendu pour lisibilité' }
                             ],
                             tips: ['regex101.com est excellent pour tester et débugger vos regex'],
                             warnings: []
@@ -720,10 +796,14 @@
                             syntax: 'Formats ISO, français, américain',
                             options: [],
                             examples: [
-                                { code: '# Date ISO (YYYY-MM-DD)\n^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$', desc: 'Date ISO avec validation basique' },
-                                { code: '# Date française (DD/MM/YYYY)\n^(0[1-9]|[12]\\d|3[01])/(0[1-9]|1[0-2])/\\d{4}$', desc: 'Format français' },
-                                { code: '# Heure (HH:MM ou HH:MM:SS)\n^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$', desc: 'Format 24h' },
-                                { code: '# Datetime ISO\n^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:?\\d{2})?$', desc: 'ISO 8601 complet' }
+                                { code: '# Date ISO (YYYY-MM-DD)
+^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$', desc: 'Date ISO avec validation basique' },
+                                { code: '# Date française (DD/MM/YYYY)
+^(0[1-9]|[12]\\d|3[01])/(0[1-9]|1[0-2])/\\d{4}$', desc: 'Format français' },
+                                { code: '# Heure (HH:MM ou HH:MM:SS)
+^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$', desc: 'Format 24h' },
+                                { code: '# Datetime ISO
+^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:?\\d{2})?$', desc: 'ISO 8601 complet' }
                             ],
                             tips: ['Pour une vraie validation de date, utilisez une librairie (dates invalides comme 31/02)'],
                             warnings: ['Ces patterns ne valident pas la cohérence (ex: 30 février)']
@@ -737,10 +817,14 @@
                             syntax: 'IP, sous-réseau, MAC',
                             options: [],
                             examples: [
-                                { code: '# IPv4 simple\n^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$', desc: 'IPv4 basique' },
-                                { code: '# IPv4 stricte (0-255)\n^((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)$', desc: 'IPv4 validée' },
-                                { code: '# CIDR notation\n^((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)/(3[0-2]|[12]?\\d)$', desc: 'IPv4 avec masque CIDR' },
-                                { code: '# Adresse MAC\n^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$', desc: 'MAC address (00:1A:2B:3C:4D:5E)' }
+                                { code: '# IPv4 simple
+^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$', desc: 'IPv4 basique' },
+                                { code: '# IPv4 stricte (0-255)
+^((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)$', desc: 'IPv4 validée' },
+                                { code: '# CIDR notation
+^((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)/(3[0-2]|[12]?\\d)$', desc: 'IPv4 avec masque CIDR' },
+                                { code: '# Adresse MAC
+^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$', desc: 'MAC address (00:1A:2B:3C:4D:5E)' }
                             ],
                             tips: ['IPv6 est très complexe - utilisez une librairie pour la validation complète'],
                             warnings: []
@@ -759,10 +843,14 @@
                                 { flag: '(?=.*[!@#$%])', desc: 'Au moins un caractère spécial' }
                             ],
                             examples: [
-                                { code: '# Minimum 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre\n^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$', desc: 'Force moyenne' },
-                                { code: '# Fort: 10+ chars, maj, min, chiffre, spécial\n^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{10,}$', desc: 'Force élevée' },
-                                { code: '# Pas de caractères répétés 3+ fois\n^(?!.*(.)\\1\\1).{8,}$', desc: 'Anti-répétition' },
-                                { code: '# Combinaison complète\n^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*])(?!.*(.)\\1\\1)[A-Za-z\\d!@#$%^&*]{10,20}$', desc: 'Validation complète' }
+                                { code: '# Minimum 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre
+^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$', desc: 'Force moyenne' },
+                                { code: '# Fort: 10+ chars, maj, min, chiffre, spécial
+^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{10,}$', desc: 'Force élevée' },
+                                { code: '# Pas de caractères répétés 3+ fois
+^(?!.*(.)\\1\\1).{8,}$', desc: 'Anti-répétition' },
+                                { code: '# Combinaison complète
+^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*])(?!.*(.)\\1\\1)[A-Za-z\\d!@#$%^&*]{10,20}$', desc: 'Validation complète' }
                             ],
                             tips: ['Affichez des indicateurs de force progressifs plutôt que juste valide/invalide'],
                             warnings: ['La longueur est plus importante que la complexité pour la sécurité']
@@ -776,11 +864,17 @@
                             syntax: 'Espaces, HTML, caractères spéciaux',
                             options: [],
                             examples: [
-                                { code: '# Supprimer espaces multiples\ns/\\s+/ /g', desc: 'Normaliser les espaces' },
-                                { code: '# Trim (espaces début/fin)\ns/^\\s+|\\s+$//g', desc: 'Équivalent trim()' },
-                                { code: '# Supprimer balises HTML\ns/<[^>]+>//g', desc: 'Retirer le HTML (basique)' },
-                                { code: '# Slug pour URL\ns/[^a-zA-Z0-9]+/-/g\ns/^-|-$//g', desc: 'Créer un slug' },
-                                { code: '# CamelCase vers snake_case\ns/([a-z])([A-Z])/$1_$2/g', desc: 'myVarName → my_Var_Name (puis lowercase)' }
+                                { code: '# Supprimer espaces multiples
+s/\\s+/ /g', desc: 'Normaliser les espaces' },
+                                { code: '# Trim (espaces début/fin)
+s/^\\s+|\\s+$//g', desc: 'Équivalent trim()' },
+                                { code: '# Supprimer balises HTML
+s/<[^>]+>//g', desc: 'Retirer le HTML (basique)' },
+                                { code: '# Slug pour URL
+s/[^a-zA-Z0-9]+/-/g
+s/^-|-$//g', desc: 'Créer un slug' },
+                                { code: '# CamelCase vers snake_case
+s/([a-z])([A-Z])/$1_$2/g', desc: 'myVarName → my_Var_Name (puis lowercase)' }
                             ],
                             tips: ['Pour le HTML, utilisez un vrai parser plutôt que regex'],
                             warnings: []
@@ -802,7 +896,19 @@
                             syntax: 'Exemple: Apache Combined Log Format',
                             options: [],
                             examples: [
-                                { code: '# Format Apache Combined Log:\n# 192.168.1.1 - - [10/Oct/2024:13:55:36 +0000] "GET /page.html HTTP/1.1" 200 2326 "http://referer.com" "Mozilla/5.0"\n\n# Composants:\n# - IP: 192.168.1.1\n# - Identité: - (ou username)\n# - User: - (ou username)\n# - Date: [10/Oct/2024:13:55:36 +0000]\n# - Requête: "GET /page.html HTTP/1.1"\n# - Status: 200\n# - Taille: 2326\n# - Referer: "http://referer.com"\n# - User-Agent: "Mozilla/5.0..."', desc: 'Analyse du format' }
+                                { code: '# Format Apache Combined Log:
+# 192.168.1.1 - - [10/Oct/2024:13:55:36 +0000] "GET /page.html HTTP/1.1" 200 2326 "http://referer.com" "Mozilla/5.0"
+
+# Composants:
+# - IP: 192.168.1.1
+# - Identité: - (ou username)
+# - User: - (ou username)
+# - Date: [10/Oct/2024:13:55:36 +0000]
+# - Requête: "GET /page.html HTTP/1.1"
+# - Status: 200
+# - Taille: 2326
+# - Referer: "http://referer.com"
+# - User-Agent: "Mozilla/5.0..."', desc: 'Analyse du format' }
                             ],
                             tips: ['Décomposez chaque partie avant d\'assembler le pattern complet'],
                             warnings: []
@@ -816,7 +922,24 @@
                             syntax: 'Groupes nommés pour chaque composant',
                             options: [],
                             examples: [
-                                { code: '# IP Address\n(?<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\n\n# Date entre crochets\n\\[(?<datetime>[^\\]]+)\\]\n\n# Requête entre guillemets\n"(?<method>\\w+)\\s+(?<path>[^\\s]+)\\s+(?<protocol>[^"]+)"\n\n# Status code\n(?<status>\\d{3})\n\n# Taille (nombre ou -)\n(?<size>\\d+|-)\n\n# Champ entre guillemets (referer, user-agent)\n"(?<referer>[^"]*)"\n"(?<useragent>[^"]*)"', desc: 'Patterns individuels' }
+                                { code: '# IP Address
+(?<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})
+
+# Date entre crochets
+\\[(?<datetime>[^\\]]+)\\]
+
+# Requête entre guillemets
+"(?<method>\\w+)\\s+(?<path>[^\\s]+)\\s+(?<protocol>[^"]+)"
+
+# Status code
+(?<status>\\d{3})
+
+# Taille (nombre ou -)
+(?<size>\\d+|-)
+
+# Champ entre guillemets (referer, user-agent)
+"(?<referer>[^"]*)"
+"(?<useragent>[^"]*)"', desc: 'Patterns individuels' }
                             ],
                             tips: ['Testez chaque pattern individuellement avant de les combiner'],
                             warnings: []
@@ -830,8 +953,18 @@
                             syntax: 'Pattern avec groupes nommés',
                             options: [],
                             examples: [
-                                { code: '# Pattern complet Apache Combined Log\n^(?<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+\n(?<ident>[^\\s]+)\\s+\n(?<user>[^\\s]+)\\s+\n\\[(?<datetime>[^\\]]+)\\]\\s+\n"(?<method>\\w+)\\s+(?<path>[^\\s]+)\\s+(?<protocol>[^"]+)"\\s+\n(?<status>\\d{3})\\s+\n(?<size>\\d+|-)\\s*\n(?:"(?<referer>[^"]*)"\\s*)?\n(?:"(?<useragent>[^"]*)")?$', desc: 'Pattern assemblé (mode étendu)' },
-                                { code: '# Version compacte (une ligne)\n^(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+([^\\s]+)\\s+([^\\s]+)\\s+\\[([^\\]]+)\\]\\s+"(\\w+)\\s+([^\\s]+)\\s+([^"]+)"\\s+(\\d{3})\\s+(\\d+|-)\\s*(?:"([^"]*)"\\s*)?(?:"([^"]*)")?$', desc: 'Version compacte' }
+                                { code: '# Pattern complet Apache Combined Log
+^(?<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+
+(?<ident>[^\\s]+)\\s+
+(?<user>[^\\s]+)\\s+
+\\[(?<datetime>[^\\]]+)\\]\\s+
+"(?<method>\\w+)\\s+(?<path>[^\\s]+)\\s+(?<protocol>[^"]+)"\\s+
+(?<status>\\d{3})\\s+
+(?<size>\\d+|-)\\s*
+(?:"(?<referer>[^"]*)"\\s*)?
+(?:"(?<useragent>[^"]*)")?$', desc: 'Pattern assemblé (mode étendu)' },
+                                { code: '# Version compacte (une ligne)
+^(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+([^\\s]+)\\s+([^\\s]+)\\s+\\[([^\\]]+)\\]\\s+"(\\w+)\\s+([^\\s]+)\\s+([^"]+)"\\s+(\\d{3})\\s+(\\d+|-)\\s*(?:"([^"]*)"\\s*)?(?:"([^"]*)")?$', desc: 'Version compacte' }
                             ],
                             tips: ['Utilisez le mode étendu (x) pour la lisibilité'],
                             warnings: []
@@ -845,7 +978,33 @@
                             syntax: 'import re',
                             options: [],
                             examples: [
-                                { code: 'import re\nfrom collections import defaultdict\nfrom datetime import datetime\n\n# Pattern Apache Combined Log\nLOG_PATTERN = re.compile(r\'\'\'\n    ^(?P<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+\n    (?P<ident>[^\\s]+)\\s+\n    (?P<user>[^\\s]+)\\s+\n    \\[(?P<datetime>[^\\]]+)\\]\\s+\n    "(?P<method>\\w+)\\s+(?P<path>[^\\s]+)\\s+(?P<protocol>[^"]+)"\\s+\n    (?P<status>\\d{3})\\s+\n    (?P<size>\\d+|-)\\s*\n    (?:"(?P<referer>[^"]*)"\\s*)?\n    (?:"(?P<useragent>[^"]*)")?$\n\'\'\', re.VERBOSE)\n\ndef parse_log_line(line):\n    """Parse une ligne de log et retourne un dict."""\n    match = LOG_PATTERN.match(line.strip())\n    if match:\n        data = match.groupdict()\n        # Convertir la taille en int\n        data[\'size\'] = int(data[\'size\']) if data[\'size\'] != \'-\' else 0\n        data[\'status\'] = int(data[\'status\'])\n        return data\n    return None', desc: 'Fonction de parsing' }
+                                { code: 'import re
+from collections import defaultdict
+from datetime import datetime
+
+# Pattern Apache Combined Log
+LOG_PATTERN = re.compile(r\'\'\'
+    ^(?P<ip>\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+
+    (?P<ident>[^\\s]+)\\s+
+    (?P<user>[^\\s]+)\\s+
+    \\[(?P<datetime>[^\\]]+)\\]\\s+
+    "(?P<method>\\w+)\\s+(?P<path>[^\\s]+)\\s+(?P<protocol>[^"]+)"\\s+
+    (?P<status>\\d{3})\\s+
+    (?P<size>\\d+|-)\\s*
+    (?:"(?P<referer>[^"]*)"\\s*)?
+    (?:"(?P<useragent>[^"]*)")?$
+\'\'\', re.VERBOSE)
+
+def parse_log_line(line):
+    """Parse une ligne de log et retourne un dict."""
+    match = LOG_PATTERN.match(line.strip())
+    if match:
+        data = match.groupdict()
+        # Convertir la taille en int
+        data[\'size\'] = int(data[\'size\']) if data[\'size\'] != \'-\' else 0
+        data[\'status\'] = int(data[\'status\'])
+        return data
+    return None', desc: 'Fonction de parsing' }
                             ],
                             tips: ['Utilisez groupdict() pour obtenir un dictionnaire avec les groupes nommés'],
                             warnings: []
@@ -859,7 +1018,36 @@
                             syntax: 'Comptages, regroupements, filtres',
                             options: [],
                             examples: [
-                                { code: 'def analyze_logs(log_file):\n    """Analyse un fichier de logs."""\n    stats = {\n        \'total\': 0,\n        \'by_status\': defaultdict(int),\n        \'by_ip\': defaultdict(int),\n        \'by_method\': defaultdict(int),\n        \'errors\': [],\n        \'total_bytes\': 0\n    }\n    \n    with open(log_file, \'r\') as f:\n        for line in f:\n            data = parse_log_line(line)\n            if data:\n                stats[\'total\'] += 1\n                stats[\'by_status\'][data[\'status\']] += 1\n                stats[\'by_ip\'][data[\'ip\']] += 1\n                stats[\'by_method\'][data[\'method\']] += 1\n                stats[\'total_bytes\'] += data[\'size\']\n                \n                # Collecter les erreurs (4xx et 5xx)\n                if data[\'status\'] >= 400:\n                    stats[\'errors\'].append({\n                        \'status\': data[\'status\'],\n                        \'path\': data[\'path\'],\n                        \'ip\': data[\'ip\']\n                    })\n    \n    return stats', desc: 'Fonction d\'analyse' }
+                                { code: 'def analyze_logs(log_file):
+    """Analyse un fichier de logs."""
+    stats = {
+        \'total\': 0,
+        \'by_status\': defaultdict(int),
+        \'by_ip\': defaultdict(int),
+        \'by_method\': defaultdict(int),
+        \'errors\': [],
+        \'total_bytes\': 0
+    }
+    
+    with open(log_file, \'r\') as f:
+        for line in f:
+            data = parse_log_line(line)
+            if data:
+                stats[\'total\'] += 1
+                stats[\'by_status\'][data[\'status\']] += 1
+                stats[\'by_ip\'][data[\'ip\']] += 1
+                stats[\'by_method\'][data[\'method\']] += 1
+                stats[\'total_bytes\'] += data[\'size\']
+                
+                # Collecter les erreurs (4xx et 5xx)
+                if data[\'status\'] >= 400:
+                    stats[\'errors\'].append({
+                        \'status\': data[\'status\'],
+                        \'path\': data[\'path\'],
+                        \'ip\': data[\'ip\']
+                    })
+    
+    return stats', desc: 'Fonction d\'analyse' }
                             ],
                             tips: ['Utilisez defaultdict pour simplifier les comptages'],
                             warnings: []
@@ -873,7 +1061,34 @@
                             syntax: 'Sortie console ou fichier',
                             options: [],
                             examples: [
-                                { code: 'def print_report(stats):\n    """Affiche un rapport d\'analyse."""\n    print("=" * 50)\n    print("  RAPPORT D\'ANALYSE DES LOGS")\n    print("=" * 50)\n    \n    print(f"\\nTotal requêtes: {stats[\'total\']}\")\n    print(f"Données transférées: {stats[\'total_bytes\'] / (1024*1024):.2f} MB")\n    \n    print("\\n--- Répartition par status ---")\n    for status, count in sorted(stats[\'by_status\'].items()):\n        pct = (count / stats[\'total\']) * 100\n        bar = \'█\' * int(pct / 2)\n        print(f"  {status}: {count:6d} ({pct:5.1f}%) {bar}")\n    \n    print("\\n--- Top 10 IPs ---")\n    top_ips = sorted(stats[\'by_ip\'].items(), key=lambda x: x[1], reverse=True)[:10]\n    for ip, count in top_ips:\n        print(f"  {ip:20s}: {count}")\n    \n    print("\\n--- Méthodes HTTP ---")\n    for method, count in sorted(stats[\'by_method\'].items(), key=lambda x: x[1], reverse=True):\n        print(f"  {method:6s}: {count}")\n    \n    if stats[\'errors\']:\n        print(f"\\n--- Dernières erreurs ({len(stats[\'errors\'])} total) ---")\n        for err in stats[\'errors\'][-5:]:\n            print(f"  [{err[\'status\']}] {err[\'path\']} (from {err[\'ip\']})")', desc: 'Fonction de rapport' }
+                                { code: 'def print_report(stats):
+    """Affiche un rapport d\'analyse."""
+    print("=" * 50)
+    print("  RAPPORT D\'ANALYSE DES LOGS")
+    print("=" * 50)
+    
+    print(f"\nTotal requêtes: {stats[\'total\']}\")
+    print(f"Données transférées: {stats[\'total_bytes\'] / (1024*1024):.2f} MB")
+    
+    print("\n--- Répartition par status ---")
+    for status, count in sorted(stats[\'by_status\'].items()):
+        pct = (count / stats[\'total\']) * 100
+        bar = \'█\' * int(pct / 2)
+        print(f"  {status}: {count:6d} ({pct:5.1f}%) {bar}")
+    
+    print("\n--- Top 10 IPs ---")
+    top_ips = sorted(stats[\'by_ip\'].items(), key=lambda x: x[1], reverse=True)[:10]
+    for ip, count in top_ips:
+        print(f"  {ip:20s}: {count}")
+    
+    print("\n--- Méthodes HTTP ---")
+    for method, count in sorted(stats[\'by_method\'].items(), key=lambda x: x[1], reverse=True):
+        print(f"  {method:6s}: {count}")
+    
+    if stats[\'errors\']:
+        print(f"\n--- Dernières erreurs ({len(stats[\'errors\'])} total) ---")
+        for err in stats[\'errors\'][-5:]:
+            print(f"  [{err[\'status\']}] {err[\'path\']} (from {err[\'ip\']})")', desc: 'Fonction de rapport' }
                             ],
                             tips: ['Utilisez des barres de progression ASCII pour visualiser les proportions'],
                             warnings: []
@@ -887,8 +1102,47 @@
                             syntax: 'python log_parser.py access.log',
                             options: [],
                             examples: [
-                                { code: '#!/usr/bin/env python3\n"""\nLog Parser - Analyseur de logs Apache\nUsage: python log_parser.py <fichier_log> [options]\n"""\nimport argparse\nimport sys\n\ndef main():\n    parser = argparse.ArgumentParser(description=\'Analyseur de logs Apache\')\n    parser.add_argument(\'logfile\', help=\'Fichier de log à analyser\')\n    parser.add_argument(\'-e\', \'--errors-only\', action=\'store_true\',\n                        help=\'Afficher uniquement les erreurs\')\n    parser.add_argument(\'-i\', \'--filter-ip\', help=\'Filtrer par IP\')\n    parser.add_argument(\'-s\', \'--filter-status\', type=int, help=\'Filtrer par status\')\n    args = parser.parse_args()\n    \n    try:\n        stats = analyze_logs(args.logfile)\n        \n        if args.filter_ip:\n            stats[\'errors\'] = [e for e in stats[\'errors\'] if e[\'ip\'] == args.filter_ip]\n        if args.filter_status:\n            stats[\'errors\'] = [e for e in stats[\'errors\'] if e[\'status\'] == args.filter_status]\n        \n        print_report(stats)\n        \n    except FileNotFoundError:\n        print(f"Erreur: Fichier \'{args.logfile}\' introuvable", file=sys.stderr)\n        sys.exit(1)\n    except Exception as e:\n        print(f"Erreur: {e}", file=sys.stderr)\n        sys.exit(1)\n\nif __name__ == \'__main__\':\n    main()', desc: 'Point d\'entrée' },
-                                { code: '# Exemples d\'utilisation\n$ python log_parser.py /var/log/apache2/access.log\n$ python log_parser.py access.log --errors-only\n$ python log_parser.py access.log --filter-ip 192.168.1.100\n$ python log_parser.py access.log --filter-status 404', desc: 'Utilisation CLI' }
+                                { code: '#!/usr/bin/env python3
+"""
+Log Parser - Analyseur de logs Apache
+Usage: python log_parser.py <fichier_log> [options]
+"""
+import argparse
+import sys
+
+def main():
+    parser = argparse.ArgumentParser(description=\'Analyseur de logs Apache\')
+    parser.add_argument(\'logfile\', help=\'Fichier de log à analyser\')
+    parser.add_argument(\'-e\', \'--errors-only\', action=\'store_true\',
+                        help=\'Afficher uniquement les erreurs\')
+    parser.add_argument(\'-i\', \'--filter-ip\', help=\'Filtrer par IP\')
+    parser.add_argument(\'-s\', \'--filter-status\', type=int, help=\'Filtrer par status\')
+    args = parser.parse_args()
+    
+    try:
+        stats = analyze_logs(args.logfile)
+        
+        if args.filter_ip:
+            stats[\'errors\'] = [e for e in stats[\'errors\'] if e[\'ip\'] == args.filter_ip]
+        if args.filter_status:
+            stats[\'errors\'] = [e for e in stats[\'errors\'] if e[\'status\'] == args.filter_status]
+        
+        print_report(stats)
+        
+    except FileNotFoundError:
+        print(f"Erreur: Fichier \'{args.logfile}\' introuvable", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Erreur: {e}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == \'__main__\':
+    main()', desc: 'Point d\'entrée' },
+                                { code: '# Exemples d\'utilisation
+$ python log_parser.py /var/log/apache2/access.log
+$ python log_parser.py access.log --errors-only
+$ python log_parser.py access.log --filter-ip 192.168.1.100
+$ python log_parser.py access.log --filter-status 404', desc: 'Utilisation CLI' }
                             ],
                             tips: ['Ajoutez une option pour exporter en JSON ou CSV'],
                             warnings: []

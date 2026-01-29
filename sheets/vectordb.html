@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire bases de données vectorielles : FAISS, ChromaDB, Pinecone, Qdrant et recherche sémantique.">
-    <title>Vector Databases - IT Cheatsheets</title>
+    <meta name="description" content="Aide-mémoire bases de données vectorielles : workflows pratiques pour FAISS, ChromaDB, Pinecone, Qdrant et recherche sémantique.">
+    <title>Bases Vectorielles - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/styles.css">
@@ -25,15 +25,15 @@
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-amber-500/20 mb-4 icon-glow">
                     <i class="fas fa-vector-square text-3xl text-amber-400"></i>
                 </div>
-                <h1 class="text-3xl font-bold mb-2 gradient-text">Vector Databases</h1>
-                <p class="text-slate-400">FAISS, ChromaDB, Pinecone et recherche sémantique</p>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Bases Vectorielles</h1>
+                <p class="text-slate-400">Workflows pratiques pour la recherche sémantique</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -53,826 +53,1027 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'faiss',
-                title: 'FAISS (Facebook)',
-                icon: 'fa-bolt',
+                id: 'creer',
+                title: 'Créer une Base Vectorielle',
+                icon: 'fa-plus-circle',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'faiss.IndexFlatL2(dimension)',
-                        desc: 'Créer un index L2 (exact)',
+                        cmd: 'Créer une base en mémoire (dev)',
+                        desc: 'ChromaDB, Qdrant, Milvus pour prototypage',
                         details: {
-                            explanation: 'Crée un index de recherche exacte basé sur la distance euclidienne L2. Simple mais lent pour de grands datasets.',
-                            syntax: 'index = faiss.IndexFlatL2(d)',
+                            explanation: 'Crée une base vectorielle en mémoire pour le développement et le prototypage. Rapide mais les données sont perdues à l\'arrêt.',
+                            syntax: 'client = chromadb.Client() / QdrantClient(":memory:")',
                             options: [
-                                { flag: 'IndexFlatL2', desc: 'Distance euclidienne (L2)' },
-                                { flag: 'IndexFlatIP', desc: 'Produit scalaire (cosine après normalisation)' }
+                                { flag: 'ChromaDB Client()', desc: 'Base en mémoire par défaut' },
+                                { flag: 'Qdrant :memory:', desc: 'Mode mémoire Qdrant' },
+                                { flag: 'Milvus Lite', desc: 'Mode léger pour dev' }
                             ],
                             examples: [
-                                { code: 'import faiss\nimport numpy as np\n\nd = 384  # dimension des embeddings\nindex = faiss.IndexFlatL2(d)', desc: 'Index exact L2' },
-                                { code: '# Pour la similarité cosinus\nfaiss.normalize_L2(embeddings)\nindex = faiss.IndexFlatIP(d)', desc: 'Index cosinus' }
+                                { code: 'import chromadb\n\n# ChromaDB en mémoire\nclient = chromadb.Client()\ncollection = client.create_collection("ma_collection")', desc: 'ChromaDB en mémoire' },
+                                { code: 'from qdrant_client import QdrantClient\n\n# Qdrant en mémoire\nclient = QdrantClient(":memory:")', desc: 'Qdrant en mémoire' },
+                                { code: 'from pymilvus import connections, utility\n\n# Milvus Lite (fichier local)\nconnections.connect("default", uri="./milvus_lite.db")', desc: 'Milvus Lite' }
                             ],
-                            tips: ['pip install faiss-cpu (ou faiss-gpu pour CUDA)'],
-                            warnings: ['IndexFlat = recherche exhaustive, O(n) par requête']
+                            tips: ['Parfait pour les tests et le prototypage', 'Passage facile vers mode persistant'],
+                            warnings: ['Données perdues à l\'arrêt du programme']
                         }
                     },
                     {
-                        cmd: 'index.add(embeddings)',
-                        desc: 'Ajouter des vecteurs',
+                        cmd: 'Créer une base persistante locale',
+                        desc: 'Sauvegarde sur disque pour production locale',
                         details: {
-                            explanation: 'Ajoute des vecteurs à l\'index. Les vecteurs doivent être des numpy arrays float32.',
-                            syntax: 'index.add(xb)',
-                            options: [],
-                            examples: [
-                                { code: 'embeddings = np.random.random((1000, 384)).astype("float32")\nindex.add(embeddings)\nprint(index.ntotal)  # 1000', desc: 'Ajouter 1000 vecteurs' }
-                            ],
-                            tips: ['Convertissez toujours en float32'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'index.search(query, k)',
-                        desc: 'Rechercher les k plus proches',
-                        details: {
-                            explanation: 'Retourne les k vecteurs les plus similaires et leurs distances.',
-                            syntax: 'distances, indices = index.search(xq, k)',
-                            options: [],
-                            examples: [
-                                { code: 'query = np.random.random((1, 384)).astype("float32")\nD, I = index.search(query, k=5)\nprint("Indices:", I)  # [[idx1, idx2, ...]]\nprint("Distances:", D)', desc: 'Top 5 plus proches' }
-                            ],
-                            tips: ['Les résultats sont triés par distance croissante'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'faiss.IndexIVFFlat()',
-                        desc: 'Index IVF (approximatif, rapide)',
-                        details: {
-                            explanation: 'Index avec clustering pour recherche approximative. Beaucoup plus rapide sur de grands datasets.',
-                            syntax: 'index = faiss.IndexIVFFlat(quantizer, d, nlist)',
+                            explanation: 'Crée une base vectorielle persistante stockée sur le disque local. Les données survivent aux redémarrages.',
+                            syntax: 'chromadb.PersistentClient(path="./chroma_db")',
                             options: [
-                                { flag: 'nlist', desc: 'Nombre de clusters (ex: 100)' },
-                                { flag: 'nprobe', desc: 'Clusters à explorer (précision vs vitesse)' }
+                                { flag: 'PersistentClient', desc: 'ChromaDB avec persistence' },
+                                { flag: 'path', desc: 'Chemin vers le dossier de stockage' }
                             ],
                             examples: [
-                                { code: 'nlist = 100  # nombre de clusters\nquantizer = faiss.IndexFlatL2(d)\nindex = faiss.IndexIVFFlat(quantizer, d, nlist)\n\n# Entraînement nécessaire\nindex.train(embeddings)\nindex.add(embeddings)\n\n# Régler précision\nindex.nprobe = 10  # explorer 10 clusters', desc: 'Index IVF complet' }
+                                { code: 'import chromadb\n\n# ChromaDB persistant\nclient = chromadb.PersistentClient(path="./chroma_db")\ncollection = client.get_or_create_collection("documents")', desc: 'ChromaDB persistant' },
+                                { code: 'from qdrant_client import QdrantClient\n\n# Qdrant persistant local\nclient = QdrantClient(path="./qdrant_storage")', desc: 'Qdrant persistant' },
+                                { code: 'import faiss\nimport numpy as np\n\n# FAISS - créer et sauvegarder\nindex = faiss.IndexFlatL2(384)\nfaiss.write_index(index, "index.faiss")', desc: 'FAISS avec fichier' }
                             ],
-                            tips: ['Augmentez nprobe pour plus de précision (plus lent)'],
-                            warnings: ['Nécessite un entraînement avant utilisation']
+                            tips: ['Utilisez get_or_create_collection pour éviter les erreurs', 'Sauvegardez régulièrement le dossier de stockage'],
+                            warnings: ['Vérifiez les permissions d\'écriture sur le chemin']
+                        }
+                    },
+                    {
+                        cmd: 'Créer une base sur serveur',
+                        desc: 'Docker/serveur pour équipes et production',
+                        details: {
+                            explanation: 'Déploie une base vectorielle sur un serveur dédié (Docker ou installation native) pour la production.',
+                            syntax: 'QdrantClient(host="localhost", port=6333)',
+                            options: [
+                                { flag: 'host', desc: 'Adresse du serveur' },
+                                { flag: 'port', desc: 'Port du service (6333 Qdrant, 19530 Milvus)' },
+                                { flag: 'grpc_port', desc: 'Port gRPC pour performances' }
+                            ],
+                            examples: [
+                                { code: '# Docker Qdrant\n# docker run -p 6333:6333 qdrant/qdrant\n\nfrom qdrant_client import QdrantClient\nclient = QdrantClient(host="localhost", port=6333)', desc: 'Qdrant Docker' },
+                                { code: '# Docker Milvus\n# docker-compose up -d\n\nfrom pymilvus import connections\nconnections.connect("default", host="localhost", port="19530")', desc: 'Milvus Docker' },
+                                { code: '# Docker Weaviate\n# docker run -p 8080:8080 semitechnologies/weaviate\n\nimport weaviate\nclient = weaviate.connect_to_local()', desc: 'Weaviate Docker' }
+                            ],
+                            tips: ['Utilisez Docker Compose pour gérer les dépendances', 'Activez la persistence avec des volumes Docker'],
+                            warnings: ['Configurez la sécurité (API key, firewall) en production']
+                        }
+                    },
+                    {
+                        cmd: 'Créer une base cloud',
+                        desc: 'Services managés (Pinecone, Qdrant Cloud)',
+                        details: {
+                            explanation: 'Utilise un service cloud managé pour une base vectorielle scalable sans maintenance.',
+                            syntax: 'Pinecone(api_key="...") / QdrantClient(url="...", api_key="...")',
+                            options: [
+                                { flag: 'api_key', desc: 'Clé d\'API du service' },
+                                { flag: 'url', desc: 'URL du cluster cloud' },
+                                { flag: 'environment', desc: 'Région/environnement (Pinecone)' }
+                            ],
+                            examples: [
+                                { code: 'from pinecone import Pinecone\n\npc = Pinecone(api_key="votre-api-key")\n\n# Créer un index\npc.create_index(\n    name="mon-index",\n    dimension=384,\n    metric="cosine",\n    spec=ServerlessSpec(cloud="aws", region="us-east-1")\n)', desc: 'Pinecone Serverless' },
+                                { code: 'from qdrant_client import QdrantClient\n\nclient = QdrantClient(\n    url="https://xyz.cloud.qdrant.io:6333",\n    api_key="votre-api-key"\n)', desc: 'Qdrant Cloud' },
+                                { code: 'import weaviate\nfrom weaviate.classes.init import Auth\n\nclient = weaviate.connect_to_weaviate_cloud(\n    cluster_url="https://xxx.weaviate.network",\n    auth_credentials=Auth.api_key("votre-api-key")\n)', desc: 'Weaviate Cloud' }
+                            ],
+                            tips: ['Commencez par le free tier pour tester', 'Utilisez des variables d\'environnement pour les clés'],
+                            warnings: ['Attention aux coûts selon le volume de données et requêtes']
+                        }
+                    },
+                    {
+                        cmd: 'Configurer la métrique de distance',
+                        desc: 'Cosine, L2 (Euclidean), Inner Product',
+                        details: {
+                            explanation: 'Choisit la méthode de calcul de similarité entre vecteurs. Cosine est le plus courant pour les embeddings de texte.',
+                            syntax: 'metric="cosine" / Distance.COSINE',
+                            options: [
+                                { flag: 'cosine', desc: 'Similarité cosinus (texte, recommandé)' },
+                                { flag: 'l2 / euclidean', desc: 'Distance euclidienne' },
+                                { flag: 'ip / dot', desc: 'Produit scalaire (Inner Product)' }
+                            ],
+                            examples: [
+                                { code: 'from qdrant_client.models import Distance, VectorParams\n\nclient.create_collection(\n    collection_name="docs",\n    vectors_config=VectorParams(\n        size=384,\n        distance=Distance.COSINE\n    )\n)', desc: 'Qdrant avec cosine' },
+                                { code: 'import faiss\nimport numpy as np\n\nd = 384\n# L2 (euclidienne)\nindex_l2 = faiss.IndexFlatL2(d)\n\n# Inner Product (cosine après normalisation)\nfaiss.normalize_L2(vectors)  # Normaliser d\'abord !\nindex_ip = faiss.IndexFlatIP(d)', desc: 'FAISS L2 vs IP' },
+                                { code: 'from pinecone import Pinecone, ServerlessSpec\n\npc.create_index(\n    name="mon-index",\n    dimension=384,\n    metric="cosine",  # ou "euclidean", "dotproduct"\n    spec=ServerlessSpec(cloud="aws", region="us-east-1")\n)', desc: 'Pinecone metric' }
+                            ],
+                            tips: ['Cosine = insensible à la magnitude, idéal pour le texte', 'IP nécessite des vecteurs normalisés pour équivaloir à cosine'],
+                            warnings: ['La métrique ne peut pas être changée après création de l\'index']
                         }
                     }
                 ]
             },
             {
-                id: 'chroma',
-                title: 'ChromaDB',
-                icon: 'fa-gem',
-                color: 'border-l-4 border-purple-500',
-                commands: [
-                    {
-                        cmd: 'chromadb.Client()',
-                        desc: 'Créer un client Chroma',
-                        details: {
-                            explanation: 'ChromaDB est une base vectorielle simple avec stockage persistant et embeddings intégrés.',
-                            syntax: 'import chromadb\nclient = chromadb.Client()',
-                            options: [
-                                { flag: 'Client()', desc: 'Client en mémoire' },
-                                { flag: 'PersistentClient(path)', desc: 'Client persistant sur disque' }
-                            ],
-                            examples: [
-                                { code: 'import chromadb\n\n# En mémoire\nclient = chromadb.Client()\n\n# Persistant\nclient = chromadb.PersistentClient(path="./chroma_db")', desc: 'Initialisation' }
-                            ],
-                            tips: ['pip install chromadb'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'client.create_collection(name)',
-                        desc: 'Créer une collection',
-                        details: {
-                            explanation: 'Une collection regroupe des documents avec leurs embeddings et métadonnées.',
-                            syntax: 'collection = client.create_collection(name, metadata, embedding_function)',
-                            options: [
-                                { flag: 'metadata', desc: 'Config de distance: {"hnsw:space": "cosine"}' },
-                                { flag: 'embedding_function', desc: 'Fonction pour générer les embeddings' }
-                            ],
-                            examples: [
-                                { code: 'collection = client.create_collection(\n    name="my_docs",\n    metadata={"hnsw:space": "cosine"}\n)', desc: 'Collection avec cosine' },
-                                { code: 'collection = client.get_or_create_collection("my_docs")', desc: 'Créer ou récupérer' }
-                            ],
-                            tips: ['get_or_create_collection évite les erreurs si elle existe'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'collection.add()',
-                        desc: 'Ajouter des documents',
-                        details: {
-                            explanation: 'Ajoute des documents avec IDs, embeddings optionnels, et métadonnées.',
-                            syntax: 'collection.add(ids, documents, embeddings, metadatas)',
-                            options: [],
-                            examples: [
-                                { code: 'collection.add(\n    ids=["doc1", "doc2", "doc3"],\n    documents=[\n        "Paris est la capitale de la France",\n        "Berlin est la capitale de l\'Allemagne",\n        "Tokyo est la capitale du Japon"\n    ],\n    metadatas=[\n        {"country": "France"},\n        {"country": "Germany"},\n        {"country": "Japan"}\n    ]\n)', desc: 'Ajout avec métadonnées' }
-                            ],
-                            tips: ['Sans embeddings, Chroma utilise son modèle par défaut'],
-                            warnings: ['Les IDs doivent être uniques']
-                        }
-                    },
-                    {
-                        cmd: 'collection.query()',
-                        desc: 'Recherche sémantique',
-                        details: {
-                            explanation: 'Recherche les documents les plus similaires à une requête.',
-                            syntax: 'results = collection.query(query_texts, n_results, where)',
-                            options: [
-                                { flag: 'query_texts', desc: 'Texte(s) de recherche' },
-                                { flag: 'query_embeddings', desc: 'Ou directement des embeddings' },
-                                { flag: 'n_results', desc: 'Nombre de résultats' },
-                                { flag: 'where', desc: 'Filtre sur métadonnées' }
-                            ],
-                            examples: [
-                                { code: 'results = collection.query(\n    query_texts=["Quelle est la capitale française?"],\n    n_results=2\n)\nprint(results["documents"])\nprint(results["distances"])', desc: 'Recherche simple' },
-                                { code: 'results = collection.query(\n    query_texts=["capitale"],\n    where={"country": "France"},\n    n_results=1\n)', desc: 'Avec filtre métadonnées' }
-                            ],
-                            tips: ['where supporte $eq, $ne, $gt, $gte, $lt, $lte, $in'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'pinecone',
-                title: 'Pinecone (Cloud)',
-                icon: 'fa-cloud',
+                id: 'stocker',
+                title: 'Stocker des Documents',
+                icon: 'fa-database',
                 color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'pinecone.init(api_key)',
-                        desc: 'Initialiser Pinecone',
+                        cmd: 'Ajouter des documents avec texte',
+                        desc: 'Auto-embedding avec ChromaDB',
                         details: {
-                            explanation: 'Pinecone est une base vectorielle cloud managée, scalable et performante.',
-                            syntax: 'from pinecone import Pinecone\npc = Pinecone(api_key="...")',
-                            options: [],
-                            examples: [
-                                { code: 'from pinecone import Pinecone\n\npc = Pinecone(api_key="YOUR_API_KEY")', desc: 'Connexion' }
-                            ],
-                            tips: ['pip install pinecone-client'],
-                            warnings: ['Service payant (tier gratuit limité)']
-                        }
-                    },
-                    {
-                        cmd: 'pc.create_index()',
-                        desc: 'Créer un index',
-                        details: {
-                            explanation: 'Crée un index avec dimension et métrique spécifiées.',
-                            syntax: 'pc.create_index(name, dimension, metric, spec)',
+                            explanation: 'Ajoute des documents texte qui sont automatiquement convertis en embeddings par le système.',
+                            syntax: 'collection.add(documents=[...], ids=[...])',
                             options: [
-                                { flag: 'metric', desc: '"cosine", "euclidean", "dotproduct"' },
-                                { flag: 'spec', desc: 'ServerlessSpec ou PodSpec' }
+                                { flag: 'documents', desc: 'Liste de textes à stocker' },
+                                { flag: 'ids', desc: 'Identifiants uniques (obligatoires)' },
+                                { flag: 'metadatas', desc: 'Métadonnées associées' }
                             ],
                             examples: [
-                                { code: 'from pinecone import ServerlessSpec\n\npc.create_index(\n    name="my-index",\n    dimension=384,\n    metric="cosine",\n    spec=ServerlessSpec(\n        cloud="aws",\n        region="us-east-1"\n    )\n)', desc: 'Index serverless' }
+                                { code: '# ChromaDB avec auto-embedding\ncollection.add(\n    documents=[\n        "Paris est la capitale de la France",\n        "Le machine learning utilise des algorithmes"\n    ],\n    metadatas=[\n        {"source": "wiki", "category": "geo"},\n        {"source": "cours", "category": "tech"}\n    ],\n    ids=["doc1", "doc2"]\n)', desc: 'ChromaDB auto-embedding' },
+                                { code: '# Weaviate avec auto-vectorisation\ncollection = client.collections.get("Documents")\n\ncollection.data.insert_many([\n    {"text": "Premier document", "source": "web"},\n    {"text": "Deuxième document", "source": "pdf"}\n])', desc: 'Weaviate auto-embedding' }
                             ],
-                            tips: ['Serverless = pay-per-use, Pod = capacité fixe'],
-                            warnings: []
+                            tips: ['ChromaDB utilise sentence-transformers par défaut', 'Les IDs doivent être uniques, sinon erreur'],
+                            warnings: ['L\'embedding automatique peut être lent pour de gros volumes']
                         }
                     },
                     {
-                        cmd: 'index.upsert(vectors)',
-                        desc: 'Insérer/mettre à jour des vecteurs',
+                        cmd: 'Ajouter des vecteurs directement',
+                        desc: 'Embeddings pré-calculés (FAISS, Qdrant)',
                         details: {
-                            explanation: 'Upsert = insert or update. Ajoute ou met à jour des vecteurs.',
-                            syntax: 'index.upsert(vectors=[(id, values, metadata), ...])',
-                            options: [],
-                            examples: [
-                                { code: 'index = pc.Index("my-index")\n\nvectors = [\n    ("vec1", [0.1, 0.2, ...], {"text": "document 1"}),\n    ("vec2", [0.3, 0.4, ...], {"text": "document 2"})\n]\nindex.upsert(vectors=vectors)', desc: 'Upsert basique' },
-                                { code: '# Avec namespace\nindex.upsert(vectors=vectors, namespace="docs")', desc: 'Avec namespace' }
-                            ],
-                            tips: ['Les namespaces permettent de partitionner les données'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'index.query()',
-                        desc: 'Rechercher',
-                        details: {
-                            explanation: 'Recherche les vecteurs les plus similaires.',
-                            syntax: 'index.query(vector, top_k, filter, include_metadata)',
+                            explanation: 'Ajoute des vecteurs d\'embedding déjà calculés. Plus de contrôle et meilleure performance.',
+                            syntax: 'index.add(vectors) / client.upsert(points=[...])',
                             options: [
-                                { flag: 'top_k', desc: 'Nombre de résultats' },
-                                { flag: 'filter', desc: 'Filtre sur métadonnées' },
-                                { flag: 'include_metadata', desc: 'Retourner les métadonnées' }
+                                { flag: 'vectors', desc: 'Tableau numpy de vecteurs' },
+                                { flag: 'points', desc: 'Liste de PointStruct (Qdrant)' },
+                                { flag: 'embeddings', desc: 'ChromaDB avec vecteurs fournis' }
                             ],
                             examples: [
-                                { code: 'results = index.query(\n    vector=[0.1, 0.2, ...],\n    top_k=5,\n    include_metadata=True\n)\nfor match in results.matches:\n    print(match.id, match.score)', desc: 'Recherche simple' }
+                                { code: 'import faiss\nimport numpy as np\n\n# FAISS - ajouter des vecteurs\nvectors = np.random.rand(100, 384).astype("float32")\nindex = faiss.IndexFlatL2(384)\nindex.add(vectors)\nprint(f"Index contient {index.ntotal} vecteurs")', desc: 'FAISS add' },
+                                { code: 'from qdrant_client.models import PointStruct\n\n# Qdrant - upsert avec vecteurs\npoints = [\n    PointStruct(id=1, vector=[0.1, 0.2, ...], payload={"text": "doc1"}),\n    PointStruct(id=2, vector=[0.3, 0.4, ...], payload={"text": "doc2"})\n]\nclient.upsert(collection_name="docs", points=points)', desc: 'Qdrant upsert' },
+                                { code: '# ChromaDB avec embeddings fournis\ncollection.add(\n    embeddings=[[0.1, 0.2, ...], [0.3, 0.4, ...]],\n    documents=["doc1", "doc2"],\n    ids=["id1", "id2"]\n)', desc: 'ChromaDB avec embeddings' }
                             ],
-                            tips: ['score proche de 1 = très similaire (cosine)'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'langchain',
-                title: 'LangChain Integration',
-                icon: 'fa-link',
-                color: 'border-l-4 border-orange-500',
-                commands: [
-                    {
-                        cmd: 'Chroma.from_documents()',
-                        desc: 'Créer un vectorstore depuis documents',
-                        details: {
-                            explanation: 'LangChain simplifie l\'intégration avec différentes bases vectorielles.',
-                            syntax: 'from langchain_community.vectorstores import Chroma',
-                            options: [],
-                            examples: [
-                                { code: 'from langchain_community.vectorstores import Chroma\nfrom langchain_community.embeddings import HuggingFaceEmbeddings\nfrom langchain.text_splitter import CharacterTextSplitter\n\n# Préparer les documents\ntext_splitter = CharacterTextSplitter(chunk_size=1000)\ndocs = text_splitter.split_documents(documents)\n\n# Créer le vectorstore\nembeddings = HuggingFaceEmbeddings()\nvectorstore = Chroma.from_documents(docs, embeddings)', desc: 'Pipeline complet' }
-                            ],
-                            tips: ['LangChain supporte Chroma, FAISS, Pinecone, Qdrant, etc.'],
-                            warnings: []
+                            tips: ['Pré-calculer les embeddings pour de meilleurs performances', 'Utilisez float32 pour FAISS'],
+                            warnings: ['La dimension doit correspondre à celle de l\'index']
                         }
                     },
                     {
-                        cmd: 'vectorstore.similarity_search()',
-                        desc: 'Recherche de similarité',
+                        cmd: 'Ajouter des métadonnées',
+                        desc: 'Payload, metadata, properties',
                         details: {
-                            explanation: 'Interface unifiée pour la recherche sémantique.',
-                            syntax: 'docs = vectorstore.similarity_search(query, k)',
+                            explanation: 'Associe des informations supplémentaires aux vecteurs pour le filtrage et le contexte.',
+                            syntax: 'metadatas=[{...}] / payload={...}',
                             options: [
-                                { flag: 'similarity_search', desc: 'Retourne les documents' },
-                                { flag: 'similarity_search_with_score', desc: 'Avec scores de similarité' }
+                                { flag: 'metadatas', desc: 'ChromaDB : liste de dicts' },
+                                { flag: 'payload', desc: 'Qdrant : dict associé au point' },
+                                { flag: 'properties', desc: 'Weaviate : propriétés de l\'objet' }
                             ],
                             examples: [
-                                { code: 'docs = vectorstore.similarity_search(\n    "Comment fonctionne Python?",\n    k=3\n)\nfor doc in docs:\n    print(doc.page_content[:100])', desc: 'Recherche top 3' }
+                                { code: '# ChromaDB\ncollection.add(\n    documents=["Mon document"],\n    metadatas=[{\n        "source": "wikipedia",\n        "category": "science",\n        "date": "2024-01-15",\n        "page": 42\n    }],\n    ids=["doc1"]\n)', desc: 'ChromaDB metadata' },
+                                { code: 'from qdrant_client.models import PointStruct\n\n# Qdrant payload\npoint = PointStruct(\n    id=1,\n    vector=[0.1, 0.2, ...],\n    payload={\n        "text": "Contenu du document",\n        "source": "pdf",\n        "page": 10,\n        "tags": ["IA", "ML"]\n    }\n)', desc: 'Qdrant payload' },
+                                { code: '# Weaviate\ncollection.data.insert({\n    "text": "Mon document",\n    "source": "web",\n    "category": "tech",\n    "rating": 4.5\n})', desc: 'Weaviate properties' }
                             ],
-                            tips: ['Utilisez as_retriever() pour l\'intégration RAG'],
-                            warnings: []
+                            tips: ['Stockez le texte original pour l\'afficher dans les résultats', 'Les métadonnées permettent le filtrage efficace'],
+                            warnings: ['Évitez les métadonnées trop volumineuses']
                         }
                     },
                     {
-                        cmd: 'vectorstore.as_retriever()',
-                        desc: 'Convertir en retriever RAG',
+                        cmd: 'Mettre à jour des documents',
+                        desc: 'Upsert pour insert ou update',
                         details: {
-                            explanation: 'Crée un retriever pour l\'utiliser dans une chaîne RAG.',
-                            syntax: 'retriever = vectorstore.as_retriever(search_kwargs)',
+                            explanation: 'Upsert = Update + Insert. Insère si l\'ID n\'existe pas, met à jour sinon.',
+                            syntax: 'collection.upsert(...) / client.upsert(...)',
                             options: [
-                                { flag: 'search_type', desc: '"similarity", "mmr", "similarity_score_threshold"' },
-                                { flag: 'search_kwargs', desc: '{"k": 5, "score_threshold": 0.8}' }
+                                { flag: 'upsert', desc: 'Insert ou Update selon l\'ID' },
+                                { flag: 'update', desc: 'Mise à jour uniquement (erreur si absent)' }
                             ],
                             examples: [
-                                { code: 'retriever = vectorstore.as_retriever(\n    search_type="similarity",\n    search_kwargs={"k": 5}\n)\n\n# Utilisation dans une chaîne RAG\nfrom langchain.chains import RetrievalQA\nqa_chain = RetrievalQA.from_chain_type(\n    llm=llm,\n    retriever=retriever\n)', desc: 'Retriever pour RAG' }
+                                { code: '# ChromaDB upsert\ncollection.upsert(\n    ids=["doc1"],\n    documents=["Nouveau contenu mis à jour"],\n    metadatas=[{"version": 2}]\n)', desc: 'ChromaDB upsert' },
+                                { code: '# Qdrant upsert (crée ou remplace)\nclient.upsert(\n    collection_name="docs",\n    points=[\n        PointStruct(\n            id=1,\n            vector=[0.1, 0.2, ...],\n            payload={"text": "Contenu mis à jour"}\n        )\n    ]\n)', desc: 'Qdrant upsert' },
+                                { code: '# Pinecone upsert\nindex.upsert(\n    vectors=[\n        {"id": "doc1", "values": [0.1, 0.2, ...], "metadata": {"updated": True}}\n    ],\n    namespace="default"\n)', desc: 'Pinecone upsert' }
                             ],
-                            tips: ['MMR (Maximal Marginal Relevance) diversifie les résultats'],
-                            warnings: []
+                            tips: ['Upsert est idéal pour les synchronisations régulières', 'Utilisez des IDs stables pour les mises à jour'],
+                            warnings: ['Upsert remplace complètement le vecteur et les métadonnées']
+                        }
+                    },
+                    {
+                        cmd: 'Supprimer des documents',
+                        desc: 'Par ID ou par filtre',
+                        details: {
+                            explanation: 'Supprime des documents de la base vectorielle par leurs IDs ou selon des critères de filtrage.',
+                            syntax: 'collection.delete(ids=[...]) / client.delete(...)',
+                            options: [
+                                { flag: 'ids', desc: 'Liste d\'IDs à supprimer' },
+                                { flag: 'where', desc: 'Filtre sur métadonnées (ChromaDB)' },
+                                { flag: 'filter', desc: 'Filtre Qdrant/Pinecone' }
+                            ],
+                            examples: [
+                                { code: '# ChromaDB - supprimer par ID\ncollection.delete(ids=["doc1", "doc2"])\n\n# ChromaDB - supprimer par filtre\ncollection.delete(where={"source": "obsolete"})', desc: 'ChromaDB delete' },
+                                { code: 'from qdrant_client.models import Filter, FieldCondition, MatchValue\n\n# Qdrant - supprimer par IDs\nclient.delete(\n    collection_name="docs",\n    points_selector=[1, 2, 3]\n)\n\n# Qdrant - supprimer par filtre\nclient.delete(\n    collection_name="docs",\n    points_selector=Filter(\n        must=[FieldCondition(key="source", match=MatchValue(value="old"))]\n    )\n)', desc: 'Qdrant delete' },
+                                { code: '# Pinecone - supprimer\nindex.delete(\n    ids=["doc1", "doc2"],\n    namespace="default"\n)\n\n# Supprimer par filtre\nindex.delete(\n    filter={"source": {"$eq": "obsolete"}},\n    namespace="default"\n)', desc: 'Pinecone delete' }
+                            ],
+                            tips: ['Testez d\'abord avec une requête pour voir ce qui sera supprimé', 'La suppression est irréversible'],
+                            warnings: ['Vérifiez deux fois les filtres avant de supprimer']
                         }
                     }
                 ]
             },
             {
                 id: 'embeddings',
-                title: 'Génération d\'Embeddings',
+                title: 'Générer des Embeddings',
                 icon: 'fa-microchip',
-                color: 'border-l-4 border-red-500',
+                color: 'border-l-4 border-purple-500',
                 commands: [
                     {
-                        cmd: 'SentenceTransformer(model)',
-                        desc: 'Embeddings avec Sentence Transformers',
+                        cmd: 'Utiliser Sentence Transformers (local)',
+                        desc: 'all-MiniLM, paraphrase-multilingual',
                         details: {
-                            explanation: 'Bibliothèque populaire pour générer des embeddings de phrases/documents.',
-                            syntax: 'from sentence_transformers import SentenceTransformer',
+                            explanation: 'Génère des embeddings localement avec la bibliothèque sentence-transformers. Gratuit et privé.',
+                            syntax: 'model = SentenceTransformer("model-name")',
                             options: [
-                                { flag: 'all-MiniLM-L6-v2', desc: 'Rapide, 384 dims, anglais' },
-                                { flag: 'paraphrase-multilingual-*', desc: 'Multilingue' },
-                                { flag: 'all-mpnet-base-v2', desc: 'Meilleure qualité, 768 dims' }
+                                { flag: 'all-MiniLM-L6-v2', desc: '384 dim, rapide, anglais' },
+                                { flag: 'all-mpnet-base-v2', desc: '768 dim, meilleure qualité' },
+                                { flag: 'paraphrase-multilingual-MiniLM-L12-v2', desc: '384 dim, multilingue' }
                             ],
                             examples: [
-                                { code: 'from sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer("all-MiniLM-L6-v2")\n\ntexts = ["Hello world", "Bonjour le monde"]\nembeddings = model.encode(texts)\nprint(embeddings.shape)  # (2, 384)', desc: 'Encoder des textes' }
+                                { code: 'from sentence_transformers import SentenceTransformer\n\n# Modèle anglais rapide\nmodel = SentenceTransformer("all-MiniLM-L6-v2")\n\ntexts = ["Hello world", "Machine learning is great"]\nembeddings = model.encode(texts)\nprint(f"Shape: {embeddings.shape}")  # (2, 384)', desc: 'Modèle anglais' },
+                                { code: '# Modèle multilingue (français inclus)\nmodel = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")\n\ntexts = ["Bonjour le monde", "L\'IA est fascinante"]\nembeddings = model.encode(texts, convert_to_numpy=True)', desc: 'Modèle multilingue' },
+                                { code: '# Batch processing pour gros volumes\nembeddings = model.encode(\n    texts,\n    batch_size=32,\n    show_progress_bar=True,\n    convert_to_numpy=True\n)', desc: 'Traitement par batch' }
                             ],
-                            tips: ['Choisissez le modèle selon langue et contraintes de perf'],
-                            warnings: []
+                            tips: ['Utilisez convert_to_numpy=True pour FAISS', 'paraphrase-multilingual est excellent pour le français'],
+                            warnings: ['Premier chargement télécharge le modèle (~100-400 MB)']
                         }
                     },
                     {
-                        cmd: 'OpenAIEmbeddings()',
-                        desc: 'Embeddings OpenAI',
+                        cmd: 'Utiliser OpenAI Embeddings (API)',
+                        desc: 'text-embedding-3-small, ada-002',
                         details: {
-                            explanation: 'Utilise l\'API OpenAI pour générer des embeddings de haute qualité.',
-                            syntax: 'from langchain_openai import OpenAIEmbeddings',
+                            explanation: 'Génère des embeddings via l\'API OpenAI. Haute qualité mais payant et nécessite internet.',
+                            syntax: 'client.embeddings.create(model="...", input=[...])',
                             options: [
-                                { flag: 'text-embedding-3-small', desc: '1536 dims, économique' },
-                                { flag: 'text-embedding-3-large', desc: '3072 dims, meilleure qualité' },
-                                { flag: 'text-embedding-ada-002', desc: 'Ancien modèle' }
+                                { flag: 'text-embedding-3-small', desc: '1536 dim, économique, recommandé' },
+                                { flag: 'text-embedding-3-large', desc: '3072 dim, haute qualité' },
+                                { flag: 'text-embedding-ada-002', desc: '1536 dim, ancien modèle' }
                             ],
                             examples: [
-                                { code: 'from langchain_openai import OpenAIEmbeddings\n\nembeddings = OpenAIEmbeddings(\n    model="text-embedding-3-small"\n)\n\nvector = embeddings.embed_query("Hello world")\ndocs_vectors = embeddings.embed_documents(["doc1", "doc2"])', desc: 'Via LangChain' }
+                                { code: 'from openai import OpenAI\n\nclient = OpenAI()  # OPENAI_API_KEY en env\n\nresponse = client.embeddings.create(\n    model="text-embedding-3-small",\n    input=["Hello world", "Machine learning"]\n)\n\nembeddings = [e.embedding for e in response.data]', desc: 'OpenAI embeddings' },
+                                { code: '# Avec LangChain\nfrom langchain_openai import OpenAIEmbeddings\n\nembeddings = OpenAIEmbeddings(model="text-embedding-3-small")\nvectors = embeddings.embed_documents(["doc1", "doc2"])\nquery_vec = embeddings.embed_query("ma question")', desc: 'Via LangChain' },
+                                { code: '# Batch avec gestion des limites\nimport time\n\ndef embed_batch(texts, batch_size=100):\n    all_embeddings = []\n    for i in range(0, len(texts), batch_size):\n        batch = texts[i:i+batch_size]\n        response = client.embeddings.create(\n            model="text-embedding-3-small",\n            input=batch\n        )\n        all_embeddings.extend([e.embedding for e in response.data])\n        time.sleep(0.1)  # Rate limiting\n    return all_embeddings', desc: 'Batch avec rate limiting' }
                             ],
-                            tips: ['Coût: ~$0.02 / 1M tokens pour text-embedding-3-small'],
-                            warnings: ['Nécessite une clé API OpenAI']
+                            tips: ['text-embedding-3-small offre le meilleur rapport qualité/prix', 'Stockez les embeddings pour éviter des appels répétés'],
+                            warnings: ['Coût par token, attention aux gros volumes', 'Nécessite une connexion internet']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser HuggingFace Embeddings',
+                        desc: 'Via LangChain ou directement',
+                        details: {
+                            explanation: 'Utilise des modèles HuggingFace pour les embeddings, localement ou via l\'API Inference.',
+                            syntax: 'HuggingFaceEmbeddings(model_name="...")',
+                            options: [
+                                { flag: 'model_name', desc: 'Nom du modèle HuggingFace' },
+                                { flag: 'model_kwargs', desc: 'Arguments du modèle (device)' },
+                                { flag: 'encode_kwargs', desc: 'Arguments d\'encodage (normalize)' }
+                            ],
+                            examples: [
+                                { code: 'from langchain_huggingface import HuggingFaceEmbeddings\n\nembeddings = HuggingFaceEmbeddings(\n    model_name="sentence-transformers/all-MiniLM-L6-v2",\n    model_kwargs={"device": "cpu"},\n    encode_kwargs={"normalize_embeddings": True}\n)\n\nvectors = embeddings.embed_documents(["doc1", "doc2"])', desc: 'HuggingFace via LangChain' },
+                                { code: '# Modèle multilingue français\nembeddings = HuggingFaceEmbeddings(\n    model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"\n)\n\nquery_vec = embeddings.embed_query("Comment fonctionne l\'IA ?")', desc: 'Modèle multilingue' },
+                                { code: '# Avec GPU\nembeddings = HuggingFaceEmbeddings(\n    model_name="BAAI/bge-small-en-v1.5",\n    model_kwargs={"device": "cuda"},\n    encode_kwargs={"normalize_embeddings": True}\n)', desc: 'Avec GPU' }
+                            ],
+                            tips: ['HuggingFaceEmbeddings est compatible avec tous les vectorstores LangChain', 'Utilisez normalize_embeddings=True pour cosine similarity'],
+                            warnings: ['Certains modèles sont volumineux (plusieurs GB)']
+                        }
+                    },
+                    {
+                        cmd: 'Normaliser les embeddings',
+                        desc: 'Pour similarité cosinus correcte',
+                        details: {
+                            explanation: 'Normalise les vecteurs à une longueur de 1 pour que le produit scalaire équivale à la similarité cosinus.',
+                            syntax: 'faiss.normalize_L2(vectors) / normalize_embeddings=True',
+                            options: [
+                                { flag: 'faiss.normalize_L2', desc: 'Normalisation in-place FAISS' },
+                                { flag: 'normalize_embeddings', desc: 'Option sentence-transformers' },
+                                { flag: 'np.linalg.norm', desc: 'Normalisation manuelle numpy' }
+                            ],
+                            examples: [
+                                { code: 'import faiss\nimport numpy as np\n\n# Normalisation FAISS (in-place)\nvectors = np.random.rand(100, 384).astype("float32")\nfaiss.normalize_L2(vectors)\n\n# Maintenant IndexFlatIP = similarité cosinus\nindex = faiss.IndexFlatIP(384)\nindex.add(vectors)', desc: 'FAISS normalize_L2' },
+                                { code: '# Sentence Transformers avec normalisation\nfrom sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer("all-MiniLM-L6-v2")\nembeddings = model.encode(\n    texts,\n    normalize_embeddings=True  # Normalise automatiquement\n)', desc: 'Sentence Transformers' },
+                                { code: 'import numpy as np\n\n# Normalisation manuelle\ndef normalize(vectors):\n    norms = np.linalg.norm(vectors, axis=1, keepdims=True)\n    return vectors / norms\n\nnormalized = normalize(embeddings)', desc: 'Normalisation numpy' }
+                            ],
+                            tips: ['Toujours normaliser si vous utilisez IndexFlatIP', 'La plupart des modèles retournent déjà des vecteurs normalisés'],
+                            warnings: ['normalize_L2 modifie le tableau en place']
+                        }
+                    },
+                    {
+                        cmd: 'Choisir le bon modèle',
+                        desc: 'Critères : langue, dimension, performance',
+                        details: {
+                            explanation: 'Guide pour choisir le modèle d\'embedding adapté à votre cas d\'usage.',
+                            syntax: 'Dépend du cas d\'usage',
+                            options: [
+                                { flag: 'Langue', desc: 'Anglais seul ou multilingue ?' },
+                                { flag: 'Dimension', desc: 'Petit (384) vs grand (1536+)' },
+                                { flag: 'Latence', desc: 'Local rapide vs API lente' },
+                                { flag: 'Coût', desc: 'Gratuit local vs payant API' }
+                            ],
+                            examples: [
+                                { code: '# Recommandations par cas d\'usage\n\n# Anglais, rapide, gratuit\nmodel = "all-MiniLM-L6-v2"  # 384 dim\n\n# Anglais, haute qualité, gratuit\nmodel = "all-mpnet-base-v2"  # 768 dim\n\n# Multilingue (français), gratuit\nmodel = "paraphrase-multilingual-MiniLM-L12-v2"  # 384 dim\n\n# Meilleure qualité, payant\nmodel = "text-embedding-3-small"  # OpenAI, 1536 dim', desc: 'Recommandations' },
+                                { code: '# Benchmark simple\nimport time\nfrom sentence_transformers import SentenceTransformer\n\nmodels = [\n    "all-MiniLM-L6-v2",\n    "all-mpnet-base-v2"\n]\n\ntexts = ["Test"] * 100\nfor model_name in models:\n    model = SentenceTransformer(model_name)\n    start = time.time()\n    model.encode(texts)\n    print(f"{model_name}: {time.time()-start:.2f}s")', desc: 'Comparer les performances' },
+                                { code: '# Vérifier la dimension\nfrom sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer("all-MiniLM-L6-v2")\nembedding = model.encode(["test"])\nprint(f"Dimension: {embedding.shape[1]}")  # 384', desc: 'Vérifier la dimension' }
+                            ],
+                            tips: ['all-MiniLM-L6-v2 est le meilleur compromis pour commencer', 'Testez sur vos données réelles avant de choisir'],
+                            warnings: ['La dimension doit être cohérente dans tout le pipeline']
                         }
                     }
                 ]
             },
             {
-                id: 'qdrant',
-                title: 'Qdrant',
-                icon: 'fa-database',
-                color: 'border-l-4 border-pink-500',
+                id: 'chercher',
+                title: 'Chercher par Similarité',
+                icon: 'fa-search',
+                color: 'border-l-4 border-orange-500',
                 commands: [
                     {
-                        cmd: 'QdrantClient()',
-                        desc: 'Créer un client Qdrant',
+                        cmd: 'Recherche sémantique simple',
+                        desc: 'query(), search(), similarity_search()',
                         details: {
-                            explanation: 'Qdrant est une base vectorielle performante avec filtrage avancé et support Rust.',
-                            syntax: 'from qdrant_client import QdrantClient',
+                            explanation: 'Recherche les documents les plus similaires à une requête textuelle.',
+                            syntax: 'collection.query(query_texts=["..."], n_results=k)',
                             options: [
-                                { flag: ':memory:', desc: 'Mode en mémoire (test)' },
-                                { flag: 'path="./qdrant"', desc: 'Persistance locale' },
-                                { flag: 'url="http://..."', desc: 'Serveur distant' }
+                                { flag: 'query_texts', desc: 'Texte de la requête (auto-embedding)' },
+                                { flag: 'n_results', desc: 'Nombre de résultats à retourner' },
+                                { flag: 'k', desc: 'Alias pour n_results' }
                             ],
                             examples: [
-                                { code: 'from qdrant_client import QdrantClient\n\n# En mémoire\nclient = QdrantClient(":memory:")\n\n# Persistant local\nclient = QdrantClient(path="./qdrant_data")\n\n# Serveur distant\nclient = QdrantClient(url="http://localhost:6333")', desc: 'Modes de connexion' },
-                                { code: '# Qdrant Cloud\nclient = QdrantClient(\n    url="https://xxx.cloud.qdrant.io",\n    api_key="your-api-key"\n)', desc: 'Qdrant Cloud' }
+                                { code: '# ChromaDB\nresults = collection.query(\n    query_texts=["Comment fonctionne le machine learning ?"],\n    n_results=5\n)\nfor doc, dist in zip(results["documents"][0], results["distances"][0]):\n    print(f"[{dist:.3f}] {doc[:100]}...")', desc: 'ChromaDB query' },
+                                { code: '# LangChain\nfrom langchain_community.vectorstores import Chroma\n\nvectorstore = Chroma.from_documents(docs, embeddings)\nresults = vectorstore.similarity_search(\n    "Comment fonctionne l\'IA ?",\n    k=5\n)\nfor doc in results:\n    print(doc.page_content)', desc: 'LangChain similarity_search' },
+                                { code: '# Weaviate\nresponse = collection.query.near_text(\n    query="intelligence artificielle",\n    limit=5\n)\nfor obj in response.objects:\n    print(obj.properties["text"])', desc: 'Weaviate near_text' }
                             ],
-                            tips: ['pip install qdrant-client', 'Docker: docker run -p 6333:6333 qdrant/qdrant'],
-                            warnings: []
+                            tips: ['Commencez par k=5-10 puis ajustez selon les résultats', 'La distance plus petite = plus similaire'],
+                            warnings: ['La qualité dépend fortement du modèle d\'embedding']
                         }
                     },
                     {
-                        cmd: 'client.create_collection()',
-                        desc: 'Créer une collection',
+                        cmd: 'Recherche par vecteur',
+                        desc: 'Avec embedding pré-calculé',
                         details: {
-                            explanation: 'Crée une collection avec configuration des vecteurs et distance.',
-                            syntax: 'client.create_collection(collection_name, vectors_config)',
+                            explanation: 'Recherche avec un vecteur d\'embedding fourni directement, sans passer par le texte.',
+                            syntax: 'index.search(query_vector, k) / client.search(vector=...)',
                             options: [
-                                { flag: 'size', desc: 'Dimension des vecteurs' },
-                                { flag: 'distance', desc: 'Cosine, Euclid, Dot' },
-                                { flag: 'on_disk', desc: 'Stocker sur disque (grands datasets)' }
+                                { flag: 'query_vector', desc: 'Vecteur numpy ou liste de floats' },
+                                { flag: 'k', desc: 'Nombre de voisins à retourner' },
+                                { flag: 'with_vectors', desc: 'Retourner aussi les vecteurs' }
                             ],
                             examples: [
-                                { code: 'from qdrant_client.models import Distance, VectorParams\n\nclient.create_collection(\n    collection_name="my_docs",\n    vectors_config=VectorParams(\n        size=384,\n        distance=Distance.COSINE\n    )\n)', desc: 'Collection cosine' },
-                                { code: '# Vecteurs multiples (texte + image)\nclient.create_collection(\n    collection_name="multimodal",\n    vectors_config={\n        "text": VectorParams(size=384, distance=Distance.COSINE),\n        "image": VectorParams(size=512, distance=Distance.COSINE)\n    }\n)', desc: 'Multi-vecteurs' }
+                                { code: 'import faiss\nimport numpy as np\n\n# FAISS search\nquery = np.random.rand(1, 384).astype("float32")\ndistances, indices = index.search(query, k=5)\n\nprint("Indices:", indices[0])\nprint("Distances:", distances[0])', desc: 'FAISS search' },
+                                { code: '# Qdrant search\nquery_vector = model.encode("Ma question").tolist()\n\nresults = client.search(\n    collection_name="docs",\n    query_vector=query_vector,\n    limit=5\n)\nfor hit in results:\n    print(f"[{hit.score:.3f}] {hit.payload[\'text\']}")', desc: 'Qdrant search' },
+                                { code: '# ChromaDB avec embedding fourni\nquery_embedding = model.encode("Ma question")\n\nresults = collection.query(\n    query_embeddings=[query_embedding.tolist()],\n    n_results=5\n)', desc: 'ChromaDB query_embeddings' }
                             ],
-                            tips: ['Support natif des vecteurs multiples par document'],
-                            warnings: []
+                            tips: ['Plus efficace si vous avez déjà l\'embedding', 'Permet de cacher les embeddings des requêtes fréquentes'],
+                            warnings: ['Le vecteur doit avoir la même dimension que l\'index']
                         }
                     },
                     {
-                        cmd: 'client.upsert()',
-                        desc: 'Insérer des points',
+                        cmd: 'Recherche par texte',
+                        desc: 'query_texts, near_text()',
                         details: {
-                            explanation: 'Insère ou met à jour des points (vecteurs + payload).',
-                            syntax: 'client.upsert(collection_name, points)',
-                            options: [],
-                            examples: [
-                                { code: 'from qdrant_client.models import PointStruct\n\npoints = [\n    PointStruct(\n        id=1,\n        vector=[0.1, 0.2, ...],\n        payload={"text": "Document 1", "category": "tech"}\n    ),\n    PointStruct(\n        id=2,\n        vector=[0.3, 0.4, ...],\n        payload={"text": "Document 2", "category": "science"}\n    )\n]\n\nclient.upsert(\n    collection_name="my_docs",\n    points=points\n)', desc: 'Upsert avec payload' },
-                                { code: '# IDs string avec UUID\nimport uuid\nPointStruct(id=str(uuid.uuid4()), vector=vec, payload=data)', desc: 'IDs UUID' }
+                            explanation: 'Recherche par texte avec conversion automatique en embedding par le système.',
+                            syntax: 'query(query_texts=[...]) / near_text(query="...")',
+                            options: [
+                                { flag: 'query_texts', desc: 'ChromaDB : liste de textes' },
+                                { flag: 'query', desc: 'Weaviate : texte de recherche' },
+                                { flag: 'near_text', desc: 'Weaviate : recherche sémantique' }
                             ],
-                            tips: ['Les payloads sont indexés automatiquement pour le filtrage'],
-                            warnings: []
+                            examples: [
+                                { code: '# ChromaDB\nresults = collection.query(\n    query_texts=["Qu\'est-ce que le deep learning ?"],\n    n_results=10,\n    include=["documents", "metadatas", "distances"]\n)', desc: 'ChromaDB query_texts' },
+                                { code: '# Weaviate v4\nresponse = collection.query.near_text(\n    query="apprentissage profond",\n    limit=10,\n    return_metadata=weaviate.classes.query.MetadataQuery(distance=True)\n)\nfor obj in response.objects:\n    print(f"[{obj.metadata.distance:.3f}] {obj.properties[\'text\']}")', desc: 'Weaviate near_text' },
+                                { code: '# Pinecone (nécessite embedding externe)\nfrom pinecone import Pinecone\n\nquery_vec = model.encode("Ma question").tolist()\nresults = index.query(\n    vector=query_vec,\n    top_k=10,\n    include_metadata=True\n)', desc: 'Pinecone query' }
+                            ],
+                            tips: ['Weaviate et ChromaDB gèrent l\'embedding automatiquement', 'include permet de choisir les champs retournés'],
+                            warnings: ['Pinecone nécessite de fournir l\'embedding']
                         }
                     },
                     {
-                        cmd: 'client.search()',
-                        desc: 'Recherche vectorielle',
+                        cmd: 'Obtenir les scores de similarité',
+                        desc: 'distances, scores, with_score',
                         details: {
-                            explanation: 'Recherche les vecteurs les plus similaires avec filtrage optionnel.',
-                            syntax: 'client.search(collection_name, query_vector, limit, query_filter)',
+                            explanation: 'Récupère les scores de similarité/distance avec les résultats pour évaluer la pertinence.',
+                            syntax: 'similarity_search_with_score() / include=["distances"]',
                             options: [
-                                { flag: 'limit', desc: 'Nombre de résultats' },
-                                { flag: 'score_threshold', desc: 'Score minimum' },
-                                { flag: 'with_payload', desc: 'Inclure le payload' },
-                                { flag: 'with_vectors', desc: 'Inclure les vecteurs' }
+                                { flag: 'distances', desc: 'ChromaDB : distances dans results' },
+                                { flag: 'score', desc: 'Qdrant : attribut hit.score' },
+                                { flag: 'with_score', desc: 'LangChain : tuple (doc, score)' }
                             ],
                             examples: [
-                                { code: 'results = client.search(\n    collection_name="my_docs",\n    query_vector=[0.1, 0.2, ...],\n    limit=5,\n    with_payload=True\n)\n\nfor result in results:\n    print(f"ID: {result.id}, Score: {result.score}")\n    print(f"Payload: {result.payload}")', desc: 'Recherche simple' },
-                                { code: '# Avec filtre\nfrom qdrant_client.models import Filter, FieldCondition, MatchValue\n\nresults = client.search(\n    collection_name="my_docs",\n    query_vector=query_vec,\n    query_filter=Filter(\n        must=[\n            FieldCondition(\n                key="category",\n                match=MatchValue(value="tech")\n            )\n        ]\n    ),\n    limit=10\n)', desc: 'Avec filtrage' }
+                                { code: '# LangChain avec scores\nresults = vectorstore.similarity_search_with_score(\n    "Ma question",\n    k=5\n)\nfor doc, score in results:\n    print(f"[{score:.4f}] {doc.page_content[:50]}...")', desc: 'LangChain with_score' },
+                                { code: '# ChromaDB\nresults = collection.query(\n    query_texts=["Ma question"],\n    n_results=5,\n    include=["documents", "distances"]\n)\nfor doc, dist in zip(results["documents"][0], results["distances"][0]):\n    print(f"[{dist:.4f}] {doc}")', desc: 'ChromaDB distances' },
+                                { code: '# Qdrant\nresults = client.search(\n    collection_name="docs",\n    query_vector=query_vec,\n    limit=5,\n    with_payload=True\n)\nfor hit in results:\n    print(f"Score: {hit.score:.4f}")\n    print(f"Texte: {hit.payload[\'text\']}")', desc: 'Qdrant scores' }
                             ],
-                            tips: ['Filtres: must, should, must_not'],
-                            warnings: []
+                            tips: ['Score élevé (cosine) ou distance faible (L2) = plus similaire', 'Utilisez un seuil pour filtrer les résultats peu pertinents'],
+                            warnings: ['L\'interprétation dépend de la métrique (cosine vs L2)']
                         }
                     },
                     {
-                        cmd: 'client.query_points()',
-                        desc: 'Recherche avancée (v1.7+)',
+                        cmd: 'Limiter le nombre de résultats',
+                        desc: 'k, limit, top_k',
                         details: {
-                            explanation: 'API moderne pour la recherche avec plus de flexibilité.',
-                            syntax: 'client.query_points(collection_name, query, limit)',
+                            explanation: 'Contrôle le nombre de résultats retournés par la recherche.',
+                            syntax: 'k=10 / limit=10 / top_k=10 / n_results=10',
                             options: [
-                                { flag: 'using', desc: 'Nom du vecteur (multi-vecteurs)' },
-                                { flag: 'query_filter', desc: 'Filtre sur payload' }
+                                { flag: 'k', desc: 'LangChain, FAISS' },
+                                { flag: 'n_results', desc: 'ChromaDB' },
+                                { flag: 'limit', desc: 'Qdrant, Weaviate' },
+                                { flag: 'top_k', desc: 'Pinecone' }
                             ],
                             examples: [
-                                { code: 'from qdrant_client.models import Query\n\nresults = client.query_points(\n    collection_name="my_docs",\n    query=query_vector,\n    limit=10,\n    with_payload=True\n)', desc: 'Query moderne' },
-                                { code: '# Recherche par ID (find similar)\nresults = client.query_points(\n    collection_name="my_docs",\n    query=123,  # ID d\'un point existant\n    limit=5\n)', desc: 'Similaires à un point' }
+                                { code: '# FAISS\ndistances, indices = index.search(query, k=10)', desc: 'FAISS k' },
+                                { code: '# ChromaDB\nresults = collection.query(\n    query_texts=["question"],\n    n_results=10\n)', desc: 'ChromaDB n_results' },
+                                { code: '# Qdrant\nresults = client.search(\n    collection_name="docs",\n    query_vector=vec,\n    limit=10\n)', desc: 'Qdrant limit' },
+                                { code: '# Pinecone\nresults = index.query(\n    vector=vec,\n    top_k=10\n)', desc: 'Pinecone top_k' }
                             ],
-                            tips: ['Permet de rechercher par ID de point existant'],
-                            warnings: []
+                            tips: ['Commencez par 5-10, augmentez si besoin pour le reranking', 'Moins de résultats = réponses plus rapides'],
+                            warnings: ['Trop de résultats peut noyer les documents pertinents']
                         }
                     }
                 ]
             },
             {
-                id: 'weaviate',
-                title: 'Weaviate',
-                icon: 'fa-project-diagram',
-                color: 'border-l-4 border-teal-500',
-                commands: [
-                    {
-                        cmd: 'weaviate.connect_to_*()',
-                        desc: 'Connexion à Weaviate',
-                        details: {
-                            explanation: 'Weaviate est une base vectorielle avec GraphQL et vectorisation intégrée.',
-                            syntax: 'import weaviate',
-                            options: [
-                                { flag: 'connect_to_local()', desc: 'Instance locale' },
-                                { flag: 'connect_to_wcs()', desc: 'Weaviate Cloud' },
-                                { flag: 'connect_to_embedded()', desc: 'Mode embarqué' }
-                            ],
-                            examples: [
-                                { code: 'import weaviate\n\n# Local (Docker)\nclient = weaviate.connect_to_local()\n\n# Weaviate Cloud\nclient = weaviate.connect_to_wcs(\n    cluster_url="https://xxx.weaviate.network",\n    auth_credentials=weaviate.auth.AuthApiKey("api-key")\n)\n\n# Embarqué (pour tests)\nclient = weaviate.connect_to_embedded()', desc: 'Modes de connexion' }
-                            ],
-                            tips: ['pip install weaviate-client', 'API v4 avec nouvelle syntaxe'],
-                            warnings: ['Weaviate v4 a une API différente de v3']
-                        }
-                    },
-                    {
-                        cmd: 'client.collections.create()',
-                        desc: 'Créer une collection',
-                        details: {
-                            explanation: 'Crée une collection avec schéma et vectorizer optionnel.',
-                            syntax: 'collection = client.collections.create(name, properties, vectorizer_config)',
-                            options: [
-                                { flag: 'properties', desc: 'Propriétés du schéma' },
-                                { flag: 'vectorizer_config', desc: 'Vectorizer intégré (OpenAI, HF, etc.)' },
-                                { flag: 'generative_config', desc: 'Modèle génératif (RAG)' }
-                            ],
-                            examples: [
-                                { code: 'from weaviate.classes.config import Configure, Property, DataType\n\ncollection = client.collections.create(\n    name="Document",\n    properties=[\n        Property(name="title", data_type=DataType.TEXT),\n        Property(name="content", data_type=DataType.TEXT),\n        Property(name="category", data_type=DataType.TEXT)\n    ],\n    vectorizer_config=Configure.Vectorizer.text2vec_openai()\n)', desc: 'Avec vectorizer OpenAI' },
-                                { code: '# Sans vectorizer (vecteurs manuels)\ncollection = client.collections.create(\n    name="MyDocs",\n    vectorizer_config=Configure.Vectorizer.none()\n)', desc: 'Vecteurs manuels' }
-                            ],
-                            tips: ['Weaviate peut vectoriser automatiquement via API externe'],
-                            warnings: ['Vectorizers nécessitent les clés API correspondantes']
-                        }
-                    },
-                    {
-                        cmd: 'collection.data.insert()',
-                        desc: 'Insérer des objets',
-                        details: {
-                            explanation: 'Insère des objets avec propriétés et vecteur optionnel.',
-                            syntax: 'collection.data.insert(properties, vector)',
-                            options: [],
-                            examples: [
-                                { code: 'collection = client.collections.get("Document")\n\n# Avec vectorisation automatique\ncollection.data.insert({\n    "title": "Introduction à Python",\n    "content": "Python est un langage de programmation...",\n    "category": "tech"\n})', desc: 'Vectorisation auto' },
-                                { code: '# Avec vecteur manuel\ncollection.data.insert(\n    properties={"title": "Doc", "content": "..."},\n    vector=[0.1, 0.2, 0.3, ...]\n)', desc: 'Vecteur fourni' },
-                                { code: '# Batch insert\nwith collection.batch.dynamic() as batch:\n    for doc in documents:\n        batch.add_object(properties=doc)', desc: 'Insertion par batch' }
-                            ],
-                            tips: ['Utilisez batch pour les insertions massives'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'collection.query.near_*()',
-                        desc: 'Recherche sémantique',
-                        details: {
-                            explanation: 'Recherche par similarité vectorielle.',
-                            syntax: 'collection.query.near_text(query, limit)',
-                            options: [
-                                { flag: 'near_text', desc: 'Recherche par texte (vectorisé)' },
-                                { flag: 'near_vector', desc: 'Recherche par vecteur' },
-                                { flag: 'near_object', desc: 'Similaires à un objet' }
-                            ],
-                            examples: [
-                                { code: 'collection = client.collections.get("Document")\n\n# Recherche textuelle\nresults = collection.query.near_text(\n    query="machine learning Python",\n    limit=5,\n    return_metadata=weaviate.classes.query.MetadataQuery(distance=True)\n)\n\nfor obj in results.objects:\n    print(obj.properties["title"])\n    print(f"Distance: {obj.metadata.distance}")', desc: 'near_text' },
-                                { code: '# Par vecteur\nresults = collection.query.near_vector(\n    near_vector=[0.1, 0.2, ...],\n    limit=10\n)', desc: 'near_vector' },
-                                { code: '# Avec filtres\nfrom weaviate.classes.query import Filter\n\nresults = collection.query.near_text(\n    query="Python",\n    filters=Filter.by_property("category").equal("tech"),\n    limit=5\n)', desc: 'Avec filtre' }
-                            ],
-                            tips: ['near_text nécessite un vectorizer configuré'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'collection.generate.near_text()',
-                        desc: 'RAG intégré (Generative Search)',
-                        details: {
-                            explanation: 'Weaviate peut générer des réponses directement à partir des résultats.',
-                            syntax: 'collection.generate.near_text(query, single_prompt, grouped_task)',
-                            options: [
-                                { flag: 'single_prompt', desc: 'Prompt par résultat' },
-                                { flag: 'grouped_task', desc: 'Prompt sur tous les résultats' }
-                            ],
-                            examples: [
-                                { code: '# Configurer le générateur à la création\ncollection = client.collections.create(\n    name="Article",\n    generative_config=Configure.Generative.openai()\n)\n\n# Générer une réponse\nresults = collection.generate.near_text(\n    query="Qu\'est-ce que Python?",\n    limit=3,\n    grouped_task="Résume ces articles en français"\n)\n\nprint(results.generated)  # Réponse générée', desc: 'RAG natif' }
-                            ],
-                            tips: ['RAG sans code additionnel!'],
-                            warnings: ['Nécessite clé API du LLM']
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'milvus',
-                title: 'Milvus',
-                icon: 'fa-server',
+                id: 'filtrer',
+                title: 'Filtrer avec Métadonnées',
+                icon: 'fa-filter',
                 color: 'border-l-4 border-cyan-500',
                 commands: [
                     {
-                        cmd: 'connections.connect()',
-                        desc: 'Connexion à Milvus',
+                        cmd: 'Filtrer par égalité',
+                        desc: 'where={"key": "value"}',
                         details: {
-                            explanation: 'Milvus est une base vectorielle open-source hautement scalable.',
-                            syntax: 'from pymilvus import connections',
+                            explanation: 'Filtre les résultats pour ne garder que ceux dont une métadonnée égale une valeur précise.',
+                            syntax: 'where={"field": "value"} / MatchValue(value=...)',
                             options: [
-                                { flag: 'host', desc: 'Adresse du serveur' },
-                                { flag: 'port', desc: 'Port (défaut: 19530)' }
+                                { flag: 'where', desc: 'ChromaDB : dict de filtres' },
+                                { flag: 'MatchValue', desc: 'Qdrant : correspondance exacte' },
+                                { flag: '$eq', desc: 'Opérateur d\'égalité explicite' }
                             ],
                             examples: [
-                                { code: 'from pymilvus import connections, utility\n\n# Connexion\nconnections.connect("default", host="localhost", port="19530")\n\n# Vérifier\nprint(utility.list_collections())', desc: 'Connexion locale' },
-                                { code: '# Milvus Lite (embarqué)\nfrom pymilvus import MilvusClient\n\nclient = MilvusClient("milvus_demo.db")', desc: 'Mode Lite (fichier)' }
+                                { code: '# ChromaDB\nresults = collection.query(\n    query_texts=["Ma question"],\n    where={"source": "wikipedia"},\n    n_results=10\n)', desc: 'ChromaDB where' },
+                                { code: 'from qdrant_client.models import Filter, FieldCondition, MatchValue\n\n# Qdrant\nresults = client.search(\n    collection_name="docs",\n    query_vector=vec,\n    query_filter=Filter(\n        must=[\n            FieldCondition(\n                key="category",\n                match=MatchValue(value="tech")\n            )\n        ]\n    ),\n    limit=10\n)', desc: 'Qdrant MatchValue' },
+                                { code: '# Pinecone\nresults = index.query(\n    vector=vec,\n    top_k=10,\n    filter={"source": {"$eq": "pdf"}}\n)', desc: 'Pinecone $eq' }
                             ],
-                            tips: ['pip install pymilvus', 'Milvus Lite pour développement local'],
-                            warnings: []
+                            tips: ['Le filtrage réduit l\'espace de recherche = plus rapide', 'Indexez les champs fréquemment filtrés'],
+                            warnings: ['Les filtres trop restrictifs peuvent exclure des résultats pertinents']
                         }
                     },
                     {
-                        cmd: 'Collection(name, schema)',
-                        desc: 'Créer une collection',
+                        cmd: 'Filtrer par comparaison',
+                        desc: '$gt, $lt, $gte, $lte, Range',
                         details: {
-                            explanation: 'Définit le schéma et crée la collection.',
-                            syntax: 'from pymilvus import Collection, FieldSchema, CollectionSchema, DataType',
+                            explanation: 'Filtre les résultats selon des comparaisons numériques (supérieur, inférieur, etc.).',
+                            syntax: '$gt, $lt, $gte, $lte / Range(gt=..., lt=...)',
                             options: [
-                                { flag: 'FieldSchema', desc: 'Définition d\'un champ' },
-                                { flag: 'DataType', desc: 'INT64, FLOAT_VECTOR, VARCHAR...' }
+                                { flag: '$gt / $gte', desc: 'Supérieur / Supérieur ou égal' },
+                                { flag: '$lt / $lte', desc: 'Inférieur / Inférieur ou égal' },
+                                { flag: 'Range', desc: 'Qdrant : intervalle numérique' }
                             ],
                             examples: [
-                                { code: 'from pymilvus import Collection, FieldSchema, CollectionSchema, DataType\n\nfields = [\n    FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),\n    FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=1000),\n    FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=384)\n]\n\nschema = CollectionSchema(fields, description="Documents")\ncollection = Collection(name="documents", schema=schema)', desc: 'Schéma complet' },
-                                { code: '# Avec MilvusClient (simplifié)\nclient.create_collection(\n    collection_name="docs",\n    dimension=384\n)', desc: 'API simplifiée' }
+                                { code: '# ChromaDB\nresults = collection.query(\n    query_texts=["Ma question"],\n    where={\n        "year": {"$gte": 2020}\n    },\n    n_results=10\n)', desc: 'ChromaDB $gte' },
+                                { code: 'from qdrant_client.models import Range\n\n# Qdrant Range\nresults = client.search(\n    collection_name="docs",\n    query_vector=vec,\n    query_filter=Filter(\n        must=[\n            FieldCondition(\n                key="price",\n                range=Range(gte=10.0, lte=100.0)\n            )\n        ]\n    )\n)', desc: 'Qdrant Range' },
+                                { code: '# Pinecone\nresults = index.query(\n    vector=vec,\n    top_k=10,\n    filter={\n        "rating": {"$gte": 4.0},\n        "year": {"$lt": 2024}\n    }\n)', desc: 'Pinecone comparaisons' }
                             ],
-                            tips: ['MilvusClient est l\'API simplifiée recommandée'],
-                            warnings: []
+                            tips: ['Utile pour filtrer par date, prix, score, etc.', 'Combinez plusieurs conditions pour affiner'],
+                            warnings: ['Vérifiez que le champ est bien numérique']
                         }
                     },
                     {
-                        cmd: 'collection.insert(data)',
-                        desc: 'Insérer des données',
+                        cmd: 'Filtrer par liste de valeurs',
+                        desc: '$in, $nin, MatchAny',
                         details: {
-                            explanation: 'Insère des entités dans la collection.',
-                            syntax: 'collection.insert(data)',
-                            options: [],
-                            examples: [
-                                { code: 'data = [\n    [1, 2, 3],  # IDs\n    ["doc1", "doc2", "doc3"],  # Textes\n    [[0.1]*384, [0.2]*384, [0.3]*384]  # Vecteurs\n]\n\ncollection.insert(data)\ncollection.flush()  # Persister', desc: 'Insert classique' },
-                                { code: '# Avec MilvusClient\nclient.insert(\n    collection_name="docs",\n    data=[\n        {"id": 1, "text": "Hello", "embedding": [0.1]*384},\n        {"id": 2, "text": "World", "embedding": [0.2]*384}\n    ]\n)', desc: 'API simplifiée' }
+                            explanation: 'Filtre les résultats dont une métadonnée est dans (ou pas dans) une liste de valeurs.',
+                            syntax: '$in: [...] / $nin: [...] / MatchAny(any=[...])',
+                            options: [
+                                { flag: '$in', desc: 'La valeur est dans la liste' },
+                                { flag: '$nin', desc: 'La valeur n\'est pas dans la liste' },
+                                { flag: 'MatchAny', desc: 'Qdrant : correspond à l\'une des valeurs' }
                             ],
-                            tips: ['flush() pour persister immédiatement'],
-                            warnings: []
+                            examples: [
+                                { code: '# ChromaDB\nresults = collection.query(\n    query_texts=["Ma question"],\n    where={\n        "category": {"$in": ["tech", "science", "ai"]}\n    },\n    n_results=10\n)', desc: 'ChromaDB $in' },
+                                { code: 'from qdrant_client.models import MatchAny\n\n# Qdrant MatchAny\nresults = client.search(\n    collection_name="docs",\n    query_vector=vec,\n    query_filter=Filter(\n        must=[\n            FieldCondition(\n                key="tags",\n                match=MatchAny(any=["python", "ml", "ai"])\n            )\n        ]\n    )\n)', desc: 'Qdrant MatchAny' },
+                                { code: '# Pinecone\nresults = index.query(\n    vector=vec,\n    top_k=10,\n    filter={\n        "source": {"$in": ["web", "pdf", "doc"]},\n        "status": {"$nin": ["draft", "archived"]}\n    }\n)', desc: 'Pinecone $in/$nin' }
+                            ],
+                            tips: ['$in est utile pour les catégories multiples', '$nin permet d\'exclure des catégories'],
+                            warnings: ['Listes trop longues peuvent impacter les performances']
                         }
                     },
                     {
-                        cmd: 'collection.create_index() + load()',
-                        desc: 'Créer un index et charger',
+                        cmd: 'Combiner plusieurs filtres',
+                        desc: 'must, should, must_not, $and/$or',
                         details: {
-                            explanation: 'Un index est nécessaire pour la recherche. La collection doit être chargée en mémoire.',
-                            syntax: 'collection.create_index(field_name, index_params)',
+                            explanation: 'Combine plusieurs conditions de filtrage avec des opérateurs logiques.',
+                            syntax: '$and: [...] / must=[...], should=[...], must_not=[...]',
                             options: [
-                                { flag: 'IVF_FLAT', desc: 'Index IVF (bon compromis)' },
-                                { flag: 'HNSW', desc: 'Hierarchical NSW (rapide)' },
-                                { flag: 'FLAT', desc: 'Recherche exacte' }
+                                { flag: '$and', desc: 'ChromaDB/Pinecone : toutes les conditions' },
+                                { flag: '$or', desc: 'ChromaDB/Pinecone : au moins une condition' },
+                                { flag: 'must', desc: 'Qdrant : toutes doivent être vraies' },
+                                { flag: 'should', desc: 'Qdrant : au moins une vraie' },
+                                { flag: 'must_not', desc: 'Qdrant : aucune ne doit être vraie' }
                             ],
                             examples: [
-                                { code: 'index_params = {\n    "index_type": "IVF_FLAT",\n    "metric_type": "COSINE",\n    "params": {"nlist": 128}\n}\n\ncollection.create_index(\n    field_name="embedding",\n    index_params=index_params\n)\n\n# Charger en mémoire\ncollection.load()', desc: 'Index IVF' },
-                                { code: '# HNSW (plus rapide)\nindex_params = {\n    "index_type": "HNSW",\n    "metric_type": "COSINE",\n    "params": {"M": 16, "efConstruction": 256}\n}\ncollection.create_index("embedding", index_params)', desc: 'Index HNSW' }
+                                { code: '# ChromaDB $and (implicite)\nresults = collection.query(\n    query_texts=["question"],\n    where={\n        "$and": [\n            {"category": "tech"},\n            {"year": {"$gte": 2023}}\n        ]\n    }\n)', desc: 'ChromaDB $and' },
+                                { code: '# ChromaDB $or\nresults = collection.query(\n    query_texts=["question"],\n    where={\n        "$or": [\n            {"source": "arxiv"},\n            {"source": "github"}\n        ]\n    }\n)', desc: 'ChromaDB $or' },
+                                { code: 'from qdrant_client.models import Filter, FieldCondition, MatchValue\n\n# Qdrant must + must_not\nresults = client.search(\n    collection_name="docs",\n    query_vector=vec,\n    query_filter=Filter(\n        must=[\n            FieldCondition(key="category", match=MatchValue(value="tech"))\n        ],\n        must_not=[\n            FieldCondition(key="status", match=MatchValue(value="draft"))\n        ]\n    )\n)', desc: 'Qdrant must/must_not' }
                             ],
-                            tips: ['HNSW: M plus grand = meilleure qualité, plus de mémoire'],
-                            warnings: ['N\'oubliez pas collection.load() avant la recherche!']
-                        }
-                    },
-                    {
-                        cmd: 'collection.search()',
-                        desc: 'Recherche vectorielle',
-                        details: {
-                            explanation: 'Recherche les vecteurs les plus similaires.',
-                            syntax: 'collection.search(data, anns_field, param, limit, output_fields)',
-                            options: [
-                                { flag: 'data', desc: 'Vecteurs de requête' },
-                                { flag: 'anns_field', desc: 'Champ vectoriel à chercher' },
-                                { flag: 'param', desc: 'Paramètres de recherche' },
-                                { flag: 'expr', desc: 'Expression de filtre' }
-                            ],
-                            examples: [
-                                { code: 'search_params = {"metric_type": "COSINE", "params": {"nprobe": 10}}\n\nresults = collection.search(\n    data=[query_vector],\n    anns_field="embedding",\n    param=search_params,\n    limit=5,\n    output_fields=["text"]\n)\n\nfor hits in results:\n    for hit in hits:\n        print(f"ID: {hit.id}, Distance: {hit.distance}")\n        print(f"Text: {hit.entity.get(\'text\')}")', desc: 'Recherche avec métadonnées' },
-                                { code: '# Avec filtre\nresults = collection.search(\n    data=[query_vec],\n    anns_field="embedding",\n    param=search_params,\n    limit=10,\n    expr=\'category == "tech"\'\n)', desc: 'Avec filtrage' }
-                            ],
-                            tips: ['nprobe: plus grand = plus précis mais plus lent'],
-                            warnings: []
+                            tips: ['must_not est pratique pour exclure du contenu', 'should augmente le score mais n\'exclut pas'],
+                            warnings: ['Filtres complexes peuvent ralentir les recherches']
                         }
                     }
                 ]
             },
             {
-                id: 'faiss_advanced',
-                title: 'FAISS Avancé',
-                icon: 'fa-cogs',
+                id: 'optimiser',
+                title: 'Optimiser les Performances',
+                icon: 'fa-bolt',
                 color: 'border-l-4 border-yellow-500',
                 commands: [
                     {
-                        cmd: 'faiss.IndexHNSWFlat()',
-                        desc: 'Index HNSW (très rapide)',
+                        cmd: 'Utiliser un index approximatif',
+                        desc: 'IVF, HNSW pour grandes bases',
                         details: {
-                            explanation: 'Hierarchical Navigable Small World - excellent compromis qualité/vitesse.',
-                            syntax: 'index = faiss.IndexHNSWFlat(d, M)',
+                            explanation: 'Les index approximatifs (ANN) sacrifient un peu de précision pour des recherches beaucoup plus rapides sur de grands volumes.',
+                            syntax: 'faiss.IndexIVFFlat() / faiss.IndexHNSWFlat()',
                             options: [
-                                { flag: 'd', desc: 'Dimension des vecteurs' },
-                                { flag: 'M', desc: 'Connexions par nœud (16-64)' },
-                                { flag: 'efConstruction', desc: 'Qualité construction (40-500)' },
-                                { flag: 'efSearch', desc: 'Qualité recherche (16-512)' }
+                                { flag: 'IVF', desc: 'Inverted File : partitionne l\'espace' },
+                                { flag: 'HNSW', desc: 'Hierarchical NSW : graphe de navigation' },
+                                { flag: 'Flat', desc: 'Exact mais lent' }
                             ],
                             examples: [
-                                { code: 'import faiss\n\n# Créer index HNSW\nindex = faiss.IndexHNSWFlat(384, 32)  # dim=384, M=32\n\n# Paramètres de construction\nindex.hnsw.efConstruction = 200\n\n# Ajouter les vecteurs\nindex.add(embeddings)\n\n# Paramètres de recherche\nindex.hnsw.efSearch = 64\nD, I = index.search(query, k=10)', desc: 'HNSW complet' }
+                                { code: 'import faiss\n\nd = 384\nnlist = 100  # nombre de clusters\n\n# Index IVF\nquantizer = faiss.IndexFlatL2(d)\nindex = faiss.IndexIVFFlat(quantizer, d, nlist)\n\n# Entraîner sur les données\nindex.train(vectors)\nindex.add(vectors)', desc: 'FAISS IVF' },
+                                { code: '# HNSW (pas besoin d\'entraînement)\nM = 32  # nombre de connexions\nindex = faiss.IndexHNSWFlat(d, M)\nindex.add(vectors)\n\n# Paramètre de recherche\nindex.hnsw.efSearch = 64', desc: 'FAISS HNSW' },
+                                { code: '# Qdrant avec HNSW (par défaut)\nclient.create_collection(\n    collection_name="large_docs",\n    vectors_config=VectorParams(\n        size=384,\n        distance=Distance.COSINE\n    ),\n    hnsw_config=HnswConfigDiff(\n        m=16,\n        ef_construct=100\n    )\n)', desc: 'Qdrant HNSW config' }
                             ],
-                            tips: ['M=32 et efConstruction=200 sont de bons défauts', 'Augmentez efSearch pour plus de précision'],
-                            warnings: ['Construction plus lente que IVF mais recherche plus rapide']
+                            tips: ['HNSW est souvent le meilleur choix moderne', 'IVF nécessite une phase d\'entraînement'],
+                            warnings: ['Résultats approximatifs : recall < 100%']
                         }
                     },
                     {
-                        cmd: 'faiss.IndexIVFPQ()',
-                        desc: 'Index avec quantification (économie mémoire)',
+                        cmd: 'Configurer les paramètres d\'index',
+                        desc: 'nlist, nprobe, M, efConstruction',
                         details: {
-                            explanation: 'Product Quantization compresse les vecteurs pour économiser la mémoire.',
-                            syntax: 'index = faiss.IndexIVFPQ(quantizer, d, nlist, m, nbits)',
+                            explanation: 'Ajuste les paramètres des index ANN pour équilibrer vitesse et précision.',
+                            syntax: 'index.nprobe = 10 / index.hnsw.efSearch = 64',
                             options: [
-                                { flag: 'nlist', desc: 'Nombre de clusters IVF' },
-                                { flag: 'm', desc: 'Nombre de sous-quantificateurs' },
-                                { flag: 'nbits', desc: 'Bits par sous-code (8 typique)' }
+                                { flag: 'nlist', desc: 'IVF : nombre de clusters (construction)' },
+                                { flag: 'nprobe', desc: 'IVF : clusters à explorer (recherche)' },
+                                { flag: 'M', desc: 'HNSW : connexions par nœud' },
+                                { flag: 'efConstruction', desc: 'HNSW : qualité construction' },
+                                { flag: 'efSearch', desc: 'HNSW : qualité recherche' }
                             ],
                             examples: [
-                                { code: 'd = 384\nnlist = 100\nm = 8  # d doit être divisible par m\nnbits = 8\n\nquantizer = faiss.IndexFlatL2(d)\nindex = faiss.IndexIVFPQ(quantizer, d, nlist, m, nbits)\n\n# Entraînement nécessaire\nindex.train(training_data)\nindex.add(embeddings)\n\n# Recherche\nindex.nprobe = 10\nD, I = index.search(query, k=5)', desc: 'IVF + PQ' }
+                                { code: '# IVF : augmenter nprobe pour meilleur recall\nindex.nprobe = 10  # défaut=1, augmenter pour précision\n\n# Règle : nprobe = sqrt(nlist) est un bon départ\nnlist = 1000\nnprobe = 32  # sqrt(1000) ≈ 32', desc: 'IVF nprobe' },
+                                { code: '# HNSW : paramètres\nindex = faiss.IndexHNSWFlat(d, M=32)  # M=16-64\nindex.hnsw.efConstruction = 200  # qualité construction\nindex.hnsw.efSearch = 64  # qualité recherche\n\n# Règle : efSearch >= k (nombre de résultats)', desc: 'HNSW paramètres' },
+                                { code: '# Qdrant : config HNSW\nfrom qdrant_client.models import HnswConfigDiff\n\nclient.update_collection(\n    collection_name="docs",\n    hnsw_config=HnswConfigDiff(\n        m=16,  # connexions (16-64)\n        ef_construct=100  # qualité construction\n    )\n)', desc: 'Qdrant HNSW' }
                             ],
-                            tips: ['~10x moins de mémoire que IndexFlat', 'Compromis précision vs mémoire'],
-                            warnings: ['Perte de précision due à la quantification']
+                            tips: ['Plus de nprobe/efSearch = meilleur recall mais plus lent', 'M=16-32 est un bon compromis'],
+                            warnings: ['Modifier efConstruction nécessite de reconstruire l\'index']
                         }
                     },
                     {
-                        cmd: 'faiss.index_factory()',
-                        desc: 'Créer un index par string',
+                        cmd: 'Compresser les vecteurs',
+                        desc: 'PQ (Product Quantization)',
                         details: {
-                            explanation: 'Factory pour créer des index complexes avec une chaîne de description.',
-                            syntax: 'index = faiss.index_factory(d, description, metric)',
+                            explanation: 'Product Quantization compresse les vecteurs pour réduire la mémoire et accélérer les recherches.',
+                            syntax: 'faiss.IndexIVFPQ(quantizer, d, nlist, m, nbits)',
                             options: [
-                                { flag: 'Flat', desc: 'Exact search' },
-                                { flag: 'IVFx,Flat', desc: 'IVF avec x clusters' },
-                                { flag: 'IVFx,PQy', desc: 'IVF + Product Quantization' },
-                                { flag: 'HNSW32', desc: 'HNSW avec M=32' },
-                                { flag: 'OPQy_d,IVFx,PQy', desc: 'OPQ + IVF + PQ' }
+                                { flag: 'm', desc: 'Nombre de sous-vecteurs (diviseur de d)' },
+                                { flag: 'nbits', desc: 'Bits par code (généralement 8)' },
+                                { flag: 'PQ', desc: 'Product Quantization' }
                             ],
                             examples: [
-                                { code: 'import faiss\n\n# Exact\nindex = faiss.index_factory(384, "Flat")\n\n# IVF simple\nindex = faiss.index_factory(384, "IVF100,Flat")\n\n# IVF + PQ\nindex = faiss.index_factory(384, "IVF100,PQ16")\n\n# HNSW\nindex = faiss.index_factory(384, "HNSW32")\n\n# Cosine (normaliser + IP)\nindex = faiss.index_factory(384, "Flat", faiss.METRIC_INNER_PRODUCT)', desc: 'Différents index' },
-                                { code: '# Index optimisé pour 1M+ vecteurs\nindex = faiss.index_factory(384, "OPQ16_64,IVF4096,PQ16")\nindex.train(training_data)\nindex.add(embeddings)', desc: 'Grand dataset' }
+                                { code: 'import faiss\n\nd = 384\nnlist = 100\nm = 48  # d doit être divisible par m\nnbits = 8\n\n# Index IVF avec PQ\nquantizer = faiss.IndexFlatL2(d)\nindex = faiss.IndexIVFPQ(quantizer, d, nlist, m, nbits)\n\n# Entraînement nécessaire\nindex.train(vectors)\nindex.add(vectors)', desc: 'FAISS IVFPQ' },
+                                { code: '# Taille mémoire\n# Sans PQ : d * 4 bytes = 384 * 4 = 1536 bytes/vecteur\n# Avec PQ : m * nbits/8 = 48 * 1 = 48 bytes/vecteur\n# Réduction : 32x !', desc: 'Calcul compression' },
+                                { code: '# Factory string FAISS\nindex = faiss.index_factory(d, "IVF100,PQ48")\nindex.train(vectors)\nindex.add(vectors)', desc: 'index_factory PQ' }
                             ],
-                            tips: ['OPQ améliore la qualité de PQ', 'Utilisez METRIC_INNER_PRODUCT pour cosine'],
-                            warnings: []
+                            tips: ['PQ réduit drastiquement la mémoire (10-50x)', 'm=d/8 ou d/4 est un bon point de départ'],
+                            warnings: ['PQ dégrade la précision, testez le recall']
                         }
                     },
                     {
-                        cmd: 'faiss.write_index() / read_index()',
-                        desc: 'Sauvegarder / Charger un index',
+                        cmd: 'Utiliser le GPU',
+                        desc: 'faiss-gpu pour accélération',
                         details: {
-                            explanation: 'Persistez l\'index sur disque pour le réutiliser.',
-                            syntax: 'faiss.write_index(index, filename)',
-                            options: [],
-                            examples: [
-                                { code: '# Sauvegarder\nfaiss.write_index(index, "mon_index.faiss")\n\n# Charger\nindex = faiss.read_index("mon_index.faiss")', desc: 'Save/Load basique' },
-                                { code: '# GPU → CPU pour sauvegarde\ncpu_index = faiss.index_gpu_to_cpu(gpu_index)\nfaiss.write_index(cpu_index, "index.faiss")', desc: 'Depuis GPU' }
+                            explanation: 'Utilise le GPU pour accélérer les recherches FAISS (jusqu\'à 10-100x plus rapide).',
+                            syntax: 'faiss.index_cpu_to_gpu(res, 0, index)',
+                            options: [
+                                { flag: 'index_cpu_to_gpu', desc: 'Convertit un index CPU en GPU' },
+                                { flag: 'GpuIndexFlatL2', desc: 'Index GPU natif' },
+                                { flag: 'StandardGpuResources', desc: 'Gestion mémoire GPU' }
                             ],
-                            tips: ['Les index GPU doivent être convertis en CPU avant sauvegarde'],
-                            warnings: []
+                            examples: [
+                                { code: 'import faiss\n\n# Installer : pip install faiss-gpu\n\n# Créer les ressources GPU\nres = faiss.StandardGpuResources()\n\n# Index CPU -> GPU\nindex_cpu = faiss.IndexFlatL2(384)\ngpu_index = faiss.index_cpu_to_gpu(res, 0, index_cpu)  # GPU 0\n\ngpu_index.add(vectors)\ndistances, indices = gpu_index.search(query, k=10)', desc: 'CPU to GPU' },
+                                { code: '# Index GPU natif\nres = faiss.StandardGpuResources()\nconfig = faiss.GpuIndexFlatConfig()\nconfig.device = 0  # GPU device\n\nindex = faiss.GpuIndexFlatL2(res, 384, config)\nindex.add(vectors)', desc: 'GpuIndexFlatL2' },
+                                { code: '# Multi-GPU\nngpus = faiss.get_num_gpus()\nprint(f"GPUs disponibles: {ngpus}")\n\n# Index sur tous les GPUs\nindex_cpu = faiss.IndexFlatL2(384)\nindex_multi = faiss.index_cpu_to_all_gpus(index_cpu)', desc: 'Multi-GPU' }
+                            ],
+                            tips: ['Le GPU accélère surtout les gros batches', 'Gardez les données sur GPU pour éviter les transferts'],
+                            warnings: ['Nécessite CUDA et faiss-gpu', 'Mémoire GPU limitée']
                         }
                     },
                     {
-                        cmd: 'faiss.GpuIndexFlatL2()',
-                        desc: 'Index GPU',
+                        cmd: 'Charger l\'index en mémoire',
+                        desc: 'Warm-up et préchargement',
                         details: {
-                            explanation: 'Utilise le GPU pour accélérer les recherches (10-100x plus rapide).',
-                            syntax: 'gpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)',
-                            options: [],
-                            examples: [
-                                { code: 'import faiss\n\n# Ressources GPU\nres = faiss.StandardGpuResources()\n\n# Créer directement sur GPU\ngpu_index = faiss.GpuIndexFlatL2(res, 384)\ngpu_index.add(embeddings)\n\n# Ou convertir un index CPU\ncpu_index = faiss.IndexFlatL2(384)\ncpu_index.add(embeddings)\ngpu_index = faiss.index_cpu_to_gpu(res, 0, cpu_index)', desc: 'Index GPU' },
-                                { code: '# Multi-GPU\ngpu_index = faiss.index_cpu_to_all_gpus(cpu_index)', desc: 'Tous les GPUs' }
+                            explanation: 'Précharge l\'index en mémoire pour des requêtes instantanées.',
+                            syntax: 'collection.load() / index = faiss.read_index(...)',
+                            options: [
+                                { flag: 'load()', desc: 'Milvus : charge en mémoire' },
+                                { flag: 'read_index', desc: 'FAISS : charge depuis fichier' },
+                                { flag: 'warm-up', desc: 'Requête initiale pour charger' }
                             ],
-                            tips: ['pip install faiss-gpu (nécessite CUDA)'],
-                            warnings: ['Mémoire GPU limitée pour très grands index']
+                            examples: [
+                                { code: '# Milvus : charger la collection\ncollection.load()\n\n# Vérifier le statut\nutility.load_state("ma_collection")', desc: 'Milvus load' },
+                                { code: '# FAISS : charger l\'index\nimport faiss\n\nindex = faiss.read_index("index.faiss")\nprint(f"Index chargé: {index.ntotal} vecteurs")', desc: 'FAISS read_index' },
+                                { code: '# Warm-up : première requête pour tout charger\nimport time\n\n# Requête de warm-up\nstart = time.time()\n_ = index.search(dummy_query, k=1)\nprint(f"Warm-up: {time.time()-start:.3f}s")\n\n# Requêtes suivantes plus rapides\nstart = time.time()\nresults = index.search(real_query, k=10)\nprint(f"Recherche: {time.time()-start:.3f}s")', desc: 'Warm-up query' }
+                            ],
+                            tips: ['Le warm-up améliore la latence des premières requêtes', 'Milvus nécessite un load() explicite'],
+                            warnings: ['L\'index doit tenir en RAM']
                         }
                     }
                 ]
             },
             {
-                id: 'best_practices',
-                title: 'Bonnes Pratiques',
-                icon: 'fa-lightbulb',
+                id: 'rag',
+                title: 'Intégrer avec un LLM (RAG)',
+                icon: 'fa-robot',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Créer un vectorstore LangChain',
+                        desc: 'Chroma.from_documents(), FAISS.from_texts()',
+                        details: {
+                            explanation: 'Crée un vectorstore compatible LangChain pour l\'intégration RAG.',
+                            syntax: 'Chroma.from_documents(docs, embeddings)',
+                            options: [
+                                { flag: 'from_documents', desc: 'Depuis des Documents LangChain' },
+                                { flag: 'from_texts', desc: 'Depuis des textes bruts' },
+                                { flag: 'persist_directory', desc: 'Dossier de persistence' }
+                            ],
+                            examples: [
+                                { code: 'from langchain_community.vectorstores import Chroma\nfrom langchain_openai import OpenAIEmbeddings\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter\n\n# Découper les documents\ntext_splitter = RecursiveCharacterTextSplitter(\n    chunk_size=1000,\n    chunk_overlap=200\n)\nchunks = text_splitter.split_documents(documents)\n\n# Créer le vectorstore\nvectorstore = Chroma.from_documents(\n    documents=chunks,\n    embedding=OpenAIEmbeddings(),\n    persist_directory="./chroma_db"\n)', desc: 'Chroma from_documents' },
+                                { code: 'from langchain_community.vectorstores import FAISS\n\n# FAISS depuis textes\ntexts = ["Premier doc", "Deuxième doc"]\nmetadatas = [{"source": "a"}, {"source": "b"}]\n\nvectorstore = FAISS.from_texts(\n    texts,\n    embedding=OpenAIEmbeddings(),\n    metadatas=metadatas\n)\n\n# Sauvegarder\nvectorstore.save_local("faiss_index")', desc: 'FAISS from_texts' },
+                                { code: '# Charger un vectorstore existant\nvectorstore = Chroma(\n    persist_directory="./chroma_db",\n    embedding_function=OpenAIEmbeddings()\n)\n\n# Ou FAISS\nvectorstore = FAISS.load_local(\n    "faiss_index",\n    OpenAIEmbeddings(),\n    allow_dangerous_deserialization=True\n)', desc: 'Charger existant' }
+                            ],
+                            tips: ['Utilisez persist_directory pour ne pas recréer à chaque fois', 'chunk_overlap aide à garder le contexte'],
+                            warnings: ['FAISS load_local nécessite allow_dangerous_deserialization=True']
+                        }
+                    },
+                    {
+                        cmd: 'Convertir en retriever',
+                        desc: 'as_retriever() pour chaînes RAG',
+                        details: {
+                            explanation: 'Convertit le vectorstore en Retriever pour l\'utiliser dans les chaînes LangChain.',
+                            syntax: 'retriever = vectorstore.as_retriever()',
+                            options: [
+                                { flag: 'search_type', desc: 'similarity, mmr, similarity_score_threshold' },
+                                { flag: 'search_kwargs', desc: 'k, score_threshold, fetch_k' },
+                                { flag: 'k', desc: 'Nombre de documents à retourner' }
+                            ],
+                            examples: [
+                                { code: '# Retriever simple\nretriever = vectorstore.as_retriever(\n    search_kwargs={"k": 5}\n)\n\n# Rechercher\ndocs = retriever.invoke("Ma question")\nfor doc in docs:\n    print(doc.page_content)', desc: 'Retriever simple' },
+                                { code: '# Avec seuil de score\nretriever = vectorstore.as_retriever(\n    search_type="similarity_score_threshold",\n    search_kwargs={\n        "score_threshold": 0.7,\n        "k": 10\n    }\n)', desc: 'Avec score threshold' },
+                                { code: '# MMR pour diversité\nretriever = vectorstore.as_retriever(\n    search_type="mmr",\n    search_kwargs={\n        "k": 5,\n        "fetch_k": 20,  # Récupère 20, garde 5 diversifiés\n        "lambda_mult": 0.5  # 0=diversité max, 1=similarité max\n    }\n)', desc: 'MMR retriever' }
+                            ],
+                            tips: ['MMR évite les résultats redondants', 'Ajustez k selon la taille du contexte LLM'],
+                            warnings: ['score_threshold peut ne retourner aucun résultat']
+                        }
+                    },
+                    {
+                        cmd: 'Configurer la stratégie de recherche',
+                        desc: 'similarity, mmr, score_threshold',
+                        details: {
+                            explanation: 'Choisit la stratégie de recherche selon le cas d\'usage.',
+                            syntax: 'search_type="mmr" / search_type="similarity_score_threshold"',
+                            options: [
+                                { flag: 'similarity', desc: 'Top-k les plus similaires (défaut)' },
+                                { flag: 'mmr', desc: 'Maximal Marginal Relevance (diversité)' },
+                                { flag: 'similarity_score_threshold', desc: 'Seuil de similarité minimum' }
+                            ],
+                            examples: [
+                                { code: '# Similarity (défaut) - top-k les plus proches\nretriever = vectorstore.as_retriever(\n    search_type="similarity",\n    search_kwargs={"k": 5}\n)', desc: 'Similarity simple' },
+                                { code: '# MMR - diversité dans les résultats\n# Utile quand les docs sont redondants\nretriever = vectorstore.as_retriever(\n    search_type="mmr",\n    search_kwargs={\n        "k": 5,           # Résultats finaux\n        "fetch_k": 20,    # Candidats initiaux\n        "lambda_mult": 0.5  # Balance similarité/diversité\n    }\n)', desc: 'MMR diversité' },
+                                { code: '# Score threshold - filtre par qualité\n# Ne retourne que les docs suffisamment pertinents\nretriever = vectorstore.as_retriever(\n    search_type="similarity_score_threshold",\n    search_kwargs={\n        "score_threshold": 0.75,  # Min 75% similarité\n        "k": 10  # Max 10 résultats\n    }\n)', desc: 'Score threshold' }
+                            ],
+                            tips: ['MMR est excellent pour RAG (évite la redondance)', 'Testez différents thresholds sur vos données'],
+                            warnings: ['lambda_mult=0 peut donner des résultats non pertinents']
+                        }
+                    },
+                    {
+                        cmd: 'Intégrer dans une chaîne RAG',
+                        desc: 'RetrievalQA, create_retrieval_chain',
+                        details: {
+                            explanation: 'Combine le retriever avec un LLM pour créer un système RAG complet.',
+                            syntax: 'create_retrieval_chain(retriever, combine_docs_chain)',
+                            options: [
+                                { flag: 'create_retrieval_chain', desc: 'Nouvelle API LangChain' },
+                                { flag: 'RetrievalQA', desc: 'Ancienne API (dépréciée)' },
+                                { flag: 'create_stuff_documents_chain', desc: 'Combine les documents' }
+                            ],
+                            examples: [
+                                { code: 'from langchain.chains import create_retrieval_chain\nfrom langchain.chains.combine_documents import create_stuff_documents_chain\nfrom langchain_openai import ChatOpenAI\nfrom langchain import hub\n\n# Créer les composants\nllm = ChatOpenAI(model="gpt-4o-mini")\nprompt = hub.pull("langchain-ai/retrieval-qa-chat")\n\n# Chaîne de combinaison\ncombine_chain = create_stuff_documents_chain(llm, prompt)\n\n# Chaîne RAG complète\nrag_chain = create_retrieval_chain(retriever, combine_chain)\n\n# Utiliser\nresponse = rag_chain.invoke({"input": "Ma question"})\nprint(response["answer"])', desc: 'create_retrieval_chain' },
+                                { code: '# Avec LCEL (LangChain Expression Language)\nfrom langchain_core.prompts import ChatPromptTemplate\nfrom langchain_core.runnables import RunnablePassthrough\nfrom langchain_core.output_parsers import StrOutputParser\n\nprompt = ChatPromptTemplate.from_template(\n    """Réponds à la question en utilisant le contexte.\n    \n    Contexte: {context}\n    Question: {question}\n    """\n)\n\nrag_chain = (\n    {"context": retriever, "question": RunnablePassthrough()}\n    | prompt\n    | llm\n    | StrOutputParser()\n)\n\nresponse = rag_chain.invoke("Ma question")', desc: 'LCEL RAG chain' },
+                                { code: '# Avec historique de conversation\nfrom langchain.chains import create_history_aware_retriever\nfrom langchain_core.prompts import MessagesPlaceholder\n\ncontextualize_prompt = ChatPromptTemplate.from_messages([\n    ("system", "Reformule la question en tenant compte de l\'historique."),\n    MessagesPlaceholder("chat_history"),\n    ("human", "{input}")\n])\n\nhistory_aware_retriever = create_history_aware_retriever(\n    llm, retriever, contextualize_prompt\n)', desc: 'Avec historique' }
+                            ],
+                            tips: ['LCEL offre plus de flexibilité', 'Utilisez hub.pull() pour des prompts testés'],
+                            warnings: ['RetrievalQA est déprécié, utilisez create_retrieval_chain']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser le RAG natif (Weaviate)',
+                        desc: 'generate.near_text() avec génération intégrée',
+                        details: {
+                            explanation: 'Weaviate offre une génération RAG intégrée sans passer par LangChain.',
+                            syntax: 'collection.generate.near_text(query, ...)',
+                            options: [
+                                { flag: 'single_prompt', desc: 'Prompt pour chaque objet' },
+                                { flag: 'grouped_task', desc: 'Prompt pour tous les objets groupés' },
+                                { flag: 'limit', desc: 'Nombre de documents à utiliser' }
+                            ],
+                            examples: [
+                                { code: 'import weaviate\n\n# Connexion avec module génératif\nclient = weaviate.connect_to_local(\n    headers={"X-OpenAI-Api-Key": openai_key}\n)\n\ncollection = client.collections.get("Documents")\n\n# RAG avec grouped_task\nresponse = collection.generate.near_text(\n    query="intelligence artificielle",\n    limit=5,\n    grouped_task="Résume ces documents en 3 points."\n)\n\nprint(response.generated)  # Réponse générée\nfor obj in response.objects:\n    print(obj.properties["text"])  # Documents sources', desc: 'Weaviate generate' },
+                                { code: '# Single prompt - génération par objet\nresponse = collection.generate.near_text(\n    query="machine learning",\n    limit=5,\n    single_prompt="Explique ce concept en une phrase: {text}"\n)\n\nfor obj in response.objects:\n    print(f"Original: {obj.properties[\'text\']}")\n    print(f"Généré: {obj.generated}")', desc: 'Single prompt' },
+                                { code: '# Avec filtres\nfrom weaviate.classes.query import Filter\n\nresponse = collection.generate.near_text(\n    query="deep learning",\n    limit=5,\n    filters=Filter.by_property("category").equal("tech"),\n    grouped_task="Quels sont les points clés ?"\n)', desc: 'Avec filtres' }
+                            ],
+                            tips: ['grouped_task est idéal pour les résumés', 'single_prompt pour transformer chaque document'],
+                            warnings: ['Nécessite un module génératif configuré (OpenAI, Cohere, etc.)']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'avance',
+                title: 'Recherches Avancées',
+                icon: 'fa-cogs',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Recherche hybride (vecteur + keywords)',
+                        desc: 'BM25 + embeddings pour meilleur recall',
+                        details: {
+                            explanation: 'Combine la recherche sémantique (vecteurs) avec la recherche lexicale (mots-clés) pour de meilleurs résultats.',
+                            syntax: 'EnsembleRetriever / hybrid search',
+                            options: [
+                                { flag: 'EnsembleRetriever', desc: 'LangChain : combine plusieurs retrievers' },
+                                { flag: 'BM25', desc: 'Algorithme de recherche par mots-clés' },
+                                { flag: 'weights', desc: 'Pondération entre les méthodes' }
+                            ],
+                            examples: [
+                                { code: 'from langchain.retrievers import EnsembleRetriever\nfrom langchain_community.retrievers import BM25Retriever\n\n# Retriever BM25 (keywords)\nbm25 = BM25Retriever.from_documents(documents)\nbm25.k = 5\n\n# Retriever vectoriel\nvector_retriever = vectorstore.as_retriever(search_kwargs={"k": 5})\n\n# Combiner avec pondération\nensemble = EnsembleRetriever(\n    retrievers=[bm25, vector_retriever],\n    weights=[0.4, 0.6]  # 40% BM25, 60% vectoriel\n)\n\ndocs = ensemble.invoke("Ma question")', desc: 'EnsembleRetriever' },
+                                { code: '# Qdrant hybrid search (sparse + dense)\nfrom qdrant_client.models import SparseVector\n\n# Nécessite des vecteurs sparse (BM25/SPLADE)\nresults = client.search(\n    collection_name="docs",\n    query_vector=("dense", dense_vector),\n    query_sparse_vector=("sparse", SparseVector(\n        indices=[1, 5, 100],\n        values=[0.5, 0.3, 0.2]\n    )),\n    limit=10\n)', desc: 'Qdrant hybrid' },
+                                { code: '# Weaviate hybrid\nresponse = collection.query.hybrid(\n    query="machine learning",\n    alpha=0.5,  # 0=keywords, 1=vectors\n    limit=10\n)', desc: 'Weaviate hybrid' }
+                            ],
+                            tips: ['Hybrid améliore le recall sur les termes techniques', 'Testez différents weights sur vos données'],
+                            warnings: ['BM25 ne comprend pas la sémantique (synonymes)']
+                        }
+                    },
+                    {
+                        cmd: 'Reranking des résultats',
+                        desc: 'CrossEncoder pour affiner le ranking',
+                        details: {
+                            explanation: 'Utilise un modèle de reranking pour réordonner les résultats et améliorer la précision.',
+                            syntax: 'CrossEncoder(model).predict([(query, doc), ...])',
+                            options: [
+                                { flag: 'CrossEncoder', desc: 'Modèle sentence-transformers' },
+                                { flag: 'CohereRerank', desc: 'API Cohere pour reranking' },
+                                { flag: 'FlashrankRerank', desc: 'Reranking local rapide' }
+                            ],
+                            examples: [
+                                { code: 'from sentence_transformers import CrossEncoder\n\n# Charger le modèle de reranking\nreranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")\n\n# Première recherche (top 20)\ninitial_results = vectorstore.similarity_search(query, k=20)\n\n# Reranking\npairs = [(query, doc.page_content) for doc in initial_results]\nscores = reranker.predict(pairs)\n\n# Trier par score\nreranked = sorted(zip(initial_results, scores), key=lambda x: x[1], reverse=True)\ntop_5 = [doc for doc, score in reranked[:5]]', desc: 'CrossEncoder rerank' },
+                                { code: 'from langchain.retrievers import ContextualCompressionRetriever\nfrom langchain_cohere import CohereRerank\n\n# Reranker Cohere\nreranker = CohereRerank(model="rerank-english-v3.0")\n\n# Retriever avec compression\nretriever = ContextualCompressionRetriever(\n    base_compressor=reranker,\n    base_retriever=vectorstore.as_retriever(search_kwargs={"k": 20})\n)\n\ndocs = retriever.invoke("Ma question")  # Top reranked', desc: 'Cohere Rerank' },
+                                { code: '# FlashRank (rapide, local)\nfrom langchain_community.document_compressors import FlashrankRerank\n\nreranker = FlashrankRerank(model="ms-marco-MiniLM-L-12-v2")\n\nretriever = ContextualCompressionRetriever(\n    base_compressor=reranker,\n    base_retriever=base_retriever\n)', desc: 'FlashRank local' }
+                            ],
+                            tips: ['Récupérez 3-4x plus de docs que nécessaire avant reranking', 'CrossEncoder est plus précis que bi-encoder'],
+                            warnings: ['Le reranking ajoute de la latence']
+                        }
+                    },
+                    {
+                        cmd: 'Recherche multi-vecteurs',
+                        desc: 'Texte + images, named vectors',
+                        details: {
+                            explanation: 'Stocke et recherche plusieurs types de vecteurs pour un même document (texte, image, etc.).',
+                            syntax: 'named_vectors / multi-vector index',
+                            options: [
+                                { flag: 'named_vectors', desc: 'Qdrant : vecteurs nommés' },
+                                { flag: 'text + image', desc: 'Multimodal (CLIP)' },
+                                { flag: 'summary + content', desc: 'Hiérarchique' }
+                            ],
+                            examples: [
+                                { code: 'from qdrant_client.models import VectorParams\n\n# Qdrant : collection multi-vecteurs\nclient.create_collection(\n    collection_name="multimodal",\n    vectors_config={\n        "text": VectorParams(size=384, distance=Distance.COSINE),\n        "image": VectorParams(size=512, distance=Distance.COSINE)\n    }\n)\n\n# Ajouter des points\nclient.upsert(\n    collection_name="multimodal",\n    points=[\n        PointStruct(\n            id=1,\n            vector={\n                "text": text_embedding,\n                "image": image_embedding\n            },\n            payload={"title": "Mon doc"}\n        )\n    ]\n)', desc: 'Qdrant named_vectors' },
+                                { code: '# Recherche sur un vecteur spécifique\nresults = client.search(\n    collection_name="multimodal",\n    query_vector=("text", query_text_vec),\n    limit=10\n)\n\n# Ou sur l\'image\nresults = client.search(\n    collection_name="multimodal",\n    query_vector=("image", query_image_vec),\n    limit=10\n)', desc: 'Recherche par type' },
+                                { code: '# CLIP pour multimodal\nfrom transformers import CLIPProcessor, CLIPModel\n\nmodel = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")\nprocessor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")\n\n# Embedding texte\ntext_inputs = processor(text=["a cat"], return_tensors="pt", padding=True)\ntext_vec = model.get_text_features(**text_inputs)\n\n# Embedding image\nimage_inputs = processor(images=[image], return_tensors="pt")\nimage_vec = model.get_image_features(**image_inputs)', desc: 'CLIP multimodal' }
+                            ],
+                            tips: ['Multi-vecteurs permet la recherche cross-modale', 'CLIP aligne texte et images dans le même espace'],
+                            warnings: ['Les dimensions doivent correspondre par type de vecteur']
+                        }
+                    },
+                    {
+                        cmd: 'Trouver des documents similaires',
+                        desc: 'near_object(), query by ID',
+                        details: {
+                            explanation: 'Recherche des documents similaires à un document existant dans la base.',
+                            syntax: 'near_object(id) / search by existing vector',
+                            options: [
+                                { flag: 'near_object', desc: 'Weaviate : similaire à un objet' },
+                                { flag: 'recommend', desc: 'Qdrant : recommandations' },
+                                { flag: 'vector reconstruction', desc: 'FAISS : récupérer le vecteur' }
+                            ],
+                            examples: [
+                                { code: '# Weaviate : documents similaires\nresponse = collection.query.near_object(\n    near_object=target_uuid,\n    limit=10\n)\nfor obj in response.objects:\n    print(obj.properties["text"])', desc: 'Weaviate near_object' },
+                                { code: '# Qdrant : recommandations\nresults = client.recommend(\n    collection_name="docs",\n    positive=[1, 5],  # IDs de docs "positifs"\n    negative=[3],      # IDs de docs à éviter\n    limit=10\n)', desc: 'Qdrant recommend' },
+                                { code: '# FAISS : récupérer le vecteur et rechercher\nif index.is_trained:\n    # Reconstruire le vecteur du doc 0\n    original_vec = index.reconstruct(0)\n    \n    # Chercher des similaires (exclure lui-même)\n    distances, indices = index.search(\n        original_vec.reshape(1, -1), k=11\n    )\n    similar_indices = indices[0][1:]  # Exclure le premier', desc: 'FAISS reconstruct' }
+                            ],
+                            tips: ['Utile pour les recommandations "plus comme celui-ci"', 'recommend avec positive/negative affine les résultats'],
+                            warnings: ['Tous les index ne supportent pas la reconstruction']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'persister',
+                title: 'Sauvegarder et Charger',
+                icon: 'fa-save',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Sauvegarder un index FAISS',
+                        desc: 'write_index() et save_local()',
+                        details: {
+                            explanation: 'Sauvegarde un index FAISS sur disque pour le réutiliser sans reconstruction.',
+                            syntax: 'faiss.write_index(index, "file.index")',
+                            options: [
+                                { flag: 'write_index', desc: 'FAISS natif : sauvegarde binaire' },
+                                { flag: 'save_local', desc: 'LangChain FAISS : avec métadonnées' }
+                            ],
+                            examples: [
+                                { code: 'import faiss\n\n# Sauvegarder l\'index FAISS\nfaiss.write_index(index, "mon_index.faiss")\n\n# Avec les IDs (si IndexIDMap)\nfaiss.write_index(index, "mon_index_avec_ids.faiss")', desc: 'FAISS write_index' },
+                                { code: '# LangChain FAISS\nfrom langchain_community.vectorstores import FAISS\n\n# Créer et sauvegarder\nvectorstore = FAISS.from_documents(docs, embeddings)\nvectorstore.save_local("faiss_store")\n\n# Crée 2 fichiers :\n# - faiss_store/index.faiss (l\'index)\n# - faiss_store/index.pkl (métadonnées)', desc: 'LangChain save_local' },
+                                { code: '# Sauvegarder avec compression\nimport gzip\nimport pickle\n\n# Index + mapping IDs\ndata = {\n    "index": faiss.serialize_index(index),\n    "id_to_text": id_to_text_mapping\n}\n\nwith gzip.open("index.pkl.gz", "wb") as f:\n    pickle.dump(data, f)', desc: 'Avec compression' }
+                            ],
+                            tips: ['Sauvegardez régulièrement lors de l\'indexation de gros volumes', 'Incluez les métadonnées/mappings si nécessaire'],
+                            warnings: ['La taille du fichier peut être importante pour de grands index']
+                        }
+                    },
+                    {
+                        cmd: 'Charger un index FAISS',
+                        desc: 'read_index() et load_local()',
+                        details: {
+                            explanation: 'Charge un index FAISS sauvegardé pour effectuer des recherches.',
+                            syntax: 'index = faiss.read_index("file.index")',
+                            options: [
+                                { flag: 'read_index', desc: 'FAISS natif : charge depuis fichier' },
+                                { flag: 'load_local', desc: 'LangChain : avec métadonnées' },
+                                { flag: 'io_flag', desc: 'Options de chargement (mmap)' }
+                            ],
+                            examples: [
+                                { code: 'import faiss\n\n# Charger l\'index FAISS\nindex = faiss.read_index("mon_index.faiss")\nprint(f"Index chargé : {index.ntotal} vecteurs")\n\n# Prêt pour la recherche\ndistances, indices = index.search(query, k=10)', desc: 'FAISS read_index' },
+                                { code: '# LangChain FAISS\nfrom langchain_community.vectorstores import FAISS\nfrom langchain_openai import OpenAIEmbeddings\n\n# Charger avec le même modèle d\'embedding\nvectorstore = FAISS.load_local(\n    "faiss_store",\n    OpenAIEmbeddings(),\n    allow_dangerous_deserialization=True\n)\n\n# Utiliser\ndocs = vectorstore.similarity_search("question", k=5)', desc: 'LangChain load_local' },
+                                { code: '# Chargement avec mmap (économise la RAM)\nindex = faiss.read_index(\n    "mon_index.faiss",\n    faiss.IO_FLAG_MMAP\n)\n\n# L\'index reste sur disque, accès à la demande\n# Utile pour les très grands index', desc: 'Avec mmap' }
+                            ],
+                            tips: ['Utilisez le même modèle d\'embedding qu\'à la création', 'mmap permet de charger des index plus grands que la RAM'],
+                            warnings: ['allow_dangerous_deserialization=True nécessaire pour LangChain (pickle)']
+                        }
+                    },
+                    {
+                        cmd: 'Persister ChromaDB',
+                        desc: 'PersistentClient et répertoire',
+                        details: {
+                            explanation: 'Configure ChromaDB pour une persistence automatique des données sur disque.',
+                            syntax: 'chromadb.PersistentClient(path="...")',
+                            options: [
+                                { flag: 'PersistentClient', desc: 'Client avec persistence auto' },
+                                { flag: 'path', desc: 'Répertoire de stockage' },
+                                { flag: 'Settings', desc: 'Configuration avancée' }
+                            ],
+                            examples: [
+                                { code: 'import chromadb\n\n# Client persistant - sauvegarde automatique\nclient = chromadb.PersistentClient(path="./chroma_db")\n\n# Les collections sont sauvegardées automatiquement\ncollection = client.get_or_create_collection("docs")\ncollection.add(\n    documents=["doc1", "doc2"],\n    ids=["id1", "id2"]\n)\n# Données persistées sur disque', desc: 'PersistentClient' },
+                                { code: '# Récupérer une collection existante\nclient = chromadb.PersistentClient(path="./chroma_db")\n\n# Liste des collections\nprint(client.list_collections())\n\n# Récupérer\ncollection = client.get_collection("docs")\nprint(f"Documents: {collection.count()}")', desc: 'Récupérer existant' },
+                                { code: '# Configuration avancée\nfrom chromadb.config import Settings\n\nclient = chromadb.PersistentClient(\n    path="./chroma_db",\n    settings=Settings(\n        anonymized_telemetry=False,\n        allow_reset=True\n    )\n)', desc: 'Settings avancés' }
+                            ],
+                            tips: ['get_or_create_collection évite les erreurs si elle existe', 'La persistence est automatique, pas besoin de save()'],
+                            warnings: ['Ne supprimez pas le dossier manuellement']
+                        }
+                    },
+                    {
+                        cmd: 'Gérer les backups',
+                        desc: 'Export, snapshots, réplication',
+                        details: {
+                            explanation: 'Stratégies de sauvegarde et réplication pour la haute disponibilité.',
+                            syntax: 'Dépend du système',
+                            options: [
+                                { flag: 'snapshot', desc: 'Qdrant : sauvegarde complète' },
+                                { flag: 'export', desc: 'Dump des données' },
+                                { flag: 'replication', desc: 'Réplicas pour HA' }
+                            ],
+                            examples: [
+                                { code: '# Qdrant : créer un snapshot\nclient.create_snapshot(collection_name="docs")\n\n# Lister les snapshots\nsnapshots = client.list_snapshots(collection_name="docs")\nfor snap in snapshots:\n    print(f"{snap.name} - {snap.creation_time}")\n\n# Restaurer (via API HTTP)\n# POST /collections/{name}/snapshots/recover', desc: 'Qdrant snapshots' },
+                                { code: '# Export ChromaDB (manuel)\nimport json\nimport chromadb\n\nclient = chromadb.PersistentClient(path="./chroma_db")\ncollection = client.get_collection("docs")\n\n# Récupérer toutes les données\nall_data = collection.get(\n    include=["documents", "metadatas", "embeddings"]\n)\n\n# Sauvegarder en JSON\nwith open("backup.json", "w") as f:\n    json.dump(all_data, f)', desc: 'Export ChromaDB' },
+                                { code: '# Script de backup automatique\nimport shutil\nimport datetime\n\ndef backup_chroma(source_path, backup_dir):\n    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")\n    backup_path = f"{backup_dir}/chroma_backup_{timestamp}"\n    shutil.copytree(source_path, backup_path)\n    print(f"Backup créé: {backup_path}")\n\nbackup_chroma("./chroma_db", "./backups")', desc: 'Backup automatique' }
+                            ],
+                            tips: ['Automatisez les backups avec cron/scheduler', 'Testez régulièrement la restauration'],
+                            warnings: ['Arrêtez les écritures pendant le backup pour cohérence']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'evaluer',
+                title: 'Évaluer et Améliorer',
+                icon: 'fa-chart-line',
                 color: 'border-l-4 border-lime-500',
                 commands: [
                     {
-                        cmd: 'Chunking stratégique',
-                        desc: 'Découper les documents intelligemment',
+                        cmd: 'Découper les documents efficacement',
+                        desc: 'chunk_size, overlap, splitters',
                         details: {
-                            explanation: 'Le découpage des documents impacte fortement la qualité de la recherche.',
-                            syntax: 'Taille et chevauchement optimaux',
+                            explanation: 'Le chunking divise les documents en morceaux adaptés pour l\'embedding et le contexte LLM.',
+                            syntax: 'RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)',
                             options: [
-                                { flag: 'chunk_size', desc: '500-1500 tokens selon le use case' },
-                                { flag: 'chunk_overlap', desc: '10-20% de la taille' },
-                                { flag: 'séparateurs', desc: 'Paragraphes > phrases > mots' }
+                                { flag: 'chunk_size', desc: 'Taille max en caractères' },
+                                { flag: 'chunk_overlap', desc: 'Chevauchement entre chunks' },
+                                { flag: 'separators', desc: 'Ordre des séparateurs' }
                             ],
                             examples: [
-                                { code: '# Tailles recommandées\n# QA précis: 200-500 tokens\n# Résumé: 1000-2000 tokens\n# Chat: 500-1000 tokens\n\n# Chunking sémantique (par paragraphe)\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter\n\nsplitter = RecursiveCharacterTextSplitter(\n    chunk_size=1000,\n    chunk_overlap=200,\n    separators=["\\n\\n", "\\n", ". ", " "]\n)', desc: 'Règles de chunking' },
-                                { code: '# Chunking par document structuré\nfrom langchain.text_splitter import MarkdownHeaderTextSplitter\n\nheaders = [("#", "Header 1"), ("##", "Header 2")]\nsplitter = MarkdownHeaderTextSplitter(headers)', desc: 'Par structure' }
+                                { code: 'from langchain.text_splitter import RecursiveCharacterTextSplitter\n\n# Splitter recommandé\nsplitter = RecursiveCharacterTextSplitter(\n    chunk_size=1000,\n    chunk_overlap=200,\n    length_function=len,\n    separators=["\\n\\n", "\\n", " ", ""]\n)\n\nchunks = splitter.split_documents(documents)\nprint(f"{len(chunks)} chunks créés")', desc: 'RecursiveCharacterTextSplitter' },
+                                { code: '# Pour le code\nfrom langchain.text_splitter import Language, RecursiveCharacterTextSplitter\n\npython_splitter = RecursiveCharacterTextSplitter.from_language(\n    language=Language.PYTHON,\n    chunk_size=2000,\n    chunk_overlap=200\n)', desc: 'Code splitter' },
+                                { code: '# Semantic chunking (expérimental)\nfrom langchain_experimental.text_splitter import SemanticChunker\nfrom langchain_openai import OpenAIEmbeddings\n\nsplitter = SemanticChunker(\n    embeddings=OpenAIEmbeddings(),\n    breakpoint_threshold_type="percentile"\n)', desc: 'Semantic chunking' }
                             ],
-                            tips: ['Testez différentes tailles sur vos données'],
-                            warnings: ['Chunks trop petits = contexte insuffisant', 'Trop grands = bruit']
+                            tips: ['chunk_size dépend du contexte LLM (4k-8k tokens)', 'overlap=20% du chunk_size est un bon départ'],
+                            warnings: ['Chunks trop petits = perte de contexte', 'Chunks trop grands = bruit dans les résultats']
                         }
                     },
                     {
-                        cmd: 'Métadonnées et filtrage',
-                        desc: 'Enrichir les documents',
+                        cmd: 'Enrichir avec des métadonnées',
+                        desc: 'source, date, category, chunk_index',
                         details: {
-                            explanation: 'Les métadonnées permettent un filtrage précis et améliorent la pertinence.',
-                            syntax: 'Structurer les métadonnées',
+                            explanation: 'Les métadonnées enrichissent les chunks pour le filtrage et la traçabilité.',
+                            syntax: 'metadatas=[{"source": ..., "page": ...}]',
                             options: [
                                 { flag: 'source', desc: 'Origine du document' },
-                                { flag: 'date', desc: 'Date de création/modification' },
-                                { flag: 'category', desc: 'Classification thématique' },
-                                { flag: 'chunk_index', desc: 'Position dans le document original' }
+                                { flag: 'page', desc: 'Numéro de page (PDF)' },
+                                { flag: 'chunk_index', desc: 'Position dans le document' },
+                                { flag: 'date', desc: 'Date du document' }
                             ],
                             examples: [
-                                { code: '# Métadonnées riches\nmetadata = {\n    "source": "rapport_2024.pdf",\n    "page": 15,\n    "section": "Finances",\n    "date": "2024-01-15",\n    "author": "Jean Dupont",\n    "doc_id": "doc_123",\n    "chunk_index": 3\n}\n\n# Stockage\nvectorstore.add_texts(texts, metadatas=[metadata])', desc: 'Structure de métadonnées' },
-                                { code: '# Filtrage à la recherche\nresults = vectorstore.similarity_search(\n    query,\n    k=5,\n    filter={"section": "Finances", "date": {"$gte": "2024-01-01"}}\n)', desc: 'Recherche filtrée' }
+                                { code: '# Ajouter des métadonnées aux chunks\nfor i, chunk in enumerate(chunks):\n    chunk.metadata.update({\n        "source": "rapport_annuel.pdf",\n        "chunk_index": i,\n        "total_chunks": len(chunks),\n        "date": "2024-01-15",\n        "category": "finance"\n    })\n\n# Stocker avec métadonnées\nvectorstore = Chroma.from_documents(chunks, embeddings)', desc: 'Enrichir les chunks' },
+                                { code: '# Filtrer à la recherche\nresults = vectorstore.similarity_search(\n    "revenus 2024",\n    k=10,\n    filter={\n        "category": "finance",\n        "date": {"$gte": "2024-01-01"}\n    }\n)', desc: 'Filtrer par métadonnées' },
+                                { code: '# Afficher les sources dans la réponse\ndef format_response(docs):\n    sources = set(doc.metadata["source"] for doc in docs)\n    return f"Sources: {\\", \\".join(sources)}"\n\nresults = retriever.invoke("Ma question")\nprint(format_response(results))', desc: 'Traçabilité des sources' }
                             ],
-                            tips: ['Indexez les métadonnées fréquemment filtrées'],
-                            warnings: []
+                            tips: ['Stockez le texte original pour l\'afficher', 'chunk_index aide à reconstruire le contexte'],
+                            warnings: ['Trop de métadonnées augmente la taille du stockage']
                         }
                     },
                     {
-                        cmd: 'Normalisation des embeddings',
-                        desc: 'Préparer les vecteurs',
+                        cmd: 'Mesurer la qualité (Recall, MRR)',
+                        desc: 'Métriques de retrieval',
                         details: {
-                            explanation: 'Normaliser les vecteurs pour utiliser la similarité cosinus correctement.',
-                            syntax: 'Normalisation L2',
-                            options: [],
-                            examples: [
-                                { code: 'import numpy as np\n\n# Normalisation manuelle\ndef normalize(vectors):\n    norms = np.linalg.norm(vectors, axis=1, keepdims=True)\n    return vectors / norms\n\nnormalized = normalize(embeddings)', desc: 'Numpy' },
-                                { code: '# Avec FAISS\nimport faiss\nfaiss.normalize_L2(embeddings)  # In-place\n\n# Puis utiliser IndexFlatIP pour cosine\nindex = faiss.IndexFlatIP(dimension)', desc: 'FAISS' },
-                                { code: '# Vérifier si le modèle normalise déjà\nfrom sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer("all-MiniLM-L6-v2")\nemb = model.encode(["test"], normalize_embeddings=True)', desc: 'Sentence Transformers' }
-                            ],
-                            tips: ['IndexFlatIP sur vecteurs normalisés = cosine similarity'],
-                            warnings: ['Vérifiez si votre modèle normalise déjà']
-                        }
-                    },
-                    {
-                        cmd: 'Hybrid Search',
-                        desc: 'Combiner recherche vectorielle et lexicale',
-                        details: {
-                            explanation: 'La recherche hybride combine BM25 (mots-clés) et embeddings pour de meilleurs résultats.',
-                            syntax: 'score_final = α * score_vector + (1-α) * score_bm25',
+                            explanation: 'Évalue la qualité du système de recherche avec des métriques standard.',
+                            syntax: 'Recall@k, MRR, nDCG',
                             options: [
-                                { flag: 'α (alpha)', desc: 'Poids de la recherche vectorielle (0.5-0.8)' }
-                            ],
-                            examples: [
-                                { code: '# Avec LangChain\nfrom langchain.retrievers import EnsembleRetriever\nfrom langchain_community.retrievers import BM25Retriever\n\n# Retriever BM25\nbm25 = BM25Retriever.from_documents(docs)\nbm25.k = 5\n\n# Retriever vectoriel\nvector_retriever = vectorstore.as_retriever(search_kwargs={"k": 5})\n\n# Ensemble\nensemble = EnsembleRetriever(\n    retrievers=[bm25, vector_retriever],\n    weights=[0.3, 0.7]  # 30% BM25, 70% vecteurs\n)', desc: 'Ensemble Retriever' },
-                                { code: '# Weaviate hybrid natif\nresults = collection.query.hybrid(\n    query="machine learning",\n    alpha=0.7,  # 70% vector, 30% keyword\n    limit=10\n)', desc: 'Weaviate hybrid' }
-                            ],
-                            tips: ['Hybrid est souvent meilleur que vector-only'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Reranking',
-                        desc: 'Réordonner les résultats',
-                        details: {
-                            explanation: 'Un reranker (cross-encoder) améliore le classement des résultats initiaux.',
-                            syntax: 'Retrieve → Rerank → Select top-k',
-                            options: [],
-                            examples: [
-                                { code: 'from sentence_transformers import CrossEncoder\n\n# Charger le reranker\nreranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")\n\n# Récupérer plus de candidats\ncandidates = vectorstore.similarity_search(query, k=20)\n\n# Scorer avec le reranker\npairs = [(query, doc.page_content) for doc in candidates]\nscores = reranker.predict(pairs)\n\n# Trier et garder top 5\nreranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)[:5]', desc: 'Cross-encoder reranking' },
-                                { code: '# Avec Cohere (API)\nfrom langchain.retrievers import ContextualCompressionRetriever\nfrom langchain_cohere import CohereRerank\n\nreranker = CohereRerank(model="rerank-multilingual-v3.0")\nretriever = ContextualCompressionRetriever(\n    base_compressor=reranker,\n    base_retriever=vectorstore.as_retriever(search_kwargs={"k": 20})\n)', desc: 'Cohere Rerank' }
-                            ],
-                            tips: ['Retrieve 3-4x plus que nécessaire, puis rerank'],
-                            warnings: ['Reranking ajoute de la latence']
-                        }
-                    },
-                    {
-                        cmd: 'Évaluation',
-                        desc: 'Mesurer la qualité de la recherche',
-                        details: {
-                            explanation: 'Évaluez votre système avec des métriques de ranking.',
-                            syntax: 'Métriques: MRR, Recall@k, nDCG',
-                            options: [
+                                { flag: 'Recall@k', desc: 'Documents pertinents dans top-k' },
                                 { flag: 'MRR', desc: 'Mean Reciprocal Rank' },
-                                { flag: 'Recall@k', desc: '% de documents pertinents dans top-k' },
-                                { flag: 'nDCG', desc: 'Normalized Discounted Cumulative Gain' }
+                                { flag: 'nDCG', desc: 'Normalized DCG (graded relevance)' }
                             ],
                             examples: [
-                                { code: '# Dataset d\'évaluation\neval_data = [\n    {"query": "Q1", "relevant_docs": ["doc_1", "doc_5"]},\n    {"query": "Q2", "relevant_docs": ["doc_3"]},\n]\n\n# Calculer Recall@5\ndef recall_at_k(results, relevant, k=5):\n    retrieved = set([r.id for r in results[:k]])\n    relevant = set(relevant)\n    return len(retrieved & relevant) / len(relevant)\n\n# MRR\ndef mrr(results, relevant):\n    for i, r in enumerate(results):\n        if r.id in relevant:\n            return 1 / (i + 1)\n    return 0', desc: 'Métriques maison' },
-                                { code: '# Avec RAGAS (évaluation RAG)\nfrom ragas import evaluate\nfrom ragas.metrics import context_recall, context_precision\n\nresult = evaluate(dataset, metrics=[context_recall, context_precision])', desc: 'RAGAS framework' }
+                                { code: 'def recall_at_k(relevant_docs, retrieved_docs, k):\n    """Calcule Recall@k"""\n    retrieved_k = set(retrieved_docs[:k])\n    relevant_set = set(relevant_docs)\n    return len(retrieved_k & relevant_set) / len(relevant_set)\n\n# Exemple\nrelevant = ["doc1", "doc2", "doc3"]\nretrieved = ["doc1", "doc4", "doc2", "doc5", "doc3"]\nprint(f"Recall@3: {recall_at_k(relevant, retrieved, 3)}")  # 0.67', desc: 'Recall@k' },
+                                { code: 'def mrr(queries_results):\n    """Mean Reciprocal Rank"""\n    reciprocal_ranks = []\n    for relevant_doc, retrieved in queries_results:\n        for i, doc in enumerate(retrieved, 1):\n            if doc == relevant_doc:\n                reciprocal_ranks.append(1/i)\n                break\n        else:\n            reciprocal_ranks.append(0)\n    return sum(reciprocal_ranks) / len(reciprocal_ranks)\n\n# Exemple\nresults = [\n    ("doc_correct", ["doc1", "doc_correct", "doc3"]),  # rang 2 -> 1/2\n    ("doc_autre", ["doc_autre", "doc2", "doc3"])  # rang 1 -> 1/1\n]\nprint(f"MRR: {mrr(results)}")  # 0.75', desc: 'MRR' },
+                                { code: '# Évaluation sur un dataset de test\nimport pandas as pd\n\ntest_queries = [\n    {"query": "Q1", "relevant": ["d1", "d2"]},\n    {"query": "Q2", "relevant": ["d3"]}\n]\n\nresults = []\nfor test in test_queries:\n    retrieved = vectorstore.similarity_search(test["query"], k=10)\n    retrieved_ids = [doc.metadata["id"] for doc in retrieved]\n    \n    recall = recall_at_k(test["relevant"], retrieved_ids, 5)\n    results.append({"query": test["query"], "recall@5": recall})\n\ndf = pd.DataFrame(results)\nprint(f"Recall@5 moyen: {df[\'recall@5\'].mean():.2f}")', desc: 'Évaluation systématique' }
                             ],
-                            tips: ['Créez un dataset de test représentatif'],
-                            warnings: []
+                            tips: ['Créez un dataset de test avec des jugements de pertinence', 'Recall@5-10 est la métrique principale pour RAG'],
+                            warnings: ['Les métriques nécessitent des labels de vérité terrain']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser RAGAS pour évaluer',
+                        desc: 'Framework d\'évaluation RAG',
+                        details: {
+                            explanation: 'RAGAS évalue automatiquement la qualité d\'un pipeline RAG sans labels manuels.',
+                            syntax: 'evaluate(dataset, metrics=[...])',
+                            options: [
+                                { flag: 'context_precision', desc: 'Pertinence du contexte' },
+                                { flag: 'context_recall', desc: 'Couverture des infos' },
+                                { flag: 'faithfulness', desc: 'Fidélité de la réponse' },
+                                { flag: 'answer_relevancy', desc: 'Pertinence de la réponse' }
+                            ],
+                            examples: [
+                                { code: 'from ragas import evaluate\nfrom ragas.metrics import (\n    context_precision,\n    context_recall,\n    faithfulness,\n    answer_relevancy\n)\nfrom datasets import Dataset\n\n# Préparer les données\ndata = {\n    "question": ["Q1", "Q2"],\n    "answer": ["Réponse 1", "Réponse 2"],\n    "contexts": [["ctx1", "ctx2"], ["ctx3"]],\n    "ground_truth": ["Vérité 1", "Vérité 2"]\n}\ndataset = Dataset.from_dict(data)\n\n# Évaluer\nresults = evaluate(\n    dataset,\n    metrics=[\n        context_precision,\n        context_recall,\n        faithfulness,\n        answer_relevancy\n    ]\n)\nprint(results)', desc: 'RAGAS evaluate' },
+                                { code: '# Intégration avec LangChain\nfrom ragas.integrations.langchain import EvaluatorChain\n\n# Créer un évaluateur\nevaluator = EvaluatorChain(\n    metrics=[faithfulness, answer_relevancy]\n)\n\n# Évaluer une réponse\nresult = evaluator.invoke({\n    "question": "Qu\'est-ce que RAG ?",\n    "answer": "RAG est...",\n    "contexts": ["Contexte récupéré..."]\n})', desc: 'Avec LangChain' },
+                                { code: '# Évaluation sans ground truth (faithfulness)\nfrom ragas.metrics import faithfulness\n\n# Vérifie si la réponse est fidèle aux contextes\n# Ne nécessite pas de vérité terrain\ndata = {\n    "question": questions,\n    "answer": answers,\n    "contexts": contexts\n}\nresult = evaluate(\n    Dataset.from_dict(data),\n    metrics=[faithfulness]\n)', desc: 'Sans ground truth' }
+                            ],
+                            tips: ['faithfulness ne nécessite pas de ground truth', 'Évaluez régulièrement en production'],
+                            warnings: ['RAGAS utilise un LLM pour évaluer = coût API']
+                        }
+                    },
+                    {
+                        cmd: 'Ajuster les paramètres',
+                        desc: 'nprobe, efSearch, weights',
+                        details: {
+                            explanation: 'Optimise les paramètres du système selon les métriques d\'évaluation.',
+                            syntax: 'Grid search sur les hyperparamètres',
+                            options: [
+                                { flag: 'nprobe', desc: 'IVF : clusters à explorer' },
+                                { flag: 'efSearch', desc: 'HNSW : qualité recherche' },
+                                { flag: 'k', desc: 'Nombre de résultats' },
+                                { flag: 'weights', desc: 'Pondération hybrid search' }
+                            ],
+                            examples: [
+                                { code: '# Grid search sur k et nprobe\nimport itertools\n\nk_values = [5, 10, 20]\nnprobe_values = [1, 5, 10, 20]\n\nbest_config = None\nbest_recall = 0\n\nfor k, nprobe in itertools.product(k_values, nprobe_values):\n    index.nprobe = nprobe\n    \n    # Évaluer sur le test set\n    recall = evaluate_recall(test_queries, k)\n    \n    if recall > best_recall:\n        best_recall = recall\n        best_config = {"k": k, "nprobe": nprobe}\n        \nprint(f"Meilleure config: {best_config}, Recall: {best_recall:.3f}")', desc: 'Grid search' },
+                                { code: '# Optimiser les weights du hybrid search\nweights_options = [\n    (0.3, 0.7),  # 30% BM25, 70% vector\n    (0.5, 0.5),\n    (0.7, 0.3)\n]\n\nfor w_bm25, w_vec in weights_options:\n    ensemble = EnsembleRetriever(\n        retrievers=[bm25_retriever, vector_retriever],\n        weights=[w_bm25, w_vec]\n    )\n    \n    recall = evaluate_recall_with_retriever(ensemble, test_queries)\n    print(f"Weights ({w_bm25}, {w_vec}): Recall={recall:.3f}")', desc: 'Optimiser hybrid weights' },
+                                { code: '# Comparer chunk sizes\nchunk_sizes = [500, 1000, 1500, 2000]\n\nfor size in chunk_sizes:\n    splitter = RecursiveCharacterTextSplitter(\n        chunk_size=size,\n        chunk_overlap=int(size * 0.2)\n    )\n    chunks = splitter.split_documents(docs)\n    \n    # Créer vectorstore et évaluer\n    vs = FAISS.from_documents(chunks, embeddings)\n    recall = evaluate_recall(vs, test_queries)\n    \n    print(f"chunk_size={size}: {len(chunks)} chunks, Recall={recall:.3f}")', desc: 'Comparer chunk sizes' }
+                            ],
+                            tips: ['Commencez par les paramètres par défaut', 'Optimisez un paramètre à la fois'],
+                            warnings: ['L\'overfitting sur le test set est possible']
                         }
                     }
                 ]

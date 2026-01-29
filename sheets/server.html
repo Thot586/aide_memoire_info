@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire Configuration Serveur : Nginx, Apache, systemd, SSL/TLS et déploiement.">
+    <meta name="description" content="Aide-mémoire Configuration Serveur : workflows pratiques pour Nginx, Apache, SSL, déploiement et administration.">
     <title>Configuration Serveur - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,14 @@
                     <i class="fas fa-server text-3xl text-indigo-400"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">Configuration Serveur</h1>
-                <p class="text-slate-400">Nginx, Apache, systemd, SSL et administration</p>
+                <p class="text-slate-400">Workflows pratiques pour l'administration serveur</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -53,98 +53,141 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'nginx',
-                title: 'Nginx',
-                icon: 'fa-server',
+                id: 'setup-webserver',
+                title: '🌐 Configurer un Serveur Web',
+                icon: 'fa-globe',
                 color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'nginx -t / systemctl',
-                        desc: 'Commandes de base',
+                        cmd: 'Installer et démarrer Nginx',
+                        desc: 'Setup initial du serveur web',
                         details: {
-                            explanation: 'Commandes essentielles pour gérer le serveur Nginx.',
-                            syntax: 'nginx [options]\nsystemctl [action] nginx',
+                            explanation: 'Installation et configuration de base de Nginx comme serveur web.',
+                            syntax: 'apt install nginx && systemctl enable nginx',
                             options: [
                                 { flag: 'nginx -t', desc: 'Tester la configuration' },
-                                { flag: 'nginx -s reload', desc: 'Recharger la config' },
-                                { flag: 'systemctl start nginx', desc: 'Démarrer Nginx' },
-                                { flag: 'systemctl status nginx', desc: 'État du service' },
+                                { flag: 'nginx -s reload', desc: 'Recharger sans arrêter' },
+                                { flag: 'systemctl status nginx', desc: 'Vérifier l\'état' },
                                 { flag: 'systemctl enable nginx', desc: 'Activer au démarrage' }
                             ],
                             examples: [
-                                { code: 'sudo nginx -t && sudo systemctl reload nginx', desc: 'Test puis reload' },
-                                { code: 'sudo systemctl status nginx', desc: 'Vérifier l\'état' },
-                                { code: 'sudo tail -f /var/log/nginx/error.log', desc: 'Suivre les erreurs' }
+                                { code: 'sudo apt update && sudo apt install -y nginx', desc: 'Installation sur Debian/Ubuntu' },
+                                { code: 'sudo systemctl enable --now nginx', desc: 'Activer et démarrer immédiatement' },
+                                { code: 'sudo nginx -t && sudo systemctl reload nginx', desc: 'Tester puis recharger la config' },
+                                { code: 'curl -I http://localhost', desc: 'Vérifier que Nginx répond' }
                             ],
                             tips: ['Toujours tester avec nginx -t avant de recharger'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Server Block basique',
-                        desc: 'Configuration site statique',
+                        cmd: 'Créer un site Nginx (server block)',
+                        desc: 'Héberger un site statique',
                         details: {
-                            explanation: 'Configuration Nginx pour servir un site statique.',
-                            syntax: '/etc/nginx/sites-available/example.com',
+                            explanation: 'Configuration d\'un server block Nginx pour servir un site web statique.',
+                            syntax: '/etc/nginx/sites-available/monsite.conf',
                             options: [
-                                { flag: 'listen', desc: 'Port d\'écoute' },
-                                { flag: 'server_name', desc: 'Domaine(s)' },
-                                { flag: 'root', desc: 'Répertoire racine' },
-                                { flag: 'index', desc: 'Fichiers index' },
-                                { flag: 'location', desc: 'Règles par chemin' }
+                                { flag: 'listen', desc: 'Port d\'écoute (80, 443)' },
+                                { flag: 'server_name', desc: 'Domaine(s) du site' },
+                                { flag: 'root', desc: 'Répertoire racine des fichiers' },
+                                { flag: 'index', desc: 'Fichiers index par défaut' },
+                                { flag: 'location', desc: 'Règles par chemin URL' }
                             ],
                             examples: [
                                 { code: 'server {\n    listen 80;\n    listen [::]:80;\n    server_name example.com www.example.com;\n    root /var/www/example.com;\n    index index.html;\n\n    location / {\n        try_files $uri $uri/ =404;\n    }\n}', desc: 'Site statique simple' },
+                                { code: 'sudo mkdir -p /var/www/example.com\nsudo chown -R www-data:www-data /var/www/example.com', desc: 'Créer le répertoire du site' },
                                 { code: 'sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/', desc: 'Activer le site' }
                             ],
-                            tips: ['Créez un lien symbolique vers sites-enabled pour activer le site'],
+                            tips: ['Créez un lien symbolique vers sites-enabled pour activer'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Reverse Proxy',
-                        desc: 'Proxy vers une application',
+                        cmd: 'Installer et configurer Apache',
+                        desc: 'Alternative à Nginx avec Apache',
                         details: {
-                            explanation: 'Configure Nginx comme reverse proxy pour une application backend (Node.js, Django, etc.).',
-                            syntax: 'location / { proxy_pass http://backend; }',
+                            explanation: 'Installation et configuration de base d\'Apache HTTP Server.',
+                            syntax: 'apt install apache2 && systemctl enable apache2',
                             options: [
-                                { flag: 'proxy_pass', desc: 'URL du backend' },
-                                { flag: 'proxy_set_header', desc: 'Headers à transmettre' },
-                                { flag: 'proxy_http_version', desc: 'Version HTTP' }
+                                { flag: 'apachectl -t', desc: 'Tester la configuration' },
+                                { flag: 'a2ensite', desc: 'Activer un site' },
+                                { flag: 'a2dissite', desc: 'Désactiver un site' },
+                                { flag: 'a2enmod', desc: 'Activer un module' }
                             ],
                             examples: [
-                                { code: 'server {\n    listen 80;\n    server_name app.example.com;\n\n    location / {\n        proxy_pass http://127.0.0.1:3000;\n        proxy_http_version 1.1;\n        proxy_set_header Upgrade $http_upgrade;\n        proxy_set_header Connection "upgrade";\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n}', desc: 'Proxy Node.js avec WebSocket' },
-                                { code: 'upstream backend {\n    server 127.0.0.1:3000;\n    server 127.0.0.1:3001;\n}\n\nserver {\n    location / {\n        proxy_pass http://backend;\n    }\n}', desc: 'Load balancing' }
+                                { code: 'sudo apt install -y apache2\nsudo systemctl enable --now apache2', desc: 'Installation Apache' },
+                                { code: '<VirtualHost *:80>\n    ServerName example.com\n    ServerAlias www.example.com\n    DocumentRoot /var/www/example.com/public\n\n    <Directory /var/www/example.com/public>\n        Options -Indexes +FollowSymLinks\n        AllowOverride All\n        Require all granted\n    </Directory>\n\n    ErrorLog ${APACHE_LOG_DIR}/example_error.log\n    CustomLog ${APACHE_LOG_DIR}/example_access.log combined\n</VirtualHost>', desc: 'VirtualHost Apache' },
+                                { code: 'sudo a2ensite example.conf && sudo apachectl -t && sudo systemctl reload apache2', desc: 'Activer et recharger' }
                             ],
-                            tips: ['Les headers X-Forwarded-* sont importants pour que l\'app connaisse l\'IP réelle'],
+                            tips: ['AllowOverride All permet les fichiers .htaccess'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Configurer PHP-FPM',
+                        desc: 'Exécuter des applications PHP',
+                        details: {
+                            explanation: 'Configuration de PHP-FPM pour de meilleures performances PHP.',
+                            syntax: 'apt install php-fpm && systemctl enable php-fpm',
+                            options: [
+                                { flag: 'fastcgi_pass', desc: 'Socket PHP-FPM (Nginx)' },
+                                { flag: 'SetHandler', desc: 'Handler PHP (Apache)' },
+                                { flag: 'pool.d/', desc: 'Configuration des pools' }
+                            ],
+                            examples: [
+                                { code: 'sudo apt install php8.2-fpm php8.2-mysql php8.2-mbstring', desc: 'Installation PHP-FPM' },
+                                { code: '# Nginx - dans le server block\nlocation ~ \\.php$ {\n    include snippets/fastcgi-php.conf;\n    fastcgi_pass unix:/run/php/php8.2-fpm.sock;\n}', desc: 'Config PHP dans Nginx' },
+                                { code: '# Apache - activer PHP-FPM\nsudo a2enmod proxy_fcgi setenvif\nsudo a2enconf php8.2-fpm\nsudo systemctl reload apache2', desc: 'Config PHP dans Apache' }
+                            ],
+                            tips: ['PHP-FPM est plus performant que mod_php'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Consulter les logs du serveur web',
+                        desc: 'Déboguer les erreurs',
+                        details: {
+                            explanation: 'Localisation et lecture des logs Nginx et Apache.',
+                            syntax: 'tail -f /var/log/nginx/error.log',
+                            options: [
+                                { flag: 'access.log', desc: 'Requêtes reçues' },
+                                { flag: 'error.log', desc: 'Erreurs serveur' },
+                                { flag: 'tail -f', desc: 'Suivre en temps réel' }
+                            ],
+                            examples: [
+                                { code: 'sudo tail -f /var/log/nginx/error.log', desc: 'Erreurs Nginx en temps réel' },
+                                { code: 'sudo tail -f /var/log/apache2/error.log', desc: 'Erreurs Apache en temps réel' },
+                                { code: 'sudo grep "404" /var/log/nginx/access.log | tail -20', desc: 'Dernières erreurs 404' },
+                                { code: 'sudo journalctl -u nginx -f', desc: 'Logs systemd Nginx' }
+                            ],
+                            tips: ['Configurez des logs personnalisés par site pour mieux déboguer'],
                             warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'ssl',
-                title: 'SSL/TLS & Certbot',
+                id: 'https-ssl',
+                title: '🔒 Sécuriser avec HTTPS',
                 icon: 'fa-lock',
                 color: 'border-l-4 border-yellow-500',
                 commands: [
                     {
-                        cmd: 'certbot',
-                        desc: 'Certificats Let\'s Encrypt',
+                        cmd: 'Obtenir un certificat Let\'s Encrypt',
+                        desc: 'SSL gratuit avec Certbot',
                         details: {
-                            explanation: 'Obtient et renouvelle automatiquement des certificats SSL gratuits de Let\'s Encrypt.',
-                            syntax: 'certbot [plugin] -d domain',
+                            explanation: 'Certbot obtient et renouvelle automatiquement des certificats SSL gratuits.',
+                            syntax: 'certbot --nginx -d domain.com',
                             options: [
-                                { flag: '--nginx', desc: 'Plugin Nginx (configure automatiquement)' },
+                                { flag: '--nginx', desc: 'Plugin Nginx (configure auto)' },
                                 { flag: '--apache', desc: 'Plugin Apache' },
                                 { flag: '-d domain', desc: 'Domaine à certifier' },
-                                { flag: '--dry-run', desc: 'Test sans modifier' },
-                                { flag: 'renew', desc: 'Renouveler les certificats' }
+                                { flag: '--dry-run', desc: 'Test sans modifier' }
                             ],
                             examples: [
-                                { code: 'sudo apt install certbot python3-certbot-nginx', desc: 'Installation Debian/Ubuntu' },
-                                { code: 'sudo certbot --nginx -d example.com -d www.example.com', desc: 'Obtenir un certificat' },
-                                { code: 'sudo certbot renew --dry-run', desc: 'Tester le renouvellement' },
+                                { code: 'sudo apt install certbot python3-certbot-nginx', desc: 'Installation Certbot pour Nginx' },
+                                { code: 'sudo certbot --nginx -d example.com -d www.example.com', desc: 'Obtenir certificat + config auto' },
+                                { code: 'sudo certbot certonly --webroot -w /var/www/example -d example.com', desc: 'Certificat seul (config manuelle)' },
                                 { code: 'sudo certbot certificates', desc: 'Lister les certificats' }
                             ],
                             tips: ['Certbot configure automatiquement la redirection HTTP → HTTPS'],
@@ -152,11 +195,11 @@
                         }
                     },
                     {
-                        cmd: 'Configuration SSL Nginx',
-                        desc: 'Config HTTPS sécurisée',
+                        cmd: 'Configurer HTTPS manuellement (Nginx)',
+                        desc: 'Config SSL sécurisée',
                         details: {
-                            explanation: 'Configuration SSL/TLS recommandée pour Nginx.',
-                            syntax: 'listen 443 ssl; ssl_certificate ...',
+                            explanation: 'Configuration SSL/TLS recommandée pour Nginx si vous ne voulez pas laisser Certbot la gérer.',
+                            syntax: 'listen 443 ssl http2;',
                             options: [
                                 { flag: 'ssl_certificate', desc: 'Chemin du certificat' },
                                 { flag: 'ssl_certificate_key', desc: 'Chemin de la clé privée' },
@@ -164,152 +207,147 @@
                                 { flag: 'ssl_ciphers', desc: 'Algorithmes de chiffrement' }
                             ],
                             examples: [
-                                { code: 'server {\n    listen 443 ssl http2;\n    server_name example.com;\n\n    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;\n\n    ssl_protocols TLSv1.2 TLSv1.3;\n    ssl_prefer_server_ciphers on;\n    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;\n\n    # HSTS\n    add_header Strict-Transport-Security "max-age=31536000" always;\n}', desc: 'HTTPS sécurisé' },
+                                { code: 'server {\n    listen 443 ssl http2;\n    server_name example.com;\n\n    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;\n\n    ssl_protocols TLSv1.2 TLSv1.3;\n    ssl_prefer_server_ciphers on;\n    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;\n\n    # HSTS - force HTTPS\n    add_header Strict-Transport-Security "max-age=31536000" always;\n\n    # ... reste de la config\n}', desc: 'Config HTTPS sécurisée' },
                                 { code: 'server {\n    listen 80;\n    server_name example.com;\n    return 301 https://$server_name$request_uri;\n}', desc: 'Redirection HTTP → HTTPS' }
                             ],
-                            tips: ['Activez HSTS pour forcer HTTPS côté navigateur'],
+                            tips: ['Activez HTTP/2 pour de meilleures performances (http2)'],
                             warnings: ['TLS 1.0 et 1.1 sont obsolètes et vulnérables']
+                        }
+                    },
+                    {
+                        cmd: 'Renouveler les certificats',
+                        desc: 'Automatiser le renouvellement',
+                        details: {
+                            explanation: 'Les certificats Let\'s Encrypt expirent après 90 jours. Certbot gère le renouvellement automatique.',
+                            syntax: 'certbot renew',
+                            options: [
+                                { flag: 'renew', desc: 'Renouveler tous les certificats proches d\'expiration' },
+                                { flag: '--dry-run', desc: 'Simuler le renouvellement' },
+                                { flag: '--force-renewal', desc: 'Forcer le renouvellement' }
+                            ],
+                            examples: [
+                                { code: 'sudo certbot renew --dry-run', desc: 'Tester le renouvellement' },
+                                { code: 'sudo certbot renew', desc: 'Renouveler si nécessaire' },
+                                { code: 'systemctl list-timers | grep certbot', desc: 'Vérifier le timer automatique' },
+                                { code: '# Cron manuel si besoin (normalement pas nécessaire)\n0 0 1 * * /usr/bin/certbot renew --quiet', desc: 'Crontab de backup' }
+                            ],
+                            tips: ['Certbot installe automatiquement un timer systemd pour le renouvellement'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Tester la configuration SSL',
+                        desc: 'Vérifier la sécurité HTTPS',
+                        details: {
+                            explanation: 'Outils pour vérifier que votre configuration SSL est correcte et sécurisée.',
+                            syntax: 'openssl s_client -connect domain:443',
+                            options: [
+                                { flag: 'openssl s_client', desc: 'Test connexion SSL' },
+                                { flag: '-servername', desc: 'SNI (si plusieurs sites)' },
+                                { flag: 'ssllabs.com', desc: 'Test en ligne complet' }
+                            ],
+                            examples: [
+                                { code: 'openssl s_client -connect example.com:443 -servername example.com', desc: 'Test connexion SSL' },
+                                { code: 'curl -vI https://example.com 2>&1 | grep -A5 "SSL connection"', desc: 'Voir les détails SSL avec curl' },
+                                { code: 'echo | openssl s_client -connect example.com:443 2>/dev/null | openssl x509 -noout -dates', desc: 'Vérifier dates du certificat' },
+                                { code: '# Test en ligne complet: https://www.ssllabs.com/ssltest/', desc: 'SSL Labs (note A à F)' }
+                            ],
+                            tips: ['Visez une note A ou A+ sur SSL Labs'],
+                            warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'systemd',
-                title: 'Systemd Services',
+                id: 'manage-services',
+                title: '⚙️ Gérer les Services',
                 icon: 'fa-cogs',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'systemctl',
-                        desc: 'Gestion des services',
+                        cmd: 'Contrôler un service avec systemctl',
+                        desc: 'Start, stop, restart, status',
                         details: {
-                            explanation: 'Commande principale pour gérer les services systemd.',
+                            explanation: 'Commandes systemctl pour gérer les services système.',
                             syntax: 'systemctl [command] [service]',
                             options: [
-                                { flag: 'start', desc: 'Démarrer un service' },
-                                { flag: 'stop', desc: 'Arrêter un service' },
+                                { flag: 'start', desc: 'Démarrer le service' },
+                                { flag: 'stop', desc: 'Arrêter le service' },
                                 { flag: 'restart', desc: 'Redémarrer' },
+                                { flag: 'reload', desc: 'Recharger la config sans arrêter' },
                                 { flag: 'status', desc: 'État du service' },
-                                { flag: 'enable', desc: 'Activer au boot' },
-                                { flag: 'disable', desc: 'Désactiver au boot' },
-                                { flag: 'daemon-reload', desc: 'Recharger les fichiers unit' }
+                                { flag: 'enable', desc: 'Activer au démarrage' },
+                                { flag: 'disable', desc: 'Désactiver au démarrage' }
                             ],
                             examples: [
                                 { code: 'sudo systemctl start nginx', desc: 'Démarrer Nginx' },
-                                { code: 'sudo systemctl enable --now myapp', desc: 'Activer et démarrer' },
-                                { code: 'systemctl list-units --type=service', desc: 'Lister les services' },
-                                { code: 'systemctl is-active nginx', desc: 'Vérifier si actif' }
+                                { code: 'sudo systemctl enable --now nginx', desc: 'Activer au boot + démarrer maintenant' },
+                                { code: 'sudo systemctl status nginx', desc: 'Vérifier l\'état' },
+                                { code: 'systemctl list-units --type=service --state=running', desc: 'Lister services actifs' },
+                                { code: 'systemctl is-active nginx && echo "OK" || echo "KO"', desc: 'Test scriptable' }
                             ],
                             tips: ['--now avec enable démarre le service immédiatement'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Créer un service',
-                        desc: 'Fichier unit personnalisé',
+                        cmd: 'Créer un service systemd',
+                        desc: 'Exécuter votre application comme service',
                         details: {
-                            explanation: 'Crée un service systemd pour votre application.',
+                            explanation: 'Créez un fichier unit pour que votre application démarre automatiquement et soit gérée par systemd.',
                             syntax: '/etc/systemd/system/myapp.service',
                             options: [
                                 { flag: '[Unit]', desc: 'Description et dépendances' },
-                                { flag: '[Service]', desc: 'Configuration du service' },
+                                { flag: '[Service]', desc: 'Configuration d\'exécution' },
                                 { flag: '[Install]', desc: 'Cibles d\'installation' },
                                 { flag: 'ExecStart', desc: 'Commande de démarrage' },
                                 { flag: 'Restart', desc: 'Politique de redémarrage' }
                             ],
                             examples: [
                                 { code: '[Unit]\nDescription=My Node.js Application\nAfter=network.target\n\n[Service]\nType=simple\nUser=www-data\nWorkingDirectory=/var/www/myapp\nExecStart=/usr/bin/node server.js\nRestart=on-failure\nRestartSec=10\nEnvironment=NODE_ENV=production\n\n[Install]\nWantedBy=multi-user.target', desc: 'Service Node.js' },
-                                { code: 'sudo systemctl daemon-reload\nsudo systemctl enable --now myapp', desc: 'Activer le service' }
+                                { code: 'sudo systemctl daemon-reload\nsudo systemctl enable --now myapp', desc: 'Activer le nouveau service' }
                             ],
                             tips: ['Restart=on-failure redémarre automatiquement en cas de crash'],
                             warnings: ['daemon-reload est nécessaire après modification du fichier unit']
                         }
                     },
                     {
-                        cmd: 'journalctl -u',
-                        desc: 'Logs d\'un service',
+                        cmd: 'Lire les logs d\'un service',
+                        desc: 'Déboguer avec journalctl',
                         details: {
-                            explanation: 'Consulte les logs d\'un service spécifique.',
+                            explanation: 'journalctl permet de consulter les logs de n\'importe quel service systemd.',
                             syntax: 'journalctl -u service [options]',
                             options: [
-                                { flag: '-u service', desc: 'Logs du service' },
-                                { flag: '-f', desc: 'Suivre en temps réel' },
-                                { flag: '-n 100', desc: 'Les 100 dernières lignes' },
-                                { flag: '--since "1 hour ago"', desc: 'Depuis une date/heure' }
+                                { flag: '-u service', desc: 'Logs du service spécifié' },
+                                { flag: '-f', desc: 'Suivre en temps réel (tail -f)' },
+                                { flag: '-n 100', desc: 'Les N dernières lignes' },
+                                { flag: '--since "1 hour ago"', desc: 'Depuis une date/heure' },
+                                { flag: '-p err', desc: 'Seulement les erreurs' }
                             ],
                             examples: [
                                 { code: 'journalctl -u nginx -f', desc: 'Logs Nginx en temps réel' },
                                 { code: 'journalctl -u myapp --since today', desc: 'Logs depuis aujourd\'hui' },
-                                { code: 'journalctl -u myapp -p err', desc: 'Seulement les erreurs' }
+                                { code: 'journalctl -u myapp -p err --no-pager', desc: 'Seulement les erreurs' },
+                                { code: 'journalctl -u myapp --since "2024-01-15" --until "2024-01-16"', desc: 'Logs d\'une période' }
                             ],
-                            tips: ['journalctl -u est indispensable pour débugger les services'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'deploy',
-                title: 'Déploiement',
-                icon: 'fa-rocket',
-                color: 'border-l-4 border-purple-500',
-                commands: [
-                    {
-                        cmd: 'Structure de déploiement',
-                        desc: 'Organisation des fichiers',
-                        details: {
-                            explanation: 'Structure recommandée pour les applications web sur un serveur.',
-                            syntax: '/var/www/app/{current,releases,shared}',
-                            options: [
-                                { flag: '/var/www/app/', desc: 'Racine de l\'application' },
-                                { flag: 'current/', desc: 'Lien vers la release active' },
-                                { flag: 'releases/', desc: 'Versions déployées' },
-                                { flag: 'shared/', desc: 'Fichiers persistants (logs, uploads)' }
-                            ],
-                            examples: [
-                                { code: '/var/www/myapp/\n├── current -> releases/20240115_123456\n├── releases/\n│   ├── 20240115_123456/\n│   └── 20240114_100000/\n└── shared/\n    ├── .env\n    ├── storage/\n    └── logs/', desc: 'Structure type' },
-                                { code: 'ln -sfn /var/www/myapp/releases/NEW /var/www/myapp/current', desc: 'Activer une release' }
-                            ],
-                            tips: ['Cette structure permet un rollback instantané en changeant le lien symbolique'],
+                            tips: ['journalctl -u est indispensable pour déboguer les services'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Script de déploiement',
-                        desc: 'Déploiement automatisé',
+                        cmd: 'Configurer les variables d\'environnement',
+                        desc: 'Fichier .env avec systemd',
                         details: {
-                            explanation: 'Script bash basique pour automatiser les déploiements.',
-                            syntax: 'deploy.sh',
+                            explanation: 'Passer des variables d\'environnement à votre service (secrets, config).',
+                            syntax: 'EnvironmentFile=/path/to/.env',
                             options: [
-                                { flag: '1', desc: 'Pull/clone le code' },
-                                { flag: '2', desc: 'Installer les dépendances' },
-                                { flag: '3', desc: 'Build si nécessaire' },
-                                { flag: '4', desc: 'Migrer la base de données' },
-                                { flag: '5', desc: 'Activer la nouvelle release' },
-                                { flag: '6', desc: 'Redémarrer le service' }
+                                { flag: 'Environment=', desc: 'Variable inline dans le service' },
+                                { flag: 'EnvironmentFile=', desc: 'Charger depuis un fichier' }
                             ],
                             examples: [
-                                { code: '#!/bin/bash\nset -e\n\nAPP_DIR="/var/www/myapp"\nRELEASE=$(date +%Y%m%d_%H%M%S)\nRELEASE_DIR="$APP_DIR/releases/$RELEASE"\n\n# Clone\ngit clone --depth=1 git@github.com:user/repo.git "$RELEASE_DIR"\n\n# Install dependencies\ncd "$RELEASE_DIR"\nnpm ci --production\n\n# Link shared files\nln -s "$APP_DIR/shared/.env" "$RELEASE_DIR/.env"\n\n# Activate release\nln -sfn "$RELEASE_DIR" "$APP_DIR/current"\n\n# Restart service\nsudo systemctl restart myapp\n\necho "Deployed $RELEASE"', desc: 'Script de déploiement simple' }
-                            ],
-                            tips: ['set -e arrête le script à la première erreur'],
-                            warnings: ['Testez toujours sur un environnement de staging d\'abord']
-                        }
-                    },
-                    {
-                        cmd: 'Environment Variables',
-                        desc: 'Configuration sensible',
-                        details: {
-                            explanation: 'Gestion sécurisée des variables d\'environnement.',
-                            syntax: '.env / systemd Environment=',
-                            options: [
-                                { flag: '.env', desc: 'Fichier de configuration' },
-                                { flag: 'EnvironmentFile=', desc: 'Dans le fichier systemd' },
-                                { flag: 'Environment=', desc: 'Variable inline systemd' }
-                            ],
-                            examples: [
-                                { code: '# /var/www/myapp/shared/.env\nNODE_ENV=production\nDATABASE_URL=postgres://user:pass@localhost/db\nSECRET_KEY=your-secret-key', desc: 'Fichier .env' },
-                                { code: '[Service]\nEnvironmentFile=/var/www/myapp/shared/.env\nExecStart=/usr/bin/node server.js', desc: 'Dans systemd' },
-                                { code: 'chmod 600 /var/www/myapp/shared/.env', desc: 'Sécuriser le fichier' }
+                                { code: '# /var/www/myapp/.env\nNODE_ENV=production\nDATABASE_URL=postgres://user:pass@localhost/db\nSECRET_KEY=your-secret-key', desc: 'Fichier .env' },
+                                { code: '[Service]\nEnvironmentFile=/var/www/myapp/.env\nExecStart=/usr/bin/node server.js', desc: 'Charger dans systemd' },
+                                { code: 'sudo chmod 600 /var/www/myapp/.env\nsudo chown root:root /var/www/myapp/.env', desc: 'Sécuriser le fichier' }
                             ],
                             tips: ['Ne commitez JAMAIS le fichier .env dans Git'],
                             warnings: ['Protégez le .env avec chmod 600']
@@ -318,17 +356,111 @@
                 ]
             },
             {
-                id: 'monitoring',
-                title: 'Monitoring',
+                id: 'deploy-app',
+                title: '🚀 Déployer une Application',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Créer la structure de déploiement',
+                        desc: 'Organisation professionnelle',
+                        details: {
+                            explanation: 'Structure recommandée avec releases pour permettre des rollbacks instantanés.',
+                            syntax: '/var/www/app/{current,releases,shared}',
+                            options: [
+                                { flag: 'current/', desc: 'Lien vers la release active' },
+                                { flag: 'releases/', desc: 'Versions déployées (horodatées)' },
+                                { flag: 'shared/', desc: 'Fichiers persistants (.env, logs, uploads)' }
+                            ],
+                            examples: [
+                                { code: 'sudo mkdir -p /var/www/myapp/{current,releases,shared}\nsudo mkdir -p /var/www/myapp/shared/{logs,uploads}\nsudo chown -R deploy:deploy /var/www/myapp', desc: 'Créer la structure' },
+                                { code: '/var/www/myapp/\n├── current -> releases/20240115_123456\n├── releases/\n│   ├── 20240115_123456/\n│   └── 20240114_100000/\n└── shared/\n    ├── .env\n    ├── uploads/\n    └── logs/', desc: 'Structure type' },
+                                { code: 'ln -sfn /var/www/myapp/releases/NOUVELLE /var/www/myapp/current', desc: 'Activer une release (rollback)' }
+                            ],
+                            tips: ['Le rollback se fait en changeant le lien symbolique current'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Écrire un script de déploiement',
+                        desc: 'Automatiser avec bash',
+                        details: {
+                            explanation: 'Script bash pour déployer automatiquement votre application.',
+                            syntax: 'deploy.sh',
+                            options: [
+                                { flag: '1', desc: 'Clone/pull le code' },
+                                { flag: '2', desc: 'Installe les dépendances' },
+                                { flag: '3', desc: 'Build si nécessaire' },
+                                { flag: '4', desc: 'Lie les fichiers partagés' },
+                                { flag: '5', desc: 'Active la nouvelle release' },
+                                { flag: '6', desc: 'Redémarre le service' }
+                            ],
+                            examples: [
+                                { code: '#!/bin/bash\nset -e\n\nAPP_DIR="/var/www/myapp"\nRELEASE=$(date +%Y%m%d_%H%M%S)\nRELEASE_DIR="$APP_DIR/releases/$RELEASE"\n\necho "=== Deploying $RELEASE ===\"\n\n# Clone\ngit clone --depth=1 git@github.com:user/repo.git "$RELEASE_DIR"\n\n# Install dependencies\ncd "$RELEASE_DIR"\nnpm ci --production\n\n# Link shared files\nln -s "$APP_DIR/shared/.env" "$RELEASE_DIR/.env"\nln -s "$APP_DIR/shared/uploads" "$RELEASE_DIR/uploads"\n\n# Build\nnpm run build\n\n# Activate release\nln -sfn "$RELEASE_DIR" "$APP_DIR/current"\n\n# Restart service\nsudo systemctl restart myapp\n\n# Cleanup: keep 5 releases\ncd "$APP_DIR/releases"\nls -1t | tail -n +6 | xargs -r rm -rf\n\necho "=== Deployed $RELEASE ===\"', desc: 'Script de déploiement complet' }
+                            ],
+                            tips: ['set -e arrête le script à la première erreur'],
+                            warnings: ['Testez toujours sur un environnement de staging d\'abord']
+                        }
+                    },
+                    {
+                        cmd: 'Déployer avec PM2 (Node.js)',
+                        desc: 'Process manager pour Node',
+                        details: {
+                            explanation: 'PM2 gère vos applications Node.js en production : redémarrage auto, cluster mode, logs.',
+                            syntax: 'pm2 start app.js',
+                            options: [
+                                { flag: 'start', desc: 'Démarrer une application' },
+                                { flag: 'restart', desc: 'Redémarrer' },
+                                { flag: 'stop', desc: 'Arrêter' },
+                                { flag: 'logs', desc: 'Voir les logs' },
+                                { flag: 'monit', desc: 'Moniteur temps réel' }
+                            ],
+                            examples: [
+                                { code: 'sudo npm install -g pm2', desc: 'Installation PM2' },
+                                { code: '// ecosystem.config.js\nmodule.exports = {\n  apps: [{\n    name: "myapp",\n    script: "dist/server.js",\n    instances: "max",\n    exec_mode: "cluster",\n    env: {\n      NODE_ENV: "production"\n    }\n  }]\n};', desc: 'Config PM2 en cluster' },
+                                { code: 'pm2 start ecosystem.config.js\npm2 save\npm2 startup', desc: 'Démarrer et persister au reboot' },
+                                { code: 'pm2 reload myapp', desc: 'Zero-downtime reload' }
+                            ],
+                            tips: ['pm2 reload fait un redémarrage sans interruption'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Déployer avec Gunicorn (Python)',
+                        desc: 'WSGI server pour Django/Flask',
+                        details: {
+                            explanation: 'Gunicorn sert les applications Python WSGI en production.',
+                            syntax: 'gunicorn app:application -w 4 -b 0.0.0.0:8000',
+                            options: [
+                                { flag: '-w', desc: 'Nombre de workers' },
+                                { flag: '-b', desc: 'Bind address:port' },
+                                { flag: '--timeout', desc: 'Timeout des requêtes' },
+                                { flag: '--reload', desc: 'Recharger sur changement (dev)' }
+                            ],
+                            examples: [
+                                { code: 'pip install gunicorn', desc: 'Installation' },
+                                { code: 'gunicorn myproject.wsgi:application --workers 4 --bind 127.0.0.1:8000', desc: 'Lancer Django' },
+                                { code: '[Service]\nUser=www-data\nWorkingDirectory=/var/www/myapp\nExecStart=/var/www/myapp/venv/bin/gunicorn \\\n  --workers 4 \\\n  --bind unix:/run/gunicorn/myapp.sock \\\n  myproject.wsgi:application', desc: 'Service systemd Gunicorn' },
+                                { code: '# Nginx proxy vers Gunicorn\nlocation / {\n    proxy_pass http://unix:/run/gunicorn/myapp.sock;\n    proxy_set_header Host $host;\n    proxy_set_header X-Real-IP $remote_addr;\n}', desc: 'Nginx → Gunicorn' }
+                            ],
+                            tips: ['Utilisez un socket Unix pour de meilleures performances locales'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'monitor-server',
+                title: '📊 Surveiller mon Serveur',
                 icon: 'fa-chart-line',
                 color: 'border-l-4 border-orange-500',
                 commands: [
                     {
-                        cmd: 'htop / top',
-                        desc: 'Surveillance des processus',
+                        cmd: 'Voir les processus et ressources',
+                        desc: 'htop, top et surveillance CPU/RAM',
                         details: {
-                            explanation: 'Outils interactifs pour surveiller les processus et ressources système.',
-                            syntax: 'htop\ntop',
+                            explanation: 'Outils interactifs pour surveiller les processus et l\'utilisation des ressources.',
+                            syntax: 'htop',
                             options: [
                                 { flag: 'htop', desc: 'Version améliorée de top' },
                                 { flag: 'F5', desc: 'Vue arborescente (htop)' },
@@ -336,118 +468,159 @@
                                 { flag: 'F9', desc: 'Envoyer un signal (kill)' }
                             ],
                             examples: [
-                                { code: 'htop', desc: 'Lancer htop' },
+                                { code: 'sudo apt install htop && htop', desc: 'Installer et lancer htop' },
                                 { code: 'htop -u www-data', desc: 'Processus d\'un utilisateur' },
-                                { code: 'top -bn1 | head -20', desc: 'Top non-interactif (scripts)' }
+                                { code: 'top -bn1 | head -20', desc: 'Top non-interactif (pour scripts)' },
+                                { code: 'ps aux --sort=-%mem | head -10', desc: 'Top 10 consommateurs RAM' }
                             ],
                             tips: ['htop est plus lisible et interactif que top'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'df / du',
-                        desc: 'Espace disque',
+                        cmd: 'Vérifier l\'espace disque',
+                        desc: 'df, du et ncdu',
                         details: {
-                            explanation: 'Affiche l\'utilisation de l\'espace disque.',
-                            syntax: 'df [options]\ndu [options] [path]',
+                            explanation: 'Surveiller l\'utilisation de l\'espace disque pour éviter les problèmes.',
+                            syntax: 'df -h && du -sh /var/*',
                             options: [
-                                { flag: 'df -h', desc: 'Espace disque lisible (human)' },
+                                { flag: 'df -h', desc: 'Espace disque par partition' },
                                 { flag: 'df -i', desc: 'Inodes (nombre de fichiers)' },
                                 { flag: 'du -sh', desc: 'Taille d\'un dossier' },
-                                { flag: 'du -h --max-depth=1', desc: 'Taille par sous-dossier' }
+                                { flag: 'ncdu', desc: 'Navigateur interactif' }
                             ],
                             examples: [
                                 { code: 'df -h', desc: 'Espace disque partitions' },
-                                { code: 'du -sh /var/log/*', desc: 'Taille des logs' },
                                 { code: 'du -h --max-depth=1 /var | sort -h', desc: 'Plus gros dossiers dans /var' },
-                                { code: 'ncdu /var', desc: 'Navigateur d\'espace disque (interactif)' }
+                                { code: 'sudo ncdu /', desc: 'Navigateur d\'espace (interactif)' },
+                                { code: 'du -sh /var/log/* | sort -h | tail -10', desc: 'Plus gros logs' }
                             ],
-                            tips: ['ncdu est un excellent outil interactif pour trouver ce qui prend de la place'],
-                            warnings: ['df -i pour vérifier si les inodes sont épuisés (beaucoup de petits fichiers)']
+                            tips: ['ncdu est excellent pour trouver ce qui prend de la place'],
+                            warnings: ['df -i pour vérifier si les inodes sont épuisés']
                         }
                     },
                     {
-                        cmd: 'Uptime & Load',
-                        desc: 'Charge système',
+                        cmd: 'Surveiller la charge système',
+                        desc: 'Load average et uptime',
                         details: {
-                            explanation: 'Surveille la charge et la disponibilité du serveur.',
-                            syntax: 'uptime\nw',
+                            explanation: 'Le load average indique la charge du système sur 1, 5 et 15 minutes.',
+                            syntax: 'uptime',
                             options: [
                                 { flag: 'uptime', desc: 'Charge et temps de fonctionnement' },
                                 { flag: 'w', desc: 'Uptime + utilisateurs connectés' },
-                                { flag: 'load average', desc: 'Charge sur 1, 5, 15 minutes' }
+                                { flag: 'load average', desc: 'Charge sur 1, 5, 15 min' }
                             ],
                             examples: [
                                 { code: 'uptime', desc: 'Charge système' },
                                 { code: 'w', desc: 'Qui est connecté + charge' },
-                                { code: 'cat /proc/loadavg', desc: 'Load average brut' }
+                                { code: 'cat /proc/loadavg', desc: 'Load average brut' },
+                                { code: 'nproc', desc: 'Nombre de CPUs (pour comparer au load)' }
                             ],
                             tips: ['Load average > nombre de CPUs = système surchargé'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Créer des alertes automatiques',
+                        desc: 'Scripts de monitoring',
+                        details: {
+                            explanation: 'Scripts pour être alerté en cas de problème (disque, service down...).',
+                            syntax: 'healthcheck.sh + crontab',
+                            options: [],
+                            examples: [
+                                { code: '#!/bin/bash\n# /usr/local/bin/disk-alert.sh\nTHRESHOLD=80\nUSAGE=$(df / | awk \'NR==2 {print $5}\' | tr -d \'%\')\n\nif [ "$USAGE" -gt "$THRESHOLD" ]; then\n  echo "Disk usage: ${USAGE}%" | mail -s "ALERT: Disk space low" admin@example.com\nfi', desc: 'Alerte espace disque' },
+                                { code: '#!/bin/bash\n# /usr/local/bin/healthcheck.sh\nURL="https://myapp.com/health"\nRESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $URL)\n\nif [ "$RESPONSE" != "200" ]; then\n  echo "Health check failed: $RESPONSE" | mail -s "ALERT: myapp down" admin@example.com\nfi', desc: 'Health check HTTP' },
+                                { code: '# Crontab\n*/5 * * * * /usr/local/bin/healthcheck.sh\n0 * * * * /usr/local/bin/disk-alert.sh', desc: 'Planifier les checks' }
+                            ],
+                            tips: ['Utilisez aussi des services externes (UptimeRobot, Pingdom)'],
                             warnings: []
                         }
                     }
                 ]
             },
             {
-                id: 'backup',
-                title: 'Sauvegardes',
+                id: 'backup-restore',
+                title: '💾 Sauvegarder et Restaurer',
                 icon: 'fa-hdd',
                 color: 'border-l-4 border-cyan-500',
                 commands: [
                     {
-                        cmd: 'rsync backup',
+                        cmd: 'Sauvegarder des fichiers avec rsync',
                         desc: 'Synchronisation incrémentale',
                         details: {
-                            explanation: 'Sauvegarde incrémentale efficace avec rsync.',
-                            syntax: 'rsync -avz --delete source/ dest/',
+                            explanation: 'rsync copie seulement les différences, rendant les backups rapides après le premier.',
+                            syntax: 'rsync -avz source/ dest/',
                             options: [
-                                { flag: '-a', desc: 'Archive (préserve permissions, dates, etc.)' },
+                                { flag: '-a', desc: 'Archive (préserve permissions, dates)' },
                                 { flag: '-v', desc: 'Verbose' },
                                 { flag: '-z', desc: 'Compression pendant le transfert' },
-                                { flag: '--delete', desc: 'Supprime les fichiers absents de la source' },
+                                { flag: '--delete', desc: 'Supprime fichiers absents de la source' },
                                 { flag: '--exclude', desc: 'Exclure des fichiers/dossiers' }
                             ],
                             examples: [
                                 { code: 'rsync -avz /var/www/ /backup/www/', desc: 'Backup local' },
                                 { code: 'rsync -avz -e ssh /var/www/ user@backup-server:/backup/', desc: 'Backup distant via SSH' },
-                                { code: 'rsync -avz --exclude="*.log" --exclude="cache/" /data/ /backup/', desc: 'Avec exclusions' }
+                                { code: 'rsync -avz --exclude="*.log" --exclude="cache/" /data/ /backup/', desc: 'Avec exclusions' },
+                                { code: 'rsync -avz --delete /var/www/ /backup/www/', desc: 'Miroir exact (attention!)' }
                             ],
                             tips: ['rsync ne transfère que les différences = backups rapides'],
-                            warnings: ['--delete supprime les fichiers de la destination qui ne sont plus dans la source']
+                            warnings: ['--delete supprime de la destination ce qui n\'est plus dans la source']
                         }
                     },
                     {
-                        cmd: 'Database backup',
-                        desc: 'Sauvegardes base de données',
+                        cmd: 'Sauvegarder une base de données',
+                        desc: 'pg_dump, mysqldump',
                         details: {
-                            explanation: 'Commandes pour sauvegarder PostgreSQL et MySQL.',
-                            syntax: 'pg_dump / mysqldump',
+                            explanation: 'Export de base de données PostgreSQL ou MySQL pour backup.',
+                            syntax: 'pg_dump dbname > backup.sql',
                             options: [
                                 { flag: 'pg_dump', desc: 'Backup PostgreSQL' },
                                 { flag: 'mysqldump', desc: 'Backup MySQL/MariaDB' },
-                                { flag: '-c', desc: 'Inclut DROP avant CREATE' },
+                                { flag: '-Fc', desc: 'Format custom compressé (pg_dump)' },
                                 { flag: '--single-transaction', desc: 'Backup cohérent' }
                             ],
                             examples: [
-                                { code: 'pg_dump -U postgres mydb > backup.sql', desc: 'Backup PostgreSQL' },
-                                { code: 'pg_dump -Fc -U postgres mydb > backup.dump', desc: 'Format custom (compressé)' },
+                                { code: 'pg_dump -U postgres mydb > backup.sql', desc: 'Backup PostgreSQL SQL' },
+                                { code: 'pg_dump -Fc -U postgres mydb > backup.dump', desc: 'Format custom (recommandé)' },
                                 { code: 'mysqldump -u root -p mydb > backup.sql', desc: 'Backup MySQL' },
-                                { code: '# Avec compression\npg_dump mydb | gzip > backup_$(date +%Y%m%d).sql.gz', desc: 'Avec compression et date' }
+                                { code: 'pg_dump mydb | gzip > backup_$(date +%Y%m%d).sql.gz', desc: 'Avec compression et date' }
                             ],
-                            tips: ['pg_dump -Fc est préféré : compressé et permet le restore sélectif'],
+                            tips: ['pg_dump -Fc est préféré : compressé et permet restore sélectif'],
                             warnings: ['Testez régulièrement la restauration de vos backups!']
                         }
                     },
                     {
-                        cmd: 'Cron backup',
-                        desc: 'Automatisation des sauvegardes',
+                        cmd: 'Restaurer une base de données',
+                        desc: 'pg_restore, mysql',
                         details: {
-                            explanation: 'Planification des sauvegardes avec cron.',
+                            explanation: 'Restauration de base de données depuis un backup.',
+                            syntax: 'pg_restore -d dbname backup.dump',
+                            options: [
+                                { flag: 'pg_restore', desc: 'Restore format custom PostgreSQL' },
+                                { flag: 'psql', desc: 'Restore format SQL PostgreSQL' },
+                                { flag: 'mysql', desc: 'Restore MySQL' },
+                                { flag: '-c', desc: 'Clean (drop) avant restore' }
+                            ],
+                            examples: [
+                                { code: 'pg_restore -d mydb -c backup.dump', desc: 'Restore PostgreSQL (format custom)' },
+                                { code: 'psql -U postgres mydb < backup.sql', desc: 'Restore PostgreSQL (format SQL)' },
+                                { code: 'gunzip < backup.sql.gz | psql mydb', desc: 'Restore depuis .gz' },
+                                { code: 'mysql -u root -p mydb < backup.sql', desc: 'Restore MySQL' }
+                            ],
+                            tips: ['Testez le restore sur une copie de la base d\'abord'],
+                            warnings: ['-c drop les tables existantes avant de les recréer']
+                        }
+                    },
+                    {
+                        cmd: 'Automatiser les backups avec cron',
+                        desc: 'Sauvegardes planifiées',
+                        details: {
+                            explanation: 'Planifier des sauvegardes automatiques quotidiennes avec cron.',
                             syntax: 'crontab -e',
                             options: [],
                             examples: [
-                                { code: '# Backup quotidien à 2h du matin\n0 2 * * * /scripts/backup.sh >> /var/log/backup.log 2>&1', desc: 'Crontab backup' },
-                                { code: '#!/bin/bash\nset -e\nDATE=$(date +%Y%m%d)\n\n# Database\npg_dump -Fc mydb > /backup/db_$DATE.dump\n\n# Files\nrsync -az --delete /var/www/ /backup/www/\n\n# Retention: garder 7 jours\nfind /backup -name "db_*.dump" -mtime +7 -delete\n\necho "Backup completed: $DATE"', desc: 'Script de backup complet' }
+                                { code: '#!/bin/bash\n# /scripts/backup.sh\nset -euo pipefail\n\nDATE=$(date +%Y%m%d_%H%M%S)\nBACKUP_DIR="/backup"\nDB_NAME="mydb"\n\n# Backup DB\npg_dump -Fc $DB_NAME > $BACKUP_DIR/db_$DATE.dump\n\n# Backup files\nrsync -az /var/www/myapp/ $BACKUP_DIR/files/\n\n# Rétention: garder 7 jours\nfind $BACKUP_DIR -name "db_*.dump" -mtime +7 -delete\n\necho "Backup completed: $DATE"', desc: 'Script de backup complet' },
+                                { code: '# crontab -e\n0 2 * * * /scripts/backup.sh >> /var/log/backup.log 2>&1', desc: 'Backup quotidien à 2h' }
                             ],
                             tips: ['Gardez plusieurs versions (7 jours, 4 semaines, 12 mois)'],
                             warnings: ['Stockez les backups sur un autre serveur/site']
@@ -456,86 +629,16 @@
                 ]
             },
             {
-                id: 'apache',
-                title: 'Apache HTTP Server',
-                icon: 'fa-feather',
-                color: 'border-l-4 border-red-500',
-                commands: [
-                    {
-                        cmd: 'apachectl / systemctl',
-                        desc: 'Commandes de base Apache',
-                        details: {
-                            explanation: 'Commandes essentielles pour gérer le serveur Apache.',
-                            syntax: 'apachectl [command]\nsystemctl [action] apache2',
-                            options: [
-                                { flag: 'apachectl -t', desc: 'Tester la configuration' },
-                                { flag: 'apachectl graceful', desc: 'Reload sans interruption' },
-                                { flag: 'systemctl start apache2', desc: 'Démarrer Apache' },
-                                { flag: 'a2ensite', desc: 'Activer un site' },
-                                { flag: 'a2dissite', desc: 'Désactiver un site' }
-                            ],
-                            examples: [
-                                { code: 'sudo apachectl -t && sudo systemctl reload apache2', desc: 'Test puis reload' },
-                                { code: 'sudo a2ensite mysite.conf && sudo systemctl reload apache2', desc: 'Activer un site' },
-                                { code: 'sudo a2enmod rewrite ssl headers', desc: 'Activer des modules' },
-                                { code: 'sudo tail -f /var/log/apache2/error.log', desc: 'Suivre les erreurs' }
-                            ],
-                            tips: ['Toujours tester avec apachectl -t avant de recharger'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'VirtualHost basique',
-                        desc: 'Configuration site Apache',
-                        details: {
-                            explanation: 'Configuration Apache pour servir un site web.',
-                            syntax: '/etc/apache2/sites-available/example.conf',
-                            options: [
-                                { flag: 'ServerName', desc: 'Domaine principal' },
-                                { flag: 'ServerAlias', desc: 'Domaines alternatifs' },
-                                { flag: 'DocumentRoot', desc: 'Répertoire racine' },
-                                { flag: 'Directory', desc: 'Configuration du dossier' }
-                            ],
-                            examples: [
-                                { code: '<VirtualHost *:80>\n    ServerName example.com\n    ServerAlias www.example.com\n    DocumentRoot /var/www/example.com/public\n\n    <Directory /var/www/example.com/public>\n        Options -Indexes +FollowSymLinks\n        AllowOverride All\n        Require all granted\n    </Directory>\n\n    ErrorLog ${APACHE_LOG_DIR}/example_error.log\n    CustomLog ${APACHE_LOG_DIR}/example_access.log combined\n</VirtualHost>', desc: 'Site statique' },
-                                { code: 'sudo a2ensite example.conf', desc: 'Activer le site' }
-                            ],
-                            tips: ['AllowOverride All permet les fichiers .htaccess'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Proxy & PHP-FPM',
-                        desc: 'Apache avec PHP-FPM',
-                        details: {
-                            explanation: 'Configure Apache comme proxy vers PHP-FPM pour de meilleures performances.',
-                            syntax: 'ProxyPassMatch "^/(.*\\.php)$" "unix:/run/php/php-fpm.sock|fcgi://localhost"',
-                            options: [
-                                { flag: 'proxy_fcgi', desc: 'Module proxy FastCGI' },
-                                { flag: 'SetHandler', desc: 'Définit le handler PHP' },
-                                { flag: 'FilesMatch', desc: 'Pattern matching' }
-                            ],
-                            examples: [
-                                { code: '# Activer les modules\nsudo a2enmod proxy_fcgi setenvif\nsudo a2enconf php8.2-fpm', desc: 'Activer PHP-FPM' },
-                                { code: '<VirtualHost *:80>\n    ServerName app.example.com\n    DocumentRoot /var/www/app/public\n\n    <FilesMatch \\.php$>\n        SetHandler "proxy:unix:/run/php/php8.2-fpm.sock|fcgi://localhost"\n    </FilesMatch>\n\n    <Directory /var/www/app/public>\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>', desc: 'VHost avec PHP-FPM' }
-                            ],
-                            tips: ['PHP-FPM est plus performant que mod_php'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'loadbalancing',
-                title: 'Load Balancing & Cache',
+                id: 'load-balancing',
+                title: '⚖️ Répartir la Charge',
                 icon: 'fa-balance-scale',
                 color: 'border-l-4 border-teal-500',
                 commands: [
                     {
-                        cmd: 'Nginx Upstream',
-                        desc: 'Load balancing avec Nginx',
+                        cmd: 'Configurer le load balancing Nginx',
+                        desc: 'Distribuer le trafic',
                         details: {
-                            explanation: 'Configure Nginx pour distribuer le trafic entre plusieurs serveurs backend.',
+                            explanation: 'Nginx peut distribuer le trafic entre plusieurs serveurs backend.',
                             syntax: 'upstream backend { server ...; }',
                             options: [
                                 { flag: 'weight=N', desc: 'Poids pour la distribution' },
@@ -546,111 +649,109 @@
                             ],
                             examples: [
                                 { code: 'upstream backend {\n    least_conn;\n    server 10.0.0.1:3000 weight=3;\n    server 10.0.0.2:3000 weight=2;\n    server 10.0.0.3:3000 backup;\n}\n\nserver {\n    listen 80;\n    location / {\n        proxy_pass http://backend;\n        proxy_next_upstream error timeout http_500;\n    }\n}', desc: 'Load balancing weighted' },
-                                { code: 'upstream backend {\n    ip_hash;  # Sticky sessions\n    server 10.0.0.1:3000;\n    server 10.0.0.2:3000;\n}', desc: 'Sticky sessions' }
+                                { code: 'upstream backend {\n    ip_hash;  # Sticky sessions\n    server 10.0.0.1:3000;\n    server 10.0.0.2:3000;\n}', desc: 'Sticky sessions (même user → même serveur)' }
                             ],
                             tips: ['ip_hash pour maintenir les sessions sur le même serveur'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Nginx Caching',
-                        desc: 'Cache proxy Nginx',
+                        cmd: 'Configurer le cache Nginx',
+                        desc: 'Accélérer avec le cache proxy',
                         details: {
-                            explanation: 'Configure le cache Nginx pour améliorer les performances.',
-                            syntax: 'proxy_cache_path ... levels=1:2 keys_zone=name:size',
+                            explanation: 'Le cache proxy Nginx stocke les réponses pour les resservir rapidement.',
+                            syntax: 'proxy_cache_path ... proxy_cache ...',
                             options: [
                                 { flag: 'proxy_cache_path', desc: 'Chemin et config du cache' },
                                 { flag: 'proxy_cache', desc: 'Active le cache' },
-                                { flag: 'proxy_cache_valid', desc: 'Durée de validité' },
+                                { flag: 'proxy_cache_valid', desc: 'Durée de validité par code' },
                                 { flag: 'proxy_cache_bypass', desc: 'Conditions pour bypass' }
                             ],
                             examples: [
-                                { code: '# Dans http {}\nproxy_cache_path /var/cache/nginx levels=1:2 keys_zone=app_cache:10m max_size=1g inactive=60m;\n\nserver {\n    location / {\n        proxy_pass http://backend;\n        proxy_cache app_cache;\n        proxy_cache_valid 200 302 10m;\n        proxy_cache_valid 404 1m;\n        proxy_cache_bypass $http_cache_control;\n        add_header X-Cache-Status $upstream_cache_status;\n    }\n}', desc: 'Cache proxy complet' },
+                                { code: '# Dans http {}\nproxy_cache_path /var/cache/nginx levels=1:2 keys_zone=app_cache:10m max_size=1g inactive=60m;\n\nserver {\n    location / {\n        proxy_pass http://backend;\n        proxy_cache app_cache;\n        proxy_cache_valid 200 302 10m;\n        proxy_cache_valid 404 1m;\n        add_header X-Cache-Status $upstream_cache_status;\n    }\n}', desc: 'Cache proxy complet' },
                                 { code: 'location ~* \\.(jpg|jpeg|png|gif|ico|css|js)$ {\n    expires 30d;\n    add_header Cache-Control "public, immutable";\n}', desc: 'Cache assets statiques' }
                             ],
-                            tips: ['X-Cache-Status permet de déboguer le cache (HIT/MISS)'],
+                            tips: ['X-Cache-Status permet de déboguer (HIT/MISS/BYPASS)'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Redis Cache',
-                        desc: 'Cache applicatif Redis',
+                        cmd: 'Installer et utiliser Redis',
+                        desc: 'Cache en mémoire',
                         details: {
-                            explanation: 'Redis comme cache en mémoire pour les sessions et données.',
+                            explanation: 'Redis comme cache en mémoire pour les sessions et données fréquentes.',
                             syntax: 'redis-cli [command]',
                             options: [
                                 { flag: 'SET key value EX sec', desc: 'Stocker avec expiration' },
                                 { flag: 'GET key', desc: 'Récupérer une valeur' },
                                 { flag: 'KEYS pattern', desc: 'Lister les clés' },
-                                { flag: 'FLUSHDB', desc: 'Vider la base' },
                                 { flag: 'INFO', desc: 'Statistiques' }
                             ],
                             examples: [
-                                { code: 'sudo apt install redis-server\nsudo systemctl enable redis-server', desc: 'Installation Redis' },
+                                { code: 'sudo apt install redis-server\nsudo systemctl enable --now redis-server', desc: 'Installation Redis' },
                                 { code: 'redis-cli SET mykey "Hello" EX 3600\nredis-cli GET mykey', desc: 'Commandes basiques' },
                                 { code: '# /etc/redis/redis.conf\nmaxmemory 256mb\nmaxmemory-policy allkeys-lru', desc: 'Config mémoire LRU' },
                                 { code: 'redis-cli INFO stats | grep hits', desc: 'Taux de cache hit' }
                             ],
-                            tips: ['allkeys-lru évince automatiquement les clés les moins utilisées'],
-                            warnings: ['Sécurisez Redis : bind 127.0.0.1 et requirepass']
+                            tips: ['allkeys-lru évince les clés les moins utilisées'],
+                            warnings: ['Sécurisez Redis: bind 127.0.0.1 et requirepass']
                         }
                     }
                 ]
             },
             {
                 id: 'security',
-                title: 'Sécurité Serveur',
+                title: '🛡️ Sécuriser mon Serveur',
                 icon: 'fa-shield-alt',
                 color: 'border-l-4 border-rose-500',
                 commands: [
                     {
-                        cmd: 'Headers de sécurité',
-                        desc: 'HTTP Security Headers',
+                        cmd: 'Ajouter les headers de sécurité',
+                        desc: 'Protection contre les attaques web',
                         details: {
-                            explanation: 'Headers HTTP pour protéger contre les attaques courantes.',
+                            explanation: 'Headers HTTP pour protéger contre clickjacking, XSS, MIME sniffing...',
                             syntax: 'add_header Header-Name "value";',
                             options: [
                                 { flag: 'X-Frame-Options', desc: 'Protection clickjacking' },
                                 { flag: 'X-Content-Type-Options', desc: 'Empêche MIME sniffing' },
-                                { flag: 'X-XSS-Protection', desc: 'Protection XSS (legacy)' },
-                                { flag: 'Content-Security-Policy', desc: 'Politique de contenu' },
-                                { flag: 'Strict-Transport-Security', desc: 'Force HTTPS' }
+                                { flag: 'Strict-Transport-Security', desc: 'Force HTTPS (HSTS)' },
+                                { flag: 'Content-Security-Policy', desc: 'Politique de contenu' }
                             ],
                             examples: [
-                                { code: '# Nginx\nadd_header X-Frame-Options "SAMEORIGIN" always;\nadd_header X-Content-Type-Options "nosniff" always;\nadd_header X-XSS-Protection "1; mode=block" always;\nadd_header Referrer-Policy "strict-origin-when-cross-origin" always;\nadd_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;', desc: 'Headers Nginx' },
-                                { code: '# CSP basique\nadd_header Content-Security-Policy "default-src \'self\'; script-src \'self\' \'unsafe-inline\'; style-src \'self\' \'unsafe-inline\';" always;', desc: 'Content Security Policy' }
+                                { code: '# Nginx - dans server {}\nadd_header X-Frame-Options "SAMEORIGIN" always;\nadd_header X-Content-Type-Options "nosniff" always;\nadd_header Referrer-Policy "strict-origin-when-cross-origin" always;\nadd_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;', desc: 'Headers essentiels' },
+                                { code: '# CSP basique\nadd_header Content-Security-Policy "default-src \'self\'; script-src \'self\' \'unsafe-inline\';" always;', desc: 'Content Security Policy' }
                             ],
                             tips: ['Testez avec securityheaders.com'],
                             warnings: ['CSP trop strict peut casser votre site']
                         }
                     },
                     {
-                        cmd: 'Fail2ban',
-                        desc: 'Protection contre brute force',
+                        cmd: 'Configurer Fail2ban',
+                        desc: 'Bloquer les attaques brute force',
                         details: {
-                            explanation: 'Bannit automatiquement les IPs après des échecs répétés.',
+                            explanation: 'Fail2ban bannit automatiquement les IPs après des échecs répétés.',
                             syntax: '/etc/fail2ban/jail.local',
                             options: [
                                 { flag: 'bantime', desc: 'Durée du bannissement' },
                                 { flag: 'findtime', desc: 'Fenêtre de détection' },
                                 { flag: 'maxretry', desc: 'Tentatives avant ban' },
-                                { flag: 'ignoreip', desc: 'IPs à ignorer' }
+                                { flag: 'ignoreip', desc: 'IPs à ne jamais bannir' }
                             ],
                             examples: [
-                                { code: 'sudo apt install fail2ban\nsudo systemctl enable fail2ban', desc: 'Installation' },
-                                { code: '# /etc/fail2ban/jail.local\n[DEFAULT]\nbantime = 1h\nfindtime = 10m\nmaxretry = 5\nignoreip = 127.0.0.1/8\n\n[sshd]\nenabled = true\nport = ssh\nfilter = sshd\nlogpath = /var/log/auth.log\nmaxretry = 3', desc: 'Configuration SSH' },
-                                { code: '[nginx-http-auth]\nenabled = true\nfilter = nginx-http-auth\nlogpath = /var/log/nginx/error.log\nmaxretry = 3', desc: 'Protection Nginx auth' },
-                                { code: 'sudo fail2ban-client status sshd\nsudo fail2ban-client set sshd unbanip 1.2.3.4', desc: 'Commandes utiles' }
+                                { code: 'sudo apt install fail2ban\nsudo systemctl enable --now fail2ban', desc: 'Installation' },
+                                { code: '# /etc/fail2ban/jail.local\n[DEFAULT]\nbantime = 1h\nfindtime = 10m\nmaxretry = 5\nignoreip = 127.0.0.1/8 YOUR_IP\n\n[sshd]\nenabled = true\nport = ssh\nmaxretry = 3', desc: 'Configuration SSH' },
+                                { code: 'sudo fail2ban-client status sshd', desc: 'Voir les IPs bannies' },
+                                { code: 'sudo fail2ban-client set sshd unbanip 1.2.3.4', desc: 'Débannir une IP' }
                             ],
-                            tips: ['Testez toujours avec votre propre IP avant d\'activer'],
-                            warnings: ['Ne vous bloquez pas vous-même ! Ajoutez votre IP à ignoreip']
+                            tips: ['Ajoutez votre IP à ignoreip pour ne pas vous bloquer'],
+                            warnings: ['Ne vous bloquez pas vous-même !']
                         }
                     },
                     {
-                        cmd: 'SSH Hardening',
-                        desc: 'Sécurisation SSH',
+                        cmd: 'Sécuriser SSH',
+                        desc: 'Hardening SSH',
                         details: {
-                            explanation: 'Renforcer la configuration SSH pour prévenir les accès non autorisés.',
+                            explanation: 'Renforcer la configuration SSH pour empêcher les accès non autorisés.',
                             syntax: '/etc/ssh/sshd_config',
                             options: [
                                 { flag: 'PasswordAuthentication', desc: 'Désactiver login par mot de passe' },
@@ -659,40 +760,123 @@
                                 { flag: 'Port', desc: 'Changer le port SSH' }
                             ],
                             examples: [
-                                { code: '# /etc/ssh/sshd_config\nPort 2222\nPermitRootLogin no\nPasswordAuthentication no\nPubkeyAuthentication yes\nAllowUsers deploy admin\nMaxAuthTries 3\nClientAliveInterval 300\nClientAliveCountMax 2', desc: 'Config sécurisée' },
-                                { code: '# Générer une clé SSH (client)\nssh-keygen -t ed25519 -C "user@host"\nssh-copy-id -p 2222 user@server', desc: 'Setup clé SSH' },
+                                { code: '# /etc/ssh/sshd_config.d/hardening.conf\nPort 2222\nPermitRootLogin no\nPasswordAuthentication no\nPubkeyAuthentication yes\nAllowUsers deploy admin\nMaxAuthTries 3', desc: 'Config sécurisée' },
+                                { code: '# Générer une clé SSH (sur votre machine)\nssh-keygen -t ed25519 -C "user@host"\nssh-copy-id -p 2222 user@server', desc: 'Setup clé SSH' },
                                 { code: 'sudo sshd -t && sudo systemctl reload sshd', desc: 'Test et reload' }
                             ],
                             tips: ['Toujours tester la config avant de reload (sshd -t)'],
-                            warnings: ['Gardez une session ouverte pendant les tests SSH !']
+                            warnings: ['Gardez une session ouverte pendant les tests SSH!']
                         }
                     },
                     {
-                        cmd: 'Audit & Logs',
-                        desc: 'Surveillance et audit',
+                        cmd: 'Configurer le firewall (UFW)',
+                        desc: 'Contrôler les ports ouverts',
                         details: {
-                            explanation: 'Surveiller les accès et détecter les activités suspectes.',
-                            syntax: 'auditd / logwatch',
+                            explanation: 'UFW (Uncomplicated Firewall) simplifie la gestion d\'iptables.',
+                            syntax: 'ufw allow/deny port',
                             options: [
-                                { flag: 'auditctl', desc: 'Configurer les règles d\'audit' },
-                                { flag: 'ausearch', desc: 'Rechercher dans les logs audit' },
-                                { flag: 'logwatch', desc: 'Rapports quotidiens par email' }
+                                { flag: 'allow', desc: 'Autoriser un port/service' },
+                                { flag: 'deny', desc: 'Bloquer un port' },
+                                { flag: 'status', desc: 'Voir les règles actives' },
+                                { flag: 'delete', desc: 'Supprimer une règle' }
                             ],
                             examples: [
-                                { code: 'sudo apt install auditd\nsudo auditctl -w /etc/passwd -p wa -k passwd_changes', desc: 'Auditer /etc/passwd' },
-                                { code: 'sudo ausearch -k passwd_changes', desc: 'Voir les modifications' },
-                                { code: 'sudo apt install logwatch\nsudo logwatch --detail High --mailto admin@example.com --range today', desc: 'Rapport logwatch' },
-                                { code: '# Logs à surveiller\ntail -f /var/log/auth.log      # Authentification\ntail -f /var/log/syslog        # Système\ntail -f /var/log/nginx/access.log  # Web', desc: 'Logs importants' }
+                                { code: 'sudo ufw default deny incoming\nsudo ufw default allow outgoing', desc: 'Politique par défaut' },
+                                { code: 'sudo ufw allow 22/tcp comment "SSH"\nsudo ufw allow 80/tcp comment "HTTP"\nsudo ufw allow 443/tcp comment "HTTPS"', desc: 'Ouvrir les ports essentiels' },
+                                { code: 'sudo ufw enable', desc: 'Activer le firewall' },
+                                { code: 'sudo ufw status numbered', desc: 'Voir les règles avec numéros' }
                             ],
-                            tips: ['Centralisez vos logs avec un SIEM (ELK, Graylog)'],
+                            tips: ['Ouvrez SSH AVANT d\'activer UFW !'],
+                            warnings: ['Vous pouvez vous bloquer si vous oubliez d\'autoriser SSH']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'proxy-reverse',
+                title: '🔄 Proxy et Reverse Proxy',
+                icon: 'fa-exchange-alt',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Configurer un reverse proxy Nginx',
+                        desc: 'Proxy vers une application backend',
+                        details: {
+                            explanation: 'Nginx comme reverse proxy transmet les requêtes à votre application (Node, Python, etc.).',
+                            syntax: 'location / { proxy_pass http://backend; }',
+                            options: [
+                                { flag: 'proxy_pass', desc: 'URL du backend' },
+                                { flag: 'proxy_set_header', desc: 'Headers à transmettre' },
+                                { flag: 'proxy_http_version', desc: 'Version HTTP (1.1 pour WebSocket)' }
+                            ],
+                            examples: [
+                                { code: 'server {\n    listen 80;\n    server_name app.example.com;\n\n    location / {\n        proxy_pass http://127.0.0.1:3000;\n        proxy_http_version 1.1;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n}', desc: 'Proxy basique' }
+                            ],
+                            tips: ['Les headers X-Forwarded-* permettent à l\'app de connaître l\'IP réelle'],
                             warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Proxy WebSocket avec Nginx',
+                        desc: 'Supporter les connexions WebSocket',
+                        details: {
+                            explanation: 'Configuration spéciale pour les connexions WebSocket persistantes.',
+                            syntax: 'proxy_set_header Upgrade $http_upgrade;',
+                            options: [
+                                { flag: 'Upgrade', desc: 'Header pour upgrade WebSocket' },
+                                { flag: 'Connection', desc: 'Doit être "upgrade"' },
+                                { flag: 'proxy_read_timeout', desc: 'Timeout pour connexions longues' }
+                            ],
+                            examples: [
+                                { code: 'location /ws/ {\n    proxy_pass http://127.0.0.1:3000;\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection "upgrade";\n    proxy_set_header Host $host;\n    proxy_read_timeout 86400;  # 24h\n}', desc: 'WebSocket proxy' },
+                                { code: '# Ou pour tout le site\nmap $http_upgrade $connection_upgrade {\n    default upgrade;\n    \'\'      close;\n}\n\nserver {\n    location / {\n        proxy_pass http://backend;\n        proxy_set_header Upgrade $http_upgrade;\n        proxy_set_header Connection $connection_upgrade;\n    }\n}', desc: 'WebSocket avec map (plus propre)' }
+                            ],
+                            tips: ['proxy_read_timeout évite la fermeture des WebSockets inactifs'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Proxy PHP-FPM avec Apache',
+                        desc: 'Apache vers PHP-FPM',
+                        details: {
+                            explanation: 'Configuration Apache pour proxy vers PHP-FPM au lieu de mod_php.',
+                            syntax: 'SetHandler "proxy:unix:/run/php/php-fpm.sock|fcgi://localhost"',
+                            options: [
+                                { flag: 'proxy_fcgi', desc: 'Module proxy FastCGI' },
+                                { flag: 'SetHandler', desc: 'Définit le handler PHP' },
+                                { flag: 'FilesMatch', desc: 'Pattern matching' }
+                            ],
+                            examples: [
+                                { code: '# Activer les modules\nsudo a2enmod proxy_fcgi setenvif\nsudo a2enconf php8.2-fpm', desc: 'Activer PHP-FPM' },
+                                { code: '<VirtualHost *:80>\n    ServerName app.example.com\n    DocumentRoot /var/www/app/public\n\n    <FilesMatch \\.php$>\n        SetHandler "proxy:unix:/run/php/php8.2-fpm.sock|fcgi://localhost"\n    </FilesMatch>\n\n    <Directory /var/www/app/public>\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>', desc: 'VHost avec PHP-FPM' }
+                            ],
+                            tips: ['PHP-FPM est plus performant et isolé que mod_php'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Proxy vers socket Unix',
+                        desc: 'Meilleure performance locale',
+                        details: {
+                            explanation: 'Utiliser un socket Unix au lieu de TCP pour les connexions locales (plus rapide).',
+                            syntax: 'proxy_pass http://unix:/path/to/socket.sock;',
+                            options: [
+                                { flag: 'unix:', desc: 'Chemin du socket Unix' },
+                                { flag: 'fastcgi_pass', desc: 'Pour PHP-FPM' }
+                            ],
+                            examples: [
+                                { code: '# Nginx vers Gunicorn via socket\nlocation / {\n    proxy_pass http://unix:/run/gunicorn/myapp.sock;\n    proxy_set_header Host $host;\n    proxy_set_header X-Real-IP $remote_addr;\n}', desc: 'Proxy vers socket Gunicorn' },
+                                { code: '# Nginx vers PHP-FPM via socket\nlocation ~ \\.php$ {\n    fastcgi_pass unix:/run/php/php8.2-fpm.sock;\n    include fastcgi_params;\n    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n}', desc: 'FastCGI vers socket PHP' }
+                            ],
+                            tips: ['Les sockets Unix sont plus rapides que TCP pour le local'],
+                            warnings: ['Vérifiez les permissions du socket (chmod, chown)']
                         }
                     }
                 ]
             },
             {
                 id: 'project-server',
-                title: '🚀 Projet: Setup Serveur Production',
+                title: '🎯 Projet: Setup Serveur Production',
                 icon: 'fa-rocket',
                 color: 'border-l-4 border-emerald-500',
                 commands: [
@@ -700,101 +884,84 @@
                         cmd: 'Étape 1: Sécurisation initiale',
                         desc: 'Premier setup du serveur',
                         details: {
-                            explanation: 'Sécuriser un nouveau serveur dès sa création.',
+                            explanation: 'Sécuriser un nouveau serveur dès sa création : utilisateur, SSH, mises à jour.',
                             syntax: 'ssh root@server',
                             options: [],
                             examples: [
-                                { code: '#!/bin/bash\n# secure-server.sh - À exécuter en tant que root\nset -e\n\n# Variables\nNEW_USER="deploy"\nSSH_PORT="2222"\n\n# 1. Mise à jour système\napt update && apt upgrade -y\napt install -y ufw fail2ban unattended-upgrades\n\n# 2. Créer utilisateur non-root\nadduser --disabled-password --gecos "" $NEW_USER\nusermod -aG sudo $NEW_USER\nmkdir -p /home/$NEW_USER/.ssh\ncp ~/.ssh/authorized_keys /home/$NEW_USER/.ssh/\nchown -R $NEW_USER:$NEW_USER /home/$NEW_USER/.ssh\nchmod 700 /home/$NEW_USER/.ssh\nchmod 600 /home/$NEW_USER/.ssh/authorized_keys\n\n# 3. Configurer sudo sans mot de passe pour deploy\necho "$NEW_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$NEW_USER', desc: 'Script initial' }
+                                { code: '#!/bin/bash\n# secure-server.sh - À exécuter en tant que root\nset -e\n\nNEW_USER="deploy"\nSSH_PORT="2222"\n\n# 1. Mise à jour système\napt update && apt upgrade -y\napt install -y ufw fail2ban unattended-upgrades\n\n# 2. Créer utilisateur non-root\nadduser --disabled-password --gecos "" $NEW_USER\nusermod -aG sudo $NEW_USER\nmkdir -p /home/$NEW_USER/.ssh\ncp ~/.ssh/authorized_keys /home/$NEW_USER/.ssh/\nchown -R $NEW_USER:$NEW_USER /home/$NEW_USER/.ssh\nchmod 700 /home/$NEW_USER/.ssh\nchmod 600 /home/$NEW_USER/.ssh/authorized_keys\n\n# 3. Sudo sans mot de passe pour deploy\necho "$NEW_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$NEW_USER', desc: 'Script sécurisation initiale' }
                             ],
-                            tips: ['Gardez toujours un accès console en backup'],
+                            tips: ['Gardez toujours un accès console de secours'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 2: Configuration SSH',
-                        desc: 'Hardening SSH et firewall',
+                        cmd: 'Étape 2: Firewall et SSH',
+                        desc: 'UFW et hardening SSH',
                         details: {
-                            explanation: 'Sécuriser l\'accès SSH et configurer le firewall.',
-                            syntax: '/etc/ssh/sshd_config',
+                            explanation: 'Configurer le firewall et sécuriser l\'accès SSH.',
+                            syntax: 'ufw + sshd_config',
                             options: [],
                             examples: [
-                                { code: '# 4. Configurer SSH\ncat > /etc/ssh/sshd_config.d/hardening.conf << EOF\nPort $SSH_PORT\nPermitRootLogin no\nPasswordAuthentication no\nPubkeyAuthentication yes\nAllowUsers $NEW_USER\nMaxAuthTries 3\nClientAliveInterval 300\nClientAliveCountMax 2\nX11Forwarding no\nEOF\n\n# 5. Configurer UFW\nufw default deny incoming\nufw default allow outgoing\nufw allow $SSH_PORT/tcp comment "SSH"\nufw allow 80/tcp comment "HTTP"\nufw allow 443/tcp comment "HTTPS"\nufw --force enable\n\n# 6. Configurer Fail2ban\ncat > /etc/fail2ban/jail.local << EOF\n[DEFAULT]\nbantime = 1h\nfindtime = 10m\nmaxretry = 5\n\n[sshd]\nenabled = true\nport = $SSH_PORT\nmaxretry = 3\nEOF\n\nsystemctl restart sshd fail2ban\necho "SSH sécurisé sur le port $SSH_PORT"', desc: 'SSH et Firewall' }
+                                { code: '# Suite du script\n# 4. Configurer SSH\ncat > /etc/ssh/sshd_config.d/hardening.conf << EOF\nPort $SSH_PORT\nPermitRootLogin no\nPasswordAuthentication no\nPubkeyAuthentication yes\nAllowUsers $NEW_USER\nMaxAuthTries 3\nEOF\n\n# 5. Configurer UFW\nufw default deny incoming\nufw default allow outgoing\nufw allow $SSH_PORT/tcp comment "SSH"\nufw allow 80/tcp comment "HTTP"\nufw allow 443/tcp comment "HTTPS"\nufw --force enable\n\n# 6. Configurer Fail2ban\ncat > /etc/fail2ban/jail.local << EOF\n[DEFAULT]\nbantime = 1h\nfindtime = 10m\nmaxretry = 5\n\n[sshd]\nenabled = true\nport = $SSH_PORT\nmaxretry = 3\nEOF\n\nsystemctl restart sshd fail2ban\necho "SSH sécurisé sur port $SSH_PORT"', desc: 'Firewall et SSH' }
                             ],
                             tips: ['Testez la connexion SSH avant de fermer la session root'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 3: Installation Stack Web',
-                        desc: 'Nginx, Node.js, PostgreSQL',
+                        cmd: 'Étape 3: Stack technique',
+                        desc: 'Nginx, Node/Python, PostgreSQL',
                         details: {
-                            explanation: 'Installer la stack technique pour l\'application.',
+                            explanation: 'Installer les composants de votre stack technique.',
                             syntax: 'apt install nginx postgresql',
                             options: [],
                             examples: [
-                                { code: '# En tant qu\'utilisateur deploy\nsudo -i\n\n# Nginx\napt install -y nginx\nsystemctl enable nginx\n\n# Node.js (via NodeSource)\ncurl -fsSL https://deb.nodesource.com/setup_20.x | bash -\napt install -y nodejs\nnpm install -g pm2\n\n# PostgreSQL\napt install -y postgresql postgresql-contrib\nsudo -u postgres createuser --interactive  # Créer user\nsudo -u postgres createdb myapp_production\n\n# Certbot pour SSL\napt install -y certbot python3-certbot-nginx\n\n# Redis (optionnel - cache)\napt install -y redis-server\nsed -i "s/^# maxmemory .*/maxmemory 256mb/" /etc/redis/redis.conf\nsed -i "s/^# maxmemory-policy .*/maxmemory-policy allkeys-lru/" /etc/redis/redis.conf\nsystemctl restart redis', desc: 'Installation stack' }
+                                { code: '# En tant qu\'utilisateur deploy\nsudo -i\n\n# Nginx\napt install -y nginx\nsystemctl enable nginx\n\n# Node.js (via NodeSource)\ncurl -fsSL https://deb.nodesource.com/setup_20.x | bash -\napt install -y nodejs\nnpm install -g pm2\n\n# OU Python\napt install -y python3-pip python3-venv\npip3 install gunicorn\n\n# PostgreSQL\napt install -y postgresql postgresql-contrib\nsudo -u postgres createuser --interactive\nsudo -u postgres createdb myapp_production\n\n# Certbot pour SSL\napt install -y certbot python3-certbot-nginx\n\n# Redis (optionnel)\napt install -y redis-server\nsystemctl enable redis-server', desc: 'Installation stack Node.js' }
                             ],
-                            tips: ['Utilisez PM2 pour gérer les applications Node.js en production'],
+                            tips: ['PM2 pour Node.js, Gunicorn pour Python'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 4: Configuration Nginx',
-                        desc: 'Reverse proxy avec SSL',
+                        cmd: 'Étape 4: Configuration Nginx + SSL',
+                        desc: 'Reverse proxy avec HTTPS',
                         details: {
-                            explanation: 'Configurer Nginx comme reverse proxy avec HTTPS.',
+                            explanation: 'Configurer Nginx comme reverse proxy avec certificat SSL.',
                             syntax: '/etc/nginx/sites-available/myapp',
                             options: [],
                             examples: [
-                                { code: '# /etc/nginx/sites-available/myapp\nupstream app_backend {\n    server 127.0.0.1:3000;\n    keepalive 64;\n}\n\nserver {\n    listen 80;\n    server_name myapp.com www.myapp.com;\n    return 301 https://$server_name$request_uri;\n}\n\nserver {\n    listen 443 ssl http2;\n    server_name myapp.com www.myapp.com;\n\n    # SSL (sera configuré par Certbot)\n    ssl_certificate /etc/letsencrypt/live/myapp.com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/myapp.com/privkey.pem;\n    ssl_protocols TLSv1.2 TLSv1.3;\n\n    # Security headers\n    add_header X-Frame-Options "SAMEORIGIN" always;\n    add_header X-Content-Type-Options "nosniff" always;\n    add_header Strict-Transport-Security "max-age=31536000" always;\n\n    # Logs\n    access_log /var/log/nginx/myapp_access.log;\n    error_log /var/log/nginx/myapp_error.log;\n\n    location / {\n        proxy_pass http://app_backend;\n        proxy_http_version 1.1;\n        proxy_set_header Upgrade $http_upgrade;\n        proxy_set_header Connection "upgrade";\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n\n    location /static/ {\n        alias /var/www/myapp/static/;\n        expires 30d;\n    }\n}', desc: 'Config Nginx complète' },
-                                { code: 'sudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/\nsudo nginx -t && sudo systemctl reload nginx\nsudo certbot --nginx -d myapp.com -d www.myapp.com', desc: 'Activation et SSL' }
+                                { code: '# /etc/nginx/sites-available/myapp\nupstream app_backend {\n    server 127.0.0.1:3000;\n    keepalive 64;\n}\n\nserver {\n    listen 80;\n    server_name myapp.com www.myapp.com;\n    return 301 https://$server_name$request_uri;\n}\n\nserver {\n    listen 443 ssl http2;\n    server_name myapp.com www.myapp.com;\n\n    # SSL (configuré par Certbot)\n    ssl_certificate /etc/letsencrypt/live/myapp.com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/myapp.com/privkey.pem;\n    ssl_protocols TLSv1.2 TLSv1.3;\n\n    # Security headers\n    add_header X-Frame-Options "SAMEORIGIN" always;\n    add_header X-Content-Type-Options "nosniff" always;\n    add_header Strict-Transport-Security "max-age=31536000" always;\n\n    location / {\n        proxy_pass http://app_backend;\n        proxy_http_version 1.1;\n        proxy_set_header Upgrade $http_upgrade;\n        proxy_set_header Connection "upgrade";\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n}\n\n# Activation\nsudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/\nsudo nginx -t && sudo systemctl reload nginx\nsudo certbot --nginx -d myapp.com -d www.myapp.com', desc: 'Config Nginx + SSL' }
                             ],
                             tips: ['Certbot configure automatiquement le renouvellement'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 5: Déploiement Application',
-                        desc: 'Structure et PM2',
+                        cmd: 'Étape 5: Déploiement application',
+                        desc: 'Structure et PM2/Gunicorn',
                         details: {
                             explanation: 'Déployer l\'application avec une structure professionnelle.',
                             syntax: '/var/www/myapp/',
                             options: [],
                             examples: [
-                                { code: '# Structure de déploiement\nmkdir -p /var/www/myapp/{current,releases,shared}\nmkdir -p /var/www/myapp/shared/{logs,uploads,.env}\nchown -R deploy:deploy /var/www/myapp\n\n# Fichier PM2 ecosystem\ncat > /var/www/myapp/ecosystem.config.js << \'EOF\'\nmodule.exports = {\n  apps: [{\n    name: "myapp",\n    cwd: "/var/www/myapp/current",\n    script: "dist/server.js",\n    instances: "max",\n    exec_mode: "cluster",\n    env: {\n      NODE_ENV: "production",\n      PORT: 3000\n    },\n    error_file: "/var/www/myapp/shared/logs/pm2-error.log",\n    out_file: "/var/www/myapp/shared/logs/pm2-out.log",\n    log_date_format: "YYYY-MM-DD HH:mm:ss Z"\n  }]\n};\nEOF\n\n# Démarrer avec PM2\npm2 start /var/www/myapp/ecosystem.config.js\npm2 save\npm2 startup  # Configure le démarrage automatique', desc: 'PM2 en cluster mode' }
+                                { code: '# Structure de déploiement\nmkdir -p /var/www/myapp/{current,releases,shared}\nmkdir -p /var/www/myapp/shared/{logs,uploads}\nchown -R deploy:deploy /var/www/myapp\n\n# PM2 ecosystem.config.js\nmodule.exports = {\n  apps: [{\n    name: "myapp",\n    cwd: "/var/www/myapp/current",\n    script: "dist/server.js",\n    instances: "max",\n    exec_mode: "cluster",\n    env: {\n      NODE_ENV: "production",\n      PORT: 3000\n    }\n  }]\n};\n\n# Démarrer et persister\npm2 start ecosystem.config.js\npm2 save\npm2 startup', desc: 'Déploiement Node.js' }
                             ],
-                            tips: ['PM2 cluster mode utilise tous les CPU disponibles'],
+                            tips: ['PM2 cluster mode utilise tous les CPU'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 6: Monitoring & Alertes',
-                        desc: 'Surveillance en production',
+                        cmd: 'Étape 6: Backup automatisé',
+                        desc: 'Sauvegardes planifiées',
                         details: {
-                            explanation: 'Mettre en place la surveillance et les alertes.',
-                            syntax: 'pm2 monit / healthcheck',
+                            explanation: 'Mettre en place des sauvegardes automatiques quotidiennes.',
+                            syntax: '/scripts/backup.sh + crontab',
                             options: [],
                             examples: [
-                                { code: '# Monitoring PM2\npm2 install pm2-logrotate\npm2 set pm2-logrotate:max_size 10M\npm2 set pm2-logrotate:retain 7\n\n# Script de health check\ncat > /usr/local/bin/healthcheck.sh << \'EOF\'\n#!/bin/bash\nURL="https://myapp.com/health"\nRESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $URL)\n\nif [ "$RESPONSE" != "200" ]; then\n  echo "Health check failed: $RESPONSE" | mail -s "ALERT: myapp down" admin@example.com\n  pm2 restart myapp\nfi\nEOF\nchmod +x /usr/local/bin/healthcheck.sh\n\n# Cron pour health check\n(crontab -l 2>/dev/null; echo "*/5 * * * * /usr/local/bin/healthcheck.sh") | crontab -', desc: 'Health check automatique' },
-                                { code: '# Monitoring ressources\napt install -y htop iotop ncdu\n\n# Alertes disque\ncat > /usr/local/bin/disk-alert.sh << \'EOF\'\n#!/bin/bash\nTHRESHOLD=80\nUSAGE=$(df / | awk \'NR==2 {print $5}\' | tr -d \'%\')\n\nif [ "$USAGE" -gt "$THRESHOLD" ]; then\n  echo "Disk usage: ${USAGE}%" | mail -s "ALERT: Disk space low" admin@example.com\nfi\nEOF\nchmod +x /usr/local/bin/disk-alert.sh\n(crontab -l; echo "0 * * * * /usr/local/bin/disk-alert.sh") | crontab -', desc: 'Alerte espace disque' }
+                                { code: '#!/bin/bash\n# /scripts/backup.sh\nset -euo pipefail\n\nDATE=$(date +%Y%m%d_%H%M%S)\nBACKUP_DIR="/backup"\nDB_NAME="myapp_production"\n\nmkdir -p $BACKUP_DIR/{db,files}\n\n# Backup DB\nsudo -u postgres pg_dump -Fc $DB_NAME > $BACKUP_DIR/db/db_$DATE.dump\n\n# Backup uploads et config\ntar -czf $BACKUP_DIR/files/uploads_$DATE.tar.gz -C /var/www/myapp/shared uploads .env\n\n# Rétention: 7 jours local\nfind $BACKUP_DIR -type f -mtime +7 -delete\n\n# Sync vers serveur distant (optionnel)\n# rsync -avz $BACKUP_DIR/ backup@remote:/backups/myapp/\n\necho "Backup completed: $DATE"\n\n# Crontab\n# 0 2 * * * /scripts/backup.sh >> /var/log/backup.log 2>&1', desc: 'Script backup complet' }
                             ],
-                            tips: ['Configurez aussi des alertes externes (UptimeRobot, Pingdom)'],
-                            warnings: []
-                        }
-                    },
-                    {
-                        cmd: 'Étape 7: Backup automatisé',
-                        desc: 'Sauvegardes et rétention',
-                        details: {
-                            explanation: 'Configurer des sauvegardes automatiques avec rétention.',
-                            syntax: '/scripts/backup.sh',
-                            options: [],
-                            examples: [
-                                { code: '#!/bin/bash\n# /scripts/backup.sh\nset -euo pipefail\n\nDATE=$(date +%Y%m%d_%H%M%S)\nBACKUP_DIR="/backup"\nDB_NAME="myapp_production"\nAPP_DIR="/var/www/myapp"\nREMOTE="backup@backup-server:/backups/myapp/"\n\n# Créer les dossiers\nmkdir -p $BACKUP_DIR/{db,files}\n\n# Backup base de données\necho "Backup database..."\nsudo -u postgres pg_dump -Fc $DB_NAME > $BACKUP_DIR/db/${DB_NAME}_$DATE.dump\n\n# Backup fichiers (uploads, config)\necho "Backup files..."\ntar -czf $BACKUP_DIR/files/uploads_$DATE.tar.gz -C $APP_DIR/shared uploads .env\n\n# Sync vers serveur distant\necho "Sync to remote..."\nrsync -avz --delete $BACKUP_DIR/ $REMOTE\n\n# Rétention locale: 7 jours\nfind $BACKUP_DIR -type f -mtime +7 -delete\n\necho "Backup completed: $DATE"', desc: 'Script backup complet' },
-                                { code: '# Crontab\n0 2 * * * /scripts/backup.sh >> /var/log/backup.log 2>&1', desc: 'Planification backup' }
-                            ],
-                            tips: ['Testez régulièrement la restauration des backups'],
-                            warnings: ['Stockez toujours les backups hors site']
+                            tips: ['Testez régulièrement la restauration'],
+                            warnings: ['Stockez les backups hors site']
                         }
                     }
                 ]

@@ -318,7 +318,8 @@
                         desc: 'Terminer des processus',
                         details: {
                             explanation: 'Envoie des signaux aux processus pour les contrôler ou les terminer.',
-                            syntax: 'kill [signal] PID\nkillall [signal] nom',
+                            syntax: 'kill [signal] PID
+killall [signal] nom',
                             options: [
                                 { flag: '-15 (SIGTERM)', desc: 'Terminer proprement (défaut)' },
                                 { flag: '-9 (SIGKILL)', desc: 'Forcer l\'arrêt immédiat' },
@@ -340,7 +341,9 @@
                         desc: 'Processus en arrière-plan',
                         details: {
                             explanation: 'Gère les processus en arrière-plan et premier plan dans le shell.',
-                            syntax: 'bg [job_id]\nfg [job_id]\njobs',
+                            syntax: 'bg [job_id]
+fg [job_id]
+jobs',
                             options: [
                                 { flag: 'Ctrl+Z', desc: 'Suspendre le processus courant' },
                                 { flag: 'bg', desc: 'Reprendre en arrière-plan' },
@@ -363,7 +366,8 @@
                         desc: 'Processus persistants',
                         details: {
                             explanation: 'Permet à un processus de continuer après la fermeture du terminal.',
-                            syntax: 'nohup commande &\ndisown job_id',
+                            syntax: 'nohup commande &
+disown job_id',
                             options: [
                                 { flag: 'nohup', desc: 'Immunise contre SIGHUP' },
                                 { flag: 'disown', desc: 'Détache un job existant' },
@@ -438,7 +442,9 @@
                         desc: 'Manipulation de colonnes',
                         details: {
                             explanation: 'Outils pour extraire, trier et dédupliquer des données.',
-                            syntax: 'cut -d":" -f1 fichier\nsort [options] fichier\nuniq [options]',
+                            syntax: 'cut -d":" -f1 fichier
+sort [options] fichier
+uniq [options]',
                             options: [
                                 { flag: 'cut -d', desc: 'Délimiteur' },
                                 { flag: 'cut -f1,3', desc: 'Champs 1 et 3' },
@@ -461,7 +467,8 @@
                         desc: 'Statistiques et aperçus',
                         details: {
                             explanation: 'Compter les lignes/mots et afficher le début ou la fin des fichiers.',
-                            syntax: 'wc [options] fichier\nhead/tail [-n N] fichier',
+                            syntax: 'wc [options] fichier
+head/tail [-n N] fichier',
                             options: [
                                 { flag: 'wc -l', desc: 'Compter les lignes' },
                                 { flag: 'wc -w', desc: 'Compter les mots' },
@@ -517,7 +524,8 @@
                         desc: 'Compression gzip',
                         details: {
                             explanation: 'Compresse ou décompresse des fichiers individuels avec gzip.',
-                            syntax: 'gzip [options] fichier\ngunzip fichier.gz',
+                            syntax: 'gzip [options] fichier
+gunzip fichier.gz',
                             options: [
                                 { flag: '-k', desc: 'Garder le fichier original' },
                                 { flag: '-d', desc: 'Décompresser' },
@@ -539,7 +547,8 @@
                         desc: 'Archives ZIP',
                         details: {
                             explanation: 'Crée et extrait des archives au format ZIP (compatible Windows).',
-                            syntax: 'zip [options] archive.zip fichiers\nunzip archive.zip',
+                            syntax: 'zip [options] archive.zip fichiers
+unzip archive.zip',
                             options: [
                                 { flag: '-r', desc: 'Récursif (dossiers)' },
                                 { flag: '-e', desc: 'Chiffrer avec mot de passe' },
@@ -569,7 +578,8 @@
                         desc: 'Définir et utiliser des variables',
                         details: {
                             explanation: 'Les variables stockent des données réutilisables dans les scripts.',
-                            syntax: 'VAR="valeur"\necho $VAR',
+                            syntax: 'VAR="valeur"
+echo $VAR',
                             options: [
                                 { flag: '$1, $2...', desc: 'Arguments du script' },
                                 { flag: '$#', desc: 'Nombre d\'arguments' },
@@ -578,7 +588,9 @@
                                 { flag: '$$', desc: 'PID du script' }
                             ],
                             examples: [
-                                { code: '#!/bin/bash\nNAME="World"\necho "Hello, $NAME!"', desc: 'Variable simple' },
+                                { code: '#!/bin/bash
+NAME="World"
+echo "Hello, $NAME!"', desc: 'Variable simple' },
                                 { code: 'FILE=${1:-"default.txt"}', desc: 'Valeur par défaut' },
                                 { code: 'DIR=$(pwd)', desc: 'Capture de sortie commande' },
                                 { code: 'readonly PI=3.14159', desc: 'Variable constante' }
@@ -592,7 +604,9 @@
                         desc: 'Exécution conditionnelle',
                         details: {
                             explanation: 'Exécute du code selon des conditions.',
-                            syntax: 'if [ condition ]; then\n  commandes\nfi',
+                            syntax: 'if [ condition ]; then
+  commandes
+fi',
                             options: [
                                 { flag: '-f fichier', desc: 'Fichier existe' },
                                 { flag: '-d dossier', desc: 'Dossier existe' },
@@ -601,8 +615,14 @@
                                 { flag: '-eq, -ne, -lt, -gt', desc: 'Comparaisons numériques' }
                             ],
                             examples: [
-                                { code: 'if [ -f "config.txt" ]; then\n  echo "Config trouvée"\nelse\n  echo "Config manquante"\nfi', desc: 'Test fichier' },
-                                { code: 'if [ "$USER" = "root" ]; then\n  echo "Vous êtes root"\nfi', desc: 'Test string' },
+                                { code: 'if [ -f "config.txt" ]; then
+  echo "Config trouvée"
+else
+  echo "Config manquante"
+fi', desc: 'Test fichier' },
+                                { code: 'if [ "$USER" = "root" ]; then
+  echo "Vous êtes root"
+fi', desc: 'Test string' },
                                 { code: '[ -d "$DIR" ] || mkdir -p "$DIR"', desc: 'Créer si n\'existe pas' },
                                 { code: '[[ "$FILE" == *.txt ]] && echo "Fichier texte"', desc: 'Pattern matching' }
                             ],
@@ -615,7 +635,9 @@
                         desc: 'Itérations',
                         details: {
                             explanation: 'Répète des commandes sur une liste ou selon une condition.',
-                            syntax: 'for item in liste; do\n  commandes\ndone',
+                            syntax: 'for item in liste; do
+  commandes
+done',
                             options: [
                                 { flag: 'for i in {1..10}', desc: 'Séquence de nombres' },
                                 { flag: 'for f in *.txt', desc: 'Glob pattern' },
@@ -623,10 +645,19 @@
                                 { flag: 'break/continue', desc: 'Contrôle de boucle' }
                             ],
                             examples: [
-                                { code: 'for f in *.log; do\n  gzip "$f"\ndone', desc: 'Compresser tous les logs' },
-                                { code: 'for i in {1..5}; do\n  echo "Itération $i"\ndone', desc: 'Boucle numérique' },
-                                { code: 'while read -r line; do\n  echo "Ligne: $line"\ndone < fichier.txt', desc: 'Lire un fichier' },
-                                { code: 'while true; do\n  sleep 60\n  ./check.sh\ndone', desc: 'Boucle infinie' }
+                                { code: 'for f in *.log; do
+  gzip "$f"
+done', desc: 'Compresser tous les logs' },
+                                { code: 'for i in {1..5}; do
+  echo "Itération $i"
+done', desc: 'Boucle numérique' },
+                                { code: 'while read -r line; do
+  echo "Ligne: $line"
+done < fichier.txt', desc: 'Lire un fichier' },
+                                { code: 'while true; do
+  sleep 60
+  ./check.sh
+done', desc: 'Boucle infinie' }
                             ],
                             tips: ['Utilisez read -r pour éviter l\'interprétation des backslashes'],
                             warnings: ['Attention aux espaces dans les noms de fichiers avec for']
@@ -637,7 +668,10 @@
                         desc: 'Modulariser et gérer les erreurs',
                         details: {
                             explanation: 'Les fonctions organisent le code, les exit codes indiquent le succès/échec.',
-                            syntax: 'function_name() {\n  commandes\n  return code\n}',
+                            syntax: 'function_name() {
+  commandes
+  return code
+}',
                             options: [
                                 { flag: 'set -e', desc: 'Arrêter sur erreur' },
                                 { flag: 'set -x', desc: 'Mode debug (trace)' },
@@ -645,10 +679,15 @@
                                 { flag: 'exit N', desc: 'Quitter avec code N' }
                             ],
                             examples: [
-                                { code: 'log() {\n  echo "[$(date)] $1"\n}\nlog "Script démarré"', desc: 'Fonction de log' },
-                                { code: 'set -euo pipefail\n# Script robuste', desc: 'Mode strict' },
+                                { code: 'log() {
+  echo "[$(date)] $1"
+}
+log "Script démarré"', desc: 'Fonction de log' },
+                                { code: 'set -euo pipefail
+# Script robuste', desc: 'Mode strict' },
                                 { code: 'trap "rm -f $TMPFILE" EXIT', desc: 'Nettoyage à la sortie' },
-                                { code: 'die() { echo "$1" >&2; exit 1; }\n[ -f "$FILE" ] || die "Fichier manquant"', desc: 'Fonction d\'erreur' }
+                                { code: 'die() { echo "$1" >&2; exit 1; }
+[ -f "$FILE" ] || die "Fichier manquant"', desc: 'Fonction d\'erreur' }
                             ],
                             tips: ['set -euo pipefail est recommandé pour les scripts robustes'],
                             warnings: ['Exit code 0 = succès, autre = échec']
@@ -667,10 +706,28 @@
                         desc: 'Base robuste avec gestion d\'erreurs',
                         details: {
                             explanation: 'Créer un script bash professionnel avec header, options et gestion d\'erreurs.',
-                            syntax: '#!/bin/bash\nset -euo pipefail',
+                            syntax: '#!/bin/bash
+set -euo pipefail',
                             options: [],
                             examples: [
-                                { code: '#!/bin/bash\n#\n# Script: deploy.sh\n# Description: Déploiement automatisé\n# Usage: ./deploy.sh [env] [options]\n#\nset -euo pipefail\nIFS=$\'\\n\\t\'\n\n# Variables globales\nSCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"\nLOG_FILE="/var/log/deploy.log"\nENV="${1:-production}"\n\n# Couleurs pour le terminal\nRED=\'\\033[0;31m\'\nGREEN=\'\\033[0;32m\'\nNC=\'\\033[0m\' # No Color', desc: 'En-tête complet' }
+                                { code: '#!/bin/bash
+#
+# Script: deploy.sh
+# Description: Déploiement automatisé
+# Usage: ./deploy.sh [env] [options]
+#
+set -euo pipefail
+IFS=$\'\n\\t\'
+
+# Variables globales
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_FILE="/var/log/deploy.log"
+ENV="${1:-production}"
+
+# Couleurs pour le terminal
+RED=\'\\033[0;31m\'
+GREEN=\'\\033[0;32m\'
+NC=\'\\033[0m\' # No Color', desc: 'En-tête complet' }
                             ],
                             tips: ['set -euo pipefail rend le script plus robuste'],
                             warnings: []
@@ -681,10 +738,31 @@
                         desc: 'Logging, erreurs, confirmations',
                         details: {
                             explanation: 'Fonctions réutilisables pour logger, afficher des erreurs et demander des confirmations.',
-                            syntax: 'log() { ... }\nerror() { ... }',
+                            syntax: 'log() { ... }
+error() { ... }',
                             options: [],
                             examples: [
-                                { code: '# Logging\nlog() {\n  local level="$1"; shift\n  echo -e "[$(date \'+%Y-%m-%d %H:%M:%S\')] [$level] $*" | tee -a "$LOG_FILE"\n}\n\ninfo() { log "INFO" "$@"; }\nwarn() { log "WARN" "${YELLOW}$*${NC}"; }\nerror() { log "ERROR" "${RED}$*${NC}" >&2; }\n\n# Gestion d\'erreurs\ndie() {\n  error "$1"\n  exit "${2:-1}"\n}\n\n# Confirmation\nconfirm() {\n  read -r -p "$1 [y/N] " response\n  [[ "$response" =~ ^[Yy]$ ]]\n}', desc: 'Fonctions utilitaires' }
+                                { code: '# Logging
+log() {
+  local level="$1"; shift
+  echo -e "[$(date \'+%Y-%m-%d %H:%M:%S\')] [$level] $*" | tee -a "$LOG_FILE"
+}
+
+info() { log "INFO" "$@"; }
+warn() { log "WARN" "${YELLOW}$*${NC}"; }
+error() { log "ERROR" "${RED}$*${NC}" >&2; }
+
+# Gestion d\'erreurs
+die() {
+  error "$1"
+  exit "${2:-1}"
+}
+
+# Confirmation
+confirm() {
+  read -r -p "$1 [y/N] " response
+  [[ "$response" =~ ^[Yy]$ ]]
+}', desc: 'Fonctions utilitaires' }
                             ],
                             tips: ['Utilisez tee pour logger à la fois dans le fichier et le terminal'],
                             warnings: []
@@ -698,7 +776,36 @@
                             syntax: 'while getopts "vh" opt; do ...',
                             options: [],
                             examples: [
-                                { code: '# Valeurs par défaut\nVERBOSE=false\nDRY_RUN=false\nTARGET_ENV="production"\n\n# Aide\nusage() {\n  cat << EOF\nUsage: $0 [options] [environment]\n\nOptions:\n  -v, --verbose    Mode verbeux\n  -n, --dry-run    Simulation sans exécution\n  -h, --help       Afficher cette aide\n\nEnvironments: staging, production (défaut)\nEOF\n  exit 0\n}\n\n# Parsing\nwhile [[ $# -gt 0 ]]; do\n  case "$1" in\n    -v|--verbose) VERBOSE=true; shift ;;\n    -n|--dry-run) DRY_RUN=true; shift ;;\n    -h|--help) usage ;;\n    -*) die "Option inconnue: $1" ;;\n    *) TARGET_ENV="$1"; shift ;;\n  esac\ndone', desc: 'Parsing complet' }
+                                { code: '# Valeurs par défaut
+VERBOSE=false
+DRY_RUN=false
+TARGET_ENV="production"
+
+# Aide
+usage() {
+  cat << EOF
+Usage: $0 [options] [environment]
+
+Options:
+  -v, --verbose    Mode verbeux
+  -n, --dry-run    Simulation sans exécution
+  -h, --help       Afficher cette aide
+
+Environments: staging, production (défaut)
+EOF
+  exit 0
+}
+
+# Parsing
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -v|--verbose) VERBOSE=true; shift ;;
+    -n|--dry-run) DRY_RUN=true; shift ;;
+    -h|--help) usage ;;
+    -*) die "Option inconnue: $1" ;;
+    *) TARGET_ENV="$1"; shift ;;
+  esac
+done', desc: 'Parsing complet' }
                             ],
                             tips: ['Supportez les options courtes (-v) et longues (--verbose)'],
                             warnings: []
@@ -712,7 +819,27 @@
                             syntax: 'check_requirements() { ... }',
                             options: [],
                             examples: [
-                                { code: 'check_requirements() {\n  info "Vérification des prérequis..."\n  \n  # Vérifier les commandes nécessaires\n  local required_cmds=(git docker rsync ssh)\n  for cmd in "${required_cmds[@]}"; do\n    command -v "$cmd" >/dev/null 2>&1 || die "$cmd n\'est pas installé"\n  done\n  \n  # Vérifier les fichiers de config\n  [ -f ".env" ] || die "Fichier .env manquant"\n  [ -f "docker-compose.yml" ] || die "docker-compose.yml manquant"\n  \n  # Vérifier les droits\n  [ -w "$LOG_FILE" ] || touch "$LOG_FILE" 2>/dev/null || die "Impossible d\'écrire dans $LOG_FILE"\n  \n  # Vérifier la connexion réseau\n  ping -c1 -W2 "$DEPLOY_HOST" >/dev/null 2>&1 || die "Serveur $DEPLOY_HOST inaccessible"\n  \n  info "Tous les prérequis sont satisfaits"\n}', desc: 'Vérifications complètes' }
+                                { code: 'check_requirements() {
+  info "Vérification des prérequis..."
+  
+  # Vérifier les commandes nécessaires
+  local required_cmds=(git docker rsync ssh)
+  for cmd in "${required_cmds[@]}"; do
+    command -v "$cmd" >/dev/null 2>&1 || die "$cmd n\'est pas installé"
+  done
+  
+  # Vérifier les fichiers de config
+  [ -f ".env" ] || die "Fichier .env manquant"
+  [ -f "docker-compose.yml" ] || die "docker-compose.yml manquant"
+  
+  # Vérifier les droits
+  [ -w "$LOG_FILE" ] || touch "$LOG_FILE" 2>/dev/null || die "Impossible d\'écrire dans $LOG_FILE"
+  
+  # Vérifier la connexion réseau
+  ping -c1 -W2 "$DEPLOY_HOST" >/dev/null 2>&1 || die "Serveur $DEPLOY_HOST inaccessible"
+  
+  info "Tous les prérequis sont satisfaits"
+}', desc: 'Vérifications complètes' }
                             ],
                             tips: ['Échouez tôt et clairement plutôt que tard avec des erreurs cryptiques'],
                             warnings: []
@@ -723,10 +850,41 @@
                         desc: 'Actions principales du script',
                         details: {
                             explanation: 'Implémenter les actions principales avec gestion des erreurs.',
-                            syntax: 'deploy() { ... }\nrun_tests() { ... }',
+                            syntax: 'deploy() { ... }
+run_tests() { ... }',
                             options: [],
                             examples: [
-                                { code: 'backup_current() {\n  info "Sauvegarde de la version actuelle..."\n  local backup_dir="/backup/$(date +%Y%m%d_%H%M%S)"\n  \n  if $DRY_RUN; then\n    info "[DRY-RUN] mkdir -p $backup_dir"\n    return 0\n  fi\n  \n  ssh "$DEPLOY_HOST" "mkdir -p $backup_dir && cp -r $APP_DIR/* $backup_dir/" \\\n    || die "Échec de la sauvegarde"\n  \n  info "Sauvegarde créée: $backup_dir"\n}\n\ndeploy() {\n  info "Déploiement vers $TARGET_ENV..."\n  \n  # Build\n  docker compose build --no-cache || die "Échec du build"\n  \n  # Tests\n  docker compose run --rm app pytest || die "Tests échoués"\n  \n  # Deploy\n  rsync -avz --delete ./dist/ "$DEPLOY_HOST:$APP_DIR/" || die "Échec rsync"\n  \n  # Restart\n  ssh "$DEPLOY_HOST" "cd $APP_DIR && docker compose up -d" || die "Échec restart"\n  \n  info "Déploiement terminé avec succès!"\n}', desc: 'Actions principales' }
+                                { code: 'backup_current() {
+  info "Sauvegarde de la version actuelle..."
+  local backup_dir="/backup/$(date +%Y%m%d_%H%M%S)"
+  
+  if $DRY_RUN; then
+    info "[DRY-RUN] mkdir -p $backup_dir"
+    return 0
+  fi
+  
+  ssh "$DEPLOY_HOST" "mkdir -p $backup_dir && cp -r $APP_DIR/* $backup_dir/" \n    || die "Échec de la sauvegarde"
+  
+  info "Sauvegarde créée: $backup_dir"
+}
+
+deploy() {
+  info "Déploiement vers $TARGET_ENV..."
+  
+  # Build
+  docker compose build --no-cache || die "Échec du build"
+  
+  # Tests
+  docker compose run --rm app pytest || die "Tests échoués"
+  
+  # Deploy
+  rsync -avz --delete ./dist/ "$DEPLOY_HOST:$APP_DIR/" || die "Échec rsync"
+  
+  # Restart
+  ssh "$DEPLOY_HOST" "cd $APP_DIR && docker compose up -d" || die "Échec restart"
+  
+  info "Déploiement terminé avec succès!"
+}', desc: 'Actions principales' }
                             ],
                             tips: ['Implémentez le mode dry-run pour tester sans risque'],
                             warnings: []
@@ -737,10 +895,41 @@
                         desc: 'Trap et gestion des erreurs',
                         details: {
                             explanation: 'Utiliser trap pour nettoyer et permettre le rollback en cas d\'échec.',
-                            syntax: 'trap cleanup EXIT\ntrap rollback ERR',
+                            syntax: 'trap cleanup EXIT
+trap rollback ERR',
                             options: [],
                             examples: [
-                                { code: '# Variables pour le rollback\nDEPLOYED=false\nBACKUP_PATH=""\n\ncleanup() {\n  local exit_code=$?\n  info "Nettoyage..."\n  \n  # Supprimer fichiers temporaires\n  rm -rf "${TMPDIR:-/tmp}/deploy_$$"* 2>/dev/null\n  \n  if [ $exit_code -ne 0 ] && [ "$DEPLOYED" = true ]; then\n    warn "Échec détecté après déploiement, rollback..."\n    rollback\n  fi\n  \n  exit $exit_code\n}\n\nrollback() {\n  error "Rollback vers la version précédente..."\n  if [ -n "$BACKUP_PATH" ]; then\n    ssh "$DEPLOY_HOST" "rm -rf $APP_DIR/* && cp -r $BACKUP_PATH/* $APP_DIR/"\n    ssh "$DEPLOY_HOST" "cd $APP_DIR && docker compose up -d"\n    info "Rollback effectué depuis: $BACKUP_PATH"\n  else\n    error "Pas de backup disponible pour le rollback!"\n  fi\n}\n\ntrap cleanup EXIT', desc: 'Gestion de sortie' }
+                                { code: '# Variables pour le rollback
+DEPLOYED=false
+BACKUP_PATH=""
+
+cleanup() {
+  local exit_code=$?
+  info "Nettoyage..."
+  
+  # Supprimer fichiers temporaires
+  rm -rf "${TMPDIR:-/tmp}/deploy_$$"* 2>/dev/null
+  
+  if [ $exit_code -ne 0 ] && [ "$DEPLOYED" = true ]; then
+    warn "Échec détecté après déploiement, rollback..."
+    rollback
+  fi
+  
+  exit $exit_code
+}
+
+rollback() {
+  error "Rollback vers la version précédente..."
+  if [ -n "$BACKUP_PATH" ]; then
+    ssh "$DEPLOY_HOST" "rm -rf $APP_DIR/* && cp -r $BACKUP_PATH/* $APP_DIR/"
+    ssh "$DEPLOY_HOST" "cd $APP_DIR && docker compose up -d"
+    info "Rollback effectué depuis: $BACKUP_PATH"
+  else
+    error "Pas de backup disponible pour le rollback!"
+  fi
+}
+
+trap cleanup EXIT', desc: 'Gestion de sortie' }
                             ],
                             tips: ['Trap EXIT est appelé dans tous les cas, même sur erreur'],
                             warnings: []
@@ -751,10 +940,40 @@
                         desc: 'Orchestration main()',
                         details: {
                             explanation: 'Fonction main qui orchestre l\'exécution du script.',
-                            syntax: 'main() { ... }\nmain "$@"',
+                            syntax: 'main() { ... }
+main "$@"',
                             options: [],
                             examples: [
-                                { code: 'main() {\n  info "=== Déploiement $TARGET_ENV ===" \n  info "Mode: $($DRY_RUN && echo "DRY-RUN" || echo "RÉEL")"\n  \n  # Confirmation en production\n  if [ "$TARGET_ENV" = "production" ] && ! $DRY_RUN; then\n    confirm "Déployer en PRODUCTION?" || die "Annulé par l\'utilisateur"\n  fi\n  \n  # Étapes du déploiement\n  check_requirements\n  \n  backup_current\n  BACKUP_PATH="$LAST_BACKUP"\n  \n  deploy\n  DEPLOYED=true\n  \n  # Vérification post-déploiement\n  sleep 5\n  if ! curl -sf "https://$APP_URL/health" >/dev/null; then\n    die "Health check échoué après déploiement"\n  fi\n  \n  info "=== Déploiement réussi! ==="\n  info "URL: https://$APP_URL"\n}\n\n# Point d\'entrée\nmain "$@"', desc: 'Fonction main' }
+                                { code: 'main() {
+  info "=== Déploiement $TARGET_ENV ===" 
+  info "Mode: $($DRY_RUN && echo "DRY-RUN" || echo "RÉEL")"
+  
+  # Confirmation en production
+  if [ "$TARGET_ENV" = "production" ] && ! $DRY_RUN; then
+    confirm "Déployer en PRODUCTION?" || die "Annulé par l\'utilisateur"
+  fi
+  
+  # Étapes du déploiement
+  check_requirements
+  
+  backup_current
+  BACKUP_PATH="$LAST_BACKUP"
+  
+  deploy
+  DEPLOYED=true
+  
+  # Vérification post-déploiement
+  sleep 5
+  if ! curl -sf "https://$APP_URL/health" >/dev/null; then
+    die "Health check échoué après déploiement"
+  fi
+  
+  info "=== Déploiement réussi! ==="
+  info "URL: https://$APP_URL"
+}
+
+# Point d\'entrée
+main "$@"', desc: 'Fonction main' }
                             ],
                             tips: ['main "$@" passe tous les arguments à la fonction main'],
                             warnings: []

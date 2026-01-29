@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Machine Learning & Deep Learning : sklearn, PyTorch, Explainable AI (SHAP, LIME, Captum, Grad-CAM).">
+    <title>Machine Learning & Deep Learning - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-orange-500/20 mb-4 icon-glow">
+                    <i class="fas fa-brain text-3xl text-orange-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Machine Learning & Deep Learning</h1>
+                <p class="text-slate-400">sklearn, PyTorch, Explainable AI (SHAP, LIME, Captum, Grad-CAM)</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 text-center text-slate-500 py-8 text-sm relative z-10">
+        <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            {
+                id: 'data-prep',
+                title: '📊 Preparation des Donnees',
+                icon: 'fa-database',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Charger et explorer un dataset',
+                        desc: 'pandas, info(), describe()',
+                        details: {
+                            explanation: 'Premiere etape de tout projet ML : charger les donnees et comprendre leur structure, types, distributions et valeurs manquantes.',
+                            syntax: 'df = pd.read_csv("data.csv")\ndf.info()\ndf.describe()',
+                            options: [
+                                { flag: 'df.info()', desc: 'Types, memoire, valeurs non-null' },
+                                { flag: 'df.describe()', desc: 'Stats descriptives (num)' },
+                                { flag: 'df.shape', desc: 'Dimensions (lignes, colonnes)' },
+                                { flag: 'df.dtypes', desc: 'Types de chaque colonne' }
+                            ],
+                            examples: [
+                                { code: 'import pandas as pd\ndf = pd.read_csv("dataset.csv")', desc: 'Charger un CSV' },
+                                { code: 'df.info()', desc: 'Vue globale du dataset' },
+                                { code: 'df.describe(include="all")', desc: 'Stats toutes colonnes' },
+                                { code: 'df.isnull().sum()', desc: 'Compter les valeurs manquantes' },
+                                { code: 'df["target"].value_counts()', desc: 'Distribution de la cible' }
+                            ],
+                            tips: ['Toujours commencer par info() et describe()', 'Verifier les types avant preprocessing'],
+                            warnings: ['Attention aux types object qui cachent des numeriques']
+                        }
+                    },
+                    {
+                        cmd: 'Gerer les valeurs manquantes',
+                        desc: 'SimpleImputer, KNNImputer',
+                        details: {
+                            explanation: 'Plusieurs strategies pour gerer les NaN : suppression, imputation par moyenne/mediane/mode, ou imputation avancee (KNN, iterative).',
+                            syntax: 'from sklearn.impute import SimpleImputer\nimputer = SimpleImputer(strategy="mean")',
+                            options: [
+                                { flag: 'strategy="mean"', desc: 'Remplacer par la moyenne' },
+                                { flag: 'strategy="median"', desc: 'Remplacer par la mediane' },
+                                { flag: 'strategy="most_frequent"', desc: 'Remplacer par le mode' },
+                                { flag: 'strategy="constant"', desc: 'Remplacer par fill_value' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.impute import SimpleImputer\nimp = SimpleImputer(strategy="median")\nX_imputed = imp.fit_transform(X)', desc: 'Imputation simple' },
+                                { code: 'from sklearn.impute import KNNImputer\nimp = KNNImputer(n_neighbors=5)\nX_imputed = imp.fit_transform(X)', desc: 'Imputation KNN' },
+                                { code: 'from sklearn.impute import IterativeImputer\nimp = IterativeImputer(max_iter=10)\nX_imputed = imp.fit_transform(X)', desc: 'Imputation iterative (MICE)' },
+                                { code: 'df.dropna(subset=["col1", "col2"])', desc: 'Supprimer lignes avec NaN' }
+                            ],
+                            tips: ['KNNImputer pour donnees avec correlations', 'IterativeImputer (MICE) pour imputation multivariee'],
+                            warnings: ['Toujours fit sur train, transform sur test', 'Ne pas imputer la variable cible']
+                        }
+                    },
+                    {
+                        cmd: 'Detecter et traiter les outliers',
+                        desc: 'IQR, Z-score, IsolationForest',
+                        details: {
+                            explanation: 'Les valeurs aberrantes peuvent fausser les modeles. Detection par methodes statistiques (IQR, Z-score) ou algorithmiques (Isolation Forest).',
+                            syntax: 'Q1, Q3 = df["col"].quantile([0.25, 0.75])\nIQR = Q3 - Q1\noutliers = df[(df["col"] < Q1 - 1.5*IQR) | (df["col"] > Q3 + 1.5*IQR)]',
+                            options: [
+                                { flag: 'IQR', desc: 'Interquartile Range (Q3-Q1)' },
+                                { flag: 'Z-score', desc: '> 3 ecarts-types = outlier' },
+                                { flag: 'IsolationForest', desc: 'Algorithme non-supervise' }
+                            ],
+                            examples: [
+                                { code: '# Methode IQR\nQ1 = df["col"].quantile(0.25)\nQ3 = df["col"].quantile(0.75)\nIQR = Q3 - Q1\ndf_clean = df[(df["col"] >= Q1 - 1.5*IQR) & (df["col"] <= Q3 + 1.5*IQR)]', desc: 'Filtrage IQR' },
+                                { code: '# Z-score\nfrom scipy import stats\nz_scores = np.abs(stats.zscore(df["col"]))\ndf_clean = df[z_scores < 3]', desc: 'Filtrage Z-score' },
+                                { code: 'from sklearn.ensemble import IsolationForest\niso = IsolationForest(contamination=0.1)\ndf["outlier"] = iso.fit_predict(X)\ndf_clean = df[df["outlier"] == 1]', desc: 'Isolation Forest' }
+                            ],
+                            tips: ['IQR robuste aux distributions non-normales', 'Isolation Forest pour donnees multivariees'],
+                            warnings: ['Ne pas supprimer sans analyser les outliers', 'Certains outliers sont des donnees valides']
+                        }
+                    },
+                    {
+                        cmd: 'Equilibrer les classes',
+                        desc: 'SMOTE, RandomUnderSampler',
+                        details: {
+                            explanation: 'Les datasets desequilibres biaisent les modeles vers la classe majoritaire. Solutions : sur-echantillonnage, sous-echantillonnage, ou class_weight.',
+                            syntax: 'from imblearn.over_sampling import SMOTE\nsmote = SMOTE(random_state=42)\nX_res, y_res = smote.fit_resample(X, y)',
+                            options: [
+                                { flag: 'SMOTE', desc: 'Sur-echantillonnage synthetique' },
+                                { flag: 'RandomUnderSampler', desc: 'Sous-echantillonnage aleatoire' },
+                                { flag: 'class_weight="balanced"', desc: 'Ponderation des classes' }
+                            ],
+                            examples: [
+                                { code: 'pip install imbalanced-learn', desc: 'Installation' },
+                                { code: 'from imblearn.over_sampling import SMOTE\nsmote = SMOTE(random_state=42)\nX_res, y_res = smote.fit_resample(X_train, y_train)', desc: 'SMOTE' },
+                                { code: 'from imblearn.under_sampling import RandomUnderSampler\nrus = RandomUnderSampler(random_state=42)\nX_res, y_res = rus.fit_resample(X_train, y_train)', desc: 'Sous-echantillonnage' },
+                                { code: 'model = RandomForestClassifier(class_weight="balanced")', desc: 'Ponderation dans le modele' }
+                            ],
+                            tips: ['SMOTE uniquement sur train set', 'class_weight est souvent suffisant'],
+                            warnings: ['Ne jamais appliquer SMOTE sur test set', 'SMOTE peut creer du bruit']
+                        }
+                    },
+                    {
+                        cmd: 'Diviser train/test stratifie',
+                        desc: 'train_test_split, stratify',
+                        details: {
+                            explanation: 'Diviser les donnees en ensembles train et test en preservant la distribution des classes (stratification).',
+                            syntax: 'from sklearn.model_selection import train_test_split\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)',
+                            options: [
+                                { flag: 'test_size', desc: 'Proportion pour le test (0.2 = 20%)' },
+                                { flag: 'stratify', desc: 'Preserver les proportions de classes' },
+                                { flag: 'random_state', desc: 'Reproductibilite' },
+                                { flag: 'shuffle', desc: 'Melanger avant split (True)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import train_test_split\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, stratify=y, random_state=42\n)', desc: 'Split stratifie' },
+                                { code: '# Pour regression (pas de stratify)\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42\n)', desc: 'Split regression' },
+                                { code: '# Train/Val/Test split\nX_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3)\nX_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5)', desc: 'Split 70/15/15' }
+                            ],
+                            tips: ['Toujours stratify pour classification', 'random_state pour reproductibilite'],
+                            warnings: ['stratify impossible avec regression']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'feature-eng',
+                title: '⚙️ Feature Engineering',
+                icon: 'fa-cogs',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Normaliser et standardiser',
+                        desc: 'StandardScaler, MinMaxScaler',
+                        details: {
+                            explanation: 'Mettre les features a la meme echelle. Essentiel pour SVM, KNN, reseaux de neurones.',
+                            syntax: 'from sklearn.preprocessing import StandardScaler\nscaler = StandardScaler()\nX_scaled = scaler.fit_transform(X_train)',
+                            options: [
+                                { flag: 'StandardScaler', desc: 'Moyenne=0, ecart-type=1' },
+                                { flag: 'MinMaxScaler', desc: 'Valeurs entre 0 et 1' },
+                                { flag: 'RobustScaler', desc: 'Robuste aux outliers' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import StandardScaler\nscaler = StandardScaler()\nX_train_scaled = scaler.fit_transform(X_train)\nX_test_scaled = scaler.transform(X_test)', desc: 'Standardisation' },
+                                { code: 'from sklearn.preprocessing import MinMaxScaler\nscaler = MinMaxScaler(feature_range=(0, 1))\nX_scaled = scaler.fit_transform(X)', desc: 'Normalisation 0-1' },
+                                { code: 'from sklearn.preprocessing import RobustScaler\nscaler = RobustScaler()\nX_scaled = scaler.fit_transform(X)', desc: 'Robuste aux outliers' }
+                            ],
+                            tips: ['fit sur train, transform sur train ET test', 'Arbres de decision non affectes par echelle'],
+                            warnings: ['JAMAIS fit sur le test set (data leakage)']
+                        }
+                    },
+                    {
+                        cmd: 'Encoder les variables categorielles',
+                        desc: 'OneHotEncoder, OrdinalEncoder',
+                        details: {
+                            explanation: 'Convertir les categories en nombres. OneHot pour nominales, Ordinal pour ordinales, Target pour haute cardinalite.',
+                            syntax: 'from sklearn.preprocessing import OneHotEncoder\nenc = OneHotEncoder(sparse_output=False, handle_unknown="ignore")',
+                            options: [
+                                { flag: 'OneHotEncoder', desc: 'Colonnes binaires par categorie' },
+                                { flag: 'OrdinalEncoder', desc: 'Entiers avec ordre' },
+                                { flag: 'TargetEncoder', desc: 'Moyenne de la cible' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import OneHotEncoder\nohe = OneHotEncoder(sparse_output=False, handle_unknown="ignore")\nX_encoded = ohe.fit_transform(X[["color"]])', desc: 'One-Hot Encoding' },
+                                { code: 'from sklearn.preprocessing import OrdinalEncoder\noe = OrdinalEncoder(categories=[["S", "M", "L", "XL"]])\nX_encoded = oe.fit_transform(X[["size"]])', desc: 'Ordinal Encoding' },
+                                { code: 'from sklearn.preprocessing import TargetEncoder\nte = TargetEncoder()\nX_encoded = te.fit_transform(X[["city"]], y)', desc: 'Target Encoding' }
+                            ],
+                            tips: ['OneHot pour categories nominales (couleurs)', 'TargetEncoder pour haute cardinalite'],
+                            warnings: ['LabelEncoder uniquement pour y, pas X']
+                        }
+                    },
+                    {
+                        cmd: 'Creer des features polynomiales',
+                        desc: 'PolynomialFeatures',
+                        details: {
+                            explanation: 'Generer des features polynomiales et interactions pour capturer des relations non-lineaires.',
+                            syntax: 'from sklearn.preprocessing import PolynomialFeatures\npoly = PolynomialFeatures(degree=2, include_bias=False)',
+                            options: [
+                                { flag: 'degree', desc: 'Degre maximal des polynomes' },
+                                { flag: 'interaction_only', desc: 'Seulement les interactions' },
+                                { flag: 'include_bias', desc: 'Inclure colonne de 1' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import PolynomialFeatures\npoly = PolynomialFeatures(degree=2, include_bias=False)\nX_poly = poly.fit_transform(X)', desc: 'Polynomes degre 2' },
+                                { code: 'poly = PolynomialFeatures(degree=2, interaction_only=True)\nX_inter = poly.fit_transform(X)', desc: 'Interactions seulement' },
+                                { code: 'poly.get_feature_names_out()', desc: 'Noms des features creees' }
+                            ],
+                            tips: ['degree=2 ou 3 maximum', 'interaction_only reduit le nombre de features'],
+                            warnings: ['Explosion combinatoire avec haut degre', 'Risque overfitting']
+                        }
+                    },
+                    {
+                        cmd: 'Selectionner les meilleures features',
+                        desc: 'SelectKBest, RFE',
+                        details: {
+                            explanation: 'Reduire le nombre de features pour ameliorer les performances et la vitesse. Methodes : filtre, wrapper, embedded.',
+                            syntax: 'from sklearn.feature_selection import SelectKBest, f_classif\nselector = SelectKBest(f_classif, k=10)',
+                            options: [
+                                { flag: 'SelectKBest', desc: 'Garder les k meilleures' },
+                                { flag: 'RFE', desc: 'Elimination recursive' },
+                                { flag: 'feature_importances_', desc: 'Importance des arbres' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.feature_selection import SelectKBest, f_classif\nselector = SelectKBest(f_classif, k=10)\nX_selected = selector.fit_transform(X, y)', desc: 'K meilleures (classification)' },
+                                { code: 'from sklearn.feature_selection import RFE\nfrom sklearn.ensemble import RandomForestClassifier\nrfe = RFE(RandomForestClassifier(), n_features_to_select=10)\nX_selected = rfe.fit_transform(X, y)', desc: 'RFE avec Random Forest' },
+                                { code: 'rf = RandomForestClassifier().fit(X, y)\nimportances = rf.feature_importances_\ntop_features = np.argsort(importances)[-10:]', desc: 'Feature importances' }
+                            ],
+                            tips: ['f_classif pour classification, f_regression pour regression', 'RFE plus robuste mais plus lent'],
+                            warnings: ['Selection sur train set uniquement']
+                        }
+                    },
+                    {
+                        cmd: 'Reduire la dimensionnalite',
+                        desc: 'PCA, UMAP, t-SNE',
+                        details: {
+                            explanation: 'Projeter les donnees dans un espace de dimension reduite tout en preservant la structure.',
+                            syntax: 'from sklearn.decomposition import PCA\npca = PCA(n_components=0.95)\nX_reduced = pca.fit_transform(X)',
+                            options: [
+                                { flag: 'n_components', desc: 'Nombre ou variance expliquee' },
+                                { flag: 'PCA', desc: 'Lineaire, rapide' },
+                                { flag: 'UMAP', desc: 'Non-lineaire, preserves structure' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.decomposition import PCA\npca = PCA(n_components=0.95)  # 95% variance\nX_pca = pca.fit_transform(X)\nprint(f"Components: {pca.n_components_}")', desc: 'PCA avec variance' },
+                                { code: 'pca = PCA(n_components=50)\nX_pca = pca.fit_transform(X)\nprint(f"Variance expliquee: {pca.explained_variance_ratio_.sum():.2%}")', desc: 'PCA 50 dimensions' },
+                                { code: 'import umap\nreducer = umap.UMAP(n_components=2)\nX_umap = reducer.fit_transform(X)', desc: 'UMAP pour visualisation' },
+                                { code: 'from sklearn.manifold import TSNE\ntsne = TSNE(n_components=2, perplexity=30)\nX_tsne = tsne.fit_transform(X)', desc: 't-SNE pour visualisation' }
+                            ],
+                            tips: ['PCA pour preprocessing, UMAP/t-SNE pour visualisation', 'Normaliser avant PCA'],
+                            warnings: ['t-SNE lent sur grands datasets', 'UMAP necessite pip install umap-learn']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'classification',
+                title: '🎯 Classification sklearn',
+                icon: 'fa-tags',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Classifier avec Random Forest',
+                        desc: 'RandomForestClassifier',
+                        details: {
+                            explanation: 'Ensemble de arbres de decision. Robuste, peu de tuning necessaire, fournit feature importances.',
+                            syntax: 'from sklearn.ensemble import RandomForestClassifier\nrf = RandomForestClassifier(n_estimators=100, random_state=42)',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre de arbres (100-500)' },
+                                { flag: 'max_depth', desc: 'Profondeur max (None = illimite)' },
+                                { flag: 'min_samples_split', desc: 'Min samples pour diviser' },
+                                { flag: 'class_weight', desc: '"balanced" pour desequilibre' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import RandomForestClassifier\nrf = RandomForestClassifier(n_estimators=200, max_depth=10, random_state=42)\nrf.fit(X_train, y_train)\ny_pred = rf.predict(X_test)', desc: 'Entrainement et prediction' },
+                                { code: 'rf.feature_importances_', desc: 'Importance des features' },
+                                { code: 'rf.predict_proba(X_test)', desc: 'Probabilites par classe' }
+                            ],
+                            tips: ['Pas besoin de normaliser', 'n_jobs=-1 pour paralleliser'],
+                            warnings: ['Peut etre lent avec beaucoup de arbres']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser XGBoost/LightGBM',
+                        desc: 'xgb.XGBClassifier, lgb.LGBMClassifier',
+                        details: {
+                            explanation: 'Gradient boosting optimise. Tres performant, gagnant frequent sur Kaggle.',
+                            syntax: 'from xgboost import XGBClassifier\nxgb = XGBClassifier(n_estimators=100, learning_rate=0.1)',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre de arbres' },
+                                { flag: 'learning_rate', desc: 'Taux apprentissage (0.01-0.3)' },
+                                { flag: 'max_depth', desc: 'Profondeur (3-10)' },
+                                { flag: 'early_stopping_rounds', desc: 'Arret anticipe' }
+                            ],
+                            examples: [
+                                { code: 'pip install xgboost lightgbm', desc: 'Installation' },
+                                { code: 'from xgboost import XGBClassifier\nxgb = XGBClassifier(n_estimators=200, learning_rate=0.05, max_depth=6)\nxgb.fit(X_train, y_train)\ny_pred = xgb.predict(X_test)', desc: 'XGBoost' },
+                                { code: 'from lightgbm import LGBMClassifier\nlgb = LGBMClassifier(n_estimators=200, learning_rate=0.05)\nlgb.fit(X_train, y_train)', desc: 'LightGBM (plus rapide)' },
+                                { code: 'xgb.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10)', desc: 'Early stopping' }
+                            ],
+                            tips: ['LightGBM plus rapide que XGBoost', 'Supporte les valeurs manquantes'],
+                            warnings: ['pip install xgboost lightgbm necessaire']
+                        }
+                    },
+                    {
+                        cmd: 'Classifier avec SVM',
+                        desc: 'SVC, kernel, C, gamma',
+                        details: {
+                            explanation: 'Support Vector Machine. Excellent pour petits datasets, frontiere de decision optimale.',
+                            syntax: 'from sklearn.svm import SVC\nsvm = SVC(kernel="rbf", C=1.0, probability=True)',
+                            options: [
+                                { flag: 'kernel', desc: '"linear", "rbf", "poly"' },
+                                { flag: 'C', desc: 'Regularisation (petit = plus regulier)' },
+                                { flag: 'gamma', desc: 'Influence de chaque point' },
+                                { flag: 'probability', desc: 'True pour predict_proba' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.svm import SVC\nfrom sklearn.preprocessing import StandardScaler\n\nscaler = StandardScaler()\nX_train_scaled = scaler.fit_transform(X_train)\nX_test_scaled = scaler.transform(X_test)\n\nsvm = SVC(kernel="rbf", probability=True)\nsvm.fit(X_train_scaled, y_train)', desc: 'SVM avec scaling' },
+                                { code: 'svm = SVC(kernel="linear")', desc: 'SVM lineaire' },
+                                { code: 'svm.predict_proba(X_test_scaled)', desc: 'Probabilites' }
+                            ],
+                            tips: ['TOUJOURS normaliser les features', 'kernel="linear" si lineairement separable'],
+                            warnings: ['Lent sur grands datasets (> 10k)']
+                        }
+                    },
+                    {
+                        cmd: 'Classifier avec regression logistique',
+                        desc: 'LogisticRegression',
+                        details: {
+                            explanation: 'Modele lineaire de base pour classification. Simple, interpretable, bon baseline.',
+                            syntax: 'from sklearn.linear_model import LogisticRegression\nlr = LogisticRegression(max_iter=1000)',
+                            options: [
+                                { flag: 'C', desc: 'Inverse de regularisation' },
+                                { flag: 'penalty', desc: '"l1", "l2", "elasticnet"' },
+                                { flag: 'class_weight', desc: '"balanced" pour desequilibre' },
+                                { flag: 'max_iter', desc: 'Iterations max (1000+)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import LogisticRegression\nlr = LogisticRegression(max_iter=1000, class_weight="balanced")\nlr.fit(X_train, y_train)', desc: 'Logistic avec equilibrage' },
+                                { code: 'lr.coef_', desc: 'Coefficients (interpretabilite)' },
+                                { code: 'lr.predict_proba(X_test)[:, 1]', desc: 'Proba classe positive' }
+                            ],
+                            tips: ['Toujours un bon baseline', 'coef_ pour interpretabilite'],
+                            warnings: ['Augmenter max_iter si warning convergence']
+                        }
+                    },
+                    {
+                        cmd: 'Evaluer un classifieur',
+                        desc: 'accuracy, precision, recall, f1, roc_auc',
+                        details: {
+                            explanation: 'Metriques pour evaluer un classifieur. Choisir selon le probleme : accuracy, F1, AUC-ROC.',
+                            syntax: 'from sklearn.metrics import classification_report, roc_auc_score\nprint(classification_report(y_test, y_pred))',
+                            options: [
+                                { flag: 'accuracy', desc: '% predictions correctes' },
+                                { flag: 'precision', desc: 'TP / (TP + FP)' },
+                                { flag: 'recall', desc: 'TP / (TP + FN)' },
+                                { flag: 'f1', desc: 'Moyenne harmonique P et R' },
+                                { flag: 'roc_auc', desc: 'Aire sous courbe ROC' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import classification_report, confusion_matrix\nprint(classification_report(y_test, y_pred))', desc: 'Rapport complet' },
+                                { code: 'from sklearn.metrics import roc_auc_score\nauc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])', desc: 'AUC-ROC' },
+                                { code: 'from sklearn.metrics import ConfusionMatrixDisplay\nConfusionMatrixDisplay.from_predictions(y_test, y_pred).plot()', desc: 'Matrice de confusion' }
+                            ],
+                            tips: ['F1 pour classes desequilibrees', 'AUC-ROC robuste au seuil'],
+                            warnings: ['Accuracy trompeuse si desequilibre']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'regression',
+                title: '📈 Regression sklearn',
+                icon: 'fa-chart-line',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Regresser avec Random Forest',
+                        desc: 'RandomForestRegressor',
+                        details: {
+                            explanation: 'Version regression de Random Forest. Robuste, capture les non-linearites.',
+                            syntax: 'from sklearn.ensemble import RandomForestRegressor\nrf = RandomForestRegressor(n_estimators=100)',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre de arbres' },
+                                { flag: 'max_depth', desc: 'Profondeur max' },
+                                { flag: 'oob_score', desc: 'Score out-of-bag' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import RandomForestRegressor\nrf = RandomForestRegressor(n_estimators=100, random_state=42)\nrf.fit(X_train, y_train)\ny_pred = rf.predict(X_test)', desc: 'Random Forest regression' },
+                                { code: 'rf = RandomForestRegressor(oob_score=True)\nrf.fit(X, y)\nprint(f"OOB R2: {rf.oob_score_:.3f}")', desc: 'Avec OOB score' },
+                                { code: 'rf.feature_importances_', desc: 'Importance des features' }
+                            ],
+                            tips: ['oob_score pour estimation sans validation', 'Pas besoin de normaliser'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser XGBoost/LightGBM regression',
+                        desc: 'XGBRegressor, LGBMRegressor',
+                        details: {
+                            explanation: 'Gradient boosting pour regression. Tres performant sur donnees tabulaires.',
+                            syntax: 'from xgboost import XGBRegressor\nxgb = XGBRegressor(n_estimators=100, learning_rate=0.1)',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre de arbres' },
+                                { flag: 'learning_rate', desc: 'Taux apprentissage' },
+                                { flag: 'max_depth', desc: 'Profondeur' },
+                                { flag: 'objective', desc: '"reg:squarederror" par defaut' }
+                            ],
+                            examples: [
+                                { code: 'from xgboost import XGBRegressor\nxgb = XGBRegressor(n_estimators=200, learning_rate=0.05)\nxgb.fit(X_train, y_train)', desc: 'XGBoost regression' },
+                                { code: 'from lightgbm import LGBMRegressor\nlgb = LGBMRegressor(n_estimators=200)\nlgb.fit(X_train, y_train)', desc: 'LightGBM regression' }
+                            ],
+                            tips: ['Early stopping avec validation set', 'LightGBM plus rapide'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Regression regularisee',
+                        desc: 'Ridge, Lasso, ElasticNet',
+                        details: {
+                            explanation: 'Regression lineaire avec regularisation pour eviter overfitting. Lasso fait selection de features.',
+                            syntax: 'from sklearn.linear_model import Ridge, Lasso, ElasticNet',
+                            options: [
+                                { flag: 'Ridge (L2)', desc: 'Coefficients petits mais non nuls' },
+                                { flag: 'Lasso (L1)', desc: 'Coefficients a zero (selection)' },
+                                { flag: 'ElasticNet', desc: 'Combinaison L1 + L2' },
+                                { flag: 'alpha', desc: 'Force de regularisation' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import Ridge\nridge = Ridge(alpha=1.0)\nridge.fit(X_train, y_train)', desc: 'Ridge regression' },
+                                { code: 'from sklearn.linear_model import Lasso\nlasso = Lasso(alpha=0.1)\nlasso.fit(X_train, y_train)\nprint(f"Features non-zero: {np.sum(lasso.coef_ != 0)}")', desc: 'Lasso (selection features)' },
+                                { code: 'from sklearn.linear_model import RidgeCV, LassoCV\nridge_cv = RidgeCV(alphas=[0.1, 1, 10]).fit(X, y)\nprint(f"Best alpha: {ridge_cv.alpha_}")', desc: 'Cross-validation du alpha' }
+                            ],
+                            tips: ['Lasso pour selection automatique', 'RidgeCV/LassoCV pour trouver alpha'],
+                            warnings: ['Normaliser les features avant regularisation']
+                        }
+                    },
+                    {
+                        cmd: 'Regression avec SVR',
+                        desc: 'SVR, kernel, epsilon',
+                        details: {
+                            explanation: 'Support Vector Regression. Bon pour petits datasets non-lineaires.',
+                            syntax: 'from sklearn.svm import SVR\nsvr = SVR(kernel="rbf")',
+                            options: [
+                                { flag: 'kernel', desc: '"linear", "rbf", "poly"' },
+                                { flag: 'C', desc: 'Regularisation' },
+                                { flag: 'epsilon', desc: 'Marge de tolerance' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.svm import SVR\nfrom sklearn.preprocessing import StandardScaler\n\nscaler = StandardScaler()\nX_train_scaled = scaler.fit_transform(X_train)\n\nsvr = SVR(kernel="rbf")\nsvr.fit(X_train_scaled, y_train)', desc: 'SVR avec scaling' }
+                            ],
+                            tips: ['TOUJOURS normaliser', 'Bon pour petits datasets'],
+                            warnings: ['Lent sur grands datasets']
+                        }
+                    },
+                    {
+                        cmd: 'Evaluer un regresseur',
+                        desc: 'MSE, RMSE, MAE, R2',
+                        details: {
+                            explanation: 'Metriques pour evaluer une regression : R2, RMSE, MAE.',
+                            syntax: 'from sklearn.metrics import mean_squared_error, r2_score',
+                            options: [
+                                { flag: 'R2', desc: 'Variance expliquee (1 = parfait)' },
+                                { flag: 'RMSE', desc: 'Racine MSE (meme unite que y)' },
+                                { flag: 'MAE', desc: 'Erreur absolue moyenne' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score\n\nr2 = r2_score(y_test, y_pred)\nrmse = mean_squared_error(y_test, y_pred, squared=False)\nmae = mean_absolute_error(y_test, y_pred)\n\nprint(f"R2: {r2:.3f}, RMSE: {rmse:.2f}, MAE: {mae:.2f}")', desc: 'Toutes les metriques' }
+                            ],
+                            tips: ['R2 > 0.7 generalement bon', 'MAE plus robuste aux outliers'],
+                            warnings: ['R2 peut etre negatif si modele tres mauvais']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'validation',
+                title: '🔄 Validation & Tuning',
+                icon: 'fa-sync-alt',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Validation croisee K-Fold',
+                        desc: 'cross_val_score, KFold',
+                        details: {
+                            explanation: 'Evaluer le modele sur plusieurs splits pour une estimation robuste des performances.',
+                            syntax: 'from sklearn.model_selection import cross_val_score\nscores = cross_val_score(model, X, y, cv=5)',
+                            options: [
+                                { flag: 'cv', desc: 'Nombre de folds (5 ou 10)' },
+                                { flag: 'scoring', desc: 'Metrique ("accuracy", "f1", "neg_mse")' },
+                                { flag: 'n_jobs', desc: '-1 pour paralleliser' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import cross_val_score\nscores = cross_val_score(model, X, y, cv=5, scoring="accuracy")\nprint(f"{scores.mean():.3f} +/- {scores.std():.3f}")', desc: 'CV 5-fold' },
+                                { code: 'from sklearn.model_selection import StratifiedKFold\nskf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)\nscores = cross_val_score(model, X, y, cv=skf)', desc: 'Stratified K-Fold' },
+                                { code: 'from sklearn.model_selection import cross_val_predict\ny_pred_cv = cross_val_predict(model, X, y, cv=5)', desc: 'Predictions CV' }
+                            ],
+                            tips: ['cv=5 ou 10 standard', 'StratifiedKFold pour classification'],
+                            warnings: ['Moyenne +/- ecart-type pour estimer variance']
+                        }
+                    },
+                    {
+                        cmd: 'Optimiser hyperparametres Grid',
+                        desc: 'GridSearchCV, param_grid',
+                        details: {
+                            explanation: 'Tester toutes les combinaisons de hyperparametres. Exhaustif mais peut etre long.',
+                            syntax: 'from sklearn.model_selection import GridSearchCV\ngrid = GridSearchCV(model, param_grid, cv=5)',
+                            options: [
+                                { flag: 'param_grid', desc: 'Dict des parametres a tester' },
+                                { flag: 'cv', desc: 'Nombre de folds' },
+                                { flag: 'scoring', desc: 'Metrique a optimiser' },
+                                { flag: 'n_jobs', desc: '-1 pour paralleliser' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import GridSearchCV\n\nparam_grid = {\n    "n_estimators": [100, 200],\n    "max_depth": [5, 10, None]\n}\n\ngrid = GridSearchCV(RandomForestClassifier(), param_grid, cv=5, n_jobs=-1)\ngrid.fit(X_train, y_train)\n\nprint(f"Best params: {grid.best_params_}")\nprint(f"Best score: {grid.best_score_:.3f}")', desc: 'Grid Search complet' },
+                                { code: 'grid.best_estimator_', desc: 'Meilleur modele entraine' }
+                            ],
+                            tips: ['best_estimator_ est deja entraine', 'cv_results_ pour tous les resultats'],
+                            warnings: ['O(n^k) combinaisons - peut etre tres long']
+                        }
+                    },
+                    {
+                        cmd: 'Optimiser avec Optuna',
+                        desc: 'optuna.create_study, suggest_*',
+                        details: {
+                            explanation: 'Optimisation bayesienne des hyperparametres. Plus efficace que Grid/Random Search.',
+                            syntax: 'import optuna\nstudy = optuna.create_study(direction="maximize")\nstudy.optimize(objective, n_trials=100)',
+                            options: [
+                                { flag: 'direction', desc: '"maximize" ou "minimize"' },
+                                { flag: 'n_trials', desc: 'Nombre de essais' },
+                                { flag: 'suggest_int', desc: 'Entier dans intervalle' },
+                                { flag: 'suggest_float', desc: 'Float dans intervalle' }
+                            ],
+                            examples: [
+                                { code: 'pip install optuna', desc: 'Installation' },
+                                { code: 'import optuna\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.model_selection import cross_val_score\n\ndef objective(trial):\n    n_estimators = trial.suggest_int("n_estimators", 50, 300)\n    max_depth = trial.suggest_int("max_depth", 3, 15)\n    \n    rf = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)\n    score = cross_val_score(rf, X, y, cv=5).mean()\n    return score\n\nstudy = optuna.create_study(direction="maximize")\nstudy.optimize(objective, n_trials=50)\n\nprint(f"Best params: {study.best_params}")', desc: 'Optuna complet' }
+                            ],
+                            tips: ['Plus efficace que GridSearch', 'Visualisations integrees'],
+                            warnings: ['pip install optuna necessaire']
+                        }
+                    },
+                    {
+                        cmd: 'Analyser courbes apprentissage',
+                        desc: 'learning_curve, validation_curve',
+                        details: {
+                            explanation: 'Diagnostiquer overfitting/underfitting avec courbes de apprentissage et validation.',
+                            syntax: 'from sklearn.model_selection import learning_curve',
+                            options: [
+                                { flag: 'train_sizes', desc: 'Proportions du train set' },
+                                { flag: 'cv', desc: 'Nombre de folds' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import learning_curve\nimport matplotlib.pyplot as plt\n\ntrain_sizes, train_scores, val_scores = learning_curve(\n    model, X, y, train_sizes=[0.2, 0.4, 0.6, 0.8, 1.0], cv=5\n)\n\nplt.plot(train_sizes, train_scores.mean(axis=1), label="Train")\nplt.plot(train_sizes, val_scores.mean(axis=1), label="Validation")\nplt.legend()\nplt.show()', desc: 'Learning curve' },
+                                { code: 'from sklearn.model_selection import validation_curve\n\ntrain_scores, val_scores = validation_curve(\n    model, X, y, param_name="max_depth", param_range=[1, 5, 10, 15, 20], cv=5\n)', desc: 'Validation curve' }
+                            ],
+                            tips: ['Gap train/val = overfitting', 'Les deux bas = underfitting'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Prevenir overfitting',
+                        desc: 'early_stopping, regularization',
+                        details: {
+                            explanation: 'Techniques pour eviter le sur-apprentissage : early stopping, regularisation, dropout.',
+                            syntax: 'model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10)',
+                            options: [
+                                { flag: 'early_stopping', desc: 'Arret si pas amelioration' },
+                                { flag: 'regularisation', desc: 'L1, L2, alpha' },
+                                { flag: 'max_depth', desc: 'Limiter profondeur arbres' }
+                            ],
+                            examples: [
+                                { code: 'from xgboost import XGBClassifier\nxgb = XGBClassifier(n_estimators=1000)\nxgb.fit(X_train, y_train, \n        eval_set=[(X_val, y_val)], \n        early_stopping_rounds=10,\n        verbose=False)', desc: 'Early stopping XGBoost' },
+                                { code: 'from sklearn.ensemble import RandomForestClassifier\nrf = RandomForestClassifier(max_depth=10, min_samples_split=10)', desc: 'Limiter complexite RF' }
+                            ],
+                            tips: ['Early stopping tres efficace', 'Toujours valider sur validation set'],
+                            warnings: ['Garder un test set separe du validation set']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'dl-basics',
+                title: '🧠 Deep Learning Basics',
+                icon: 'fa-brain',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Creer un reseau sequentiel',
+                        desc: 'torch.nn.Sequential, layers',
+                        details: {
+                            explanation: 'Empiler des couches lineairement pour creer un reseau simple.',
+                            syntax: 'import torch.nn as nn\nmodel = nn.Sequential(\n    nn.Linear(input_dim, 128),\n    nn.ReLU(),\n    nn.Linear(128, num_classes)\n)',
+                            options: [
+                                { flag: 'nn.Linear', desc: 'Couche dense (fully connected)' },
+                                { flag: 'nn.ReLU', desc: 'Activation ReLU' },
+                                { flag: 'nn.Dropout', desc: 'Regularisation dropout' }
+                            ],
+                            examples: [
+                                { code: 'import torch\nimport torch.nn as nn\n\nmodel = nn.Sequential(\n    nn.Linear(784, 256),\n    nn.ReLU(),\n    nn.Dropout(0.3),\n    nn.Linear(256, 128),\n    nn.ReLU(),\n    nn.Linear(128, 10)\n)', desc: 'MLP pour MNIST' },
+                                { code: 'print(model)', desc: 'Afficher architecture' }
+                            ],
+                            tips: ['Sequential pour architectures simples', 'Dropout entre couches pour regularisation'],
+                            warnings: ['pip install torch necessaire']
+                        }
+                    },
+                    {
+                        cmd: 'Definir une classe de modele',
+                        desc: 'nn.Module, __init__, forward',
+                        details: {
+                            explanation: 'Definir un modele PyTorch avec plus de flexibilite en heritant de nn.Module.',
+                            syntax: 'class MyModel(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.fc1 = nn.Linear(784, 128)\n        \n    def forward(self, x):\n        return self.fc1(x)',
+                            options: [
+                                { flag: '__init__', desc: 'Definir les couches' },
+                                { flag: 'forward', desc: 'Definir le passage avant' },
+                                { flag: 'super().__init__()', desc: 'Initialiser nn.Module' }
+                            ],
+                            examples: [
+                                { code: 'import torch.nn as nn\nimport torch.nn.functional as F\n\nclass MLP(nn.Module):\n    def __init__(self, input_dim, hidden_dim, num_classes):\n        super().__init__()\n        self.fc1 = nn.Linear(input_dim, hidden_dim)\n        self.fc2 = nn.Linear(hidden_dim, num_classes)\n        \n    def forward(self, x):\n        x = F.relu(self.fc1(x))\n        x = self.fc2(x)\n        return x\n\nmodel = MLP(784, 256, 10)', desc: 'MLP personnalise' }
+                            ],
+                            tips: ['Plus flexible que Sequential', 'forward() appele automatiquement'],
+                            warnings: ['Toujours appeler super().__init__()']
+                        }
+                    },
+                    {
+                        cmd: 'Configurer optimiseur et loss',
+                        desc: 'Adam, CrossEntropyLoss, lr',
+                        details: {
+                            explanation: 'Choisir la fonction de perte et optimiseur pour entrainement.',
+                            syntax: 'criterion = nn.CrossEntropyLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=0.001)',
+                            options: [
+                                { flag: 'CrossEntropyLoss', desc: 'Classification multiclasse' },
+                                { flag: 'BCEWithLogitsLoss', desc: 'Classification binaire' },
+                                { flag: 'MSELoss', desc: 'Regression' },
+                                { flag: 'Adam', desc: 'Optimiseur adaptatif' }
+                            ],
+                            examples: [
+                                { code: 'import torch.nn as nn\nimport torch.optim as optim\n\n# Classification multiclasse\ncriterion = nn.CrossEntropyLoss()\noptimizer = optim.Adam(model.parameters(), lr=1e-3)', desc: 'Classification' },
+                                { code: '# Classification binaire\ncriterion = nn.BCEWithLogitsLoss()\noptimizer = optim.Adam(model.parameters(), lr=1e-3)', desc: 'Binaire' },
+                                { code: '# Regression\ncriterion = nn.MSELoss()\noptimizer = optim.Adam(model.parameters(), lr=1e-3)', desc: 'Regression' }
+                            ],
+                            tips: ['Adam est un bon defaut', 'lr entre 1e-4 et 1e-2'],
+                            warnings: ['CrossEntropyLoss attend des logits, pas softmax']
+                        }
+                    },
+                    {
+                        cmd: 'Boucle entrainement',
+                        desc: 'train loop, backward, step',
+                        details: {
+                            explanation: 'La boucle entrainement PyTorch : forward, loss, backward, step.',
+                            syntax: 'for epoch in range(epochs):\n    for X, y in dataloader:\n        optimizer.zero_grad()\n        outputs = model(X)\n        loss = criterion(outputs, y)\n        loss.backward()\n        optimizer.step()',
+                            options: [
+                                { flag: 'zero_grad()', desc: 'Reset gradients' },
+                                { flag: 'backward()', desc: 'Calcul gradients' },
+                                { flag: 'step()', desc: 'Mise a jour poids' }
+                            ],
+                            examples: [
+                                { code: 'from torch.utils.data import DataLoader, TensorDataset\n\n# Creer DataLoader\ndataset = TensorDataset(X_train_tensor, y_train_tensor)\ndataloader = DataLoader(dataset, batch_size=32, shuffle=True)\n\n# Boucle entrainement\nfor epoch in range(10):\n    model.train()\n    total_loss = 0\n    for X_batch, y_batch in dataloader:\n        optimizer.zero_grad()\n        outputs = model(X_batch)\n        loss = criterion(outputs, y_batch)\n        loss.backward()\n        optimizer.step()\n        total_loss += loss.item()\n    print(f"Epoch {epoch+1}, Loss: {total_loss/len(dataloader):.4f}")', desc: 'Boucle complete' }
+                            ],
+                            tips: ['model.train() pour mode entrainement', 'model.eval() pour inference'],
+                            warnings: ['Ne pas oublier zero_grad()']
+                        }
+                    },
+                    {
+                        cmd: 'Sauvegarder/charger un modele',
+                        desc: 'torch.save, torch.load',
+                        details: {
+                            explanation: 'Sauvegarder et charger les poids du modele.',
+                            syntax: 'torch.save(model.state_dict(), "model.pth")\nmodel.load_state_dict(torch.load("model.pth"))',
+                            options: [
+                                { flag: 'state_dict()', desc: 'Dictionnaire des poids' },
+                                { flag: 'torch.save', desc: 'Sauvegarder' },
+                                { flag: 'torch.load', desc: 'Charger' }
+                            ],
+                            examples: [
+                                { code: '# Sauvegarder\ntorch.save(model.state_dict(), "model.pth")', desc: 'Sauvegarder poids' },
+                                { code: '# Charger\nmodel = MyModel()  # Recreer architecture\nmodel.load_state_dict(torch.load("model.pth"))\nmodel.eval()', desc: 'Charger poids' },
+                                { code: '# Sauvegarder modele complet (moins recommande)\ntorch.save(model, "model_complete.pth")', desc: 'Modele complet' }
+                            ],
+                            tips: ['Preferer state_dict() au modele complet', 'model.eval() apres chargement'],
+                            warnings: ['Recreer architecture identique avant load']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'cnn-vision',
+                title: '🖼️ CNN & Vision',
+                icon: 'fa-image',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Construire un CNN',
+                        desc: 'Conv2d, MaxPool2d, BatchNorm2d',
+                        details: {
+                            explanation: 'Creer un reseau convolutif pour traitement images.',
+                            syntax: 'nn.Conv2d(in_channels, out_channels, kernel_size)\nnn.MaxPool2d(kernel_size)',
+                            options: [
+                                { flag: 'Conv2d', desc: 'Couche convolutive' },
+                                { flag: 'MaxPool2d', desc: 'Pooling max' },
+                                { flag: 'BatchNorm2d', desc: 'Normalisation batch' }
+                            ],
+                            examples: [
+                                { code: 'import torch.nn as nn\n\nclass CNN(nn.Module):\n    def __init__(self, num_classes=10):\n        super().__init__()\n        self.conv_layers = nn.Sequential(\n            nn.Conv2d(3, 32, kernel_size=3, padding=1),\n            nn.BatchNorm2d(32),\n            nn.ReLU(),\n            nn.MaxPool2d(2),\n            nn.Conv2d(32, 64, kernel_size=3, padding=1),\n            nn.BatchNorm2d(64),\n            nn.ReLU(),\n            nn.MaxPool2d(2)\n        )\n        self.fc = nn.Linear(64 * 8 * 8, num_classes)\n        \n    def forward(self, x):\n        x = self.conv_layers(x)\n        x = x.view(x.size(0), -1)\n        return self.fc(x)', desc: 'CNN simple' }
+                            ],
+                            tips: ['BatchNorm accelere entrainement', 'Padding="same" preserve dimensions'],
+                            warnings: ['Calculer dimensions apres pooling']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser un modele pre-entraine',
+                        desc: 'torchvision.models, ResNet',
+                        details: {
+                            explanation: 'Charger des modeles pre-entraines sur ImageNet pour transfer learning.',
+                            syntax: 'from torchvision import models\nmodel = models.resnet50(weights="IMAGENET1K_V2")',
+                            options: [
+                                { flag: 'ResNet', desc: 'resnet18, resnet50, resnet101' },
+                                { flag: 'EfficientNet', desc: 'efficientnet_b0 a b7' },
+                                { flag: 'ViT', desc: 'Vision Transformer' }
+                            ],
+                            examples: [
+                                { code: 'from torchvision import models\n\n# Charger ResNet pre-entraine\nmodel = models.resnet50(weights="IMAGENET1K_V2")\n\n# Remplacer derniere couche pour notre tache\nnum_classes = 10\nmodel.fc = nn.Linear(model.fc.in_features, num_classes)', desc: 'ResNet transfer learning' },
+                                { code: 'model = models.efficientnet_b0(weights="IMAGENET1K_V1")\nmodel.classifier[1] = nn.Linear(1280, num_classes)', desc: 'EfficientNet' }
+                            ],
+                            tips: ['Geler couches avec requires_grad=False', 'EfficientNet bon ratio performance/taille'],
+                            warnings: ['Normaliser images comme ImageNet']
+                        }
+                    },
+                    {
+                        cmd: 'Fine-tuner un modele',
+                        desc: 'freeze layers, transfer learning',
+                        details: {
+                            explanation: 'Adapter un modele pre-entraine a notre tache en gelant/degelant des couches.',
+                            syntax: 'for param in model.parameters():\n    param.requires_grad = False\nmodel.fc.requires_grad = True',
+                            options: [
+                                { flag: 'requires_grad=False', desc: 'Geler les poids' },
+                                { flag: 'Fine-tuning partiel', desc: 'Degeler les dernieres couches' }
+                            ],
+                            examples: [
+                                { code: '# Geler tout sauf derniere couche\nfor param in model.parameters():\n    param.requires_grad = False\n\n# Degeler derniere couche\nfor param in model.fc.parameters():\n    param.requires_grad = True', desc: 'Feature extraction' },
+                                { code: '# Fine-tuning progressif\nfor param in model.layer4.parameters():\n    param.requires_grad = True', desc: 'Degeler dernier bloc' },
+                                { code: '# Learning rate different par groupe\noptimizer = optim.Adam([\n    {"params": model.fc.parameters(), "lr": 1e-3},\n    {"params": model.layer4.parameters(), "lr": 1e-4}\n])', desc: 'LR discriminatif' }
+                            ],
+                            tips: ['Commencer par feature extraction', 'LR plus petit pour couches pre-entrainees'],
+                            warnings: ['Fine-tuning complet risque overfitting']
+                        }
+                    },
+                    {
+                        cmd: 'Augmenter les images',
+                        desc: 'transforms, RandomHorizontalFlip',
+                        details: {
+                            explanation: 'Data augmentation pour augmenter la variete du dataset et reduire overfitting.',
+                            syntax: 'from torchvision import transforms\ntransform = transforms.Compose([...])',
+                            options: [
+                                { flag: 'RandomHorizontalFlip', desc: 'Flip horizontal' },
+                                { flag: 'RandomRotation', desc: 'Rotation aleatoire' },
+                                { flag: 'ColorJitter', desc: 'Variation couleurs' },
+                                { flag: 'RandomCrop', desc: 'Crop aleatoire' }
+                            ],
+                            examples: [
+                                { code: 'from torchvision import transforms\n\ntrain_transform = transforms.Compose([\n    transforms.Resize(256),\n    transforms.RandomCrop(224),\n    transforms.RandomHorizontalFlip(),\n    transforms.ColorJitter(brightness=0.2, contrast=0.2),\n    transforms.ToTensor(),\n    transforms.Normalize(mean=[0.485, 0.456, 0.406], \n                         std=[0.229, 0.224, 0.225])\n])\n\nval_transform = transforms.Compose([\n    transforms.Resize(256),\n    transforms.CenterCrop(224),\n    transforms.ToTensor(),\n    transforms.Normalize(mean=[0.485, 0.456, 0.406], \n                         std=[0.229, 0.224, 0.225])\n])', desc: 'Transforms train/val' }
+                            ],
+                            tips: ['Augmentation uniquement sur train', 'Normalisation ImageNet pour transfer'],
+                            warnings: ['Pas augmentation sur validation/test']
+                        }
+                    },
+                    {
+                        cmd: 'Classifier des images',
+                        desc: 'ImageFolder, DataLoader',
+                        details: {
+                            explanation: 'Pipeline complet pour classification images avec PyTorch.',
+                            syntax: 'from torchvision.datasets import ImageFolder\nfrom torch.utils.data import DataLoader',
+                            options: [
+                                { flag: 'ImageFolder', desc: 'Dataset depuis dossiers' },
+                                { flag: 'DataLoader', desc: 'Batching et shuffling' }
+                            ],
+                            examples: [
+                                { code: 'from torchvision.datasets import ImageFolder\nfrom torch.utils.data import DataLoader\n\n# Structure: data/train/class1/, data/train/class2/, ...\ntrain_dataset = ImageFolder("data/train", transform=train_transform)\nval_dataset = ImageFolder("data/val", transform=val_transform)\n\ntrain_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)\nval_loader = DataLoader(val_dataset, batch_size=32)\n\nprint(f"Classes: {train_dataset.classes}")', desc: 'Dataset ImageFolder' },
+                                { code: '# Boucle entrainement\nfor images, labels in train_loader:\n    images = images.to(device)\n    labels = labels.to(device)\n    outputs = model(images)\n    loss = criterion(outputs, labels)', desc: 'Iteration sur batches' }
+                            ],
+                            tips: ['Organiser images par dossier de classe', 'num_workers pour chargement parallele'],
+                            warnings: ['Structure dossiers: root/class_name/image.jpg']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'nlp-transformers',
+                title: '📝 NLP & Transformers',
+                icon: 'fa-language',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Tokenizer avec HuggingFace',
+                        desc: 'AutoTokenizer, encode, padding',
+                        details: {
+                            explanation: 'Convertir du texte en tokens numeriques pour les modeles Transformers.',
+                            syntax: 'from transformers import AutoTokenizer\ntokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")',
+                            options: [
+                                { flag: 'padding', desc: 'Ajouter padding a max_length' },
+                                { flag: 'truncation', desc: 'Tronquer si trop long' },
+                                { flag: 'max_length', desc: 'Longueur max' },
+                                { flag: 'return_tensors', desc: '"pt" pour PyTorch' }
+                            ],
+                            examples: [
+                                { code: 'pip install transformers', desc: 'Installation' },
+                                { code: 'from transformers import AutoTokenizer\n\ntokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")\n\ntexts = ["Hello world", "How are you?"]\nencoded = tokenizer(texts, padding=True, truncation=True, \n                    max_length=128, return_tensors="pt")\n\nprint(encoded.keys())  # input_ids, attention_mask', desc: 'Tokenization batch' },
+                                { code: 'tokenizer.decode(encoded["input_ids"][0])', desc: 'Decoder tokens' }
+                            ],
+                            tips: ['AutoTokenizer charge le bon tokenizer', 'padding=True pour batches'],
+                            warnings: ['pip install transformers necessaire']
+                        }
+                    },
+                    {
+                        cmd: 'Charger un modele pre-entraine',
+                        desc: 'AutoModel, from_pretrained',
+                        details: {
+                            explanation: 'Charger un modele Transformer pre-entraine (BERT, RoBERTa, etc.).',
+                            syntax: 'from transformers import AutoModel\nmodel = AutoModel.from_pretrained("bert-base-uncased")',
+                            options: [
+                                { flag: 'AutoModel', desc: 'Modele de base (embeddings)' },
+                                { flag: 'AutoModelForSequenceClassification', desc: 'Classification' },
+                                { flag: 'AutoModelForTokenClassification', desc: 'NER' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import AutoModel, AutoTokenizer\n\nmodel_name = "bert-base-uncased"\ntokenizer = AutoTokenizer.from_pretrained(model_name)\nmodel = AutoModel.from_pretrained(model_name)\n\n# Inference\ntext = "Hello, how are you?"\ninputs = tokenizer(text, return_tensors="pt")\noutputs = model(**inputs)\n\n# outputs.last_hidden_state: [batch, seq_len, hidden_dim]', desc: 'Charger BERT' }
+                            ],
+                            tips: ['Modeles populaires: bert, roberta, distilbert', 'CLS token pour classification'],
+                            warnings: ['Modeles volumineux (plusieurs GB)']
+                        }
+                    },
+                    {
+                        cmd: 'Fine-tuner BERT/RoBERTa',
+                        desc: 'Trainer, TrainingArguments',
+                        details: {
+                            explanation: 'Fine-tuner un Transformer avec le Trainer de HuggingFace.',
+                            syntax: 'from transformers import Trainer, TrainingArguments',
+                            options: [
+                                { flag: 'learning_rate', desc: 'Typiquement 2e-5 a 5e-5' },
+                                { flag: 'num_train_epochs', desc: '3-5 pour fine-tuning' },
+                                { flag: 'per_device_train_batch_size', desc: 'Batch size par GPU' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments\nfrom datasets import load_dataset\n\n# Charger dataset\ndataset = load_dataset("imdb")\n\n# Tokenizer\ndef tokenize(batch):\n    return tokenizer(batch["text"], padding=True, truncation=True, max_length=512)\n\ndataset = dataset.map(tokenize, batched=True)\n\n# Modele\nmodel = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)\n\n# Training\ntraining_args = TrainingArguments(\n    output_dir="./results",\n    num_train_epochs=3,\n    per_device_train_batch_size=16,\n    learning_rate=2e-5,\n    evaluation_strategy="epoch"\n)\n\ntrainer = Trainer(model=model, args=training_args, \n                  train_dataset=dataset["train"], eval_dataset=dataset["test"])\ntrainer.train()', desc: 'Fine-tuning complet' }
+                            ],
+                            tips: ['LR petit (2e-5) pour fine-tuning', 'Peu d epochs (3-5)'],
+                            warnings: ['pip install datasets pour load_dataset']
+                        }
+                    },
+                    {
+                        cmd: 'Classification de texte',
+                        desc: 'AutoModelForSequenceClassification',
+                        details: {
+                            explanation: 'Classification de texte (sentiment, topic) avec Transformers.',
+                            syntax: 'from transformers import pipeline\nclassifier = pipeline("text-classification")',
+                            options: [
+                                { flag: 'text-classification', desc: 'Classification de texte' },
+                                { flag: 'sentiment-analysis', desc: 'Analyse de sentiment' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import pipeline\n\n# Pipeline pre-configure\nclassifier = pipeline("sentiment-analysis")\nresult = classifier("I love this product!")\nprint(result)  # [{"label": "POSITIVE", "score": 0.99}]', desc: 'Pipeline simple' },
+                                { code: 'from transformers import AutoModelForSequenceClassification, AutoTokenizer\n\nmodel = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=3)\ntokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")\n\ninputs = tokenizer("Great movie!", return_tensors="pt")\noutputs = model(**inputs)\nlogits = outputs.logits', desc: 'Modele direct' }
+                            ],
+                            tips: ['pipeline() pour inference rapide', 'num_labels selon nombre de classes'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Generer des embeddings',
+                        desc: 'sentence-transformers, encode',
+                        details: {
+                            explanation: 'Generer des embeddings de phrases pour recherche semantique, clustering.',
+                            syntax: 'from sentence_transformers import SentenceTransformer\nmodel = SentenceTransformer("all-MiniLM-L6-v2")',
+                            options: [
+                                { flag: 'all-MiniLM-L6-v2', desc: 'Rapide et efficace' },
+                                { flag: 'all-mpnet-base-v2', desc: 'Meilleure qualite' }
+                            ],
+                            examples: [
+                                { code: 'pip install sentence-transformers', desc: 'Installation' },
+                                { code: 'from sentence_transformers import SentenceTransformer\n\nmodel = SentenceTransformer("all-MiniLM-L6-v2")\n\nsentences = ["Hello world", "How are you?", "Machine learning is great"]\nembeddings = model.encode(sentences)\n\nprint(embeddings.shape)  # (3, 384)', desc: 'Generer embeddings' },
+                                { code: 'from sklearn.metrics.pairwise import cosine_similarity\n\nsimilarity = cosine_similarity(embeddings)\nprint(similarity)', desc: 'Similarite cosinus' }
+                            ],
+                            tips: ['Embeddings pour recherche semantique', 'Modeles optimises pour phrases'],
+                            warnings: ['pip install sentence-transformers']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'explainable-ml',
+                title: '🔍 Explainable ML',
+                icon: 'fa-search',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Expliquer globalement avec SHAP',
+                        desc: 'shap.Explainer, summary_plot',
+                        details: {
+                            explanation: 'SHAP (SHapley Additive exPlanations) calcule la contribution de chaque feature aux predictions. Vue globale avec summary_plot.',
+                            syntax: 'import shap\nexplainer = shap.Explainer(model)\nshap_values = explainer(X)',
+                            options: [
+                                { flag: 'TreeExplainer', desc: 'Optimise pour arbres (RF, XGB)' },
+                                { flag: 'summary_plot', desc: 'Vue globale des importances' },
+                                { flag: 'bar_plot', desc: 'Importance moyenne absolue' }
+                            ],
+                            examples: [
+                                { code: 'pip install shap', desc: 'Installation' },
+                                { code: 'import shap\n\n# Pour Random Forest, XGBoost, LightGBM\nexplainer = shap.TreeExplainer(model)\nshap_values = explainer.shap_values(X_test)\n\n# Vue globale\nshap.summary_plot(shap_values, X_test)', desc: 'SHAP pour arbres' },
+                                { code: '# SHAP generique (plus lent)\nexplainer = shap.Explainer(model.predict, X_train)\nshap_values = explainer(X_test)\n\nshap.plots.beeswarm(shap_values)', desc: 'SHAP generique' },
+                                { code: 'shap.plots.bar(shap_values)', desc: 'Importance moyenne' }
+                            ],
+                            tips: ['TreeExplainer tres rapide pour arbres', 'summary_plot montre distribution des impacts'],
+                            warnings: ['SHAP generique peut etre lent sur grands datasets']
+                        }
+                    },
+                    {
+                        cmd: 'Expliquer localement avec SHAP',
+                        desc: 'shap.force_plot, waterfall_plot',
+                        details: {
+                            explanation: 'Expliquer une prediction individuelle en montrant la contribution de chaque feature.',
+                            syntax: 'shap.plots.waterfall(shap_values[0])\nshap.plots.force(shap_values[0])',
+                            options: [
+                                { flag: 'waterfall', desc: 'Cascade des contributions' },
+                                { flag: 'force', desc: 'Visualisation en forces' }
+                            ],
+                            examples: [
+                                { code: 'import shap\n\nexplainer = shap.TreeExplainer(model)\nshap_values = explainer(X_test)\n\n# Expliquer la premiere prediction\nshap.plots.waterfall(shap_values[0])', desc: 'Waterfall plot' },
+                                { code: '# Force plot pour une instance\nshap.initjs()\nshap.plots.force(shap_values[0])', desc: 'Force plot' },
+                                { code: '# Force plot pour plusieurs instances\nshap.plots.force(shap_values[:10])', desc: 'Force plot multiple' }
+                            ],
+                            tips: ['Waterfall plus lisible que force', 'Couleur = direction de impact'],
+                            warnings: ['initjs() necessaire pour force plot dans notebook']
+                        }
+                    },
+                    {
+                        cmd: 'Interpreter avec LIME',
+                        desc: 'LimeTabularExplainer, explain_instance',
+                        details: {
+                            explanation: 'LIME (Local Interpretable Model-agnostic Explanations) explique localement en approximant par un modele simple.',
+                            syntax: 'from lime.lime_tabular import LimeTabularExplainer\nexplainer = LimeTabularExplainer(X_train)',
+                            options: [
+                                { flag: 'mode', desc: '"classification" ou "regression"' },
+                                { flag: 'feature_names', desc: 'Noms des features' },
+                                { flag: 'class_names', desc: 'Noms des classes' }
+                            ],
+                            examples: [
+                                { code: 'pip install lime', desc: 'Installation' },
+                                { code: 'from lime.lime_tabular import LimeTabularExplainer\n\nexplainer = LimeTabularExplainer(\n    X_train.values,\n    feature_names=X_train.columns.tolist(),\n    class_names=["Negative", "Positive"],\n    mode="classification"\n)\n\n# Expliquer une instance\nexp = explainer.explain_instance(\n    X_test.iloc[0].values,\n    model.predict_proba,\n    num_features=10\n)\n\nexp.show_in_notebook()', desc: 'LIME classification' },
+                                { code: 'exp.as_list()  # Liste des contributions', desc: 'Contributions en liste' }
+                            ],
+                            tips: ['Model-agnostic: fonctionne avec tout modele', 'Interpretation locale (par instance)'],
+                            warnings: ['Approximation locale peut varier']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser InterpretML (EBM)',
+                        desc: 'ExplainableBoostingClassifier, show()',
+                        details: {
+                            explanation: 'InterpretML propose des modeles inheremment interpretables comme EBM (Explainable Boosting Machine).',
+                            syntax: 'from interpret.glassbox import ExplainableBoostingClassifier\nebm = ExplainableBoostingClassifier()',
+                            options: [
+                                { flag: 'EBM', desc: 'Modele GAM booste' },
+                                { flag: 'show()', desc: 'Dashboard interactif' }
+                            ],
+                            examples: [
+                                { code: 'pip install interpret', desc: 'Installation' },
+                                { code: 'from interpret.glassbox import ExplainableBoostingClassifier\nfrom interpret import show\n\n# Modele inheremment interpretable\nebm = ExplainableBoostingClassifier()\nebm.fit(X_train, y_train)\n\n# Dashboard global\nebm_global = ebm.explain_global()\nshow(ebm_global)', desc: 'EBM global' },
+                                { code: '# Explication locale\nebm_local = ebm.explain_local(X_test[:5], y_test[:5])\nshow(ebm_local)', desc: 'EBM local' },
+                                { code: 'print(f"Accuracy: {ebm.score(X_test, y_test):.3f}")', desc: 'Performance EBM' }
+                            ],
+                            tips: ['EBM = performance proche de GB avec interpretabilite', 'Dashboard interactif dans notebook'],
+                            warnings: ['pip install interpret necessaire']
+                        }
+                    },
+                    {
+                        cmd: 'Generer des counterfactuals DiCE',
+                        desc: 'dice_ml, generate_counterfactuals',
+                        details: {
+                            explanation: 'DiCE genere des counterfactuals: "que faudrait-il changer pour obtenir une prediction differente?"',
+                            syntax: 'import dice_ml\nd = dice_ml.Data(...)\nm = dice_ml.Model(...)\nexp = dice_ml.Dice(d, m)',
+                            options: [
+                                { flag: 'counterfactual', desc: 'Instance modifiee minimalement' },
+                                { flag: 'total_CFs', desc: 'Nombre de counterfactuals' }
+                            ],
+                            examples: [
+                                { code: 'pip install dice-ml', desc: 'Installation' },
+                                { code: 'import dice_ml\nimport pandas as pd\n\n# Definir les donnees\nd = dice_ml.Data(\n    dataframe=df_train,\n    continuous_features=["age", "income"],\n    outcome_name="target"\n)\n\n# Definir le modele\nm = dice_ml.Model(model=model, backend="sklearn")\n\n# Creer explainer\nexp = dice_ml.Dice(d, m, method="random")\n\n# Generer counterfactuals\nquery_instance = df_test.iloc[0:1]\ncf = exp.generate_counterfactuals(query_instance, total_CFs=5)\ncf.visualize_as_dataframe()', desc: 'DiCE complet' }
+                            ],
+                            tips: ['Counterfactuals = explications actionables', 'Utile pour decisions (credit, etc.)'],
+                            warnings: ['Necessite pandas DataFrame']
+                        }
+                    },
+                    {
+                        cmd: 'Analyser les dependances partielles',
+                        desc: 'shap.dependence_plot, PartialDependenceDisplay',
+                        details: {
+                            explanation: 'Visualiser comment une feature affecte la prediction en moyennant sur les autres features.',
+                            syntax: 'from sklearn.inspection import PartialDependenceDisplay\nPartialDependenceDisplay.from_estimator(model, X, features)',
+                            options: [
+                                { flag: 'features', desc: 'Features a analyser' },
+                                { flag: 'kind', desc: '"average" ou "individual"' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.inspection import PartialDependenceDisplay\nimport matplotlib.pyplot as plt\n\nfig, ax = plt.subplots(figsize=(12, 4))\nPartialDependenceDisplay.from_estimator(\n    model, X_train, features=["age", "income", ("age", "income")],\n    ax=ax\n)\nplt.show()', desc: 'PDP sklearn' },
+                                { code: 'import shap\n\nexplainer = shap.TreeExplainer(model)\nshap_values = explainer.shap_values(X_test)\n\n# Dependence plot avec interaction\nshap.dependence_plot("age", shap_values, X_test)', desc: 'SHAP dependence' }
+                            ],
+                            tips: ['PDP = effet marginal moyen', 'SHAP dependence montre interactions'],
+                            warnings: ['PDP assume independance des features']
+                        }
+                    },
+                    {
+                        cmd: 'Calculer importance permutations',
+                        desc: 'permutation_importance, sklearn',
+                        details: {
+                            explanation: 'Mesurer importance en shufflant chaque feature et mesurant la baisse de performance.',
+                            syntax: 'from sklearn.inspection import permutation_importance\nresult = permutation_importance(model, X_test, y_test, n_repeats=10)',
+                            options: [
+                                { flag: 'n_repeats', desc: 'Nombre de permutations' },
+                                { flag: 'scoring', desc: 'Metrique a utiliser' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.inspection import permutation_importance\nimport matplotlib.pyplot as plt\n\nresult = permutation_importance(model, X_test, y_test, n_repeats=10, random_state=42)\n\n# Trier par importance\nsorted_idx = result.importances_mean.argsort()\n\nfig, ax = plt.subplots()\nax.boxplot(result.importances[sorted_idx].T, vert=False, labels=X.columns[sorted_idx])\nax.set_title("Permutation Importances")\nplt.tight_layout()\nplt.show()', desc: 'Permutation importance' }
+                            ],
+                            tips: ['Model-agnostic', 'Calcule sur test set pour fiabilite'],
+                            warnings: ['Peut etre biaise si features correlees']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'explainable-dl',
+                title: '🧬 Explainable Deep Learning',
+                icon: 'fa-eye',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Visualiser avec Grad-CAM',
+                        desc: 'pytorch-grad-cam, GradCAM',
+                        details: {
+                            explanation: 'Grad-CAM visualise les regions de image importantes pour la prediction du CNN.',
+                            syntax: 'from pytorch_grad_cam import GradCAM\ncam = GradCAM(model=model, target_layers=target_layers)',
+                            options: [
+                                { flag: 'target_layers', desc: 'Couches convolutives a analyser' },
+                                { flag: 'GradCAM++', desc: 'Version amelioree' },
+                                { flag: 'ScoreCAM', desc: 'Sans gradients' }
+                            ],
+                            examples: [
+                                { code: 'pip install pytorch-grad-cam', desc: 'Installation' },
+                                { code: 'from pytorch_grad_cam import GradCAM\nfrom pytorch_grad_cam.utils.image import show_cam_on_image\nfrom pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget\nimport numpy as np\n\n# Definir couche cible (derniere conv)\ntarget_layers = [model.layer4[-1]]\n\n# Creer Grad-CAM\ncam = GradCAM(model=model, target_layers=target_layers)\n\n# Generer heatmap\ngrayscale_cam = cam(input_tensor=input_tensor, targets=None)\ngrayscale_cam = grayscale_cam[0, :]\n\n# Superposer sur image\nvisualization = show_cam_on_image(rgb_img, grayscale_cam, use_rgb=True)', desc: 'Grad-CAM complet' },
+                                { code: 'from pytorch_grad_cam import GradCAMPlusPlus\ncam = GradCAMPlusPlus(model=model, target_layers=target_layers)', desc: 'Grad-CAM++' }
+                            ],
+                            tips: ['layer4[-1] pour ResNet', 'Normaliser image entre 0 et 1 pour show_cam'],
+                            warnings: ['Modele en eval() et pas de gradient']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser Captum IntegratedGradients',
+                        desc: 'captum, IntegratedGradients',
+                        details: {
+                            explanation: 'Captum (PyTorch) calcule les attributions avec Integrated Gradients et autres methodes.',
+                            syntax: 'from captum.attr import IntegratedGradients\nig = IntegratedGradients(model)\nattributions = ig.attribute(input, target=label)',
+                            options: [
+                                { flag: 'IntegratedGradients', desc: 'Gradients integres' },
+                                { flag: 'n_steps', desc: 'Nombre de etapes integration' },
+                                { flag: 'baselines', desc: 'Point de reference' }
+                            ],
+                            examples: [
+                                { code: 'pip install captum', desc: 'Installation' },
+                                { code: 'from captum.attr import IntegratedGradients\nfrom captum.attr import visualization as viz\n\n# Creer explainer\nig = IntegratedGradients(model)\n\n# Calculer attributions\nattributions = ig.attribute(input_tensor, target=predicted_class, n_steps=50)\n\n# Visualiser\nfig, ax = viz.visualize_image_attr(\n    np.transpose(attributions.squeeze().cpu().detach().numpy(), (1, 2, 0)),\n    np.transpose(original_image.squeeze().cpu().detach().numpy(), (1, 2, 0)),\n    method="blended_heat_map",\n    sign="positive",\n    show_colorbar=True\n)', desc: 'Integrated Gradients' }
+                            ],
+                            tips: ['n_steps=50 est un bon defaut', 'Baseline = image noire generalement'],
+                            warnings: ['pip install captum necessaire']
+                        }
+                    },
+                    {
+                        cmd: 'Calculer Saliency Maps',
+                        desc: 'captum.attr.Saliency',
+                        details: {
+                            explanation: 'Saliency map = gradient de la sortie par rapport a entree. Simple et rapide.',
+                            syntax: 'from captum.attr import Saliency\nsaliency = Saliency(model)\nattr = saliency.attribute(input, target=label)',
+                            options: [
+                                { flag: 'abs', desc: 'Valeur absolue des gradients' }
+                            ],
+                            examples: [
+                                { code: 'from captum.attr import Saliency\nfrom captum.attr import visualization as viz\n\n# Saliency map\nsaliency = Saliency(model)\ngrads = saliency.attribute(input_tensor, target=predicted_class)\n\n# Visualiser\ngrads = grads.squeeze().cpu().detach().numpy()\ngrads = np.transpose(grads, (1, 2, 0))\ngrads = np.abs(grads).sum(axis=2)  # Somme sur canaux\n\nimport matplotlib.pyplot as plt\nplt.imshow(grads, cmap="hot")\nplt.colorbar()\nplt.show()', desc: 'Saliency simple' }
+                            ],
+                            tips: ['Plus rapide que IG', 'Moins stable (gradient local)'],
+                            warnings: ['Peut etre bruite']
+                        }
+                    },
+                    {
+                        cmd: 'Appliquer DeepLIFT',
+                        desc: 'captum.attr.DeepLift',
+                        details: {
+                            explanation: 'DeepLIFT compare les activations a une reference et propage les differences.',
+                            syntax: 'from captum.attr import DeepLift\ndl = DeepLift(model)\nattr = dl.attribute(input, target=label)',
+                            options: [
+                                { flag: 'baselines', desc: 'Reference (zeros par defaut)' }
+                            ],
+                            examples: [
+                                { code: 'from captum.attr import DeepLift\n\n# DeepLIFT\ndl = DeepLift(model)\nattributions = dl.attribute(input_tensor, target=predicted_class)\n\n# Visualiser comme IG\nfig, ax = viz.visualize_image_attr(\n    np.transpose(attributions.squeeze().cpu().detach().numpy(), (1, 2, 0)),\n    np.transpose(original_image.squeeze().cpu().detach().numpy(), (1, 2, 0)),\n    method="blended_heat_map"\n)', desc: 'DeepLIFT' }
+                            ],
+                            tips: ['Plus rapide que IG', 'Compare a baseline'],
+                            warnings: ['Baseline importante pour resultats']
+                        }
+                    },
+                    {
+                        cmd: 'Visualiser attention Transformers',
+                        desc: 'attention_weights, BertViz',
+                        details: {
+                            explanation: 'Visualiser les poids attention des Transformers pour comprendre sur quels tokens le modele se concentre.',
+                            syntax: 'outputs = model(**inputs, output_attentions=True)\nattentions = outputs.attentions',
+                            options: [
+                                { flag: 'output_attentions=True', desc: 'Retourner les attentions' },
+                                { flag: 'BertViz', desc: 'Visualisation interactive' }
+                            ],
+                            examples: [
+                                { code: 'from transformers import AutoModel, AutoTokenizer\n\nmodel = AutoModel.from_pretrained("bert-base-uncased", output_attentions=True)\ntokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")\n\ninputs = tokenizer("The cat sat on the mat", return_tensors="pt")\noutputs = model(**inputs)\n\n# outputs.attentions: tuple de tenseurs [batch, heads, seq, seq]\nattention_layer_0 = outputs.attentions[0]\nprint(f"Shape: {attention_layer_0.shape}")', desc: 'Extraire attentions' },
+                                { code: 'pip install bertviz', desc: 'Installation BertViz' },
+                                { code: 'from bertviz import head_view\n\nhead_view(attention=outputs.attentions, tokens=tokenizer.convert_ids_to_tokens(inputs["input_ids"][0]))', desc: 'Visualisation BertViz' }
+                            ],
+                            tips: ['Attention != importance', 'BertViz pour visualisation interactive'],
+                            warnings: ['pip install bertviz necessaire']
+                        }
+                    },
+                    {
+                        cmd: 'Expliquer avec TCAV',
+                        desc: 'tcav, concept activation vectors',
+                        details: {
+                            explanation: 'TCAV (Testing with Concept Activation Vectors) teste si un concept humain influence les predictions.',
+                            syntax: 'from captum.concept import TCAV\ntcav = TCAV(model, layers)',
+                            options: [
+                                { flag: 'concept', desc: 'Concept a tester (ex: "stripes")' },
+                                { flag: 'layers', desc: 'Couches a analyser' }
+                            ],
+                            examples: [
+                                { code: 'from captum.concept import TCAV\nfrom captum.concept import Concept\n\n# Definir concepts avec exemples\nconcept_striped = Concept(0, "striped", striped_images_dataset)\nconcept_dotted = Concept(1, "dotted", dotted_images_dataset)\n\n# TCAV\ntcav = TCAV(\n    model=model,\n    layers=["layer4"],\n    layer_attr_method=IntegratedGradients\n)\n\n# Calculer scores\ntcav_scores = tcav.interpret(\n    inputs=test_images,\n    experimental_sets=[[concept_striped, concept_dotted]],\n    target=target_class\n)', desc: 'TCAV avec Captum' }
+                            ],
+                            tips: ['Necessite exemples du concept', 'Interpretation de haut niveau'],
+                            warnings: ['Preparation des concepts peut etre longue']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'pipelines-prod',
+                title: '🚀 Pipelines & Production',
+                icon: 'fa-rocket',
+                color: 'border-l-4 border-lime-500',
+                commands: [
+                    {
+                        cmd: 'Creer un Pipeline sklearn',
+                        desc: 'Pipeline, make_pipeline',
+                        details: {
+                            explanation: 'Enchainer preprocessing et modele en un seul objet. Evite le data leakage.',
+                            syntax: 'from sklearn.pipeline import Pipeline\npipe = Pipeline([(name, transformer), ..., (name, estimator)])',
+                            options: [
+                                { flag: 'Pipeline', desc: 'Avec noms explicites' },
+                                { flag: 'make_pipeline', desc: 'Noms automatiques' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.pipeline import Pipeline, make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.ensemble import RandomForestClassifier\n\n# Pipeline explicite\npipe = Pipeline([\n    ("scaler", StandardScaler()),\n    ("clf", RandomForestClassifier())\n])\n\n# Pipeline simplifie\npipe = make_pipeline(StandardScaler(), RandomForestClassifier())\n\npipe.fit(X_train, y_train)\npipe.predict(X_test)', desc: 'Pipeline simple' }
+                            ],
+                            tips: ['Evite data leakage', 'Compatible GridSearchCV'],
+                            warnings: ['Dernier element doit etre estimateur']
+                        }
+                    },
+                    {
+                        cmd: 'Combiner transformations',
+                        desc: 'ColumnTransformer',
+                        details: {
+                            explanation: 'Appliquer differentes transformations a differentes colonnes.',
+                            syntax: 'from sklearn.compose import ColumnTransformer\nct = ColumnTransformer([(name, transformer, columns), ...])',
+                            options: [
+                                { flag: 'remainder', desc: '"drop", "passthrough"' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.compose import ColumnTransformer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\n\nnum_features = ["age", "income"]\ncat_features = ["city", "gender"]\n\npreprocessor = ColumnTransformer([\n    ("num", StandardScaler(), num_features),\n    ("cat", OneHotEncoder(handle_unknown="ignore"), cat_features)\n])\n\n# Pipeline complet\npipe = Pipeline([\n    ("preprocessor", preprocessor),\n    ("clf", RandomForestClassifier())\n])\n\npipe.fit(X_train, y_train)', desc: 'ColumnTransformer' }
+                            ],
+                            tips: ['remainder="passthrough" garde autres colonnes'],
+                            warnings: ['Ordre colonnes peut changer']
+                        }
+                    },
+                    {
+                        cmd: 'Serialiser avec joblib',
+                        desc: 'joblib.dump, joblib.load',
+                        details: {
+                            explanation: 'Sauvegarder et charger le pipeline entraine pour reutilisation.',
+                            syntax: 'import joblib\njoblib.dump(pipe, "pipeline.joblib")\npipe = joblib.load("pipeline.joblib")',
+                            options: [
+                                { flag: 'compress', desc: 'Niveau de compression (0-9)' }
+                            ],
+                            examples: [
+                                { code: 'import joblib\n\n# Sauvegarder\njoblib.dump(pipe, "models/pipeline.joblib", compress=3)\n\n# Charger\npipe = joblib.load("models/pipeline.joblib")\n\n# Utiliser\ny_pred = pipe.predict(X_new)', desc: 'Sauvegarder/charger' }
+                            ],
+                            tips: ['Sauvegarder pipeline complet, pas juste modele', 'compress=3 bon compromis taille/vitesse'],
+                            warnings: ['Version sklearn doit etre compatible']
+                        }
+                    },
+                    {
+                        cmd: 'Exporter en ONNX',
+                        desc: 'torch.onnx.export, onnxruntime',
+                        details: {
+                            explanation: 'ONNX est un format standard pour deployer des modeles sur differentes plateformes.',
+                            syntax: 'import torch.onnx\ntorch.onnx.export(model, dummy_input, "model.onnx")',
+                            options: [
+                                { flag: 'opset_version', desc: 'Version ONNX' },
+                                { flag: 'dynamic_axes', desc: 'Axes de taille variable' }
+                            ],
+                            examples: [
+                                { code: 'pip install onnx onnxruntime', desc: 'Installation' },
+                                { code: 'import torch.onnx\n\n# Export PyTorch vers ONNX\nmodel.eval()\ndummy_input = torch.randn(1, 3, 224, 224)\n\ntorch.onnx.export(\n    model,\n    dummy_input,\n    "model.onnx",\n    opset_version=11,\n    input_names=["input"],\n    output_names=["output"],\n    dynamic_axes={"input": {0: "batch"}, "output": {0: "batch"}}\n)', desc: 'Export ONNX' },
+                                { code: 'import onnxruntime as ort\n\n# Inference ONNX\nsession = ort.InferenceSession("model.onnx")\noutputs = session.run(None, {"input": input_numpy})', desc: 'Inference ONNX' }
+                            ],
+                            tips: ['ONNX pour deploiement cross-platform', 'onnxruntime pour inference rapide'],
+                            warnings: ['Tous les ops PyTorch ne sont pas supportes']
+                        }
+                    },
+                    {
+                        cmd: 'Servir avec FastAPI',
+                        desc: 'FastAPI, pydantic',
+                        details: {
+                            explanation: 'Creer une API REST pour servir les predictions du modele.',
+                            syntax: 'from fastapi import FastAPI\napp = FastAPI()\n\n@app.post("/predict")\ndef predict(data): ...',
+                            options: [
+                                { flag: 'pydantic', desc: 'Validation des donnees' },
+                                { flag: 'async', desc: 'Requetes asynchrones' }
+                            ],
+                            examples: [
+                                { code: 'pip install fastapi uvicorn', desc: 'Installation' },
+                                { code: 'from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport joblib\nimport numpy as np\n\napp = FastAPI()\nmodel = joblib.load("pipeline.joblib")\n\nclass PredictionInput(BaseModel):\n    features: list[float]\n\nclass PredictionOutput(BaseModel):\n    prediction: int\n    probability: float\n\n@app.post("/predict", response_model=PredictionOutput)\ndef predict(data: PredictionInput):\n    X = np.array(data.features).reshape(1, -1)\n    pred = model.predict(X)[0]\n    proba = model.predict_proba(X)[0].max()\n    return PredictionOutput(prediction=int(pred), probability=float(proba))', desc: 'API FastAPI' },
+                                { code: 'uvicorn main:app --reload', desc: 'Lancer serveur' }
+                            ],
+                            tips: ['Pydantic pour validation automatique', 'Documentation auto sur /docs'],
+                            warnings: ['Charger modele au demarrage, pas a chaque requete']
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'project-pipeline',
+                title: '🎯 Projet: Pipeline ML Complet',
+                icon: 'fa-project-diagram',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Etape 1: EDA et preparation',
+                        desc: 'pandas, matplotlib, data cleaning',
+                        details: {
+                            explanation: 'Explorer les donnees, comprendre les distributions, identifier les problemes.',
+                            syntax: 'df.info()\ndf.describe()\ndf.isnull().sum()',
+                            options: [],
+                            examples: [
+                                { code: 'import pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\n# Charger\ndf = pd.read_csv("data.csv")\n\n# Explorer\nprint(df.info())\nprint(df.describe())\nprint(f"Valeurs manquantes:\\n{df.isnull().sum()}")\n\n# Visualiser\nfig, axes = plt.subplots(2, 2, figsize=(12, 10))\n\n# Distribution cible\ndf["target"].value_counts().plot(kind="bar", ax=axes[0, 0], title="Target")\n\n# Correlations\nsns.heatmap(df.corr(numeric_only=True), ax=axes[0, 1], cmap="coolwarm")\n\n# Distributions\ndf.hist(ax=axes[1, 0], figsize=(12, 8))\n\nplt.tight_layout()\nplt.show()', desc: 'EDA complet' }
+                            ],
+                            tips: ['Toujours commencer par EDA', 'Documenter les observations'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Etape 2: Feature engineering',
+                        desc: 'transformers, pipeline',
+                        details: {
+                            explanation: 'Preparer les features avec un pipeline sklearn.',
+                            syntax: 'ColumnTransformer + Pipeline',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\nfrom sklearn.impute import SimpleImputer\n\n# Identifier types de colonnes\nnum_features = df.select_dtypes(include=["int64", "float64"]).columns.tolist()\ncat_features = df.select_dtypes(include=["object"]).columns.tolist()\nnum_features.remove("target")  # Enlever cible\n\n# Pipeline numerique\nnum_pipeline = Pipeline([\n    ("imputer", SimpleImputer(strategy="median")),\n    ("scaler", StandardScaler())\n])\n\n# Pipeline categoriel\ncat_pipeline = Pipeline([\n    ("imputer", SimpleImputer(strategy="most_frequent")),\n    ("encoder", OneHotEncoder(handle_unknown="ignore"))\n])\n\n# Combiner\npreprocessor = ColumnTransformer([\n    ("num", num_pipeline, num_features),\n    ("cat", cat_pipeline, cat_features)\n])', desc: 'Feature engineering pipeline' }
+                            ],
+                            tips: ['Separer num et cat', 'Imputer avant encoder'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Etape 3: Entrainement et tuning',
+                        desc: 'GridSearchCV, Optuna',
+                        details: {
+                            explanation: 'Entrainer plusieurs modeles et optimiser les hyperparametres.',
+                            syntax: 'GridSearchCV ou Optuna',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.model_selection import GridSearchCV, cross_val_score\nfrom sklearn.ensemble import RandomForestClassifier\nfrom xgboost import XGBClassifier\n\n# Pipeline complet\nfull_pipeline = Pipeline([\n    ("preprocessor", preprocessor),\n    ("clf", RandomForestClassifier())\n])\n\n# Grid Search\nparam_grid = {\n    "clf__n_estimators": [100, 200],\n    "clf__max_depth": [5, 10, None]\n}\n\ngrid = GridSearchCV(full_pipeline, param_grid, cv=5, scoring="f1", n_jobs=-1)\ngrid.fit(X_train, y_train)\n\nprint(f"Best params: {grid.best_params_}")\nprint(f"Best score: {grid.best_score_:.3f}")\n\n# Meilleur modele\nbest_model = grid.best_estimator_', desc: 'Tuning avec GridSearch' }
+                            ],
+                            tips: ['Comparer plusieurs algorithmes', 'F1 pour classes desequilibrees'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Etape 4: Evaluation et XAI',
+                        desc: 'metrics, SHAP, LIME',
+                        details: {
+                            explanation: 'Evaluer le modele final et expliquer ses predictions.',
+                            syntax: 'classification_report + SHAP',
+                            options: [],
+                            examples: [
+                                { code: 'from sklearn.metrics import classification_report, ConfusionMatrixDisplay\nimport shap\n\n# Evaluation\ny_pred = best_model.predict(X_test)\nprint(classification_report(y_test, y_pred))\n\n# Matrice de confusion\nConfusionMatrixDisplay.from_predictions(y_test, y_pred)\nplt.show()\n\n# SHAP (apres preprocessing)\nX_test_processed = best_model.named_steps["preprocessor"].transform(X_test)\nclf = best_model.named_steps["clf"]\n\nexplainer = shap.TreeExplainer(clf)\nshap_values = explainer.shap_values(X_test_processed)\n\n# Summary plot\nshap.summary_plot(shap_values, X_test_processed)', desc: 'Evaluation et XAI' }
+                            ],
+                            tips: ['Toujours expliquer le modele', 'Garder trace des metriques'],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Etape 5: Deploiement API',
+                        desc: 'FastAPI, Docker',
+                        details: {
+                            explanation: 'Deployer le modele comme API REST.',
+                            syntax: 'FastAPI + Docker',
+                            options: [],
+                            examples: [
+                                { code: '# main.py\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel\nimport joblib\nimport pandas as pd\n\napp = FastAPI(title="ML Prediction API")\nmodel = joblib.load("models/pipeline.joblib")\n\nclass InputData(BaseModel):\n    age: float\n    income: float\n    city: str\n\n@app.post("/predict")\ndef predict(data: InputData):\n    df = pd.DataFrame([data.dict()])\n    pred = model.predict(df)[0]\n    proba = model.predict_proba(df)[0].max()\n    return {"prediction": int(pred), "confidence": float(proba)}\n\n@app.get("/health")\ndef health():\n    return {"status": "healthy"}', desc: 'API FastAPI' },
+                                { code: '# Dockerfile\nFROM python:3.10-slim\n\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\nCOPY . .\nCMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]', desc: 'Dockerfile' },
+                                { code: 'docker build -t ml-api .\ndocker run -p 8000:8000 ml-api', desc: 'Build et run Docker' }
+                            ],
+                            tips: ['Health check pour monitoring', 'Docker pour deploiement reproductible'],
+                            warnings: ['Ne pas exposer modele sans authentification en prod']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>
