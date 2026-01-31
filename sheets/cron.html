@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aide-mémoire Cron : syntaxe crontab, planification de tâches, expressions et exemples pratiques.">
+    <meta name="description" content="Aide-mémoire Cron : workflows pratiques pour la planification de tâches sous Linux.">
     <title>Cron & Planification - IT Cheatsheets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,14 +26,14 @@
                     <i class="fas fa-clock text-3xl text-amber-400"></i>
                 </div>
                 <h1 class="text-3xl font-bold mb-2 gradient-text">Cron & Planification</h1>
-                <p class="text-slate-400">Automatisation et planification de tâches sous Linux</p>
+                <p class="text-slate-400">Workflows pratiques pour l'automatisation sous Linux</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-4 relative z-10">
         <div class="mb-8 relative">
-            <input type="text" id="searchInput" placeholder="Rechercher une commande..."
+            <input type="text" id="searchInput" placeholder="Rechercher un workflow..."
                    class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
         </div>
@@ -53,14 +53,14 @@
     <script>
         const cheatsheetData = [
             {
-                id: 'syntax',
-                title: 'Syntaxe Crontab',
+                id: 'understand-syntax',
+                title: '📝 Comprendre la Syntaxe',
                 icon: 'fa-code',
                 color: 'border-l-4 border-amber-500',
                 commands: [
                     {
-                        cmd: '* * * * * commande',
-                        desc: 'Format de base crontab',
+                        cmd: 'Maîtriser le format de base',
+                        desc: '* * * * * commande (5 champs temporels)',
                         details: {
                             explanation: 'Une ligne crontab définit quand et quelle commande exécuter. Les 5 champs temporels suivis de la commande.',
                             syntax: 'minute heure jour_mois mois jour_semaine commande',
@@ -81,8 +81,8 @@
                         }
                     },
                     {
-                        cmd: 'Caractères spéciaux',
-                        desc: '*, /, -, et virgule',
+                        cmd: 'Utiliser les caractères spéciaux',
+                        desc: '*, /, -, virgule pour plus de flexibilité',
                         details: {
                             explanation: 'Les caractères spéciaux permettent des expressions plus flexibles.',
                             syntax: '* (tout) , (liste) - (plage) / (intervalle)',
@@ -103,8 +103,8 @@
                         }
                     },
                     {
-                        cmd: 'Raccourcis temporels',
-                        desc: '@hourly, @daily, @weekly...',
+                        cmd: 'Utiliser les raccourcis temporels',
+                        desc: '@hourly, @daily, @weekly, @reboot...',
                         details: {
                             explanation: 'Raccourcis prédéfinis pour les planifications courantes.',
                             syntax: '@raccourci commande',
@@ -128,14 +128,14 @@
                 ]
             },
             {
-                id: 'commands',
-                title: 'Commandes Crontab',
+                id: 'manage-crontab',
+                title: '🖥️ Gérer la Crontab',
                 icon: 'fa-terminal',
                 color: 'border-l-4 border-blue-500',
                 commands: [
                     {
-                        cmd: 'crontab -e',
-                        desc: 'Éditer la crontab de l\'utilisateur',
+                        cmd: 'Éditer la crontab',
+                        desc: 'crontab -e pour modifier les tâches',
                         details: {
                             explanation: 'Ouvre l\'éditeur pour modifier la crontab de l\'utilisateur courant.',
                             syntax: 'crontab -e',
@@ -153,8 +153,8 @@
                         }
                     },
                     {
-                        cmd: 'crontab -l',
-                        desc: 'Lister les tâches cron',
+                        cmd: 'Lister les tâches cron',
+                        desc: 'crontab -l pour voir les tâches',
                         details: {
                             explanation: 'Affiche toutes les tâches cron de l\'utilisateur.',
                             syntax: 'crontab -l [-u user]',
@@ -172,8 +172,8 @@
                         }
                     },
                     {
-                        cmd: 'crontab -r',
-                        desc: 'Supprimer la crontab',
+                        cmd: 'Supprimer la crontab',
+                        desc: 'crontab -r (attention: pas de confirmation!)',
                         details: {
                             explanation: 'Supprime toute la crontab de l\'utilisateur. ATTENTION : pas de confirmation!',
                             syntax: 'crontab -r',
@@ -192,14 +192,14 @@
                 ]
             },
             {
-                id: 'examples',
-                title: 'Exemples Pratiques',
-                icon: 'fa-book',
+                id: 'schedule-tasks',
+                title: '📅 Planifier des Tâches',
+                icon: 'fa-calendar-check',
                 color: 'border-l-4 border-green-500',
                 commands: [
                     {
-                        cmd: 'Backup quotidien',
-                        desc: 'Sauvegarde automatique',
+                        cmd: 'Planifier un backup quotidien',
+                        desc: 'Sauvegarde automatique chaque nuit',
                         details: {
                             explanation: 'Script de backup exécuté automatiquement tous les jours.',
                             syntax: '0 2 * * * /path/to/backup.sh',
@@ -209,13 +209,13 @@
                                 { code: '0 3 * * * mysqldump -u root -p\'pass\' mydb > /backup/db_$(date +\\%Y\\%m\\%d).sql', desc: 'Backup MySQL à 3h' },
                                 { code: '0 4 * * 0 rsync -avz /data/ /backup/weekly/', desc: 'Rsync hebdomadaire (dimanche)' }
                             ],
-                            tips: ['Utilisez date +\\%Y\\%m\\%d pour inclure la date dans le nom (échapper le %)'],
+                            tips: ['Utilisez date +\\%Y\\%m\\%d pour inclure la date (échapper le %)'],
                             warnings: ['Testez vos scripts manuellement avant de les planifier']
                         }
                     },
                     {
-                        cmd: 'Nettoyage de logs',
-                        desc: 'Rotation et suppression',
+                        cmd: 'Planifier un nettoyage de logs',
+                        desc: 'Rotation et suppression automatiques',
                         details: {
                             explanation: 'Supprime ou archive les vieux fichiers de logs automatiquement.',
                             syntax: '0 0 * * * find /var/log -name "*.log" -mtime +30 -delete',
@@ -230,8 +230,8 @@
                         }
                     },
                     {
-                        cmd: 'Monitoring & Alertes',
-                        desc: 'Surveillance système',
+                        cmd: 'Planifier du monitoring',
+                        desc: 'Vérifications périodiques avec alertes',
                         details: {
                             explanation: 'Vérifications périodiques avec notifications.',
                             syntax: '*/5 * * * * /check_script.sh',
@@ -248,14 +248,14 @@
                 ]
             },
             {
-                id: 'output',
-                title: 'Gestion des Sorties',
+                id: 'handle-output',
+                title: '📤 Gérer les Sorties',
                 icon: 'fa-file-export',
                 color: 'border-l-4 border-purple-500',
                 commands: [
                     {
-                        cmd: 'Redirection des sorties',
-                        desc: 'Logs et emails',
+                        cmd: 'Rediriger les sorties vers des fichiers',
+                        desc: '> pour stdout, 2>&1 pour stderr',
                         details: {
                             explanation: 'Par défaut, cron envoie la sortie par email. Redirigez vers des fichiers pour éviter cela.',
                             syntax: 'commande > fichier 2>&1',
@@ -275,8 +275,8 @@
                         }
                     },
                     {
-                        cmd: 'MAILTO',
-                        desc: 'Configurer les notifications email',
+                        cmd: 'Configurer les notifications email',
+                        desc: 'MAILTO pour définir le destinataire',
                         details: {
                             explanation: 'Variable d\'environnement pour définir le destinataire des sorties cron.',
                             syntax: 'MAILTO=email@example.com',
@@ -285,12 +285,9 @@
                                 { flag: 'MAILTO=""', desc: 'Désactive les emails' }
                             ],
                             examples: [
-                                { code: 'MAILTO=admin@example.com
-0 * * * * /script.sh', desc: 'Envoyer les sorties par email' },
-                                { code: 'MAILTO=""
-0 * * * * /script.sh', desc: 'Désactiver les emails' },
-                                { code: 'MAILTO=admin@ex.com,backup@ex.com
-0 2 * * * /backup.sh', desc: 'Plusieurs destinataires' }
+                                { code: 'MAILTO=admin@example.com\n0 * * * * /script.sh', desc: 'Envoyer les sorties par email' },
+                                { code: 'MAILTO=""\n0 * * * * /script.sh', desc: 'Désactiver les emails' },
+                                { code: 'MAILTO=admin@ex.com,backup@ex.com\n0 2 * * * /backup.sh', desc: 'Plusieurs destinataires' }
                             ],
                             tips: ['Mettez MAILTO en haut de votre crontab'],
                             warnings: ['Nécessite un MTA configuré (postfix, sendmail, etc.)']
@@ -299,14 +296,14 @@
                 ]
             },
             {
-                id: 'env',
-                title: 'Environnement',
+                id: 'configure-env',
+                title: '⚙️ Configurer l\'Environnement',
                 icon: 'fa-cog',
                 color: 'border-l-4 border-red-500',
                 commands: [
                     {
-                        cmd: 'Variables d\'environnement',
-                        desc: 'PATH, SHELL, HOME...',
+                        cmd: 'Définir les variables d\'environnement',
+                        desc: 'PATH, SHELL, HOME en tête de crontab',
                         details: {
                             explanation: 'Les cron jobs s\'exécutent avec un environnement minimal. Définissez les variables nécessaires.',
                             syntax: 'VARIABLE=valeur en haut de la crontab',
@@ -316,11 +313,7 @@
                                 { flag: 'HOME', desc: 'Répertoire home' }
                             ],
                             examples: [
-                                { code: 'SHELL=/bin/bash
-PATH=/usr/local/bin:/usr/bin:/bin
-HOME=/home/user
-
-0 * * * * /script.sh', desc: 'Variables en tête de crontab' },
+                                { code: 'SHELL=/bin/bash\nPATH=/usr/local/bin:/usr/bin:/bin\nHOME=/home/user\n\n0 * * * * /script.sh', desc: 'Variables en tête de crontab' },
                                 { code: '0 * * * * source ~/.bashrc && /script.sh', desc: 'Charger le profil bash' },
                                 { code: '0 * * * * /usr/bin/env python3 /script.py', desc: 'Utiliser env pour Python' }
                             ],
@@ -329,8 +322,8 @@ HOME=/home/user
                         }
                     },
                     {
-                        cmd: '/etc/cron.d/',
-                        desc: 'Crontabs système',
+                        cmd: 'Utiliser les crontabs système',
+                        desc: '/etc/cron.d/, /etc/cron.daily/, etc.',
                         details: {
                             explanation: 'Répertoire pour les crontabs système. Format légèrement différent (inclut l\'utilisateur).',
                             syntax: 'minute heure jour mois semaine USER commande',
@@ -342,10 +335,8 @@ HOME=/home/user
                                 { flag: '/etc/cron.monthly/', desc: 'Scripts exécutés chaque mois' }
                             ],
                             examples: [
-                                { code: '# /etc/cron.d/myapp
-*/5 * * * * www-data /var/www/app/cron.sh', desc: 'Fichier dans cron.d' },
-                                { code: '# Placer un script dans /etc/cron.daily/
-chmod +x /etc/cron.daily/backup', desc: 'Script daily' }
+                                { code: '# /etc/cron.d/myapp\n*/5 * * * * www-data /var/www/app/cron.sh', desc: 'Fichier dans cron.d' },
+                                { code: '# Placer un script dans /etc/cron.daily/\nchmod +x /etc/cron.daily/backup', desc: 'Script daily' }
                             ],
                             tips: ['Les scripts dans cron.daily/ ne doivent pas avoir d\'extension'],
                             warnings: ['Les fichiers dans cron.d doivent spécifier l\'utilisateur']
@@ -354,75 +345,14 @@ chmod +x /etc/cron.daily/backup', desc: 'Script daily' }
                 ]
             },
             {
-                id: 'alternatives',
-                title: 'Alternatives à Cron',
-                icon: 'fa-exchange-alt',
-                color: 'border-l-4 border-cyan-500',
-                commands: [
-                    {
-                        cmd: 'systemd timers',
-                        desc: 'Alternative moderne à cron',
-                        details: {
-                            explanation: 'Les timers systemd offrent plus de flexibilité que cron (logs, dépendances, etc.).',
-                            syntax: 'systemctl enable/start mon-timer.timer',
-                            options: [
-                                { flag: 'OnCalendar', desc: 'Planification style calendrier' },
-                                { flag: 'OnBootSec', desc: 'Délai après le boot' },
-                                { flag: 'Persistent', desc: 'Rattrape les exécutions manquées' }
-                            ],
-                            examples: [
-                                { code: '# /etc/systemd/system/backup.timer
-[Unit]
-Description=Daily backup
-
-[Timer]
-OnCalendar=*-*-* 02:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target', desc: 'Timer quotidien à 2h' },
-                                { code: 'systemctl list-timers --all', desc: 'Lister tous les timers' },
-                                { code: 'systemctl enable --now backup.timer', desc: 'Activer un timer' }
-                            ],
-                            tips: ['Les timers systemd permettent de voir facilement les logs avec journalctl'],
-                            warnings: ['Nécessite un fichier .service associé']
-                        }
-                    },
-                    {
-                        cmd: 'at',
-                        desc: 'Exécution unique différée',
-                        details: {
-                            explanation: 'Planifie une commande pour une exécution unique à un moment précis.',
-                            syntax: 'at TIME < script.sh
-echo "cmd" | at TIME',
-                            options: [
-                                { flag: 'at now + 1 hour', desc: 'Dans une heure' },
-                                { flag: 'at 15:00', desc: 'À 15h aujourd\'hui' },
-                                { flag: 'at noon tomorrow', desc: 'Demain à midi' },
-                                { flag: 'atq', desc: 'Lister les jobs at' },
-                                { flag: 'atrm N', desc: 'Supprimer le job N' }
-                            ],
-                            examples: [
-                                { code: 'echo "/scripts/deploy.sh" | at 02:00', desc: 'Déployer à 2h' },
-                                { code: 'at now + 30 minutes <<< "systemctl restart nginx"', desc: 'Restart dans 30 min' },
-                                { code: 'atq
-atrm 5', desc: 'Lister et supprimer un job' }
-                            ],
-                            tips: ['Utilisez at pour des tâches ponctuelles, cron pour les récurrentes'],
-                            warnings: []
-                        }
-                    }
-                ]
-            },
-            {
-                id: 'advanced-patterns',
-                title: 'Patterns Avancés',
+                id: 'use-advanced-scheduling',
+                title: '🧩 Utiliser les Planifications Avancées',
                 icon: 'fa-puzzle-piece',
                 color: 'border-l-4 border-pink-500',
                 commands: [
                     {
-                        cmd: 'Expressions complexes',
-                        desc: 'Planifications sophistiquées',
+                        cmd: 'Créer des expressions complexes',
+                        desc: 'Combiner intervalles, plages et listes',
                         details: {
                             explanation: 'Combiner plusieurs champs pour des planifications précises et complexes.',
                             syntax: '*/15 9-17 * * 1-5 commande',
@@ -436,7 +366,6 @@ atrm 5', desc: 'Lister et supprimer un job' }
                                 { code: '*/15 9-17 * * 1-5 cmd', desc: 'Toutes les 15 min, 9h-17h, lun-ven' },
                                 { code: '0 8-18/2 * * * cmd', desc: 'Heures paires de 8h à 18h' },
                                 { code: '0 0 1-7 * 0 cmd', desc: 'Premier dimanche du mois' },
-                                { code: '0 0 15,L * * cmd', desc: '15 et dernier jour du mois (si supporté)' },
                                 { code: '30 4 1,15 * * cmd', desc: '1er et 15 à 4h30' }
                             ],
                             tips: ['Utilisez crontab.guru pour valider les expressions complexes'],
@@ -444,8 +373,8 @@ atrm 5', desc: 'Lister et supprimer un job' }
                         }
                     },
                     {
-                        cmd: 'Exécution conditionnelle',
-                        desc: 'Cron avec conditions',
+                        cmd: 'Exécuter conditionnellement',
+                        desc: 'Ajouter des conditions avant exécution',
                         details: {
                             explanation: 'Exécuter des tâches seulement si certaines conditions sont remplies.',
                             syntax: '* * * * * [ condition ] && commande',
@@ -458,16 +387,15 @@ atrm 5', desc: 'Lister et supprimer un job' }
                             examples: [
                                 { code: '0 0 * * * [ $(date +\\%d) -le 7 ] && [ $(date +\\%u) -eq 1 ] && /scripts/monthly.sh', desc: 'Premier lundi du mois' },
                                 { code: '*/5 * * * * [ -f /var/run/myapp.pid ] || /scripts/start_myapp.sh', desc: 'Démarrer si absent' },
-                                { code: '0 * * * * pgrep -x nginx >/dev/null || systemctl restart nginx', desc: 'Watchdog nginx' },
-                                { code: '*/10 * * * * [ $(awk \'{print $1}\' /proc/loadavg | cut -d. -f1) -lt 5 ] && /scripts/heavy_task.sh', desc: 'Seulement si load < 5' }
+                                { code: '0 * * * * pgrep -x nginx >/dev/null || systemctl restart nginx', desc: 'Watchdog nginx' }
                             ],
                             tips: ['Combinez avec && et || pour créer des conditions complexes'],
                             warnings: ['Attention à l\'échappement du % dans crontab']
                         }
                     },
                     {
-                        cmd: 'flock (verrou)',
-                        desc: 'Éviter les exécutions parallèles',
+                        cmd: 'Éviter les exécutions parallèles (flock)',
+                        desc: 'Utiliser un verrou pour empêcher les doublons',
                         details: {
                             explanation: 'Utilise un verrou pour empêcher les exécutions simultanées du même script.',
                             syntax: 'flock [-n|-w timeout] lockfile command',
@@ -480,11 +408,7 @@ atrm 5', desc: 'Lister et supprimer un job' }
                             examples: [
                                 { code: '*/5 * * * * flock -n /tmp/backup.lock /scripts/backup.sh', desc: 'Skip si déjà en cours' },
                                 { code: '*/10 * * * * flock -w 60 /tmp/sync.lock /scripts/sync.sh', desc: 'Attendre 60s max' },
-                                { code: '# Dans le script lui-même
-#!/bin/bash
-exec 200>/tmp/myscript.lock
-flock -n 200 || { echo "Déjà en cours"; exit 1; }
-# ... reste du script', desc: 'Verrou dans le script' }
+                                { code: '#!/bin/bash\nexec 200>/tmp/myscript.lock\nflock -n 200 || { echo "Déjà en cours"; exit 1; }\n# ... reste du script', desc: 'Verrou dans le script' }
                             ],
                             tips: ['flock est la méthode standard pour éviter les courses'],
                             warnings: ['Le fichier de verrou doit être sur un système de fichiers local']
@@ -493,14 +417,14 @@ flock -n 200 || { echo "Déjà en cours"; exit 1; }
                 ]
             },
             {
-                id: 'debugging',
-                title: 'Débogage Cron',
+                id: 'debug-cron',
+                title: '🐛 Déboguer les Jobs Cron',
                 icon: 'fa-bug',
                 color: 'border-l-4 border-orange-500',
                 commands: [
                     {
-                        cmd: 'Logs et diagnostics',
-                        desc: 'Trouver pourquoi cron échoue',
+                        cmd: 'Consulter les logs cron',
+                        desc: 'journalctl et /var/log/syslog',
                         details: {
                             explanation: 'Méthodes pour diagnostiquer les problèmes avec les tâches cron.',
                             syntax: 'journalctl / /var/log/syslog',
@@ -510,24 +434,17 @@ flock -n 200 || { echo "Déjà en cours"; exit 1; }
                                 { flag: '/var/log/cron', desc: 'Logs cron (RHEL/CentOS)' }
                             ],
                             examples: [
-                                { code: '# Voir les exécutions cron récentes
-journalctl -u cron --since "1 hour ago"
-grep CRON /var/log/syslog | tail -50', desc: 'Logs cron' },
-                                { code: '# Tracer l\'exécution d\'un script
-* * * * * /scripts/task.sh >> /var/log/task.log 2>&1', desc: 'Logger la sortie' },
-                                { code: '# Debug verbeux
-* * * * * bash -x /scripts/task.sh >> /var/log/task_debug.log 2>&1', desc: 'Trace complète avec bash -x' },
-                                { code: '# Vérifier si cron est actif
-systemctl status cron
-crontab -l', desc: 'État du service' }
+                                { code: 'journalctl -u cron --since "1 hour ago"\ngrep CRON /var/log/syslog | tail -50', desc: 'Logs cron récents' },
+                                { code: '* * * * * /scripts/task.sh >> /var/log/task.log 2>&1', desc: 'Logger la sortie' },
+                                { code: '* * * * * bash -x /scripts/task.sh >> /var/log/task_debug.log 2>&1', desc: 'Trace complète avec bash -x' }
                             ],
                             tips: ['bash -x affiche chaque commande avant exécution'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Test manuel',
-                        desc: 'Simuler l\'environnement cron',
+                        cmd: 'Simuler l\'environnement cron',
+                        desc: 'Tester avec un environnement minimal',
                         details: {
                             explanation: 'Tester un script dans les mêmes conditions que cron (environnement minimal).',
                             syntax: 'env -i /bin/sh -c "script"',
@@ -536,27 +453,16 @@ crontab -l', desc: 'État du service' }
                                 { flag: 'PATH=/usr/bin:/bin', desc: 'PATH minimal de cron' }
                             ],
                             examples: [
-                                { code: '# Simuler l\'environnement cron
-env -i HOME=$HOME PATH=/usr/bin:/bin SHELL=/bin/sh /scripts/task.sh', desc: 'Test avec env minimal' },
-                                { code: '# Comparer les environnements
-# Dans cron: * * * * * env > /tmp/cron_env.txt
-# En terminal: env > /tmp/shell_env.txt
-diff /tmp/shell_env.txt /tmp/cron_env.txt', desc: 'Comparer les environnements' },
-                                { code: '# Wrapper pour environnement
-#!/bin/bash
-# /scripts/cron-wrapper.sh
-source /etc/environment
-export PATH=/usr/local/bin:/usr/bin:/bin
-cd /var/www/app
-exec "$@"', desc: 'Script wrapper' }
+                                { code: 'env -i HOME=$HOME PATH=/usr/bin:/bin SHELL=/bin/sh /scripts/task.sh', desc: 'Test avec env minimal' },
+                                { code: '# Dans cron: * * * * * env > /tmp/cron_env.txt\n# En terminal: env > /tmp/shell_env.txt\ndiff /tmp/shell_env.txt /tmp/cron_env.txt', desc: 'Comparer les environnements' }
                             ],
                             tips: ['Les scripts doivent fonctionner avec un PATH minimal'],
                             warnings: ['Cron n\'a pas accès à votre .bashrc ni vos variables d\'env']
                         }
                     },
                     {
-                        cmd: 'Problèmes courants',
-                        desc: 'Solutions aux erreurs fréquentes',
+                        cmd: 'Résoudre les problèmes courants',
+                        desc: 'Chemins, permissions, PATH...',
                         details: {
                             explanation: 'Les erreurs les plus fréquentes avec cron et leurs solutions.',
                             syntax: 'Diagnostic → Solution',
@@ -567,21 +473,9 @@ exec "$@"', desc: 'Script wrapper' }
                                 { flag: 'Pas de sortie', desc: 'Rediriger stdout et stderr' }
                             ],
                             examples: [
-                                { code: '# ❌ Chemin relatif
-0 * * * * ./script.sh
-# ✅ Chemin absolu
-0 * * * * /home/user/scripts/script.sh', desc: 'Chemins absolus' },
-                                { code: '# ❌ Commande sans PATH
-0 * * * * python3 script.py
-# ✅ Chemin complet
-0 * * * * /usr/bin/python3 /home/user/script.py', desc: 'Chemin complet des binaires' },
-                                { code: '# ❌ % non échappé (interprété comme newline)
-0 * * * * echo $(date +%Y-%m-%d)
-# ✅ % échappé
-0 * * * * echo $(date +\\%Y-\\%m-\\%d)', desc: 'Échapper le %' },
-                                { code: '# Vérifier les permissions
-ls -la /scripts/task.sh
-namei -l /scripts/task.sh  # Vérifie tout le chemin', desc: 'Diagnostic permissions' }
+                                { code: '# ❌ Chemin relatif\n0 * * * * ./script.sh\n# ✅ Chemin absolu\n0 * * * * /home/user/scripts/script.sh', desc: 'Chemins absolus' },
+                                { code: '# ❌ Commande sans PATH\n0 * * * * python3 script.py\n# ✅ Chemin complet\n0 * * * * /usr/bin/python3 /home/user/script.py', desc: 'Chemin complet des binaires' },
+                                { code: '# ❌ % non échappé\n0 * * * * echo $(date +%Y-%m-%d)\n# ✅ % échappé\n0 * * * * echo $(date +\\%Y-\\%m-\\%d)', desc: 'Échapper le %' }
                             ],
                             tips: ['which commande pour trouver le chemin complet d\'un binaire'],
                             warnings: []
@@ -590,125 +484,102 @@ namei -l /scripts/task.sh  # Vérifie tout le chemin', desc: 'Diagnostic permiss
                 ]
             },
             {
-                id: 'best-practices',
-                title: 'Bonnes Pratiques',
+                id: 'apply-best-practices',
+                title: '✔️ Appliquer les Bonnes Pratiques',
                 icon: 'fa-check-double',
                 color: 'border-l-4 border-indigo-500',
                 commands: [
                     {
-                        cmd: 'Structure de script cron',
-                        desc: 'Template robuste pour cron',
+                        cmd: 'Créer un template de script robuste',
+                        desc: 'Structure recommandée pour scripts cron',
                         details: {
                             explanation: 'Structure recommandée pour un script destiné à cron.',
-                            syntax: '#!/bin/bash
-set -euo pipefail',
+                            syntax: '#!/bin/bash\nset -euo pipefail',
                             options: [],
                             examples: [
-                                { code: '#!/bin/bash
-#
-# Script: backup-daily.sh
-# Cron: 0 2 * * * /scripts/backup-daily.sh
-#
-set -euo pipefail
-
-# Configuration
-SCRIPT_NAME="backup-daily"
-LOG_FILE="/var/log/${SCRIPT_NAME}.log"
-LOCK_FILE="/tmp/${SCRIPT_NAME}.lock"
-MAX_LOG_SIZE=$((10*1024*1024))  # 10 MB
-
-# Logging
-log() { echo "[$(date \'+%Y-%m-%d %H:%M:%S\')] $*" >> "$LOG_FILE"; }
-die() { log "ERREUR: $*"; exit 1; }
-
-# Rotation des logs
-[ -f "$LOG_FILE" ] && [ $(stat -f%z "$LOG_FILE" 2>/dev/null || stat -c%s "$LOG_FILE") -gt $MAX_LOG_SIZE ] && \n  mv "$LOG_FILE" "${LOG_FILE}.old"
-
-# Verrou
-exec 200>"$LOCK_FILE"
-flock -n 200 || die "Déjà en cours d\'exécution"
-
-# Début
-log "=== Démarrage $SCRIPT_NAME ==="
-
-# Cleanup à la fin
-trap \'log "=== Fin $SCRIPT_NAME (code: $?) ==="\' EXIT
-
-# Votre code ici...
-log "Tâche terminée avec succès"', desc: 'Template complet' }
+                                { code: '#!/bin/bash\n#\n# Script: backup-daily.sh\n# Cron: 0 2 * * * /scripts/backup-daily.sh\n#\nset -euo pipefail\n\n# Configuration\nSCRIPT_NAME="backup-daily"\nLOG_FILE="/var/log/${SCRIPT_NAME}.log"\nLOCK_FILE="/tmp/${SCRIPT_NAME}.lock"\n\n# Logging\nlog() { echo "[$(date \'+%Y-%m-%d %H:%M:%S\')] $*" >> "$LOG_FILE"; }\ndie() { log "ERREUR: $*"; exit 1; }\n\n# Verrou\nexec 200>"$LOCK_FILE"\nflock -n 200 || die "Déjà en cours d\'exécution"\n\n# Cleanup à la fin\ntrap \'log "=== Fin $SCRIPT_NAME (code: $?) ==="\' EXIT\n\nlog "=== Démarrage $SCRIPT_NAME ==="\n# Votre code ici...\nlog "Tâche terminée avec succès"', desc: 'Template complet' }
                             ],
                             tips: ['Ce template gère logging, verrou, rotation et cleanup'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Notifications',
-                        desc: 'Alertes en cas d\'erreur',
+                        cmd: 'Configurer les notifications d\'erreur',
+                        desc: 'Email, webhook, healthcheck.io',
                         details: {
                             explanation: 'Configurer des notifications pour être alerté des échecs.',
                             syntax: 'MAILTO / webhook / healthcheck',
                             options: [],
                             examples: [
-                                { code: '# MAILTO en tête de crontab
-MAILTO=admin@example.com
-MAILTO_ON_ERROR=admin@example.com
-
-# Notification sur erreur seulement
-0 * * * * /script.sh 2>&1 | ifne mail -s "Cron Error" admin@example.com', desc: 'Email sur erreur' },
-                                { code: '# Webhook Slack/Discord
-notify_error() {
-  curl -s -X POST -H "Content-type: application/json" \n    -d "{\"text\": \"❌ Cron failed: $1\"}" \n    "$SLACK_WEBHOOK_URL"
-}
-
-/script.sh || notify_error "backup-daily"', desc: 'Webhook notification' },
-                                { code: '# Healthcheck.io (ping de vie)
-# Ping au début et succès/échec à la fin
-0 * * * * curl -fsS -m 10 --retry 5 https://hc-ping.com/UUID/start && /script.sh && curl -fsS -m 10 --retry 5 https://hc-ping.com/UUID || curl -fsS -m 10 --retry 5 https://hc-ping.com/UUID/fail', desc: 'Healthcheck.io' }
+                                { code: '# Notification sur erreur seulement\n0 * * * * /script.sh 2>&1 | ifne mail -s "Cron Error" admin@example.com', desc: 'Email sur erreur' },
+                                { code: '# Webhook Slack/Discord\nnotify_error() {\n  curl -s -X POST -H "Content-type: application/json" \\\n    -d "{\\\"text\\\": \\\"❌ Cron failed: $1\\\"}" \\\n    "$SLACK_WEBHOOK_URL"\n}\n\n/script.sh || notify_error "backup-daily"', desc: 'Webhook notification' },
+                                { code: '# Healthcheck.io (ping de vie)\n0 * * * * curl -fsS https://hc-ping.com/UUID/start && /script.sh && curl -fsS https://hc-ping.com/UUID || curl -fsS https://hc-ping.com/UUID/fail', desc: 'Healthcheck.io' }
                             ],
                             tips: ['Healthcheck.io alerte aussi si le job ne s\'exécute pas'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Organisation crontab',
-                        desc: 'Maintenir une crontab propre',
+                        cmd: 'Organiser la crontab',
+                        desc: 'Documenter et grouper les tâches',
                         details: {
                             explanation: 'Bonnes pratiques pour organiser et documenter la crontab.',
                             syntax: '# Commentaires explicatifs',
                             options: [],
                             examples: [
-                                { code: '# ========================================
-# Crontab de production - myapp
-# Dernière mise à jour: 2024-01-15
-# Contact: admin@example.com
-# ========================================
-
-# --- Variables ---
-SHELL=/bin/bash
-PATH=/usr/local/bin:/usr/bin:/bin
-MAILTO=admin@example.com
-
-# --- Backups (fenêtre: 2h-4h) ---
-# Backup base de données - quotidien
-0 2 * * * /scripts/backup-db.sh
-# Backup fichiers - quotidien
-30 2 * * * /scripts/backup-files.sh
-# Sync vers S3 - quotidien
-0 3 * * * /scripts/sync-s3.sh
-
-# --- Maintenance (fenêtre: 4h-6h) ---
-# Nettoyage logs - hebdomadaire (dimanche)
-0 4 * * 0 /scripts/cleanup-logs.sh
-# Optimisation DB - hebdomadaire (dimanche)
-30 4 * * 0 /scripts/optimize-db.sh
-
-# --- Monitoring (permanent) ---
-# Health check - toutes les 5 min
-*/5 * * * * /scripts/healthcheck.sh
-# Métriques - toutes les minutes
-* * * * * /scripts/collect-metrics.sh', desc: 'Crontab organisée' }
+                                { code: '# ========================================\n# Crontab de production - myapp\n# Dernière mise à jour: 2024-01-15\n# ========================================\n\n# --- Variables ---\nSHELL=/bin/bash\nPATH=/usr/local/bin:/usr/bin:/bin\nMAILTO=admin@example.com\n\n# --- Backups (fenêtre: 2h-4h) ---\n0 2 * * * /scripts/backup-db.sh\n30 2 * * * /scripts/backup-files.sh\n\n# --- Maintenance (fenêtre: 4h-6h) ---\n0 4 * * 0 /scripts/cleanup-logs.sh\n\n# --- Monitoring (permanent) ---\n*/5 * * * * /scripts/healthcheck.sh', desc: 'Crontab organisée' }
                             ],
-                            tips: ['Groupez les tâches par fonction et documentez les fenêtres de maintenance'],
+                            tips: ['Groupez les tâches par fonction et documentez les fenêtres'],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'explore-alternatives',
+                title: '🔀 Explorer les Alternatives',
+                icon: 'fa-exchange-alt',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Utiliser les timers systemd',
+                        desc: 'Alternative moderne avec plus de contrôle',
+                        details: {
+                            explanation: 'Les timers systemd offrent plus de flexibilité que cron (logs, dépendances, etc.).',
+                            syntax: 'systemctl enable/start mon-timer.timer',
+                            options: [
+                                { flag: 'OnCalendar', desc: 'Planification style calendrier' },
+                                { flag: 'OnBootSec', desc: 'Délai après le boot' },
+                                { flag: 'Persistent', desc: 'Rattrape les exécutions manquées' }
+                            ],
+                            examples: [
+                                { code: '# /etc/systemd/system/backup.timer\n[Unit]\nDescription=Daily backup\n\n[Timer]\nOnCalendar=*-*-* 02:00:00\nPersistent=true\n\n[Install]\nWantedBy=timers.target', desc: 'Timer quotidien à 2h' },
+                                { code: 'systemctl list-timers --all', desc: 'Lister tous les timers' },
+                                { code: 'systemctl enable --now backup.timer', desc: 'Activer un timer' }
+                            ],
+                            tips: ['Les timers systemd permettent de voir facilement les logs avec journalctl'],
+                            warnings: ['Nécessite un fichier .service associé']
+                        }
+                    },
+                    {
+                        cmd: 'Utiliser la commande at',
+                        desc: 'Exécution unique à un moment précis',
+                        details: {
+                            explanation: 'Planifie une commande pour une exécution unique à un moment précis.',
+                            syntax: 'at TIME < script.sh\necho "cmd" | at TIME',
+                            options: [
+                                { flag: 'at now + 1 hour', desc: 'Dans une heure' },
+                                { flag: 'at 15:00', desc: 'À 15h aujourd\'hui' },
+                                { flag: 'at noon tomorrow', desc: 'Demain à midi' },
+                                { flag: 'atq', desc: 'Lister les jobs at' },
+                                { flag: 'atrm N', desc: 'Supprimer le job N' }
+                            ],
+                            examples: [
+                                { code: 'echo "/scripts/deploy.sh" | at 02:00', desc: 'Déployer à 2h' },
+                                { code: 'at now + 30 minutes <<< "systemctl restart nginx"', desc: 'Restart dans 30 min' },
+                                { code: 'atq\natrm 5', desc: 'Lister et supprimer un job' }
+                            ],
+                            tips: ['Utilisez at pour des tâches ponctuelles, cron pour les récurrentes'],
                             warnings: []
                         }
                     }
@@ -716,403 +587,106 @@ MAILTO=admin@example.com
             },
             {
                 id: 'project-automation',
-                title: '🔧 Projet: Pipeline d\'Automatisation',
+                title: '🎯 Projet: Pipeline d\'Automatisation',
                 icon: 'fa-cogs',
                 color: 'border-l-4 border-emerald-500',
                 commands: [
                     {
-                        cmd: 'Étape 1: Analyse des besoins',
+                        cmd: 'Étape 1: Analyser les besoins',
                         desc: 'Inventaire des tâches à automatiser',
                         details: {
                             explanation: 'Identifier et catégoriser toutes les tâches à automatiser.',
                             syntax: 'Inventaire → Priorisation → Planification',
                             options: [],
                             examples: [
-                                { code: '# Inventaire des tâches
-
-## BACKUPS (Critique - Quotidien)
-- [ ] Backup base de données PostgreSQL
-- [ ] Backup fichiers uploads utilisateurs
-- [ ] Sync vers stockage distant (S3/GCS)
-- [ ] Rétention: 7 jours local, 30 jours distant
-
-## MAINTENANCE (Important - Hebdomadaire)
-- [ ] Rotation des logs applicatifs
-- [ ] Nettoyage fichiers temporaires
-- [ ] Optimisation/VACUUM base de données
-- [ ] Mise à jour des certificats SSL
-
-## MONITORING (Critique - Continu)
-- [ ] Health check application
-- [ ] Vérification espace disque
-- [ ] Surveillance charge système
-- [ ] Alertes en cas de problème
-
-## RAPPORTS (Utile - Variable)
-- [ ] Rapport d\'activité quotidien
-- [ ] Métriques hebdomadaires
-- [ ] Rapport mensuel de facturation', desc: 'Inventaire type' }
+                                { code: '# Inventaire des tâches\n\n## BACKUPS (Critique - Quotidien)\n- [ ] Backup base de données\n- [ ] Backup fichiers uploads\n- [ ] Sync vers stockage distant\n\n## MAINTENANCE (Important - Hebdomadaire)\n- [ ] Rotation des logs\n- [ ] Nettoyage fichiers temporaires\n- [ ] Optimisation DB\n\n## MONITORING (Critique - Continu)\n- [ ] Health check application\n- [ ] Vérification espace disque\n- [ ] Alertes en cas de problème', desc: 'Inventaire type' }
                             ],
                             tips: ['Classez par criticité: Critique > Important > Utile'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 2: Structure des scripts',
+                        cmd: 'Étape 2: Structurer les scripts',
                         desc: 'Organisation des fichiers',
                         details: {
                             explanation: 'Créer une structure de répertoires organisée pour les scripts.',
                             syntax: '/opt/scripts/{backup,maintenance,monitoring}',
                             options: [],
                             examples: [
-                                { code: '# Créer la structure
-sudo mkdir -p /opt/scripts/{backup,maintenance,monitoring,lib,config}
-sudo mkdir -p /var/log/scripts
-sudo chown -R root:adm /opt/scripts /var/log/scripts
-
-# Structure finale
-/opt/scripts/
-├── backup/
-│   ├── backup-database.sh
-│   ├── backup-files.sh
-│   └── sync-remote.sh
-├── maintenance/
-│   ├── cleanup-logs.sh
-│   ├── optimize-db.sh
-│   └── renew-certs.sh
-├── monitoring/
-│   ├── healthcheck.sh
-│   ├── disk-check.sh
-│   └── alerting.sh
-├── lib/
-│   ├── common.sh      # Fonctions partagées
-│   └── notify.sh      # Notifications
-└── config/
-    ├── backup.conf
-    └── notify.conf', desc: 'Structure recommandée' }
+                                { code: 'sudo mkdir -p /opt/scripts/{backup,maintenance,monitoring,lib,config}\nsudo mkdir -p /var/log/scripts\n\n# Structure finale\n/opt/scripts/\n├── backup/\n│   ├── backup-database.sh\n│   └── backup-files.sh\n├── maintenance/\n│   ├── cleanup-logs.sh\n│   └── optimize-db.sh\n├── monitoring/\n│   └── healthcheck.sh\n├── lib/\n│   └── common.sh\n└── config/\n    └── backup.conf', desc: 'Structure recommandée' }
                             ],
                             tips: ['Séparez la config des scripts pour faciliter les mises à jour'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 3: Bibliothèque commune',
+                        cmd: 'Étape 3: Créer la bibliothèque commune',
                         desc: 'Fonctions réutilisables',
                         details: {
                             explanation: 'Créer une bibliothèque de fonctions communes à tous les scripts.',
                             syntax: '/opt/scripts/lib/common.sh',
                             options: [],
                             examples: [
-                                { code: '#!/bin/bash
-# /opt/scripts/lib/common.sh
-# Bibliothèque de fonctions communes
-
-# Strict mode
-set -euo pipefail
-
-# Couleurs
-export RED=\'\\033[0;31m\'
-export GREEN=\'\\033[0;32m\'
-export YELLOW=\'\\033[1;33m\'
-export NC=\'\\033[0m\'
-
-# Logging
-SCRIPT_NAME="${SCRIPT_NAME:-$(basename "$0" .sh)}"
-LOG_DIR="${LOG_DIR:-/var/log/scripts}"
-LOG_FILE="${LOG_DIR}/${SCRIPT_NAME}.log"
-
-log() {
-  local level="$1"; shift
-  echo "[$(date \'+%Y-%m-%d %H:%M:%S\')] [$level] $*" | tee -a "$LOG_FILE"
-}
-
-info()  { log "INFO" "$@"; }
-warn()  { log "WARN" "$@"; }
-error() { log "ERROR" "$@" >&2; }
-die()   { error "$@"; exit 1; }
-
-# Verrou
-LOCK_FILE="/tmp/${SCRIPT_NAME}.lock"
-acquire_lock() {
-  exec 200>"$LOCK_FILE"
-  flock -n 200 || die "Script déjà en cours d\'exécution"
-}
-
-# Nettoyage
-cleanup() {
-  local exit_code=$?
-  [ $exit_code -eq 0 ] && info "Terminé avec succès" || error "Échec (code: $exit_code)"
-  exit $exit_code
-}
-trap cleanup EXIT
-
-# Check prérequis
-require_root() {
-  [ "$(id -u)" -eq 0 ] || die "Ce script doit être exécuté en tant que root"
-}
-
-require_commands() {
-  for cmd in "$@"; do
-    command -v "$cmd" >/dev/null 2>&1 || die "Commande requise non trouvée: $cmd"
-  done
-}', desc: 'Bibliothèque commune' }
+                                { code: '#!/bin/bash\n# /opt/scripts/lib/common.sh\nset -euo pipefail\n\n# Logging\nSCRIPT_NAME="${SCRIPT_NAME:-$(basename "$0" .sh)}"\nLOG_FILE="/var/log/scripts/${SCRIPT_NAME}.log"\n\nlog() { echo "[$(date \'+%Y-%m-%d %H:%M:%S\')] $*" | tee -a "$LOG_FILE"; }\ninfo()  { log "INFO: $@"; }\nerror() { log "ERROR: $@" >&2; }\ndie()   { error "$@"; exit 1; }\n\n# Verrou\nLOCK_FILE="/tmp/${SCRIPT_NAME}.lock"\nacquire_lock() {\n  exec 200>"$LOCK_FILE"\n  flock -n 200 || die "Script déjà en cours"\n}\n\n# Cleanup\ntrap \'[ $? -eq 0 ] && info "Terminé" || error "Échec (code: $?)"\' EXIT', desc: 'Bibliothèque commune' }
                             ],
                             tips: ['Source cette bibliothèque dans tous vos scripts'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 4: Script de backup',
-                        desc: 'Sauvegarde automatisée complète',
+                        cmd: 'Étape 4: Implémenter le backup',
+                        desc: 'Script de sauvegarde complet',
                         details: {
                             explanation: 'Script de backup professionnel avec rotation et sync distant.',
                             syntax: '/opt/scripts/backup/backup-all.sh',
                             options: [],
                             examples: [
-                                { code: '#!/bin/bash
-# /opt/scripts/backup/backup-all.sh
-SCRIPT_NAME="backup-all"
-source /opt/scripts/lib/common.sh
-source /opt/scripts/config/backup.conf
-
-acquire_lock
-require_root
-require_commands pg_dump tar rsync aws
-
-info "=== Démarrage backup complet ==="
-
-# Variables
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="${BACKUP_BASE}/${DATE}"
-mkdir -p "$BACKUP_DIR"
-
-# 1. Backup base de données
-info "Backup PostgreSQL..."
-DBFILE="$BACKUP_DIR/database.sql.gz"
-if sudo -u postgres pg_dump -Fc "$DB_NAME" | gzip > "$DBFILE"; then
-  info "Database: $(ls -lh $DBFILE | awk \'{print $5}\')"
-else
-  die "Échec backup database"
-fi
-
-# 2. Backup fichiers
-info "Backup fichiers..."
-FILESBACKUP="$BACKUP_DIR/files.tar.gz"
-tar -czf "$FILESBACKUP" -C "$APP_DIR" uploads config .env 2>/dev/null || true
-info "Files: $(ls -lh $FILESBACKUP | awk \'{print $5}\')"
-
-# 3. Rotation locale (garder N jours)
-info "Rotation locale (garder ${RETENTION_DAYS} jours)..."
-find "$BACKUP_BASE" -maxdepth 1 -type d -mtime +${RETENTION_DAYS} -exec rm -rf {} \\;
-
-# 4. Sync vers stockage distant
-if [ -n "${S3_BUCKET:-}" ]; then
-  info "Sync vers S3..."
-  aws s3 sync "$BACKUP_DIR" "s3://${S3_BUCKET}/backups/${DATE}/"
-fi
-
-info "=== Backup terminé: $BACKUP_DIR ==="', desc: 'Script backup complet' },
-                                { code: '# /opt/scripts/config/backup.conf
-BACKUP_BASE="/backup"
-DB_NAME="myapp_production"
-APP_DIR="/var/www/myapp"
-RETENTION_DAYS=7
-S3_BUCKET="mycompany-backups"', desc: 'Fichier de config' }
+                                { code: '#!/bin/bash\nSCRIPT_NAME="backup-all"\nsource /opt/scripts/lib/common.sh\nsource /opt/scripts/config/backup.conf\n\nacquire_lock\ninfo "=== Démarrage backup =="\n\nDATE=$(date +%Y%m%d_%H%M%S)\nBACKUP_DIR="${BACKUP_BASE}/${DATE}"\nmkdir -p "$BACKUP_DIR"\n\n# 1. Backup DB\ninfo "Backup PostgreSQL..."\nsudo -u postgres pg_dump -Fc "$DB_NAME" | gzip > "$BACKUP_DIR/database.sql.gz"\n\n# 2. Backup fichiers\ninfo "Backup fichiers..."\ntar -czf "$BACKUP_DIR/files.tar.gz" -C "$APP_DIR" uploads config\n\n# 3. Rotation\ninfo "Rotation..."\nfind "$BACKUP_BASE" -maxdepth 1 -type d -mtime +${RETENTION_DAYS} -exec rm -rf {} \\;\n\ninfo "=== Backup terminé ==="', desc: 'Script backup' }
                             ],
                             tips: ['Testez la restauration régulièrement !'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 5: Monitoring et alertes',
-                        desc: 'Surveillance proactive',
+                        cmd: 'Étape 5: Ajouter le monitoring',
+                        desc: 'Surveillance avec alertes',
                         details: {
                             explanation: 'Scripts de monitoring avec alertes automatiques.',
-                            syntax: '/opt/scripts/monitoring/*.sh',
+                            syntax: '/opt/scripts/monitoring/healthcheck.sh',
                             options: [],
                             examples: [
-                                { code: '#!/bin/bash
-# /opt/scripts/monitoring/healthcheck.sh
-SCRIPT_NAME="healthcheck"
-source /opt/scripts/lib/common.sh
-source /opt/scripts/lib/notify.sh
-
-# Seuils
-DISK_THRESHOLD=80
-LOAD_THRESHOLD=10
-MEMORY_THRESHOLD=90
-
-ALERTS=()
-
-# Check disk
-DISK_USAGE=$(df / | awk \'NR==2 {print $5}\' | tr -d \'%\')
-if [ "$DISK_USAGE" -gt "$DISK_THRESHOLD" ]; then
-  ALERTS+=("Disque: ${DISK_USAGE}% (seuil: ${DISK_THRESHOLD}%)")
-fi
-
-# Check load
-LOAD=$(awk \'{print $1}\' /proc/loadavg | cut -d. -f1)
-if [ "$LOAD" -gt "$LOAD_THRESHOLD" ]; then
-  ALERTS+=("Load: ${LOAD} (seuil: ${LOAD_THRESHOLD})")
-fi
-
-# Check memory
-MEM_USAGE=$(free | awk \'/Mem:/ {printf "%.0f", $3/$2*100}\')
-if [ "$MEM_USAGE" -gt "$MEMORY_THRESHOLD" ]; then
-  ALERTS+=("Mémoire: ${MEM_USAGE}% (seuil: ${MEMORY_THRESHOLD}%)")
-fi
-
-# Check services
-for service in nginx postgresql redis; do
-  if ! systemctl is-active --quiet "$service"; then
-    ALERTS+=("Service arrêté: $service")
-  fi
-done
-
-# Check URL
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${APP_URL}/health" 2>/dev/null || echo "000")
-if [ "$HTTP_CODE" != "200" ]; then
-  ALERTS+=("HTTP: code $HTTP_CODE sur ${APP_URL}/health")
-fi
-
-# Envoyer alertes
-if [ ${#ALERTS[@]} -gt 0 ]; then
-  MESSAGE="⚠️ ALERTES SERVEUR $(hostname):\n"
-  for alert in "${ALERTS[@]}"; do
-    MESSAGE+="• $alert\n"
-  done
-  notify_slack "$MESSAGE"
-  error "$MESSAGE"
-else
-  info "Tous les checks OK"
-fi', desc: 'Health check complet' }
+                                { code: '#!/bin/bash\nSCRIPT_NAME="healthcheck"\nsource /opt/scripts/lib/common.sh\n\nALERTS=()\n\n# Check disk (> 80%)\nDISK=$(df / | awk \'NR==2 {print $5}\' | tr -d \'%\')\n[ "$DISK" -gt 80 ] && ALERTS+=("Disque: ${DISK}%")\n\n# Check services\nfor svc in nginx postgresql; do\n  systemctl is-active --quiet "$svc" || ALERTS+=("Service down: $svc")\ndone\n\n# Check URL\nHTTP=$(curl -s -o /dev/null -w "%{http_code}" "${APP_URL}/health" || echo "000")\n[ "$HTTP" != "200" ] && ALERTS+=("HTTP: code $HTTP")\n\n# Envoyer alertes\nif [ ${#ALERTS[@]} -gt 0 ]; then\n  echo "⚠️ ALERTES: ${ALERTS[*]}" | mail -s "Alert $(hostname)" admin@example.com\nfi', desc: 'Health check' }
                             ],
                             tips: ['Ajustez les seuils selon votre environnement'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 6: Crontab finale',
+                        cmd: 'Étape 6: Assembler la crontab',
                         desc: 'Orchestration complète',
                         details: {
                             explanation: 'Assembler toutes les tâches dans une crontab organisée.',
                             syntax: 'crontab -e',
                             options: [],
                             examples: [
-                                { code: '# ============================================
-# CRONTAB PRODUCTION - myapp
-# Généré le: 2024-01-15
-# Maintainer: admin@example.com
-# ============================================
-
-SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=""
-
-# ============================================
-# MONITORING (Critique - Permanent)
-# ============================================
-# Health check système - toutes les 5 min
-*/5 * * * * /opt/scripts/monitoring/healthcheck.sh
-
-# Métriques Prometheus - chaque minute
-* * * * * /opt/scripts/monitoring/collect-metrics.sh
-
-# ============================================
-# BACKUPS (Critique - Fenêtre 02:00-04:00)
-# ============================================
-# Backup complet - quotidien à 2h
-0 2 * * * /opt/scripts/backup/backup-all.sh
-
-# Vérification intégrité backups - quotidien à 3h
-0 3 * * * /opt/scripts/backup/verify-backups.sh
-
-# ============================================
-# MAINTENANCE (Important - Fenêtre 04:00-06:00)
-# ============================================
-# Rotation logs - quotidien à 4h
-0 4 * * * /opt/scripts/maintenance/rotate-logs.sh
-
-# Optimisation DB - dimanche à 4h30
-30 4 * * 0 /opt/scripts/maintenance/optimize-db.sh
-
-# Nettoyage fichiers temp - quotidien à 5h
-0 5 * * * /opt/scripts/maintenance/cleanup-temp.sh
-
-# ============================================
-# RAPPORTS (Utile - Heures ouvrées)
-# ============================================
-# Rapport quotidien - lun-ven à 8h
-0 8 * * 1-5 /opt/scripts/reports/daily-report.sh
-
-# Rapport hebdomadaire - lundi à 9h
-0 9 * * 1 /opt/scripts/reports/weekly-report.sh
-
-# ============================================
-# FIN CRONTAB
-# ============================================', desc: 'Crontab complète' }
+                                { code: '# ============================================\n# CRONTAB PRODUCTION - myapp\n# ============================================\n\nSHELL=/bin/bash\nPATH=/usr/local/bin:/usr/bin:/bin\nMAILTO=""\n\n# --- MONITORING (Permanent) ---\n*/5 * * * * /opt/scripts/monitoring/healthcheck.sh\n\n# --- BACKUPS (02:00-04:00) ---\n0 2 * * * /opt/scripts/backup/backup-all.sh\n\n# --- MAINTENANCE (04:00-06:00) ---\n0 4 * * * /opt/scripts/maintenance/rotate-logs.sh\n30 4 * * 0 /opt/scripts/maintenance/optimize-db.sh\n\n# --- RAPPORTS (Heures ouvrées) ---\n0 8 * * 1-5 /opt/scripts/reports/daily-report.sh', desc: 'Crontab complète' }
                             ],
                             tips: ['Documentez et versionnez votre crontab avec Git'],
                             warnings: []
                         }
                     },
                     {
-                        cmd: 'Étape 7: Tableau de bord',
+                        cmd: 'Étape 7: Créer le tableau de bord',
                         desc: 'Suivi des exécutions',
                         details: {
                             explanation: 'Script pour générer un rapport d\'état des tâches cron.',
                             syntax: '/opt/scripts/cron-status.sh',
                             options: [],
                             examples: [
-                                { code: '#!/bin/bash
-# /opt/scripts/cron-status.sh
-# Génère un rapport d\'état des tâches automatisées
-
-echo "========================================"
-echo "  ÉTAT DES TÂCHES AUTOMATISÉES"
-echo "  $(date)"
-echo "========================================"
-echo
-
-# Dernières exécutions
-echo "--- Dernières exécutions ---"
-for log in /var/log/scripts/*.log; do
-  name=$(basename "$log" .log)
-  last=$(tail -1 "$log" 2>/dev/null | cut -d\']\' -f1 | tr -d \'[\')
-  status=$(grep -c "ERROR" "$log" 2>/dev/null || echo "0")
-  if [ "$status" -gt 0 ]; then
-    printf "%-20s %s ⚠️  (%d erreurs)\n" "$name" "$last" "$status"
-  else
-    printf "%-20s %s ✓\n" "$name" "$last"
-  fi
-done
-echo
-
-# Prochaines exécutions
-echo "--- Prochaines exécutions ---"
-if command -v cronutils >/dev/null; then
-  crontab -l | cronutils next 5
-else
-  echo "(Installer cronutils pour voir les prochaines exécutions)"
-fi
-echo
-
-# Espace disque backups
-echo "--- Espace backups ---"
-du -sh /backup/* 2>/dev/null | tail -5
-echo "Total: $(du -sh /backup 2>/dev/null | cut -f1)"
-echo
-
-# Alertes récentes
-echo "--- Alertes récentes (24h) ---"
-grep -h "ERROR\\|WARN" /var/log/scripts/*.log 2>/dev/null | \n  grep "$(date +%Y-%m-%d)\\|$(date -d yesterday +%Y-%m-%d)" | tail -10
-echo
-
-echo "========================================"', desc: 'Script de status' },
-                                { code: '# Ajouter au cron pour rapport quotidien
-0 7 * * * /opt/scripts/cron-status.sh | mail -s "Cron Status $(hostname)" admin@example.com', desc: 'Rapport par email' }
+                                { code: '#!/bin/bash\necho "=== ÉTAT DES TÂCHES =="\necho "$(date)"\necho\n\necho "--- Dernières exécutions ---"\nfor log in /var/log/scripts/*.log; do\n  name=$(basename "$log" .log)\n  last=$(tail -1 "$log" 2>/dev/null | cut -d\']\' -f1 | tr -d \'[\')\n  errors=$(grep -c "ERROR" "$log" 2>/dev/null || echo "0")\n  if [ "$errors" -gt 0 ]; then\n    echo "$name: $last ⚠️ ($errors erreurs)"\n  else\n    echo "$name: $last ✓"\n  fi\ndone\n\necho\necho "--- Espace backups ---"\ndu -sh /backup/* 2>/dev/null | tail -5', desc: 'Script de status' },
+                                { code: '# Rapport quotidien par email\n0 7 * * * /opt/scripts/cron-status.sh | mail -s "Cron Status" admin@example.com', desc: 'Rapport email' }
                             ],
-                            tips: ['Automatisez ce rapport pour une vue quotidienne de vos automatisations'],
+                            tips: ['Automatisez ce rapport pour une vue quotidienne'],
                             warnings: []
                         }
                     }
