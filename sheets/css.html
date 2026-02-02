@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire CSS3 : Flexbox, Grid, animations, responsive design et bonnes pratiques.">
+    <title>CSS3 Moderne - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-500/20 mb-4 icon-glow">
+                    <i class="fab fa-css3-alt text-3xl text-blue-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">CSS3 Moderne</h1>
+                <p class="text-slate-400">Flexbox, Grid, animations et responsive design</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: flexbox, grid, animation)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 1: SÉLECTEURS ESSENTIELS
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'selectors',
+                title: '🎨 Sélecteurs Essentiels',
+                icon: 'fa-bullseye',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Sélecteurs de base',
+                        desc: 'Élément, classe, id, universel',
+                        details: {
+                            explanation: 'Les sélecteurs de base ciblent les éléments HTML de différentes manières.',
+                            syntax: 'element { }\n.classe { }\n#id { }\n* { }',
+                            options: [
+                                { flag: 'element', desc: 'Toutes les balises de ce type' },
+                                { flag: '.classe', desc: 'Éléments avec cette classe' },
+                                { flag: '#id', desc: 'Élément unique avec cet id' },
+                                { flag: '*', desc: 'Tous les éléments' }
+                            ],
+                            examples: [
+                                { code: `/* Par élément */
+p { color: gray; }
+h1, h2, h3 { font-weight: bold; }
+
+/* Par classe (réutilisable) */
+.btn { padding: 10px 20px; }
+.btn-primary { background: blue; }
+.card { border-radius: 8px; }
+
+/* Par id (unique) */
+#header { position: fixed; }
+#main-content { margin-top: 60px; }
+
+/* Universel */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Combinaison */
+p.intro { font-size: 1.2em; }
+div#container { max-width: 1200px; }`, desc: 'Sélecteurs de base' }
+                            ],
+                            tips: [
+                                'Préférez les classes aux id (réutilisables)',
+                                'Évitez les sélecteurs trop spécifiques',
+                                'box-sizing: border-box sur * est une bonne pratique'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Sélecteurs combinateurs',
+                        desc: 'Descendant, enfant, adjacent, général',
+                        details: {
+                            explanation: 'Les combinateurs définissent la relation entre les éléments.',
+                            syntax: 'A B (descendant)\nA > B (enfant direct)\nA + B (adjacent)\nA ~ B (général)',
+                            options: [
+                                { flag: 'A B', desc: 'B descendant de A (tous niveaux)' },
+                                { flag: 'A > B', desc: 'B enfant direct de A' },
+                                { flag: 'A + B', desc: 'B immédiatement après A' },
+                                { flag: 'A ~ B', desc: 'Tous les B après A (même niveau)' }
+                            ],
+                            examples: [
+                                { code: `/* Descendant (tous les niveaux) */
+nav a { color: white; }
+.card p { margin-bottom: 1em; }
+
+/* Enfant direct (premier niveau) */
+ul > li { list-style: none; }
+.menu > li > a { padding: 10px; }
+
+/* Adjacent (immédiatement après) */
+h2 + p { font-size: 1.1em; } /* Premier p après h2 */
+input + label { margin-left: 5px; }
+
+/* Général (tous les suivants au même niveau) */
+h2 ~ p { color: gray; } /* Tous les p après h2 */
+
+/* Combinaisons */
+.sidebar > ul > li > a { display: block; }
+article > p:first-of-type { font-weight: bold; }`, desc: 'Combinateurs' }
+                            ],
+                            tips: [
+                                '> est plus performant que le descendant simple',
+                                '+ utile pour espacer les éléments consécutifs',
+                                'Attention à la spécificité des sélecteurs longs'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Pseudo-classes',
+                        desc: ':hover, :focus, :nth-child, :first-of-type',
+                        details: {
+                            explanation: 'Les pseudo-classes ciblent des états ou positions spécifiques.',
+                            syntax: 'selector:pseudo-class { }',
+                            options: [
+                                { flag: ':hover', desc: 'Au survol souris' },
+                                { flag: ':focus', desc: 'Élément actif (clavier)' },
+                                { flag: ':active', desc: 'Pendant le clic' },
+                                { flag: ':first-child', desc: 'Premier enfant' },
+                                { flag: ':last-child', desc: 'Dernier enfant' },
+                                { flag: ':nth-child(n)', desc: 'Nième enfant' },
+                                { flag: ':not()', desc: 'Négation' }
+                            ],
+                            examples: [
+                                { code: `/* États interactifs */
+a:hover { color: blue; }
+button:hover { transform: scale(1.05); }
+input:focus { border-color: blue; outline: none; }
+button:active { transform: scale(0.98); }
+
+/* Position dans le parent */
+li:first-child { margin-top: 0; }
+li:last-child { margin-bottom: 0; }
+tr:nth-child(odd) { background: #f5f5f5; }
+tr:nth-child(even) { background: white; }
+
+/* Formules nth-child */
+li:nth-child(3) { } /* Le 3ème */
+li:nth-child(2n) { } /* Pairs (2, 4, 6...) */
+li:nth-child(2n+1) { } /* Impairs */
+li:nth-child(3n) { } /* Multiples de 3 */
+li:nth-child(-n+3) { } /* Les 3 premiers */
+
+/* Type spécifique */
+p:first-of-type { font-weight: bold; }
+p:last-of-type { margin-bottom: 0; }
+
+/* Négation */
+button:not(.disabled) { cursor: pointer; }
+input:not([type="submit"]) { border: 1px solid gray; }
+
+/* États de formulaire */
+input:valid { border-color: green; }
+input:invalid { border-color: red; }
+input:required { border-left: 3px solid blue; }
+input:disabled { opacity: 0.5; }`, desc: 'Pseudo-classes' }
+                            ],
+                            tips: [
+                                ':nth-child compte tous les enfants, :nth-of-type compte par type',
+                                ':focus-visible pour focus clavier uniquement',
+                                ':not() ne peut contenir qu\'un sélecteur simple'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Pseudo-éléments',
+                        desc: '::before, ::after, ::first-letter',
+                        details: {
+                            explanation: 'Les pseudo-éléments ciblent des parties d\'un élément.',
+                            syntax: 'selector::pseudo-element { content: ""; }',
+                            options: [
+                                { flag: '::before', desc: 'Contenu avant l\'élément' },
+                                { flag: '::after', desc: 'Contenu après l\'élément' },
+                                { flag: '::first-letter', desc: 'Première lettre' },
+                                { flag: '::first-line', desc: 'Première ligne' },
+                                { flag: '::selection', desc: 'Texte sélectionné' },
+                                { flag: '::placeholder', desc: 'Placeholder des inputs' }
+                            ],
+                            examples: [
+                                { code: `/* Before/After (content obligatoire) */
+.required::after {
+    content: " *";
+    color: red;
+}
+
+.icon::before {
+    content: "→ ";
+}
+
+/* Décorations avec before/after */
+.fancy-title::before,
+.fancy-title::after {
+    content: "";
+    display: inline-block;
+    width: 50px;
+    height: 2px;
+    background: currentColor;
+    vertical-align: middle;
+    margin: 0 10px;
+}
+
+/* Overlay avec ::after */
+.card {
+    position: relative;
+}
+.card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.card:hover::after {
+    opacity: 1;
+}
+
+/* Typographie */
+p::first-letter {
+    font-size: 2em;
+    font-weight: bold;
+    float: left;
+    margin-right: 5px;
+}
+
+p::first-line {
+    font-variant: small-caps;
+}
+
+/* Sélection */
+::selection {
+    background: blue;
+    color: white;
+}
+
+/* Placeholder */
+input::placeholder {
+    color: #999;
+    font-style: italic;
+}`, desc: 'Pseudo-éléments' }
+                            ],
+                            tips: [
+                                'content est obligatoire pour ::before/::after',
+                                'Utilisez content: "" pour les décorations',
+                                '::before et ::after sont inline par défaut'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 2: BOX MODEL & LAYOUT
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'box-model',
+                title: '📦 Box Model & Layout',
+                icon: 'fa-square',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Box Model expliqué',
+                        desc: 'content, padding, border, margin',
+                        details: {
+                            explanation: 'Chaque élément HTML est une boîte avec content, padding, border et margin.',
+                            syntax: 'margin → border → padding → content',
+                            options: [
+                                { flag: 'content', desc: 'Le contenu de l\'élément' },
+                                { flag: 'padding', desc: 'Espace intérieur (entre content et border)' },
+                                { flag: 'border', desc: 'Bordure de l\'élément' },
+                                { flag: 'margin', desc: 'Espace extérieur (entre éléments)' }
+                            ],
+                            examples: [
+                                { code: `/* Box-sizing (TOUJOURS utiliser border-box) */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+/* border-box = width inclut padding + border */
+/* content-box = width = contenu seul (par défaut, problématique) */
+
+/* Padding */
+.card {
+    padding: 20px;              /* Tous les côtés */
+    padding: 10px 20px;         /* vertical | horizontal */
+    padding: 10px 20px 15px;    /* top | horizontal | bottom */
+    padding: 10px 20px 15px 5px; /* top | right | bottom | left */
+}
+
+/* Margin */
+.section {
+    margin: 0 auto;             /* Centrer horizontalement */
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Margin négatif (utile pour déborder) */
+.full-width {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* Border */
+.box {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    border-top: 3px solid blue;
+}`, desc: 'Box Model' }
+                            ],
+                            tips: [
+                                'Utilisez TOUJOURS box-sizing: border-box',
+                                'margin: 0 auto centre les éléments block',
+                                'Les margins verticaux fusionnent (margin collapse)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Display',
+                        desc: 'block, inline, inline-block, none, flex, grid',
+                        details: {
+                            explanation: 'La propriété display définit comment un élément est affiché.',
+                            syntax: 'display: block | inline | inline-block | flex | grid | none',
+                            options: [
+                                { flag: 'block', desc: 'Prend toute la largeur, nouvelle ligne' },
+                                { flag: 'inline', desc: 'Sur la ligne, pas de width/height' },
+                                { flag: 'inline-block', desc: 'Sur la ligne avec width/height' },
+                                { flag: 'none', desc: 'Complètement caché' },
+                                { flag: 'flex', desc: 'Conteneur flexible' },
+                                { flag: 'grid', desc: 'Conteneur grille' }
+                            ],
+                            examples: [
+                                { code: `/* Block (div, p, h1-h6, section...) */
+.block {
+    display: block;
+    width: 100%;           /* Prend toute la largeur */
+    margin: 10px 0;        /* Margin vertical fonctionne */
+}
+
+/* Inline (span, a, strong...) */
+.inline {
+    display: inline;
+    /* width et height ignorés */
+    /* margin vertical ignoré */
+    padding: 5px 10px;     /* Padding horizontal OK */
+}
+
+/* Inline-block (meilleur des deux) */
+.tag {
+    display: inline-block;
+    padding: 5px 10px;
+    width: 100px;          /* Width fonctionne */
+    margin: 5px;           /* Margin fonctionne */
+    vertical-align: middle;
+}
+
+/* None (cacher complètement) */
+.hidden {
+    display: none;         /* Retiré du flux */
+}
+
+/* Visibility (garde l'espace) */
+.invisible {
+    visibility: hidden;    /* Caché mais garde l'espace */
+}
+
+/* Flex et Grid */
+.flex-container { display: flex; }
+.grid-container { display: grid; }`, desc: 'Valeurs de display' }
+                            ],
+                            tips: [
+                                'inline-block résout beaucoup de problèmes de layout',
+                                'display: none retire l\'élément du DOM visuellement',
+                                'visibility: hidden garde l\'espace'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Width et Height',
+                        desc: 'width, min-width, max-width, height',
+                        details: {
+                            explanation: 'Contrôlez les dimensions des éléments avec ces propriétés.',
+                            syntax: 'width: value;\nmin-width: value;\nmax-width: value;',
+                            options: [
+                                { flag: 'width/height', desc: 'Taille fixe ou relative' },
+                                { flag: 'min-width', desc: 'Taille minimum' },
+                                { flag: 'max-width', desc: 'Taille maximum' },
+                                { flag: 'auto', desc: 'Taille automatique' },
+                                { flag: '100%', desc: 'Relatif au parent' },
+                                { flag: '100vw/vh', desc: 'Relatif au viewport' }
+                            ],
+                            examples: [
+                                { code: `/* Largeur fixe vs responsive */
+.fixed { width: 300px; }
+.relative { width: 50%; }
+.responsive {
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Pattern container responsive */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Min et Max */
+.card {
+    min-width: 200px;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Hauteur */
+.hero {
+    height: 100vh;         /* Pleine hauteur viewport */
+    min-height: 500px;     /* Minimum */
+}
+
+.content {
+    min-height: 100vh;     /* Au moins la hauteur de l'écran */
+}
+
+/* Aspect ratio */
+.video-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+}
+
+/* Fit-content */
+.inline-box {
+    width: fit-content;    /* S'adapte au contenu */
+    max-width: 100%;
+}`, desc: 'Dimensions' }
+                            ],
+                            tips: [
+                                'max-width: 100% empêche le débordement',
+                                'min-height: 100vh pour les layouts full-page',
+                                'aspect-ratio remplace le padding-top hack'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 3: FLEXBOX
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'flexbox',
+                title: '🧱 Flexbox',
+                icon: 'fa-th-large',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Flexbox Container',
+                        desc: 'display: flex, direction, wrap',
+                        details: {
+                            explanation: 'Flexbox est un système de layout unidimensionnel (ligne ou colonne).',
+                            syntax: 'display: flex;\nflex-direction: row | column;\nflex-wrap: wrap;',
+                            options: [
+                                { flag: 'flex-direction', desc: 'row (défaut) | row-reverse | column | column-reverse' },
+                                { flag: 'flex-wrap', desc: 'nowrap (défaut) | wrap | wrap-reverse' },
+                                { flag: 'flex-flow', desc: 'Raccourci direction + wrap' }
+                            ],
+                            examples: [
+                                { code: `/* Container flex basique */
+.flex-container {
+    display: flex;
+    flex-direction: row;     /* Éléments en ligne */
+}
+
+/* Colonne (vertical) */
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Wrap (retour à la ligne) */
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Raccourci */
+.flex-flow {
+    display: flex;
+    flex-flow: row wrap;     /* direction + wrap */
+}
+
+/* Gap (espacement) */
+.flex-gap {
+    display: flex;
+    gap: 20px;               /* Espace entre tous les éléments */
+    row-gap: 10px;           /* Espace vertical */
+    column-gap: 20px;        /* Espace horizontal */
+}`, desc: 'Container flex' }
+                            ],
+                            tips: [
+                                'gap remplace les margins pour l\'espacement',
+                                'flex-wrap: wrap pour les layouts responsives',
+                                'Pensez Flexbox pour les layouts 1D'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Alignement Flexbox',
+                        desc: 'justify-content, align-items, align-content',
+                        details: {
+                            explanation: 'Ces propriétés contrôlent l\'alignement des éléments flex.',
+                            syntax: 'justify-content: center;\nalign-items: center;',
+                            options: [
+                                { flag: 'justify-content', desc: 'Alignement axe principal' },
+                                { flag: 'align-items', desc: 'Alignement axe secondaire (une ligne)' },
+                                { flag: 'align-content', desc: 'Alignement multi-lignes' }
+                            ],
+                            examples: [
+                                { code: `/* justify-content (axe principal) */
+.justify {
+    display: flex;
+    justify-content: flex-start;    /* Début (défaut) */
+    justify-content: flex-end;      /* Fin */
+    justify-content: center;        /* Centre */
+    justify-content: space-between; /* Espace entre */
+    justify-content: space-around;  /* Espace autour */
+    justify-content: space-evenly;  /* Espace égal */
+}
+
+/* align-items (axe secondaire) */
+.align {
+    display: flex;
+    align-items: stretch;     /* Étire (défaut) */
+    align-items: flex-start;  /* Haut */
+    align-items: flex-end;    /* Bas */
+    align-items: center;      /* Centre vertical */
+    align-items: baseline;    /* Ligne de base texte */
+}
+
+/* CENTRAGE PARFAIT */
+.center-perfect {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Raccourci place-content */
+.place-center {
+    display: flex;
+    place-content: center;    /* justify + align */
+}
+
+/* align-content (multi-lignes) */
+.multiline {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-content: center;
+    align-content: space-between;
+}`, desc: 'Alignement' }
+                            ],
+                            tips: [
+                                'justify = axe principal, align = axe secondaire',
+                                'Centrage vertical/horizontal: justify + align-items center',
+                                'align-content ne fonctionne qu\'avec wrap'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Flex Items',
+                        desc: 'flex-grow, flex-shrink, flex-basis, align-self',
+                        details: {
+                            explanation: 'Propriétés appliquées aux enfants d\'un conteneur flex.',
+                            syntax: 'flex: grow shrink basis;\nalign-self: center;',
+                            options: [
+                                { flag: 'flex-grow', desc: 'Facteur de croissance (0 par défaut)' },
+                                { flag: 'flex-shrink', desc: 'Facteur de rétrécissement (1 par défaut)' },
+                                { flag: 'flex-basis', desc: 'Taille de base (auto par défaut)' },
+                                { flag: 'flex', desc: 'Raccourci (grow shrink basis)' },
+                                { flag: 'align-self', desc: 'Alignement individuel' },
+                                { flag: 'order', desc: 'Ordre d\'affichage' }
+                            ],
+                            examples: [
+                                { code: `/* flex-grow : prendre l'espace disponible */
+.sidebar { flex-grow: 0; width: 250px; }
+.main { flex-grow: 1; } /* Prend tout l'espace restant */
+
+/* Répartition égale */
+.equal-items > * {
+    flex: 1;  /* Raccourci pour flex: 1 1 0% */
+}
+
+/* Ratios */
+.col-1 { flex: 1; }  /* 1/3 */
+.col-2 { flex: 2; }  /* 2/3 */
+
+/* flex-basis : taille de base */
+.item {
+    flex-basis: 200px;    /* Taille initiale */
+    flex-grow: 1;         /* Peut grandir */
+    flex-shrink: 1;       /* Peut rétrécir */
+}
+
+/* Raccourcis courants */
+.auto { flex: 0 1 auto; }    /* Défaut */
+.none { flex: 0 0 auto; }    /* Taille fixe */
+.grow { flex: 1 1 auto; }    /* Grandit */
+.fill { flex: 1 1 0%; }      /* Répartition égale */
+
+/* align-self (override align-items) */
+.item-center { align-self: center; }
+.item-end { align-self: flex-end; }
+
+/* order (réordonner visuellement) */
+.first { order: -1; }
+.last { order: 1; }`, desc: 'Flex items' }
+                            ],
+                            tips: [
+                                'flex: 1 est le raccourci le plus utilisé',
+                                'flex-basis est comme width/height selon direction',
+                                'order ne change pas l\'ordre dans le DOM'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Patterns Flexbox courants',
+                        desc: 'Navbar, cards, holy grail',
+                        details: {
+                            explanation: 'Patterns de layout fréquents avec Flexbox.',
+                            syntax: 'Exemples pratiques',
+                            options: [],
+                            examples: [
+                                { code: `/* Navbar avec logo et navigation */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+}
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+/* Cards en grille flexible */
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.card {
+    flex: 1 1 300px;  /* Min 300px, grandit, rétrécit */
+    max-width: 400px;
+}
+
+/* Footer toujours en bas (sticky footer) */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main { flex: 1; }
+footer { /* Reste en bas */ }
+
+/* Holy Grail Layout */
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+.sidebar-left { width: 200px; }
+.content { flex: 1; }
+.sidebar-right { width: 200px; }
+
+/* Input avec bouton */
+.input-group {
+    display: flex;
+}
+.input-group input { flex: 1; }
+.input-group button { flex-shrink: 0; }
+
+/* Centrage d'icône dans bouton */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}`, desc: 'Patterns Flexbox' }
+                            ],
+                            tips: [
+                                'flex: 1 1 300px pour des cards responsives',
+                                'flex-direction: column + flex: 1 pour sticky footer',
+                                'inline-flex pour les boutons avec icônes'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 4: CSS GRID
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'grid',
+                title: '📐 CSS Grid',
+                icon: 'fa-border-all',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Grid Container',
+                        desc: 'display: grid, columns, rows',
+                        details: {
+                            explanation: 'Grid est un système de layout bidimensionnel (lignes ET colonnes).',
+                            syntax: 'display: grid;\ngrid-template-columns: ...;\ngrid-template-rows: ...;',
+                            options: [
+                                { flag: 'grid-template-columns', desc: 'Définit les colonnes' },
+                                { flag: 'grid-template-rows', desc: 'Définit les lignes' },
+                                { flag: 'gap', desc: 'Espacement entre cellules' },
+                                { flag: 'fr', desc: 'Unité fractionnaire' }
+                            ],
+                            examples: [
+                                { code: `/* Grille basique 3 colonnes */
+.grid {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    gap: 20px;
+}
+
+/* Colonnes égales */
+.grid-equal {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    /* ou */ grid-template-columns: repeat(3, 1fr);
+}
+
+/* Colonnes responsives auto */
+.grid-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Grille explicite (colonnes ET lignes) */
+.grid-explicit {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: 60px 1fr 40px;
+    min-height: 100vh;
+}
+
+/* Gap */
+.grid-gap {
+    display: grid;
+    gap: 20px;           /* row-gap et column-gap */
+    row-gap: 10px;
+    column-gap: 20px;
+}`, desc: 'Container Grid' }
+                            ],
+                            tips: [
+                                'fr = fraction de l\'espace disponible',
+                                'auto-fit + minmax = grille responsive sans media query',
+                                'Utilisez Grid pour les layouts 2D'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Placement sur la grille',
+                        desc: 'grid-column, grid-row, grid-area',
+                        details: {
+                            explanation: 'Contrôlez le placement des éléments sur la grille.',
+                            syntax: 'grid-column: start / end;\ngrid-row: start / end;',
+                            options: [
+                                { flag: 'grid-column', desc: 'Colonne(s) occupée(s)' },
+                                { flag: 'grid-row', desc: 'Ligne(s) occupée(s)' },
+                                { flag: 'grid-area', desc: 'Raccourci row-start / col-start / row-end / col-end' },
+                                { flag: 'span', desc: 'Nombre de cellules à occuper' }
+                            ],
+                            examples: [
+                                { code: `/* Placement par numéro de ligne */
+.header {
+    grid-column: 1 / 4;      /* De la ligne 1 à 4 */
+    grid-column: 1 / -1;     /* Toute la largeur */
+}
+
+/* Span (nombre de colonnes/lignes) */
+.wide {
+    grid-column: span 2;     /* Occupe 2 colonnes */
+}
+.tall {
+    grid-row: span 3;        /* Occupe 3 lignes */
+}
+
+/* Position spécifique */
+.item {
+    grid-column: 2;          /* Colonne 2 */
+    grid-row: 1;             /* Ligne 1 */
+}
+
+/* grid-area (raccourci) */
+.element {
+    grid-area: 1 / 1 / 3 / 4; /* row-start / col-start / row-end / col-end */
+}
+
+/* Layout magazine */
+.grid-magazine {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+.featured {
+    grid-column: 1 / 3;
+    grid-row: 1 / 3;
+}`, desc: 'Placement Grid' }
+                            ],
+                            tips: [
+                                '-1 = dernière ligne/colonne',
+                                'span X = occupe X cellules depuis la position',
+                                'Les numéros commencent à 1 (pas 0)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Grid Template Areas',
+                        desc: 'Layout nommé visuellement',
+                        details: {
+                            explanation: 'grid-template-areas permet de dessiner visuellement le layout.',
+                            syntax: 'grid-template-areas: "header header"\n                    "sidebar main";',
+                            options: [
+                                { flag: 'grid-template-areas', desc: 'Définit les zones nommées' },
+                                { flag: 'grid-area', desc: 'Assigne un élément à une zone' },
+                                { flag: '.', desc: 'Cellule vide' }
+                            ],
+                            examples: [
+                                { code: `/* Layout complet avec areas */
+.page {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: 60px 1fr 40px;
+    grid-template-areas:
+        "header header"
+        "sidebar main"
+        "footer footer";
+    min-height: 100vh;
+}
+
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main { grid-area: main; }
+.footer { grid-area: footer; }
+
+/* Responsive avec areas */
+@media (max-width: 768px) {
+    .page {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto auto;
+        grid-template-areas:
+            "header"
+            "main"
+            "sidebar"
+            "footer";
+    }
+}
+
+/* Cellules vides avec . */
+.grid-with-gap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-areas:
+        "a . b"
+        "a c b";
+}`, desc: 'Template areas' }
+                            ],
+                            tips: [
+                                'Très visuel et lisible pour les layouts complexes',
+                                'Utilisez . pour les cellules vides',
+                                'Facile à modifier pour le responsive'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Grid responsive (auto-fit/auto-fill)',
+                        desc: 'Grilles adaptatives sans media queries',
+                        details: {
+                            explanation: 'auto-fit et auto-fill créent des grilles responsive automatiquement.',
+                            syntax: 'grid-template-columns: repeat(auto-fit, minmax(min, max))',
+                            options: [
+                                { flag: 'auto-fit', desc: 'Étire les colonnes pour remplir' },
+                                { flag: 'auto-fill', desc: 'Garde les colonnes vides' },
+                                { flag: 'minmax()', desc: 'Taille min et max' }
+                            ],
+                            examples: [
+                                { code: `/* Grille de cards responsive */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Différence auto-fit vs auto-fill */
+/* auto-fit : les colonnes s'étirent */
+.stretch {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* auto-fill : garde les colonnes vides possibles */
+.keep-cols {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+/* Galerie d'images responsive */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+.gallery img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Grille avec minimum fixe */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+    gap: 1.5rem;
+}`, desc: 'Grid responsive' }
+                            ],
+                            tips: [
+                                'auto-fit est plus courant (étire pour remplir)',
+                                'minmax(min(100%, 300px), 1fr) évite le débordement mobile',
+                                'Pas besoin de media queries pour les grilles simples'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 5: POSITIONNEMENT
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'positioning',
+                title: '🎭 Positionnement',
+                icon: 'fa-arrows-alt',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Position',
+                        desc: 'static, relative, absolute, fixed, sticky',
+                        details: {
+                            explanation: 'La propriété position contrôle le positionnement des éléments.',
+                            syntax: 'position: relative | absolute | fixed | sticky;',
+                            options: [
+                                { flag: 'static', desc: 'Normal (défaut)' },
+                                { flag: 'relative', desc: 'Décalé par rapport à sa position normale' },
+                                { flag: 'absolute', desc: 'Positionné par rapport au parent positionné' },
+                                { flag: 'fixed', desc: 'Fixé par rapport au viewport' },
+                                { flag: 'sticky', desc: 'Hybride relative/fixed' }
+                            ],
+                            examples: [
+                                { code: `/* Relative : décalage par rapport à position normale */
+.relative {
+    position: relative;
+    top: 10px;
+    left: 20px;
+    /* L'espace original est conservé */
+}
+
+/* Absolute : par rapport au parent positionné */
+.parent {
+    position: relative; /* Crée le contexte */
+}
+.absolute-child {
+    position: absolute;
+    top: 0;
+    right: 0;
+    /* Sort du flux normal */
+}
+
+/* Fixed : par rapport au viewport */
+.navbar-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+/* Sticky : reste fixé au scroll */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 100;
+}
+
+/* Centrage avec position absolute */
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Inset (raccourci top/right/bottom/left) */
+.overlay {
+    position: absolute;
+    inset: 0;  /* = top: 0; right: 0; bottom: 0; left: 0; */
+}`, desc: 'Position' }
+                            ],
+                            tips: [
+                                'relative sur parent + absolute sur enfant = pattern courant',
+                                'sticky nécessite une valeur top/bottom',
+                                'inset: 0 couvre tout le parent'
+                            ],
+                            warnings: [
+                                'absolute et fixed sortent l\'élément du flux'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Z-index',
+                        desc: 'Ordre d\'empilement',
+                        details: {
+                            explanation: 'z-index contrôle l\'ordre d\'empilement des éléments positionnés.',
+                            syntax: 'z-index: number;',
+                            options: [
+                                { flag: 'auto', desc: 'Même niveau que le parent' },
+                                { flag: 'number', desc: 'Plus élevé = devant' },
+                                { flag: 'négatif', desc: 'Derrière les éléments normaux' }
+                            ],
+                            examples: [
+                                { code: `/* Ordre d'empilement */
+.behind { z-index: -1; }
+.normal { z-index: 0; }
+.dropdown { z-index: 100; }
+.modal { z-index: 1000; }
+.tooltip { z-index: 1100; }
+
+/* Convention de z-index */
+:root {
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-tooltip: 700;
+}
+
+.modal {
+    position: fixed;
+    z-index: var(--z-modal);
+}
+
+/* Contexte d'empilement */
+.card {
+    position: relative;
+    z-index: 1;  /* Crée un nouveau contexte */
+}
+/* Les enfants de .card sont empilés dans ce contexte */`, desc: 'Z-index' }
+                            ],
+                            tips: [
+                                'z-index ne fonctionne que sur éléments positionnés',
+                                'Utilisez des variables CSS pour gérer les z-index',
+                                'Un parent avec z-index crée un contexte d\'empilement'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Overflow',
+                        desc: 'Contrôle du débordement',
+                        details: {
+                            explanation: 'overflow contrôle ce qui se passe quand le contenu déborde.',
+                            syntax: 'overflow: visible | hidden | scroll | auto;',
+                            options: [
+                                { flag: 'visible', desc: 'Débordement visible (défaut)' },
+                                { flag: 'hidden', desc: 'Coupe le contenu' },
+                                { flag: 'scroll', desc: 'Barre de défilement toujours' },
+                                { flag: 'auto', desc: 'Barre si nécessaire' }
+                            ],
+                            examples: [
+                                { code: `/* Cacher le débordement */
+.clipped {
+    overflow: hidden;
+}
+
+/* Défilement */
+.scrollable {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Défilement horizontal */
+.horizontal-scroll {
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+/* Texte tronqué avec ellipse */
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Truncate multi-lignes */
+.line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Scroll smooth */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Scrollbar styling */
+.custom-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}`, desc: 'Overflow' }
+                            ],
+                            tips: [
+                                'overflow: hidden crée un contexte de formatage',
+                                'text-overflow: ellipsis nécessite nowrap + hidden',
+                                '-webkit-line-clamp pour troncature multi-lignes'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 6: EFFETS VISUELS
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'effects',
+                title: '✨ Effets Visuels',
+                icon: 'fa-magic',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Shadows',
+                        desc: 'box-shadow, text-shadow, drop-shadow',
+                        details: {
+                            explanation: 'Les ombres ajoutent de la profondeur aux éléments.',
+                            syntax: 'box-shadow: x y blur spread color;\ntext-shadow: x y blur color;',
+                            options: [
+                                { flag: 'box-shadow', desc: 'Ombre de boîte' },
+                                { flag: 'text-shadow', desc: 'Ombre de texte' },
+                                { flag: 'filter: drop-shadow', desc: 'Ombre qui suit la forme' },
+                                { flag: 'inset', desc: 'Ombre intérieure' }
+                            ],
+                            examples: [
+                                { code: `/* Box shadow basique */
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Ombre plus prononcée */
+.elevated {
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1),
+                0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+/* Ombres multiples (profondeur) */
+.depth {
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.12),
+        0 1px 2px rgba(0,0,0,0.24);
+}
+
+/* Ombre intérieure */
+.inset {
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Effet glow */
+.glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+/* Text shadow */
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Drop shadow (suit la forme, utile pour PNG) */
+.drop {
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+}`, desc: 'Shadows' }
+                            ],
+                            tips: [
+                                'Plusieurs ombres séparées par virgule',
+                                'drop-shadow suit la forme (utile pour PNG transparents)',
+                                'Utilisez des variables pour les ombres cohérentes'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Border radius',
+                        desc: 'Coins arrondis',
+                        details: {
+                            explanation: 'border-radius arrondit les coins des éléments.',
+                            syntax: 'border-radius: value | tl tr br bl;',
+                            options: [
+                                { flag: 'border-radius', desc: 'Tous les coins' },
+                                { flag: 'border-top-left-radius', desc: 'Coin spécifique' },
+                                { flag: '50%', desc: 'Cercle (si carré)' },
+                                { flag: '9999px', desc: 'Pill shape' }
+                            ],
+                            examples: [
+                                { code: `/* Coins arrondis */
+.rounded { border-radius: 8px; }
+.rounded-lg { border-radius: 16px; }
+
+/* Cercle (élément carré) */
+.circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+/* Pill shape (bouton) */
+.pill {
+    border-radius: 9999px;
+    padding: 8px 24px;
+}
+
+/* Coins spécifiques */
+.tab {
+    border-radius: 8px 8px 0 0; /* top-left top-right bottom-right bottom-left */
+}
+
+/* Ellipse (deux rayons) */
+.ellipse {
+    border-radius: 50% / 25%;
+}`, desc: 'Border radius' }
+                            ],
+                            tips: [
+                                '50% sur un carré = cercle',
+                                '9999px = arrondi maximal (pill)',
+                                'Ordre: top-left, top-right, bottom-right, bottom-left'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Filters',
+                        desc: 'blur, brightness, grayscale, etc.',
+                        details: {
+                            explanation: 'Les filtres CSS modifient le rendu visuel des éléments.',
+                            syntax: 'filter: blur() brightness() contrast()...',
+                            options: [
+                                { flag: 'blur()', desc: 'Flou (px)' },
+                                { flag: 'brightness()', desc: 'Luminosité (0-2)' },
+                                { flag: 'contrast()', desc: 'Contraste (0-2)' },
+                                { flag: 'grayscale()', desc: 'Niveaux de gris (0-1)' },
+                                { flag: 'saturate()', desc: 'Saturation (0-2+)' },
+                                { flag: 'sepia()', desc: 'Effet sépia (0-1)' },
+                                { flag: 'hue-rotate()', desc: 'Rotation teinte (deg)' }
+                            ],
+                            examples: [
+                                { code: `/* Flou */
+.blur { filter: blur(4px); }
+
+/* Image en noir et blanc */
+.grayscale { filter: grayscale(100%); }
+.grayscale:hover { filter: grayscale(0); }
+
+/* Assombrir/éclaircir */
+.darken { filter: brightness(0.7); }
+.lighten { filter: brightness(1.3); }
+
+/* Combinaison */
+.vintage {
+    filter: sepia(0.5) contrast(1.1) brightness(0.9);
+}
+
+/* Backdrop filter (flou derrière) */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Overlay flou */
+.modal-backdrop {
+    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.5);
+}`, desc: 'Filters' }
+                            ],
+                            tips: [
+                                'filter s\'applique à l\'élément et ses enfants',
+                                'backdrop-filter s\'applique à ce qui est derrière',
+                                'Combinez plusieurs filtres dans une déclaration'
+                            ],
+                            warnings: [
+                                'backdrop-filter nécessite -webkit- pour Safari'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Opacity et mix-blend-mode',
+                        desc: 'Transparence et modes de fusion',
+                        details: {
+                            explanation: 'Contrôlez la transparence et le mélange des couleurs.',
+                            syntax: 'opacity: 0-1;\nmix-blend-mode: multiply | screen | ...;',
+                            options: [
+                                { flag: 'opacity', desc: 'Transparence (0=invisible, 1=opaque)' },
+                                { flag: 'mix-blend-mode', desc: 'Mode de fusion avec le fond' },
+                                { flag: 'background-blend-mode', desc: 'Fusion des backgrounds' }
+                            ],
+                            examples: [
+                                { code: `/* Opacité */
+.transparent { opacity: 0.5; }
+.fade-out { opacity: 0; }
+
+/* ATTENTION: opacity affecte les enfants */
+/* Pour fond transparent seulement, utilisez rgba */
+.bg-transparent {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Mix blend mode */
+.multiply { mix-blend-mode: multiply; }
+.screen { mix-blend-mode: screen; }
+.overlay { mix-blend-mode: overlay; }
+.difference { mix-blend-mode: difference; }
+
+/* Effet duotone */
+.duotone {
+    position: relative;
+}
+.duotone::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: blue;
+    mix-blend-mode: multiply;
+}
+
+/* Background blend */
+.bg-blend {
+    background:
+        linear-gradient(blue, red),
+        url(image.jpg);
+    background-blend-mode: multiply;
+}`, desc: 'Opacity et blend modes' }
+                            ],
+                            tips: [
+                                'rgba() pour fond transparent sans affecter enfants',
+                                'mix-blend-mode crée des effets Photoshop',
+                                'multiply assombrit, screen éclaircit'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 7: COULEURS & BACKGROUNDS
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'colors',
+                title: '🌈 Couleurs & Backgrounds',
+                icon: 'fa-palette',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Formats de couleur',
+                        desc: 'hex, rgb, hsl, oklch',
+                        details: {
+                            explanation: 'CSS supporte plusieurs formats de couleur.',
+                            syntax: '#hex | rgb() | hsl() | oklch()',
+                            options: [
+                                { flag: '#hex', desc: '#RGB ou #RRGGBB' },
+                                { flag: 'rgb()', desc: 'Rouge, Vert, Bleu (0-255)' },
+                                { flag: 'hsl()', desc: 'Teinte, Saturation, Luminosité' },
+                                { flag: 'oklch()', desc: 'Luminosité, Chroma, Hue (moderne)' }
+                            ],
+                            examples: [
+                                { code: `/* Hexadécimal */
+.hex { color: #ff6600; }
+.hex-alpha { color: #ff660080; } /* 50% transparent */
+
+/* RGB */
+.rgb { color: rgb(255, 102, 0); }
+.rgba { color: rgb(255 102 0 / 50%); } /* Syntaxe moderne */
+
+/* HSL (plus intuitif) */
+.hsl { color: hsl(24, 100%, 50%); }
+.hsla { color: hsl(24 100% 50% / 50%); }
+
+/* Générer des variantes avec HSL */
+:root {
+    --primary-h: 220;
+    --primary-s: 90%;
+    --primary: hsl(var(--primary-h), var(--primary-s), 50%);
+    --primary-light: hsl(var(--primary-h), var(--primary-s), 70%);
+    --primary-dark: hsl(var(--primary-h), var(--primary-s), 30%);
+}
+
+/* OKLCH (meilleure perception) */
+.oklch { color: oklch(60% 0.15 250); }
+
+/* Couleurs système */
+.system {
+    color: CanvasText;
+    background: Canvas;
+    accent-color: AccentColor;
+}
+
+/* currentColor */
+.icon {
+    fill: currentColor; /* Hérite de color */
+}`, desc: 'Formats de couleur' }
+                            ],
+                            tips: [
+                                'HSL est plus facile à manipuler (teintes, variantes)',
+                                'OKLCH offre une meilleure perception uniforme',
+                                'currentColor hérite de la couleur de texte'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Gradients',
+                        desc: 'linear-gradient, radial-gradient, conic-gradient',
+                        details: {
+                            explanation: 'Les dégradés créent des transitions entre couleurs.',
+                            syntax: 'background: linear-gradient(direction, color1, color2);',
+                            options: [
+                                { flag: 'linear-gradient', desc: 'Dégradé linéaire' },
+                                { flag: 'radial-gradient', desc: 'Dégradé radial' },
+                                { flag: 'conic-gradient', desc: 'Dégradé conique' },
+                                { flag: 'repeating-*', desc: 'Versions répétées' }
+                            ],
+                            examples: [
+                                { code: `/* Linear gradient */
+.gradient {
+    background: linear-gradient(to right, #667eea, #764ba2);
+}
+
+/* Avec angle */
+.angle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Multi-couleurs */
+.rainbow {
+    background: linear-gradient(
+        90deg,
+        red, orange, yellow, green, blue, purple
+    );
+}
+
+/* Radial gradient */
+.radial {
+    background: radial-gradient(circle, #667eea, #764ba2);
+}
+.radial-position {
+    background: radial-gradient(circle at top right, #fff, #000);
+}
+
+/* Conic gradient */
+.conic {
+    background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+}
+
+/* Pie chart avec conic */
+.pie {
+    background: conic-gradient(
+        #4CAF50 0% 35%,
+        #2196F3 35% 70%,
+        #FF9800 70% 100%
+    );
+    border-radius: 50%;
+}
+
+/* Overlay gradient sur image */
+.hero {
+    background:
+        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)),
+        url(image.jpg);
+    background-size: cover;
+}`, desc: 'Gradients' }
+                            ],
+                            tips: [
+                                'Superposez gradient + image avec virgule',
+                                'conic-gradient idéal pour pie charts',
+                                'Utilisez des color stops pour contrôler la transition'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Background',
+                        desc: 'image, size, position, repeat',
+                        details: {
+                            explanation: 'Contrôlez les images et couleurs de fond.',
+                            syntax: 'background: color image position/size repeat;',
+                            options: [
+                                { flag: 'background-image', desc: 'Image(s) de fond' },
+                                { flag: 'background-size', desc: 'cover | contain | dimensions' },
+                                { flag: 'background-position', desc: 'center | top right | 50% 50%' },
+                                { flag: 'background-repeat', desc: 'repeat | no-repeat | repeat-x' },
+                                { flag: 'background-attachment', desc: 'scroll | fixed | local' }
+                            ],
+                            examples: [
+                                { code: `/* Image de fond basique */
+.bg-image {
+    background-image: url('image.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Raccourci */
+.bg-short {
+    background: url('image.jpg') center/cover no-repeat;
+}
+
+/* Parallax (fixed) */
+.parallax {
+    background: url('bg.jpg') center/cover no-repeat fixed;
+}
+
+/* Backgrounds multiples */
+.multi-bg {
+    background:
+        url('icon.png') top right no-repeat,
+        url('pattern.png') repeat,
+        linear-gradient(#fff, #eee);
+}
+
+/* Pattern répété */
+.pattern {
+    background-image: url('pattern.png');
+    background-repeat: repeat;
+    background-size: 50px 50px;
+}
+
+/* Couleur de fond avec fallback */
+.safe {
+    background-color: #333;
+    background-image: url('bg.jpg');
+}
+
+/* Object-fit pour images dans conteneur */
+.img-cover {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    object-position: center;
+}`, desc: 'Background' }
+                            ],
+                            tips: [
+                                'cover remplit, contain s\'adapte sans couper',
+                                'Les backgrounds multiples se superposent',
+                                'object-fit fonctionne comme background-size pour img'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 8: TYPOGRAPHIE
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'typography',
+                title: '📝 Typographie',
+                icon: 'fa-font',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Propriétés de texte',
+                        desc: 'font-family, size, weight, line-height',
+                        details: {
+                            explanation: 'Les propriétés de base pour styliser le texte.',
+                            syntax: 'font: weight size/line-height family;',
+                            options: [
+                                { flag: 'font-family', desc: 'Police de caractères' },
+                                { flag: 'font-size', desc: 'Taille (px, rem, em, %)' },
+                                { flag: 'font-weight', desc: '100-900 ou normal/bold' },
+                                { flag: 'line-height', desc: 'Hauteur de ligne' },
+                                { flag: 'font-style', desc: 'normal | italic | oblique' }
+                            ],
+                            examples: [
+                                { code: `/* Font stack (fallbacks) */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont,
+                 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Tailles responsive avec clamp */
+h1 {
+    font-size: clamp(2rem, 5vw, 4rem);
+}
+
+/* Line-height pour lisibilité */
+p {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Font shorthand */
+.title {
+    font: bold 2rem/1.2 'Georgia', serif;
+}
+
+/* Variable fonts */
+.variable {
+    font-family: 'Inter', sans-serif;
+    font-weight: 450;  /* Valeurs intermédiaires */
+    font-variation-settings: 'wght' 450, 'slnt' -10;
+}
+
+/* System font stack */
+.system-font {
+    font-family: system-ui, -apple-system, sans-serif;
+}`, desc: 'Propriétés font' }
+                            ],
+                            tips: [
+                                'rem pour les tailles (relatif à html)',
+                                'line-height: 1.5-1.7 pour le corps de texte',
+                                'clamp() pour tailles fluides responsive'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Alignement et décoration',
+                        desc: 'text-align, decoration, transform',
+                        details: {
+                            explanation: 'Contrôlez l\'alignement et les décorations du texte.',
+                            syntax: 'text-align: left | center | right | justify;',
+                            options: [
+                                { flag: 'text-align', desc: 'Alignement horizontal' },
+                                { flag: 'text-decoration', desc: 'Soulignement, etc.' },
+                                { flag: 'text-transform', desc: 'Casse du texte' },
+                                { flag: 'letter-spacing', desc: 'Espacement des lettres' },
+                                { flag: 'word-spacing', desc: 'Espacement des mots' }
+                            ],
+                            examples: [
+                                { code: `/* Alignement */
+.center { text-align: center; }
+.right { text-align: right; }
+.justify { text-align: justify; }
+
+/* Décoration */
+.underline { text-decoration: underline; }
+.line-through { text-decoration: line-through; }
+.no-underline { text-decoration: none; }
+
+/* Décoration avancée */
+.fancy-underline {
+    text-decoration: underline wavy red;
+    text-underline-offset: 4px;
+}
+
+/* Transform */
+.uppercase { text-transform: uppercase; }
+.lowercase { text-transform: lowercase; }
+.capitalize { text-transform: capitalize; }
+
+/* Espacement */
+.spaced {
+    letter-spacing: 0.05em;
+}
+.wide {
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+/* Indentation */
+.indent {
+    text-indent: 2em;
+}`, desc: 'Text styles' }
+                            ],
+                            tips: [
+                                'text-underline-offset améliore le rendu du soulignement',
+                                'letter-spacing en em s\'adapte à la taille',
+                                'Évitez justify sur écrans étroits'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Web Fonts',
+                        desc: '@font-face et Google Fonts',
+                        details: {
+                            explanation: 'Intégrez des polices personnalisées.',
+                            syntax: '@font-face { font-family: ...; src: url(...); }',
+                            options: [
+                                { flag: '@font-face', desc: 'Définir une police' },
+                                { flag: 'font-display', desc: 'swap | block | fallback | optional' },
+                                { flag: 'woff2', desc: 'Format moderne recommandé' }
+                            ],
+                            examples: [
+                                { code: `/* @font-face local */
+@font-face {
+    font-family: 'MyFont';
+    src: url('/fonts/myfont.woff2') format('woff2'),
+         url('/fonts/myfont.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap; /* Évite FOIT */
+}
+
+/* Variable font */
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Variable.woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Google Fonts (dans HTML) */
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+/* Utilisation */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Performance : subset pour caractères spécifiques */
+<link href="...&text=Hello" rel="stylesheet">`, desc: 'Web fonts' }
+                            ],
+                            tips: [
+                                'font-display: swap évite le texte invisible',
+                                'woff2 est le format le plus léger',
+                                'Préchargez les polices critiques avec preload'
+                            ],
+                            warnings: [
+                                'Les web fonts peuvent ralentir le chargement'
+                            ]
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 9: ANIMATIONS & TRANSITIONS
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'animations',
+                title: '🔄 Animations & Transitions',
+                icon: 'fa-play',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Transitions',
+                        desc: 'Animer les changements de propriétés',
+                        details: {
+                            explanation: 'Les transitions animent le passage d\'un état à un autre.',
+                            syntax: 'transition: property duration timing-function delay;',
+                            options: [
+                                { flag: 'transition-property', desc: 'Propriété(s) à animer' },
+                                { flag: 'transition-duration', desc: 'Durée (s ou ms)' },
+                                { flag: 'transition-timing-function', desc: 'Courbe d\'animation' },
+                                { flag: 'transition-delay', desc: 'Délai avant démarrage' }
+                            ],
+                            examples: [
+                                { code: `/* Transition basique */
+.button {
+    background: blue;
+    transition: background 0.3s ease;
+}
+.button:hover {
+    background: darkblue;
+}
+
+/* Transition multiple */
+.card {
+    transition: transform 0.3s ease,
+                box-shadow 0.3s ease,
+                opacity 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* Toutes les propriétés */
+.all {
+    transition: all 0.3s ease;
+}
+
+/* Timing functions */
+.ease { transition-timing-function: ease; }
+.ease-in { transition-timing-function: ease-in; }
+.ease-out { transition-timing-function: ease-out; }
+.ease-in-out { transition-timing-function: ease-in-out; }
+.linear { transition-timing-function: linear; }
+
+/* Cubic-bezier personnalisé */
+.bounce {
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Avec délai */
+.staggered {
+    transition: opacity 0.3s ease 0.1s;
+}`, desc: 'Transitions' }
+                            ],
+                            tips: [
+                                'Évitez "all" pour les performances',
+                                'ease-out pour entrées, ease-in pour sorties',
+                                'cubic-bezier.com pour créer des courbes'
+                            ],
+                            warnings: [
+                                'N\'animez pas width/height (préférez transform)'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: '@keyframes',
+                        desc: 'Animations complexes',
+                        details: {
+                            explanation: '@keyframes définit les étapes d\'une animation.',
+                            syntax: '@keyframes name { from { } to { } }\nanimation: name duration timing;',
+                            options: [
+                                { flag: 'animation-name', desc: 'Nom du keyframe' },
+                                { flag: 'animation-duration', desc: 'Durée' },
+                                { flag: 'animation-iteration-count', desc: 'infinite ou nombre' },
+                                { flag: 'animation-direction', desc: 'normal | reverse | alternate' },
+                                { flag: 'animation-fill-mode', desc: 'forwards | backwards | both' }
+                            ],
+                            examples: [
+                                { code: `/* Keyframes basiques */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* Avec pourcentages */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.bouncing {
+    animation: bounce 1s ease-in-out infinite;
+}
+
+/* Spin */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Pulse */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.pulsing {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Slide in */
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
+/* Animation au scroll (avec JS) */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+}
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}`, desc: 'Keyframes' }
+                            ],
+                            tips: [
+                                'forwards garde l\'état final',
+                                'alternate fait l\'animation en aller-retour',
+                                'Combinez avec Intersection Observer pour scroll'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Transform',
+                        desc: 'translate, rotate, scale, skew',
+                        details: {
+                            explanation: 'transform modifie la géométrie d\'un élément sans affecter le layout.',
+                            syntax: 'transform: translate() rotate() scale();',
+                            options: [
+                                { flag: 'translate(x, y)', desc: 'Déplacement' },
+                                { flag: 'rotate(deg)', desc: 'Rotation' },
+                                { flag: 'scale(x, y)', desc: 'Mise à l\'échelle' },
+                                { flag: 'skew(x, y)', desc: 'Inclinaison' },
+                                { flag: 'transform-origin', desc: 'Point de transformation' }
+                            ],
+                            examples: [
+                                { code: `/* Translate (déplacement) */
+.move { transform: translate(10px, 20px); }
+.move-x { transform: translateX(50px); }
+.move-y { transform: translateY(-20px); }
+
+/* Centrage avec translate */
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Rotate */
+.rotate { transform: rotate(45deg); }
+.rotate-hover:hover { transform: rotate(180deg); }
+
+/* Scale */
+.zoom { transform: scale(1.5); }
+.zoom-hover:hover { transform: scale(1.1); }
+.flip-x { transform: scaleX(-1); }
+.flip-y { transform: scaleY(-1); }
+
+/* Combinaison */
+.combined {
+    transform: translateY(-5px) rotate(5deg) scale(1.05);
+}
+
+/* Transform origin */
+.from-center { transform-origin: center; }
+.from-top-left { transform-origin: top left; }
+.from-bottom { transform-origin: bottom; }
+
+/* 3D */
+.perspective {
+    perspective: 1000px;
+}
+.rotate-3d {
+    transform: rotateX(30deg) rotateY(45deg);
+}`, desc: 'Transform' }
+                            ],
+                            tips: [
+                                'transform est très performant (GPU)',
+                                'Animez transform plutôt que left/top',
+                                'transform-origin change le point de pivot'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 10: RESPONSIVE DESIGN
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'responsive',
+                title: '📱 Responsive Design',
+                icon: 'fa-mobile-alt',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Media Queries',
+                        desc: '@media pour différentes tailles d\'écran',
+                        details: {
+                            explanation: 'Les media queries appliquent des styles selon les conditions.',
+                            syntax: '@media (condition) { styles }',
+                            options: [
+                                { flag: 'min-width', desc: 'Largeur minimum' },
+                                { flag: 'max-width', desc: 'Largeur maximum' },
+                                { flag: 'prefers-color-scheme', desc: 'dark | light' },
+                                { flag: 'prefers-reduced-motion', desc: 'reduce' }
+                            ],
+                            examples: [
+                                { code: `/* Mobile-first (min-width) - RECOMMANDÉ */
+.container {
+    padding: 1rem;
+}
+
+@media (min-width: 640px) {  /* sm */
+    .container { padding: 1.5rem; }
+}
+
+@media (min-width: 768px) {  /* md */
+    .container { padding: 2rem; }
+}
+
+@media (min-width: 1024px) { /* lg */
+    .container { max-width: 1024px; }
+}
+
+@media (min-width: 1280px) { /* xl */
+    .container { max-width: 1280px; }
+}
+
+/* Desktop-first (max-width) */
+.nav-menu {
+    display: flex;
+}
+
+@media (max-width: 768px) {
+    .nav-menu {
+        display: none;
+    }
+    .nav-toggle {
+        display: block;
+    }
+}
+
+/* Combinaison */
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* Tablettes uniquement */
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #1a1a1a;
+        --text: #ffffff;
+    }
+}
+
+/* Réduire les animations */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}`, desc: 'Media queries' }
+                            ],
+                            tips: [
+                                'Mobile-first avec min-width est préférable',
+                                'Breakpoints courants: 640, 768, 1024, 1280px',
+                                'prefers-reduced-motion pour l\'accessibilité'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Container Queries',
+                        desc: 'Styles basés sur le conteneur parent',
+                        details: {
+                            explanation: 'Container queries permettent des styles basés sur la taille du parent.',
+                            syntax: '@container (min-width: ...) { }',
+                            options: [
+                                { flag: 'container-type', desc: 'inline-size | size' },
+                                { flag: 'container-name', desc: 'Nom du conteneur' },
+                                { flag: '@container', desc: 'Requête de conteneur' }
+                            ],
+                            examples: [
+                                { code: `/* Définir un conteneur */
+.card-container {
+    container-type: inline-size;
+    container-name: card;
+}
+
+/* Styles selon la taille du conteneur */
+@container card (min-width: 400px) {
+    .card {
+        display: flex;
+        flex-direction: row;
+    }
+    .card-image {
+        width: 40%;
+    }
+}
+
+@container card (min-width: 600px) {
+    .card-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* Container query sans nom */
+.sidebar {
+    container-type: inline-size;
+}
+
+@container (max-width: 300px) {
+    .widget {
+        font-size: 0.875rem;
+    }
+}
+
+/* Unités de conteneur */
+.responsive-text {
+    font-size: clamp(1rem, 5cqi, 2rem);
+    /* cqi = 1% de la largeur inline du conteneur */
+}`, desc: 'Container queries' }
+                            ],
+                            tips: [
+                                'Idéal pour les composants réutilisables',
+                                'cqi, cqw = unités relatives au conteneur',
+                                'Plus flexible que les media queries pour les composants'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Unités responsive',
+                        desc: 'rem, em, vw, vh, clamp()',
+                        details: {
+                            explanation: 'Utilisez les bonnes unités pour un design adaptatif.',
+                            syntax: 'clamp(min, preferred, max)',
+                            options: [
+                                { flag: 'rem', desc: 'Relatif à font-size de html' },
+                                { flag: 'em', desc: 'Relatif au parent' },
+                                { flag: 'vw/vh', desc: 'Viewport width/height (%)' },
+                                { flag: 'clamp()', desc: 'Valeur fluide avec min/max' },
+                                { flag: 'min()/max()', desc: 'Choisir min ou max de valeurs' }
+                            ],
+                            examples: [
+                                { code: `/* Base responsive */
+html {
+    font-size: 16px;
+}
+
+/* Rem pour les tailles (relatif à html) */
+h1 { font-size: 2.5rem; }    /* 40px */
+p { font-size: 1rem; }        /* 16px */
+.small { font-size: 0.875rem; } /* 14px */
+
+/* Viewport units */
+.hero {
+    height: 100vh;
+    min-height: 500px;
+}
+
+.full-width {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+}
+
+/* Clamp pour taille fluide */
+h1 {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    /* min: 1.5rem, préféré: 4vw, max: 3rem */
+}
+
+.container {
+    width: clamp(300px, 90%, 1200px);
+}
+
+/* min() et max() */
+.sidebar {
+    width: min(300px, 100%);
+}
+
+.card {
+    width: max(300px, 50%);
+}
+
+/* Combinaison */
+.padding-responsive {
+    padding: clamp(1rem, 5vw, 3rem);
+}`, desc: 'Unités responsive' }
+                            ],
+                            tips: [
+                                'rem pour tout sauf line-height',
+                                'clamp() remplace beaucoup de media queries',
+                                'dvh au lieu de vh pour mobile (barre d\'adresse)'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 11: VARIABLES CSS
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'variables',
+                title: '🎛️ Variables CSS',
+                icon: 'fa-sliders-h',
+                color: 'border-l-4 border-violet-500',
+                commands: [
+                    {
+                        cmd: 'Custom Properties',
+                        desc: 'Déclarer et utiliser des variables',
+                        details: {
+                            explanation: 'Les variables CSS (custom properties) permettent de réutiliser des valeurs.',
+                            syntax: '--nom: valeur;\nvar(--nom, fallback)',
+                            options: [
+                                { flag: '--var-name', desc: 'Déclaration de variable' },
+                                { flag: 'var()', desc: 'Utilisation de variable' },
+                                { flag: ':root', desc: 'Variables globales' }
+                            ],
+                            examples: [
+                                { code: `/* Déclaration globale */
+:root {
+    --color-primary: #3b82f6;
+    --color-secondary: #10b981;
+    --color-text: #1f2937;
+    --color-bg: #ffffff;
+
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 2rem;
+
+    --radius: 8px;
+    --shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'Fira Code', monospace;
+}
+
+/* Utilisation */
+.button {
+    background: var(--color-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius);
+    font-family: var(--font-sans);
+}
+
+/* Avec fallback */
+.element {
+    color: var(--custom-color, var(--color-text));
+}
+
+/* Variables locales (scoped) */
+.card {
+    --card-padding: 1.5rem;
+    padding: var(--card-padding);
+}
+
+.card.compact {
+    --card-padding: 0.75rem;
+}`, desc: 'Variables CSS' }
+                            ],
+                            tips: [
+                                'Variables héritent comme les autres propriétés',
+                                'Utilisez des fallbacks pour la robustesse',
+                                ':root = html (plus spécifique si besoin)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Theming (Dark/Light)',
+                        desc: 'Système de thèmes avec variables',
+                        details: {
+                            explanation: 'Les variables facilitent l\'implémentation du dark mode.',
+                            syntax: '@media (prefers-color-scheme: dark) { :root { ... } }',
+                            options: [
+                                { flag: 'prefers-color-scheme', desc: 'Préférence système' },
+                                { flag: 'data-theme', desc: 'Attribut pour toggle manuel' }
+                            ],
+                            examples: [
+                                { code: `/* Thème par défaut (light) */
+:root {
+    --color-bg: #ffffff;
+    --color-surface: #f8fafc;
+    --color-text: #1e293b;
+    --color-text-muted: #64748b;
+    --color-primary: #3b82f6;
+    --color-border: #e2e8f0;
+}
+
+/* Dark mode automatique */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg: #0f172a;
+        --color-surface: #1e293b;
+        --color-text: #f1f5f9;
+        --color-text-muted: #94a3b8;
+        --color-primary: #60a5fa;
+        --color-border: #334155;
+    }
+}
+
+/* Utilisation */
+body {
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+}
+
+/* Toggle manuel avec data-theme */
+[data-theme="dark"] {
+    --color-bg: #0f172a;
+    --color-text: #f1f5f9;
+    /* ... */
+}
+
+/* JavaScript toggle */
+// document.documentElement.dataset.theme = 'dark';
+
+/* Transition douce entre thèmes */
+:root {
+    transition: background-color 0.3s, color 0.3s;
+}`, desc: 'Theming' }
+                            ],
+                            tips: [
+                                'Définissez toutes les couleurs comme variables',
+                                'prefers-color-scheme respecte la préférence système',
+                                'data-theme permet le toggle manuel'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Calculs avec variables',
+                        desc: 'calc() avec custom properties',
+                        details: {
+                            explanation: 'Combinez calc() et variables pour des layouts dynamiques.',
+                            syntax: 'calc(var(--value) * 2)',
+                            options: [
+                                { flag: 'calc()', desc: 'Calculs mathématiques' },
+                                { flag: '+, -, *, /', desc: 'Opérateurs' }
+                            ],
+                            examples: [
+                                { code: `/* Système d'espacement */
+:root {
+    --space-unit: 0.25rem;
+    --space-1: calc(var(--space-unit) * 1);  /* 4px */
+    --space-2: calc(var(--space-unit) * 2);  /* 8px */
+    --space-4: calc(var(--space-unit) * 4);  /* 16px */
+    --space-8: calc(var(--space-unit) * 8);  /* 32px */
+}
+
+/* Échelle typographique */
+:root {
+    --font-base: 1rem;
+    --font-scale: 1.25;
+    --font-sm: calc(var(--font-base) / var(--font-scale));
+    --font-lg: calc(var(--font-base) * var(--font-scale));
+    --font-xl: calc(var(--font-lg) * var(--font-scale));
+}
+
+/* Layout avec variables */
+:root {
+    --sidebar-width: 250px;
+    --header-height: 60px;
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--header-height);
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Grille dynamique */
+:root {
+    --columns: 3;
+    --gap: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(var(--columns), 1fr);
+    gap: var(--gap);
+}
+
+@media (max-width: 768px) {
+    :root {
+        --columns: 1;
+        --gap: 10px;
+    }
+}`, desc: 'Calculs CSS' }
+                            ],
+                            tips: [
+                                'calc() nécessite des espaces autour des opérateurs',
+                                'Combinez unités différentes: calc(100% - 50px)',
+                                'Les variables peuvent contenir des expressions calc()'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

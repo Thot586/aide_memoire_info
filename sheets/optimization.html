@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Recherche et Optimisation : gradient descent, metaheuristiques, algorithmes genetiques.">
+    <title>Recherche & Optimisation - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- KaTeX pour les formules mathematiques -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        .formula {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+        .formula-inline {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .katex { font-size: 1.1em; }
+        .katex-display { margin: 0.5em 0; }
+        .formula-name {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-green-500/20 mb-4 icon-glow">
+                    <i class="fas fa-bullseye text-3xl text-green-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Recherche & Optimisation</h1>
+                <p class="text-slate-400">Gradient descent, metaheuristiques, algorithmes genetiques</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: gradient, genetique, recuit)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: FONDAMENTAUX OPTIMISATION
+            // ===============================================================
+            {
+                id: 'fundamentals',
+                title: 'Fondamentaux Optimisation',
+                icon: 'fa-crosshairs',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Probleme d\'optimisation',
+                        desc: 'Min/Max sous contraintes',
+                        details: {
+                            explanation: 'Trouver les valeurs des variables qui minimisent/maximisent une fonction objectif.',
+                            syntax: '$$\\min_{x} f(x) \\quad \\text{s.t.} \\quad g_i(x) \\leq 0, \\quad h_j(x) = 0$$',
+                            options: [
+                                { flag: 'Fonction objectif', desc: 'f(x) a minimiser/maximiser' },
+                                { flag: 'Contraintes inegalite', desc: '$$g_i(x) \\leq 0$$' },
+                                { flag: 'Contraintes egalite', desc: '$$h_j(x) = 0$$' },
+                                { flag: 'Espace de recherche', desc: 'Domaine des variables' }
+                            ],
+                            examples: [
+                                { code: `# Optimisation avec scipy
+from scipy.optimize import minimize
+
+# Fonction objectif
+def objective(x):
+    return x[0]**2 + x[1]**2
+
+# Point initial
+x0 = [5, 5]
+
+# Minimisation
+result = minimize(objective, x0, method='BFGS')
+print(result.x)  # [0, 0] - minimum
+
+# Avec contraintes
+from scipy.optimize import minimize
+
+def objective(x):
+    return -(x[0] * x[1])  # max x*y = min -x*y
+
+constraints = [
+    {'type': 'ineq', 'fun': lambda x: 10 - x[0] - x[1]},  # x+y <= 10
+    {'type': 'ineq', 'fun': lambda x: x[0]},  # x >= 0
+    {'type': 'ineq', 'fun': lambda x: x[1]}   # y >= 0
+]
+
+result = minimize(objective, [1, 1], constraints=constraints)`, desc: 'Optimisation avec scipy' }
+                            ],
+                            tips: [
+                                'Maximiser f(x) = minimiser -f(x)',
+                                'Verifiez toujours si le probleme est convexe'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Optima locaux vs globaux',
+                        desc: 'Minimum local peut ne pas etre global',
+                        details: {
+                            explanation: 'Un minimum local est le plus bas dans un voisinage, pas forcement le plus bas partout.',
+                            syntax: '$$f(x^*) \\leq f(x)$$ pour tout x voisin (local) ou tout x (global)',
+                            options: [
+                                { flag: 'Local', desc: 'Meilleur dans un voisinage' },
+                                { flag: 'Global', desc: 'Meilleur partout' },
+                                { flag: 'Convexe', desc: 'Local = Global (unicite)' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+# Fonction avec plusieurs minima
+def f(x):
+    return np.sin(5*x) + x**2/10
+
+# Gradient descent peut trouver differents minima
+# selon le point de depart
+
+# Multi-start: plusieurs points de depart
+from scipy.optimize import minimize
+
+best_result = None
+for _ in range(10):
+    x0 = np.random.uniform(-5, 5)
+    result = minimize(f, x0, method='BFGS')
+    if best_result is None or result.fun < best_result.fun:
+        best_result = result
+
+# Global optimization
+from scipy.optimize import differential_evolution
+
+bounds = [(-5, 5)]
+result = differential_evolution(f, bounds)`, desc: 'Recherche de minimum global' }
+                            ],
+                            tips: [
+                                'Multi-start pour explorer plusieurs bassins',
+                                'Methodes globales: simulated annealing, genetic algorithms'
+                            ],
+                            warnings: ['Gradient descent trouve des minima locaux']
+                        }
+                    },
+                    {
+                        cmd: 'Convexite',
+                        desc: 'Propriete garantissant l\'optimalite',
+                        details: {
+                            explanation: 'Une fonction convexe n\'a qu\'un seul minimum (qui est global).',
+                            syntax: '$$f(\\lambda x + (1-\\lambda)y) \\leq \\lambda f(x) + (1-\\lambda)f(y)$$',
+                            options: [
+                                { flag: 'Fonction convexe', desc: 'Courbe "en forme de bol"' },
+                                { flag: 'Ensemble convexe', desc: 'Segment entre 2 points reste dedans' },
+                                { flag: 'Hessienne', desc: 'Convexe si Hessienne semi-def. positive' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+# Exemples de fonctions convexes:
+# - f(x) = x^2 (quadratique)
+# - f(x) = |x| (valeur absolue)
+# - f(x) = e^x (exponentielle)
+# - f(x) = -log(x) (log-barriere)
+
+# Verifier convexite via Hessienne
+def check_convexity(f, x):
+    """
+    Hessienne definie positive = convexe
+    """
+    from torch.autograd.functional import hessian
+    import torch
+
+    x_tensor = torch.tensor(x, requires_grad=True)
+    H = hessian(f, x_tensor)
+    eigenvalues = torch.linalg.eigvalsh(H)
+
+    return torch.all(eigenvalues >= 0).item()
+
+# Fonctions convexes courantes en ML:
+# - MSE loss
+# - Regularisation L2
+# - Cross-entropy (sur les poids)`, desc: 'Convexite' }
+                            ],
+                            tips: [
+                                'Probleme convexe = solution globale garantie',
+                                'La somme de fonctions convexes est convexe'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: DESCENTE DE GRADIENT
+            // ===============================================================
+            {
+                id: 'gradient-descent',
+                title: 'Descente de Gradient',
+                icon: 'fa-chart-line',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Gradient Descent basique',
+                        desc: 'Batch gradient descent',
+                        details: {
+                            explanation: 'Mise a jour des poids dans la direction opposee au gradient.',
+                            syntax: '$$\\theta_{t+1} = \\theta_t - \\eta \\nabla f(\\theta_t)$$',
+                            options: [
+                                { flag: 'Learning rate', desc: '$$\\eta$$ - taille du pas' },
+                                { flag: 'Gradient', desc: '$$\\nabla f$$ - direction de montee maximale' },
+                                { flag: 'Batch', desc: 'Calcul sur tout le dataset' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+def gradient_descent(f, grad_f, x0, lr=0.01, n_iter=1000, tol=1e-6):
+    x = x0.copy()
+    history = [x.copy()]
+
+    for _ in range(n_iter):
+        gradient = grad_f(x)
+        x_new = x - lr * gradient
+
+        if np.linalg.norm(x_new - x) < tol:
+            break
+
+        x = x_new
+        history.append(x.copy())
+
+    return x, history
+
+# Exemple: minimiser f(x,y) = x^2 + y^2
+def f(x):
+    return x[0]**2 + x[1]**2
+
+def grad_f(x):
+    return np.array([2*x[0], 2*x[1]])
+
+x_opt, hist = gradient_descent(f, grad_f, np.array([5.0, 5.0]))
+print(x_opt)  # proche de [0, 0]`, desc: 'Gradient Descent from scratch' }
+                            ],
+                            tips: [
+                                'Learning rate trop grand -> divergence',
+                                'Learning rate trop petit -> convergence lente'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'SGD et Mini-batch',
+                        desc: 'Stochastic Gradient Descent',
+                        details: {
+                            explanation: 'Calcule le gradient sur un echantillon plutot que tout le dataset.',
+                            syntax: '$$\\theta_{t+1} = \\theta_t - \\eta \\nabla f(\\theta_t; x_i)$$',
+                            options: [
+                                { flag: 'Batch GD', desc: 'Tout le dataset, stable mais lent' },
+                                { flag: 'SGD', desc: 'Un exemple, bruyant mais rapide' },
+                                { flag: 'Mini-batch', desc: 'Compromis (32, 64, 128...)' }
+                            ],
+                            examples: [
+                                { code: `import torch
+import torch.nn as nn
+import torch.optim as optim
+
+model = nn.Linear(10, 1)
+optimizer = optim.SGD(model.parameters(), lr=0.01)
+criterion = nn.MSELoss()
+
+# Mini-batch training
+batch_size = 32
+for epoch in range(100):
+    for i in range(0, len(X_train), batch_size):
+        X_batch = X_train[i:i+batch_size]
+        y_batch = y_train[i:i+batch_size]
+
+        optimizer.zero_grad()
+        output = model(X_batch)
+        loss = criterion(output, y_batch)
+        loss.backward()
+        optimizer.step()`, desc: 'SGD en PyTorch' }
+                            ],
+                            tips: [
+                                'Mini-batch = meilleur compromis vitesse/stabilite',
+                                'Batch size typique: 32, 64, 128, 256'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Momentum',
+                        desc: 'Accelerer la convergence',
+                        details: {
+                            explanation: 'Accumule les gradients passes pour accelerer dans les directions consistantes.',
+                            syntax: '$$v_t = \\gamma v_{t-1} + \\eta \\nabla f$$\n$$\\theta_t = \\theta_{t-1} - v_t$$',
+                            options: [
+                                { flag: 'gamma', desc: 'Coefficient de momentum (0.9 typique)' },
+                                { flag: 'Acceleration', desc: 'Accumule vitesse dans directions consistantes' },
+                                { flag: 'Nesterov', desc: 'Look-ahead momentum' }
+                            ],
+                            examples: [
+                                { code: `# Momentum from scratch
+def sgd_momentum(grad_f, x0, lr=0.01, momentum=0.9, n_iter=1000):
+    x = x0.copy()
+    v = np.zeros_like(x)
+
+    for _ in range(n_iter):
+        gradient = grad_f(x)
+        v = momentum * v + lr * gradient
+        x = x - v
+
+    return x
+
+# PyTorch
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+
+# Nesterov momentum
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, nesterov=True)`, desc: 'Momentum' }
+                            ],
+                            tips: [
+                                'Momentum aide a sortir des minima plats',
+                                'Nesterov est souvent legerement meilleur'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Learning Rate Scheduling',
+                        desc: 'Ajuster le learning rate',
+                        details: {
+                            explanation: 'Reduire le learning rate au fil de l\'entrainement.',
+                            syntax: 'Decay, Step, Cosine, Warmup',
+                            options: [
+                                { flag: 'Step decay', desc: 'Divise par facteur tous les N epochs' },
+                                { flag: 'Exponential', desc: '$$\\eta_t = \\eta_0 \\cdot \\gamma^t$$' },
+                                { flag: 'Cosine annealing', desc: 'Decay en cosinus' },
+                                { flag: 'Warmup', desc: 'Augmente puis decroit' }
+                            ],
+                            examples: [
+                                { code: `import torch.optim as optim
+from torch.optim.lr_scheduler import (
+    StepLR, ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau
+)
+
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
+
+# Step decay: lr *= 0.1 tous les 30 epochs
+scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+
+# Cosine annealing
+scheduler = CosineAnnealingLR(optimizer, T_max=100)
+
+# Reduce on plateau
+scheduler = ReduceLROnPlateau(optimizer, mode='min', patience=10)
+
+# Training loop
+for epoch in range(100):
+    train_one_epoch()
+    val_loss = validate()
+    scheduler.step(val_loss)  # Pour ReduceLROnPlateau
+    # scheduler.step()  # Pour les autres`, desc: 'LR Scheduling PyTorch' }
+                            ],
+                            tips: [
+                                'Cosine annealing souvent meilleur que step decay',
+                                'Warmup aide pour grands learning rates initiaux'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: OPTIMISEURS AVANCES
+            // ===============================================================
+            {
+                id: 'advanced-optimizers',
+                title: 'Optimiseurs Avances',
+                icon: 'fa-cogs',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Adam',
+                        desc: 'Adaptive Moment Estimation',
+                        details: {
+                            explanation: 'Combine momentum et learning rates adaptatifs par parametre.',
+                            syntax: '$$m_t = \\beta_1 m_{t-1} + (1-\\beta_1)g_t$$\n$$v_t = \\beta_2 v_{t-1} + (1-\\beta_2)g_t^2$$\n$$\\theta_t = \\theta_{t-1} - \\eta \\frac{\\hat{m}_t}{\\sqrt{\\hat{v}_t} + \\epsilon}$$',
+                            options: [
+                                { flag: 'beta1', desc: '0.9 - decay pour 1er moment' },
+                                { flag: 'beta2', desc: '0.999 - decay pour 2e moment' },
+                                { flag: 'epsilon', desc: '1e-8 - stabilite numerique' }
+                            ],
+                            examples: [
+                                { code: `# Adam from scratch
+def adam(grad_f, x0, lr=0.001, beta1=0.9, beta2=0.999, eps=1e-8, n_iter=1000):
+    x = x0.copy()
+    m = np.zeros_like(x)
+    v = np.zeros_like(x)
+
+    for t in range(1, n_iter + 1):
+        g = grad_f(x)
+
+        # Update biased moments
+        m = beta1 * m + (1 - beta1) * g
+        v = beta2 * v + (1 - beta2) * g**2
+
+        # Bias correction
+        m_hat = m / (1 - beta1**t)
+        v_hat = v / (1 - beta2**t)
+
+        # Update parameters
+        x = x - lr * m_hat / (np.sqrt(v_hat) + eps)
+
+    return x
+
+# PyTorch
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999))`, desc: 'Adam' }
+                            ],
+                            tips: [
+                                'Adam est un bon choix par defaut',
+                                'lr=1e-3 ou 3e-4 sont de bons points de depart'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'AdamW',
+                        desc: 'Adam avec weight decay decouple',
+                        details: {
+                            explanation: 'Corrige le probleme de L2 regularization dans Adam.',
+                            syntax: '$$\\theta_t = \\theta_{t-1} - \\eta(\\frac{\\hat{m}_t}{\\sqrt{\\hat{v}_t} + \\epsilon} + \\lambda \\theta_{t-1})$$',
+                            options: [
+                                { flag: 'Weight decay', desc: 'Regularisation L2 decouplee' },
+                                { flag: 'Transformers', desc: 'Prefere pour les Transformers' }
+                            ],
+                            examples: [
+                                { code: `# AdamW en PyTorch
+optimizer = torch.optim.AdamW(
+    model.parameters(),
+    lr=1e-3,
+    weight_decay=0.01,  # L2 regularization
+    betas=(0.9, 0.999)
+)
+
+# Configuration typique pour Transformers
+optimizer = torch.optim.AdamW(
+    model.parameters(),
+    lr=5e-5,
+    weight_decay=0.01,
+    betas=(0.9, 0.999),
+    eps=1e-8
+)`, desc: 'AdamW' }
+                            ],
+                            tips: [
+                                'AdamW > Adam pour Transformers',
+                                'weight_decay typique: 0.01 ou 0.1'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'RMSprop',
+                        desc: 'Root Mean Square Propagation',
+                        details: {
+                            explanation: 'Learning rate adaptatif base sur la moyenne mobile des gradients carres.',
+                            syntax: '$$v_t = \\gamma v_{t-1} + (1-\\gamma)g_t^2$$\n$$\\theta_t = \\theta_{t-1} - \\frac{\\eta}{\\sqrt{v_t + \\epsilon}}g_t$$',
+                            options: [
+                                { flag: 'alpha', desc: '0.99 - decay rate' },
+                                { flag: 'eps', desc: '1e-8 - stabilite' }
+                            ],
+                            examples: [
+                                { code: `# RMSprop
+optimizer = torch.optim.RMSprop(
+    model.parameters(),
+    lr=0.01,
+    alpha=0.99,
+    eps=1e-8
+)
+
+# RMSprop avec momentum
+optimizer = torch.optim.RMSprop(
+    model.parameters(),
+    lr=0.01,
+    alpha=0.99,
+    momentum=0.9
+)`, desc: 'RMSprop' }
+                            ],
+                            tips: [
+                                'Bon pour RNN (historiquement)',
+                                'Adam est generalement prefere maintenant'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'LBFGS et Newton',
+                        desc: 'Methodes du second ordre',
+                        details: {
+                            explanation: 'Utilisent l\'information de courbure (Hessienne) pour converger plus vite.',
+                            syntax: '$$\\theta_{t+1} = \\theta_t - H^{-1} \\nabla f$$ (Newton)',
+                            options: [
+                                { flag: 'Newton', desc: 'Utilise la Hessienne (exacte)' },
+                                { flag: 'LBFGS', desc: 'Approximation de l\'inverse Hessienne' },
+                                { flag: 'Avantage', desc: 'Convergence plus rapide' },
+                                { flag: 'Inconvenient', desc: 'Cout memoire/calcul plus eleve' }
+                            ],
+                            examples: [
+                                { code: `from scipy.optimize import minimize
+
+# Newton-CG
+result = minimize(f, x0, method='Newton-CG', jac=grad_f, hess=hess_f)
+
+# BFGS (quasi-Newton)
+result = minimize(f, x0, method='BFGS', jac=grad_f)
+
+# L-BFGS-B (avec bornes)
+bounds = [(-5, 5), (-5, 5)]
+result = minimize(f, x0, method='L-BFGS-B', jac=grad_f, bounds=bounds)
+
+# PyTorch LBFGS
+optimizer = torch.optim.LBFGS(model.parameters(), lr=1, max_iter=20)
+
+def closure():
+    optimizer.zero_grad()
+    output = model(X)
+    loss = criterion(output, y)
+    loss.backward()
+    return loss
+
+optimizer.step(closure)`, desc: 'Second-order methods' }
+                            ],
+                            tips: [
+                                'LBFGS pour petits problemes batch',
+                                'Trop couteux pour large-scale deep learning'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: ALGORITHMES GENETIQUES
+            // ===============================================================
+            {
+                id: 'genetic',
+                title: 'Algorithmes Genetiques',
+                icon: 'fa-dna',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Principe GA',
+                        desc: 'Evolution inspiree de la biologie',
+                        details: {
+                            explanation: 'Fait evoluer une population de solutions par selection, croisement et mutation.',
+                            syntax: 'Population -> Selection -> Crossover -> Mutation -> Next gen',
+                            options: [
+                                { flag: 'Individu', desc: 'Une solution candidate (chromosome)' },
+                                { flag: 'Fitness', desc: 'Qualite de la solution' },
+                                { flag: 'Population', desc: 'Ensemble d\'individus' },
+                                { flag: 'Generation', desc: 'Une iteration de l\'algorithme' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+def genetic_algorithm(fitness_fn, n_genes, pop_size=100, n_generations=100,
+                      mutation_rate=0.01, crossover_rate=0.8):
+    # Initialisation aleatoire
+    population = np.random.random((pop_size, n_genes))
+
+    for gen in range(n_generations):
+        # Evaluation
+        fitness = np.array([fitness_fn(ind) for ind in population])
+
+        # Selection (tournament)
+        parents = tournament_selection(population, fitness, pop_size)
+
+        # Crossover
+        offspring = crossover(parents, crossover_rate)
+
+        # Mutation
+        offspring = mutate(offspring, mutation_rate)
+
+        # Nouvelle generation
+        population = offspring
+
+        # Meilleur individu
+        best_idx = np.argmax(fitness)
+        print(f"Gen {gen}: Best fitness = {fitness[best_idx]:.4f}")
+
+    best_idx = np.argmax([fitness_fn(ind) for ind in population])
+    return population[best_idx]`, desc: 'Structure GA' }
+                            ],
+                            tips: [
+                                'Population large pour exploration',
+                                'Balance exploration (mutation) et exploitation (selection)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Selection',
+                        desc: 'Choisir les parents',
+                        details: {
+                            explanation: 'Selectionne les individus les plus aptes pour la reproduction.',
+                            syntax: 'Roulette, Tournament, Rank',
+                            options: [
+                                { flag: 'Roulette', desc: 'Proba proportionnelle au fitness' },
+                                { flag: 'Tournament', desc: 'Competition entre k individus' },
+                                { flag: 'Rank', desc: 'Base sur le rang, pas la valeur' },
+                                { flag: 'Elitisme', desc: 'Garde les meilleurs directement' }
+                            ],
+                            examples: [
+                                { code: `def roulette_selection(population, fitness, n_select):
+    """Selection par roulette"""
+    probs = fitness / fitness.sum()
+    indices = np.random.choice(len(population), size=n_select, p=probs)
+    return population[indices]
+
+def tournament_selection(population, fitness, n_select, k=3):
+    """Selection par tournoi"""
+    selected = []
+    for _ in range(n_select):
+        # Choisir k individus aleatoirement
+        candidates = np.random.choice(len(population), size=k, replace=False)
+        # Garder le meilleur
+        winner = candidates[np.argmax(fitness[candidates])]
+        selected.append(population[winner])
+    return np.array(selected)
+
+def elitist_selection(population, fitness, n_elite=2):
+    """Garde les n meilleurs"""
+    elite_idx = np.argsort(fitness)[-n_elite:]
+    return population[elite_idx]`, desc: 'Methodes de selection' }
+                            ],
+                            tips: [
+                                'Tournament est souvent prefere (moins de pression selective)',
+                                'Elitisme empeche de perdre les meilleures solutions'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Crossover (Croisement)',
+                        desc: 'Combiner deux parents',
+                        details: {
+                            explanation: 'Cree des enfants en combinant le materiel genetique des parents.',
+                            syntax: 'Single-point, Two-point, Uniform',
+                            options: [
+                                { flag: 'Single-point', desc: 'Coupe en un point' },
+                                { flag: 'Two-point', desc: 'Coupe en deux points' },
+                                { flag: 'Uniform', desc: 'Chaque gene vient d\'un parent au hasard' }
+                            ],
+                            examples: [
+                                { code: `def single_point_crossover(parent1, parent2):
+    """Crossover en un point"""
+    point = np.random.randint(1, len(parent1))
+    child1 = np.concatenate([parent1[:point], parent2[point:]])
+    child2 = np.concatenate([parent2[:point], parent1[point:]])
+    return child1, child2
+
+def uniform_crossover(parent1, parent2, prob=0.5):
+    """Crossover uniforme"""
+    mask = np.random.random(len(parent1)) < prob
+    child1 = np.where(mask, parent1, parent2)
+    child2 = np.where(mask, parent2, parent1)
+    return child1, child2
+
+def blend_crossover(parent1, parent2, alpha=0.5):
+    """Pour valeurs continues - BLX-alpha"""
+    diff = np.abs(parent1 - parent2)
+    low = np.minimum(parent1, parent2) - alpha * diff
+    high = np.maximum(parent1, parent2) + alpha * diff
+    child = np.random.uniform(low, high)
+    return child`, desc: 'Types de crossover' }
+                            ],
+                            tips: [
+                                'Blend crossover pour problemes continus',
+                                'Crossover rate typique: 0.6-0.9'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Mutation',
+                        desc: 'Introduire de la variation',
+                        details: {
+                            explanation: 'Modifie aleatoirement des genes pour maintenir la diversite.',
+                            syntax: 'Bit flip (binaire), Gaussian (continu)',
+                            options: [
+                                { flag: 'Bit flip', desc: 'Inverse un bit (binaire)' },
+                                { flag: 'Gaussian', desc: 'Ajoute bruit gaussien (continu)' },
+                                { flag: 'Mutation rate', desc: 'Probabilite de mutation par gene' }
+                            ],
+                            examples: [
+                                { code: `def bit_flip_mutation(individual, mutation_rate=0.01):
+    """Mutation pour representation binaire"""
+    mask = np.random.random(len(individual)) < mutation_rate
+    individual[mask] = 1 - individual[mask]
+    return individual
+
+def gaussian_mutation(individual, mutation_rate=0.1, sigma=0.1):
+    """Mutation pour representation continue"""
+    mask = np.random.random(len(individual)) < mutation_rate
+    noise = np.random.normal(0, sigma, len(individual))
+    individual[mask] += noise[mask]
+    return individual
+
+def adaptive_mutation(individual, generation, max_gen):
+    """Mutation qui decroit avec les generations"""
+    rate = 0.1 * (1 - generation / max_gen)
+    return gaussian_mutation(individual, mutation_rate=rate)`, desc: 'Types de mutation' }
+                            ],
+                            tips: [
+                                'Mutation rate typique: 0.01-0.1',
+                                'Trop de mutation = recherche aleatoire'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: INTELLIGENCE EN ESSAIM
+            // ===============================================================
+            {
+                id: 'swarm',
+                title: 'Intelligence en Essaim',
+                icon: 'fa-spider',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Particle Swarm Optimization',
+                        desc: 'PSO - Optimisation par essaim',
+                        details: {
+                            explanation: 'Les particules explorent l\'espace en se basant sur leur meilleure position et celle du groupe.',
+                            syntax: '$$v_i = w \\cdot v_i + c_1 r_1 (p_i - x_i) + c_2 r_2 (g - x_i)$$\n$$x_i = x_i + v_i$$',
+                            options: [
+                                { flag: 'Position (x)', desc: 'Solution candidate' },
+                                { flag: 'Velocite (v)', desc: 'Direction et vitesse' },
+                                { flag: 'pbest', desc: 'Meilleure position personnelle' },
+                                { flag: 'gbest', desc: 'Meilleure position globale' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+def pso(fitness_fn, n_dims, n_particles=30, n_iter=100,
+        w=0.7, c1=1.5, c2=1.5, bounds=None):
+
+    # Initialisation
+    if bounds is None:
+        bounds = [(-10, 10)] * n_dims
+
+    positions = np.random.uniform(
+        [b[0] for b in bounds],
+        [b[1] for b in bounds],
+        (n_particles, n_dims)
+    )
+    velocities = np.zeros((n_particles, n_dims))
+
+    # Meilleures positions
+    pbest = positions.copy()
+    pbest_fitness = np.array([fitness_fn(p) for p in positions])
+    gbest_idx = np.argmax(pbest_fitness)
+    gbest = pbest[gbest_idx].copy()
+
+    for _ in range(n_iter):
+        r1, r2 = np.random.random(2)
+
+        # Mise a jour velocite
+        velocities = (w * velocities +
+                     c1 * r1 * (pbest - positions) +
+                     c2 * r2 * (gbest - positions))
+
+        # Mise a jour position
+        positions += velocities
+
+        # Bornes
+        for i, (low, high) in enumerate(bounds):
+            positions[:, i] = np.clip(positions[:, i], low, high)
+
+        # Update pbest et gbest
+        fitness = np.array([fitness_fn(p) for p in positions])
+        improved = fitness > pbest_fitness
+        pbest[improved] = positions[improved]
+        pbest_fitness[improved] = fitness[improved]
+
+        if np.max(pbest_fitness) > fitness_fn(gbest):
+            gbest = pbest[np.argmax(pbest_fitness)].copy()
+
+    return gbest, fitness_fn(gbest)`, desc: 'PSO implementation' }
+                            ],
+                            tips: [
+                                'w decroissant: exploration -> exploitation',
+                                'c1 = c2 = 2 est une bonne valeur par defaut'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Ant Colony Optimization',
+                        desc: 'ACO - Colonies de fourmis',
+                        details: {
+                            explanation: 'Les fourmis deposent des pheromones pour guider les autres vers les bonnes solutions.',
+                            syntax: '$$P_{ij} = \\frac{\\tau_{ij}^\\alpha \\eta_{ij}^\\beta}{\\sum_k \\tau_{ik}^\\alpha \\eta_{ik}^\\beta}$$',
+                            options: [
+                                { flag: 'Pheromones', desc: '$$\\tau$$ - trace laissee' },
+                                { flag: 'Heuristique', desc: '$$\\eta$$ - info a priori (ex: 1/distance)' },
+                                { flag: 'Evaporation', desc: 'Les pheromones disparaissent' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+def ant_colony_tsp(distances, n_ants=20, n_iter=100,
+                   alpha=1, beta=5, evaporation=0.5, Q=100):
+    """ACO pour le probleme du voyageur de commerce"""
+    n_cities = len(distances)
+    pheromones = np.ones((n_cities, n_cities))
+    best_path = None
+    best_length = float('inf')
+
+    for _ in range(n_iter):
+        all_paths = []
+
+        for ant in range(n_ants):
+            path = [np.random.randint(n_cities)]
+
+            while len(path) < n_cities:
+                current = path[-1]
+                unvisited = [c for c in range(n_cities) if c not in path]
+
+                # Probabilites
+                probs = []
+                for next_city in unvisited:
+                    tau = pheromones[current][next_city] ** alpha
+                    eta = (1 / distances[current][next_city]) ** beta
+                    probs.append(tau * eta)
+
+                probs = np.array(probs) / sum(probs)
+                next_city = np.random.choice(unvisited, p=probs)
+                path.append(next_city)
+
+            all_paths.append(path)
+
+        # Evaporation
+        pheromones *= (1 - evaporation)
+
+        # Depot de pheromones
+        for path in all_paths:
+            length = sum(distances[path[i]][path[i+1]]
+                        for i in range(len(path)-1))
+            length += distances[path[-1]][path[0]]
+
+            if length < best_length:
+                best_length = length
+                best_path = path
+
+            for i in range(len(path) - 1):
+                pheromones[path[i]][path[i+1]] += Q / length
+
+    return best_path, best_length`, desc: 'ACO pour TSP' }
+                            ],
+                            tips: [
+                                'Bien adapte aux problemes combinatoires (TSP, routing)',
+                                'alpha controle l\'importance des pheromones'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: RECUIT SIMULE
+            // ===============================================================
+            {
+                id: 'simulated-annealing',
+                title: 'Recuit Simule',
+                icon: 'fa-fire',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Principe',
+                        desc: 'Accepter des solutions pires avec probabilite decroissante',
+                        details: {
+                            explanation: 'Inspire de la metallurgie, permet d\'echapper aux minima locaux.',
+                            syntax: '$$P(\\text{accept}) = \\exp\\left(-\\frac{\\Delta E}{T}\\right)$$ si $$\\Delta E > 0$$',
+                            options: [
+                                { flag: 'Temperature T', desc: 'Decroit au fil du temps' },
+                                { flag: 'Delta E', desc: 'Difference d\'energie (cout)' },
+                                { flag: 'Cooling schedule', desc: 'Comment T decroit' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+def simulated_annealing(cost_fn, neighbor_fn, x0,
+                        T_init=100, T_min=1e-10, alpha=0.99,
+                        n_iter=1000):
+    """
+    cost_fn: fonction de cout a minimiser
+    neighbor_fn: genere un voisin de la solution courante
+    """
+    x = x0
+    cost = cost_fn(x)
+    T = T_init
+
+    best_x = x
+    best_cost = cost
+
+    for _ in range(n_iter):
+        # Generer un voisin
+        x_new = neighbor_fn(x)
+        cost_new = cost_fn(x_new)
+
+        # Difference de cout
+        delta = cost_new - cost
+
+        # Accepter si meilleur OU avec probabilite exp(-delta/T)
+        if delta < 0 or np.random.random() < np.exp(-delta / T):
+            x = x_new
+            cost = cost_new
+
+            if cost < best_cost:
+                best_x = x
+                best_cost = cost
+
+        # Refroidissement
+        T = max(T * alpha, T_min)
+
+    return best_x, best_cost`, desc: 'Simulated Annealing' }
+                            ],
+                            tips: [
+                                'T initial eleve pour exploration',
+                                'alpha proche de 1 pour refroidissement lent'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Cooling Schedules',
+                        desc: 'Schemas de refroidissement',
+                        details: {
+                            explanation: 'Comment la temperature decroit au fil des iterations.',
+                            syntax: 'Geometrique, Lineaire, Logarithmique',
+                            options: [
+                                { flag: 'Geometrique', desc: '$$T_{k+1} = \\alpha T_k$$ avec $$\\alpha \\in [0.8, 0.99]$$' },
+                                { flag: 'Lineaire', desc: '$$T_k = T_0 - k \\cdot \\Delta$$' },
+                                { flag: 'Logarithmique', desc: '$$T_k = \\frac{T_0}{\\log(k+1)}$$' },
+                                { flag: 'Adaptatif', desc: 'Ajuste selon le taux d\'acceptation' }
+                            ],
+                            examples: [
+                                { code: `# Cooling schedules
+def geometric_cooling(T, alpha=0.95):
+    return T * alpha
+
+def linear_cooling(T, delta=0.1):
+    return max(T - delta, 1e-10)
+
+def logarithmic_cooling(T0, k):
+    return T0 / np.log(k + 2)
+
+# Adaptive cooling
+def adaptive_cooling(T, acceptance_rate, target_rate=0.4):
+    if acceptance_rate > target_rate:
+        return T * 0.95  # Refroidir plus vite
+    else:
+        return T * 0.99  # Refroidir plus lentement`, desc: 'Cooling schedules' }
+                            ],
+                            tips: [
+                                'Geometrique avec alpha=0.95 est un bon defaut',
+                                'Adaptatif ajuste selon les resultats'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: RECHERCHE LOCALE
+            // ===============================================================
+            {
+                id: 'local-search',
+                title: 'Recherche Locale',
+                icon: 'fa-search-location',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Hill Climbing',
+                        desc: 'Monter vers le sommet',
+                        details: {
+                            explanation: 'Se deplace toujours vers le voisin qui ameliore la solution.',
+                            syntax: 'Repete: choisir le meilleur voisin si meilleur que courant',
+                            options: [
+                                { flag: 'Simple HC', desc: 'Premier voisin ameliorant' },
+                                { flag: 'Steepest HC', desc: 'Meilleur voisin parmi tous' },
+                                { flag: 'Stochastic HC', desc: 'Voisin ameliorant aleatoire' }
+                            ],
+                            examples: [
+                                { code: `def hill_climbing(cost_fn, neighbor_fn, x0, n_iter=1000):
+    """Simple hill climbing (descente, on minimise)"""
+    x = x0
+    cost = cost_fn(x)
+
+    for _ in range(n_iter):
+        # Generer un voisin
+        x_new = neighbor_fn(x)
+        cost_new = cost_fn(x_new)
+
+        # Accepter seulement si meilleur
+        if cost_new < cost:
+            x = x_new
+            cost = cost_new
+
+    return x, cost
+
+def steepest_hill_climbing(cost_fn, all_neighbors_fn, x0):
+    """Steepest ascent - explore tous les voisins"""
+    x = x0
+    cost = cost_fn(x)
+
+    while True:
+        neighbors = all_neighbors_fn(x)
+        costs = [cost_fn(n) for n in neighbors]
+        best_idx = np.argmin(costs)
+
+        if costs[best_idx] >= cost:
+            break  # Optimum local atteint
+
+        x = neighbors[best_idx]
+        cost = costs[best_idx]
+
+    return x, cost`, desc: 'Hill Climbing' }
+                            ],
+                            tips: [
+                                'Simple mais bloque aux optima locaux',
+                                'Random restart pour explorer plusieurs bassins'
+                            ],
+                            warnings: ['Ne trouve que des optima locaux']
+                        }
+                    },
+                    {
+                        cmd: 'Tabu Search',
+                        desc: 'Recherche avec memoire',
+                        details: {
+                            explanation: 'Interdit de revenir aux solutions recemment visitees.',
+                            syntax: 'Liste tabu des mouvements interdits',
+                            options: [
+                                { flag: 'Liste tabu', desc: 'Solutions ou mouvements interdits' },
+                                { flag: 'Tenure', desc: 'Duree dans la liste tabu' },
+                                { flag: 'Aspiration', desc: 'Critere pour lever le tabu' }
+                            ],
+                            examples: [
+                                { code: `def tabu_search(cost_fn, neighbors_fn, x0,
+                 n_iter=1000, tabu_tenure=10):
+    x = x0
+    cost = cost_fn(x)
+    best_x = x
+    best_cost = cost
+
+    tabu_list = []
+
+    for _ in range(n_iter):
+        neighbors = neighbors_fn(x)
+
+        # Filtrer les mouvements tabous (sauf aspiration)
+        valid_neighbors = []
+        for n in neighbors:
+            n_tuple = tuple(n) if hasattr(n, '__iter__') else n
+            if n_tuple not in tabu_list:
+                valid_neighbors.append(n)
+            elif cost_fn(n) < best_cost:  # Aspiration
+                valid_neighbors.append(n)
+
+        if not valid_neighbors:
+            break
+
+        # Meilleur voisin non-tabou
+        costs = [cost_fn(n) for n in valid_neighbors]
+        best_idx = np.argmin(costs)
+        x = valid_neighbors[best_idx]
+        cost = costs[best_idx]
+
+        # Mise a jour tabu list
+        x_tuple = tuple(x) if hasattr(x, '__iter__') else x
+        tabu_list.append(x_tuple)
+        if len(tabu_list) > tabu_tenure:
+            tabu_list.pop(0)
+
+        if cost < best_cost:
+            best_x = x
+            best_cost = cost
+
+    return best_x, best_cost`, desc: 'Tabu Search' }
+                            ],
+                            tips: [
+                                'Tabu tenure adaptatif peut etre utile',
+                                'Critere d\'aspiration evite de bloquer'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Variable Neighborhood Search',
+                        desc: 'VNS - Changer de voisinage',
+                        details: {
+                            explanation: 'Explore plusieurs structures de voisinage pour echapper aux optima locaux.',
+                            syntax: 'k voisinages differents, passe au suivant si bloque',
+                            options: [
+                                { flag: 'Shaking', desc: 'Perturbation avec voisinage k' },
+                                { flag: 'Local search', desc: 'Recherche locale depuis perturbation' },
+                                { flag: 'Move/not move', desc: 'Accepter si ameliore, sinon k++' }
+                            ],
+                            examples: [
+                                { code: `def vns(cost_fn, neighbor_fns, local_search, x0,
+        n_iter=100, k_max=None):
+    """
+    neighbor_fns: liste de fonctions de voisinage
+    local_search: fonction de recherche locale
+    """
+    if k_max is None:
+        k_max = len(neighbor_fns)
+
+    x = x0
+    cost = cost_fn(x)
+
+    for _ in range(n_iter):
+        k = 0
+        while k < k_max:
+            # Shaking: perturbation avec voisinage k
+            x_shake = neighbor_fns[k](x)
+
+            # Local search depuis la perturbation
+            x_local, cost_local = local_search(cost_fn, x_shake)
+
+            # Move or not
+            if cost_local < cost:
+                x = x_local
+                cost = cost_local
+                k = 0  # Recommencer avec premier voisinage
+            else:
+                k += 1  # Passer au voisinage suivant
+
+    return x, cost`, desc: 'VNS' }
+                            ],
+                            tips: [
+                                'Plusieurs voisinages complementaires',
+                                'Combine exploration (shaking) et exploitation (local search)'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: PROGRAMMATION LINEAIRE
+            // ===============================================================
+            {
+                id: 'linear-programming',
+                title: 'Programmation Lineaire',
+                icon: 'fa-draw-polygon',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Formulation',
+                        desc: 'Optimisation avec contraintes lineaires',
+                        details: {
+                            explanation: 'Maximiser/minimiser une fonction lineaire sous contraintes lineaires.',
+                            syntax: '$$\\min c^T x \\quad \\text{s.t.} \\quad Ax \\leq b, \\quad x \\geq 0$$',
+                            options: [
+                                { flag: 'Objectif', desc: 'Fonction lineaire a optimiser' },
+                                { flag: 'Contraintes', desc: 'Inegalites et egalites lineaires' },
+                                { flag: 'Polyedre', desc: 'Espace realisable est un polyedre' }
+                            ],
+                            examples: [
+                                { code: `from scipy.optimize import linprog
+
+# Minimiser: c.T @ x
+# s.t. A_ub @ x <= b_ub
+#      A_eq @ x = b_eq
+#      bounds pour chaque x
+
+# Exemple: max 3x + 2y
+#          s.t. x + y <= 4
+#               2x + y <= 5
+#               x, y >= 0
+
+# linprog minimise, donc on minimise -3x - 2y
+c = [-3, -2]
+A_ub = [[1, 1], [2, 1]]
+b_ub = [4, 5]
+bounds = [(0, None), (0, None)]
+
+result = linprog(c, A_ub=A_ub, b_ub=b_ub, bounds=bounds)
+print(f"Solution: x={result.x[0]:.2f}, y={result.x[1]:.2f}")
+print(f"Valeur optimale: {-result.fun:.2f}")  # Negation car minimisation`, desc: 'LP avec scipy' }
+                            ],
+                            tips: [
+                                'La solution optimale est sur un sommet du polyedre',
+                                'Solveurs: scipy, PuLP, Gurobi, CPLEX'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'PuLP',
+                        desc: 'Modelisation LP en Python',
+                        details: {
+                            explanation: 'Librairie Python pour modeliser et resoudre des problemes LP/MILP.',
+                            syntax: 'Definir variables, objectif, contraintes',
+                            options: [
+                                { flag: 'LpVariable', desc: 'Variables de decision' },
+                                { flag: 'LpProblem', desc: 'Probleme d\'optimisation' },
+                                { flag: 'Solveurs', desc: 'CBC (defaut), GLPK, Gurobi...' }
+                            ],
+                            examples: [
+                                { code: `from pulp import *
+
+# Creer le probleme
+prob = LpProblem("Production_Mix", LpMaximize)
+
+# Variables
+x = LpVariable("chaises", lowBound=0, cat='Integer')
+y = LpVariable("tables", lowBound=0, cat='Integer')
+
+# Objectif: maximiser profit
+prob += 30*x + 50*y, "Profit"
+
+# Contraintes
+prob += 2*x + 4*y <= 100, "Bois"
+prob += 3*x + 2*y <= 80, "Travail"
+
+# Resoudre
+prob.solve()
+
+print(f"Status: {LpStatus[prob.status]}")
+print(f"Chaises: {value(x)}")
+print(f"Tables: {value(y)}")
+print(f"Profit max: {value(prob.objective)}")`, desc: 'PuLP example' }
+                            ],
+                            tips: [
+                                'cat="Integer" pour programmation en nombres entiers (MILP)',
+                                'cat="Binary" pour variables 0/1'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Dualite',
+                        desc: 'Probleme dual et interpretation',
+                        details: {
+                            explanation: 'Chaque probleme LP (primal) a un probleme dual equivalent.',
+                            syntax: 'Primal min -> Dual max',
+                            options: [
+                                { flag: 'Weak duality', desc: 'Dual <= Primal' },
+                                { flag: 'Strong duality', desc: 'Dual = Primal a l\'optimum' },
+                                { flag: 'Shadow prices', desc: 'Variables duales = valeur marginale des contraintes' }
+                            ],
+                            examples: [
+                                { code: `# Primal:
+# min c.T @ x
+# s.t. Ax >= b
+#      x >= 0
+
+# Dual:
+# max b.T @ y
+# s.t. A.T @ y <= c
+#      y >= 0
+
+# Shadow prices (sensibilite)
+# y_i* = valeur marginale de la i-eme contrainte
+# = combien l'objectif change si on relache la contrainte de 1 unite
+
+# En PuLP, acces aux shadow prices:
+for name, constraint in prob.constraints.items():
+    print(f"{name}: {constraint.pi}")  # Shadow price`, desc: 'Dualite et shadow prices' }
+                            ],
+                            tips: [
+                                'Shadow prices utiles pour analyse de sensibilite',
+                                'Si contrainte non saturee, son shadow price = 0'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'MILP',
+                        desc: 'Programmation en nombres entiers',
+                        details: {
+                            explanation: 'Certaines variables doivent etre entieres.',
+                            syntax: 'LP + contraintes d\'integralite',
+                            options: [
+                                { flag: 'Integer', desc: 'Variables entieres' },
+                                { flag: 'Binary', desc: 'Variables 0/1' },
+                                { flag: 'Branch & Bound', desc: 'Algorithme de resolution' }
+                            ],
+                            examples: [
+                                { code: `from pulp import *
+
+# Probleme du sac a dos (Knapsack)
+prob = LpProblem("Knapsack", LpMaximize)
+
+items = ['A', 'B', 'C', 'D']
+values = {'A': 60, 'B': 100, 'C': 120, 'D': 80}
+weights = {'A': 10, 'B': 20, 'C': 30, 'D': 15}
+capacity = 50
+
+# Variables binaires: prendre ou pas
+x = LpVariable.dicts("item", items, cat='Binary')
+
+# Objectif: maximiser valeur
+prob += lpSum([values[i] * x[i] for i in items])
+
+# Contrainte de capacite
+prob += lpSum([weights[i] * x[i] for i in items]) <= capacity
+
+prob.solve()
+
+print("Items selectionnes:")
+for i in items:
+    if value(x[i]) == 1:
+        print(f"  {i}: valeur={values[i]}, poids={weights[i]}")`, desc: 'MILP: Knapsack' }
+                            ],
+                            tips: [
+                                'MILP est NP-hard mais solveurs modernes tres efficaces',
+                                'Gurobi/CPLEX pour problemes industriels'
+                            ],
+                            warnings: ['Peut etre beaucoup plus lent que LP pur']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <!-- Logique commune -->
+    <script src="../js/cheatsheet.js"></script>
+
+    <!-- Initialisation KaTeX -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+
+        const originalShowModal = window.showModal;
+        if (originalShowModal) {
+            window.showModal = function(categoryId, commandIndex) {
+                originalShowModal(categoryId, commandIndex);
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        renderMathInElement(document.getElementById('modalContent'), {
+                            delimiters: [
+                                {left: '$$', right: '$$', display: true},
+                                {left: '$', right: '$', display: false}
+                            ],
+                            throwOnError: false
+                        });
+                    }
+                }, 100);
+            };
+        }
+    </script>
+</body>
+</html>

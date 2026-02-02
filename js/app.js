@@ -86,9 +86,28 @@ const appData = [
         bgGlow: 'bg-fuchsia-500/20',
         link: 'sheets/vectordb.html'
     },
-
     // ==================== WEB & DEVOPS ====================
     // Ordre par similarité et difficulté croissante
+    {
+        id: 'html',
+        title: 'HTML5 & Formulaires',
+        desc: 'Structure sémantique, formulaires avancés avec GPS et multimédia.',
+        type: 'Web & DevOps',
+        icon: 'fab fa-html5',
+        color: 'text-orange-500',
+        bgGlow: 'bg-orange-500/20',
+        link: 'sheets/html.html'
+    },
+    {
+        id: 'css',
+        title: 'CSS3 Moderne',
+        desc: 'Flexbox, Grid, animations et responsive design.',
+        type: 'Web & DevOps',
+        icon: 'fab fa-css3-alt',
+        color: 'text-blue-500',
+        bgGlow: 'bg-blue-500/20',
+        link: 'sheets/css.html'
+    },
     {
         id: 'javascript',
         title: 'JavaScript',
@@ -250,6 +269,59 @@ const appData = [
         color: 'text-indigo-400',
         bgGlow: 'bg-indigo-500/20',
         link: 'sheets/server.html'
+    },
+
+    // ==================== CONCEPTS ====================
+    // Ordre : Maths Appliquées → Statistiques → Probabilités → Algorithmie → Optimisation
+    {
+        id: 'math-applied',
+        title: 'Mathématiques Appliquées',
+        desc: 'Algèbre linéaire, optimisation, fondations ML/DL et LLM.',
+        type: 'Concepts',
+        icon: 'fas fa-square-root-alt',
+        color: 'text-purple-400',
+        bgGlow: 'bg-purple-500/20',
+        link: 'sheets/math-applied.html'
+    },
+    {
+        id: 'statistics',
+        title: 'Statistiques',
+        desc: 'Stats descriptives, tests d\'hypothèses, régression et métriques.',
+        type: 'Concepts',
+        icon: 'fas fa-chart-bar',
+        color: 'text-cyan-400',
+        bgGlow: 'bg-cyan-500/20',
+        link: 'sheets/statistics.html'
+    },
+    {
+        id: 'probability',
+        title: 'Probabilités',
+        desc: 'Distributions, Bayes, théorèmes fondamentaux et inférence.',
+        type: 'Concepts',
+        icon: 'fas fa-dice',
+        color: 'text-rose-400',
+        bgGlow: 'bg-rose-500/20',
+        link: 'sheets/probability.html'
+    },
+    {
+        id: 'algorithms',
+        title: 'Algorithmie',
+        desc: 'Structures de données, algorithmes de tri, graphes et complexité.',
+        type: 'Concepts',
+        icon: 'fas fa-sitemap',
+        color: 'text-amber-400',
+        bgGlow: 'bg-amber-500/20',
+        link: 'sheets/algorithms.html'
+    },
+    {
+        id: 'optimization',
+        title: 'Recherche & Optimisation',
+        desc: 'Gradient descent, métaheuristiques, algorithmes génétiques.',
+        type: 'Concepts',
+        icon: 'fas fa-bullseye',
+        color: 'text-green-400',
+        bgGlow: 'bg-green-500/20',
+        link: 'sheets/optimization.html'
     }
 ];
 

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Template Dark Theme - Design moderne avec glassmorphism et effets de glow">
+    <title>Dark Theme Template</title>
+    
+    <!-- Font Awesome pour les icônes -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Styles du template -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Header avec effet glow -->
+    <header class="header-glow">
+        <div class="max-w-xl mx-auto text-center relative z-10">
+            <!-- Badge -->
+            <span class="badge badge-primary mb-4" style="display: inline-block; margin-bottom: 1.5rem;">
+                VOTRE BADGE
+            </span>
+            
+            <!-- Titre avec gradient -->
+            <h1 class="gradient-text" style="margin-bottom: 1rem;">
+                Titre Principal
+            </h1>
+            
+            <!-- Sous-titre -->
+            <p style="font-size: 1.125rem; max-width: 600px; margin: 0 auto;">
+                Description de votre projet ou application. Ce template utilise un design moderne avec glassmorphism et effets de glow.
+            </p>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main style="max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem;" class="relative z-10">
+
+        <!-- Section filtres et recherche -->
+        <section class="flex justify-between items-center gap-6 mb-4" style="flex-wrap: wrap; margin-bottom: 2rem;">
+            
+            <!-- Filtres -->
+            <div class="flex gap-2" style="flex-wrap: wrap;">
+                <button class="filter-btn active">Tout voir</button>
+                <button class="filter-btn">Catégorie 1</button>
+                <button class="filter-btn">Catégorie 2</button>
+                <button class="filter-btn">Catégorie 3</button>
+            </div>
+            
+            <!-- Recherche -->
+            <div class="input-with-icon" style="width: 320px;">
+                <i class="fas fa-search icon"></i>
+                <input type="text" class="input" placeholder="Rechercher...">
+            </div>
+        </section>
+
+        <!-- Grille de cartes -->
+        <section style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+            
+            <!-- Carte 1 -->
+            <article class="glass-card card-glow shine-effect">
+                <div class="flex items-center gap-4 mb-4">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #0284c7); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-code" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.125rem; margin: 0;">Titre de la carte</h3>
+                        <span class="badge badge-primary" style="font-size: 0.625rem;">Label</span>
+                    </div>
+                </div>
+                <p style="margin-bottom: 1rem;">
+                    Description courte de l'élément. Le glassmorphism crée une impression de profondeur élégante.
+                </p>
+                <button class="btn-secondary w-full">
+                    <i class="fas fa-arrow-right"></i>
+                    Voir plus
+                </button>
+            </article>
+
+            <!-- Carte 2 -->
+            <article class="glass-card card-glow shine-effect">
+                <div class="flex items-center gap-4 mb-4">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #22c55e, #16a34a); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-database" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.125rem; margin: 0;">Autre élément</h3>
+                        <span class="badge badge-success" style="font-size: 0.625rem;">Actif</span>
+                    </div>
+                </div>
+                <p style="margin-bottom: 1rem;">
+                    Les effets de shine et glow au survol ajoutent une dimension interactive et moderne.
+                </p>
+                <button class="btn-secondary w-full">
+                    <i class="fas fa-arrow-right"></i>
+                    Voir plus
+                </button>
+            </article>
+
+            <!-- Carte 3 -->
+            <article class="glass-card card-glow shine-effect">
+                <div class="flex items-center gap-4 mb-4">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-cog" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.125rem; margin: 0;">Configuration</h3>
+                        <span class="badge badge-warning" style="font-size: 0.625rem;">En cours</span>
+                    </div>
+                </div>
+                <p style="margin-bottom: 1rem;">
+                    La palette sky/slate offre un contraste agréable et une lisibilité optimale.
+                </p>
+                <button class="btn-secondary w-full">
+                    <i class="fas fa-arrow-right"></i>
+                    Voir plus
+                </button>
+            </article>
+
+            <!-- Carte 4 -->
+            <article class="glass-card card-glow shine-effect">
+                <div class="flex items-center gap-4 mb-4">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #ef4444, #dc2626); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-exclamation-triangle" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.125rem; margin: 0;">Alertes</h3>
+                        <span class="badge badge-danger" style="font-size: 0.625rem;">Urgent</span>
+                    </div>
+                </div>
+                <p style="margin-bottom: 1rem;">
+                    Les badges colorés permettent de signaler différents états visuellement.
+                </p>
+                <button class="btn-secondary w-full">
+                    <i class="fas fa-arrow-right"></i>
+                    Voir plus
+                </button>
+            </article>
+
+        </section>
+
+        <!-- Section boutons démonstration -->
+        <section style="margin-top: 3rem; padding: 2rem; border-radius: 1rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.05);">
+            <h2 style="margin-bottom: 1.5rem;">Composants disponibles</h2>
+            
+            <div class="flex gap-4" style="flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <button class="btn-primary">
+                    <i class="fas fa-check"></i>
+                    Bouton Primaire
+                </button>
+                <button class="btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    Bouton Secondaire
+                </button>
+                <button class="btn-ghost">
+                    <i class="fas fa-link"></i>
+                    Bouton Ghost
+                </button>
+                <button class="btn-icon">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="btn-icon">
+                    <i class="fas fa-star"></i>
+                </button>
+            </div>
+
+            <div class="flex gap-4" style="flex-wrap: wrap;">
+                <span class="badge badge-primary">Primary</span>
+                <span class="badge badge-success">Success</span>
+                <span class="badge badge-warning">Warning</span>
+                <span class="badge badge-danger">Danger</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer style="border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: auto; position: relative; z-index: 10;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; text-align: center; color: var(--color-text-dimmed); font-size: 0.875rem;">
+            <p>© 2026 - Votre Nom</p>
+        </div>
+    </footer>
+
+    <!-- Scripts (optionnel) -->
+    <script src="js/app.js"></script>
+</body>
+</html>

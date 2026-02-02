@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Algorithmie : structures de donnees, algorithmes de tri, graphes et complexite.">
+    <title>Algorithmie - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- KaTeX pour les formules mathematiques -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        .formula {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+        .formula-inline {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .katex { font-size: 1.1em; }
+        .katex-display { margin: 0.5em 0; }
+        .formula-name {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-amber-500/20 mb-4 icon-glow">
+                    <i class="fas fa-sitemap text-3xl text-amber-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Algorithmie</h1>
+                <p class="text-slate-400">Structures de donnees, algorithmes de tri, graphes et complexite</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: quicksort, dijkstra, O(n))..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: STRUCTURES DE DONNEES
+            // ===============================================================
+            {
+                id: 'data-structures',
+                title: 'Structures de Donnees',
+                icon: 'fa-cubes',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Arrays et Listes',
+                        desc: 'Stockage sequentiel',
+                        details: {
+                            explanation: 'Structures de base pour stocker des collections d\'elements.',
+                            syntax: 'Array: acces O(1), insertion O(n) | Liste chainee: acces O(n), insertion O(1)',
+                            options: [
+                                { flag: 'Array', desc: 'Acces O(1), insertion/suppression O(n)' },
+                                { flag: 'Dynamic Array', desc: 'Amortized O(1) pour append (Python list)' },
+                                { flag: 'Linked List', desc: 'Insertion O(1), acces O(n)' },
+                                { flag: 'Doubly Linked', desc: 'Parcours bidirectionnel' }
+                            ],
+                            examples: [
+                                { code: `# Python list = dynamic array
+arr = [1, 2, 3, 4, 5]
+arr.append(6)      # O(1) amortized
+arr.insert(0, 0)   # O(n) - decalage
+arr.pop()          # O(1)
+arr.pop(0)         # O(n)
+arr[2]             # O(1) - acces direct
+
+# Linked list (collections.deque)
+from collections import deque
+dll = deque([1, 2, 3])
+dll.appendleft(0)  # O(1)
+dll.append(4)      # O(1)
+dll.popleft()      # O(1)`, desc: 'Arrays et Listes en Python' }
+                            ],
+                            tips: [
+                                'Utilisez deque si insertions frequentes aux deux extremites',
+                                'list.insert(0, x) est O(n), evitez-le'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Piles et Files',
+                        desc: 'LIFO et FIFO',
+                        details: {
+                            explanation: 'Structures avec politique d\'acces specifique.',
+                            syntax: 'Stack: LIFO | Queue: FIFO',
+                            options: [
+                                { flag: 'Stack (Pile)', desc: 'Last In First Out - push/pop O(1)' },
+                                { flag: 'Queue (File)', desc: 'First In First Out - enqueue/dequeue O(1)' },
+                                { flag: 'Priority Queue', desc: 'Element prioritaire sort en premier' },
+                                { flag: 'Deque', desc: 'Double-ended queue' }
+                            ],
+                            examples: [
+                                { code: `# Stack avec list
+stack = []
+stack.append(1)    # push
+stack.append(2)
+stack.pop()        # pop -> 2
+
+# Queue avec deque
+from collections import deque
+queue = deque()
+queue.append(1)    # enqueue
+queue.append(2)
+queue.popleft()    # dequeue -> 1
+
+# Priority Queue (min-heap)
+import heapq
+pq = []
+heapq.heappush(pq, 3)
+heapq.heappush(pq, 1)
+heapq.heappush(pq, 2)
+heapq.heappop(pq)  # -> 1 (minimum)`, desc: 'Piles et Files' }
+                            ],
+                            tips: [
+                                'Stack: appels de fonctions, undo, parsing',
+                                'Queue: BFS, buffer, scheduling'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Hash Tables',
+                        desc: 'Dictionnaires, acces O(1)',
+                        details: {
+                            explanation: 'Stockage cle-valeur avec acces quasi-constant.',
+                            syntax: '$$h(k) \\mod m$$ determine l\'index',
+                            options: [
+                                { flag: 'Acces', desc: 'O(1) moyen, O(n) pire cas' },
+                                { flag: 'Collision', desc: 'Chaining ou open addressing' },
+                                { flag: 'Load factor', desc: 'n/m, rehash si > 0.7' }
+                            ],
+                            examples: [
+                                { code: `# Python dict = hash table
+d = {}
+d['a'] = 1        # O(1)
+d['b'] = 2
+x = d.get('a')    # O(1)
+del d['a']        # O(1)
+'b' in d          # O(1)
+
+# Set = hash table sans valeurs
+s = {1, 2, 3}
+s.add(4)          # O(1)
+s.remove(1)       # O(1)
+2 in s            # O(1)
+
+# Counter (dict specialise)
+from collections import Counter
+c = Counter(['a', 'b', 'a', 'c', 'a'])
+c.most_common(2)  # [('a', 3), ('b', 1)]`, desc: 'Hash Tables en Python' }
+                            ],
+                            tips: [
+                                'Les cles doivent etre hashables (immutables)',
+                                'defaultdict evite les KeyError'
+                            ],
+                            warnings: ['Pire cas O(n) si beaucoup de collisions']
+                        }
+                    },
+                    {
+                        cmd: 'Arbres',
+                        desc: 'Arbre binaire, BST, Heap',
+                        details: {
+                            explanation: 'Structures hierarchiques avec noeuds et aretes.',
+                            syntax: 'BST: recherche/insertion O(log n) si equilibre',
+                            options: [
+                                { flag: 'Binary Tree', desc: 'Chaque noeud a 0-2 enfants' },
+                                { flag: 'BST', desc: 'Gauche < Parent < Droite' },
+                                { flag: 'Heap', desc: 'Parent >= enfants (max) ou <= (min)' },
+                                { flag: 'AVL/Red-Black', desc: 'BST auto-equilibres' }
+                            ],
+                            examples: [
+                                { code: `# BST simple
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.left = self.right = None
+
+def insert(root, val):
+    if not root:
+        return Node(val)
+    if val < root.val:
+        root.left = insert(root.left, val)
+    else:
+        root.right = insert(root.right, val)
+    return root
+
+def search(root, val):
+    if not root or root.val == val:
+        return root
+    if val < root.val:
+        return search(root.left, val)
+    return search(root.right, val)
+
+# Heap avec heapq (min-heap)
+import heapq
+heap = [3, 1, 4, 1, 5]
+heapq.heapify(heap)  # O(n)
+heapq.heappop(heap)  # O(log n) -> 1`, desc: 'BST et Heap' }
+                            ],
+                            tips: [
+                                'BST degenere en liste si non equilibre',
+                                'heapq en Python est un min-heap'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Graphes',
+                        desc: 'Representations',
+                        details: {
+                            explanation: 'Ensemble de noeuds connectes par des aretes.',
+                            syntax: 'G = (V, E) ou V = sommets, E = aretes',
+                            options: [
+                                { flag: 'Matrice adjacence', desc: 'Espace O(V^2), edge check O(1)' },
+                                { flag: 'Liste adjacence', desc: 'Espace O(V+E), meilleur si sparse' },
+                                { flag: 'Oriente/Non oriente', desc: 'Aretes a sens unique ou bidirectionnelles' },
+                                { flag: 'Pondere', desc: 'Aretes avec poids' }
+                            ],
+                            examples: [
+                                { code: `# Liste d'adjacence (dict)
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D'],
+    'C': ['A', 'D'],
+    'D': ['B', 'C']
+}
+
+# Graphe pondere
+weighted = {
+    'A': [('B', 4), ('C', 2)],
+    'B': [('A', 4), ('D', 3)],
+    'C': [('A', 2), ('D', 1)],
+    'D': [('B', 3), ('C', 1)]
+}
+
+# Avec networkx
+import networkx as nx
+G = nx.Graph()
+G.add_edge('A', 'B', weight=4)
+G.add_edge('A', 'C', weight=2)`, desc: 'Representations de graphes' }
+                            ],
+                            tips: [
+                                'Liste adjacence pour graphes peu denses',
+                                'Matrice pour graphes tres denses ou acces frequent'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: COMPLEXITE ALGORITHMIQUE
+            // ===============================================================
+            {
+                id: 'complexity',
+                title: 'Complexite Algorithmique',
+                icon: 'fa-tachometer-alt',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Notation Big O',
+                        desc: 'Borne superieure asymptotique',
+                        details: {
+                            explanation: 'Decrit le comportement au pire cas quand n tend vers l\'infini.',
+                            syntax: '$$O(g(n))$$: $$f(n) \\leq c \\cdot g(n)$$ pour n assez grand',
+                            options: [
+                                { flag: 'O(1)', desc: 'Constant - independant de n' },
+                                { flag: 'O(log n)', desc: 'Logarithmique - diviser pour regner' },
+                                { flag: 'O(n)', desc: 'Lineaire - parcours simple' },
+                                { flag: 'O(n log n)', desc: 'Quasi-lineaire - tris efficaces' },
+                                { flag: 'O(n^2)', desc: 'Quadratique - boucles imbriquees' },
+                                { flag: 'O(2^n)', desc: 'Exponentiel - sous-ensembles' },
+                                { flag: 'O(n!)', desc: 'Factoriel - permutations' }
+                            ],
+                            examples: [
+                                { code: `# O(1) - Constant
+def get_first(arr):
+    return arr[0]
+
+# O(log n) - Logarithmique
+def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
+
+# O(n) - Lineaire
+def find_max(arr):
+    return max(arr)
+
+# O(n^2) - Quadratique
+def bubble_sort(arr):
+    for i in range(len(arr)):
+        for j in range(len(arr) - 1):
+            if arr[j] > arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]`, desc: 'Exemples de complexite' }
+                            ],
+                            tips: [
+                                'On ignore les constantes: O(2n) = O(n)',
+                                'On garde le terme dominant: O(n^2 + n) = O(n^2)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Complexite spatiale',
+                        desc: 'Memoire utilisee',
+                        details: {
+                            explanation: 'Quantite de memoire supplementaire utilisee par l\'algorithme.',
+                            syntax: 'Espace = entree + espace auxiliaire',
+                            options: [
+                                { flag: 'In-place', desc: 'O(1) espace auxiliaire' },
+                                { flag: 'Recursion', desc: 'Pile d\'appels = O(profondeur)' }
+                            ],
+                            examples: [
+                                { code: `# O(1) espace - in-place
+def reverse_inplace(arr):
+    left, right = 0, len(arr) - 1
+    while left < right:
+        arr[left], arr[right] = arr[right], arr[left]
+        left += 1
+        right -= 1
+
+# O(n) espace
+def reverse_copy(arr):
+    return arr[::-1]  # Cree une copie
+
+# O(log n) espace (pile de recursion)
+def binary_search_recursive(arr, target, left, right):
+    if left > right:
+        return -1
+    mid = (left + right) // 2
+    if arr[mid] == target:
+        return mid
+    elif arr[mid] < target:
+        return binary_search_recursive(arr, target, mid + 1, right)
+    else:
+        return binary_search_recursive(arr, target, left, mid - 1)`, desc: 'Complexite spatiale' }
+                            ],
+                            tips: [
+                                'La recursion utilise de l\'espace sur la pile',
+                                'Convertir en iteratif reduit souvent l\'espace'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Analyse de complexite',
+                        desc: 'Pire, moyen, meilleur cas',
+                        details: {
+                            explanation: 'Differentes facons d\'analyser un algorithme.',
+                            syntax: 'Big O (pire), Theta (moyen), Omega (meilleur)',
+                            options: [
+                                { flag: 'Pire cas (O)', desc: 'Borne superieure - garantie' },
+                                { flag: 'Meilleur cas (Omega)', desc: 'Borne inferieure' },
+                                { flag: 'Cas moyen (Theta)', desc: 'Comportement typique' },
+                                { flag: 'Amortized', desc: 'Cout moyen sur une sequence d\'operations' }
+                            ],
+                            examples: [
+                                { code: `# QuickSort
+# Meilleur: O(n log n) - pivot divise en 2
+# Moyen: O(n log n)
+# Pire: O(n^2) - pivot toujours min ou max
+
+# Binary Search
+# Tous les cas: O(log n)
+
+# Linear Search
+# Meilleur: O(1) - premier element
+# Moyen: O(n/2) = O(n)
+# Pire: O(n) - dernier ou absent
+
+# Dynamic Array append
+# Amortized O(1) car resize rare
+# Pire cas single op: O(n)`, desc: 'Analyse de cas' }
+                            ],
+                            tips: [
+                                'En pratique, on utilise souvent O (pire cas) par securite',
+                                'Le cas moyen peut etre difficile a calculer'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: ALGORITHMES DE RECHERCHE
+            // ===============================================================
+            {
+                id: 'search',
+                title: 'Algorithmes de Recherche',
+                icon: 'fa-search',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Recherche lineaire',
+                        desc: 'Parcours sequentiel O(n)',
+                        details: {
+                            explanation: 'Parcourt tous les elements jusqu\'a trouver la cible.',
+                            syntax: 'for i in range(n): if arr[i] == target: return i',
+                            options: [
+                                { flag: 'Temps', desc: 'O(n) pire/moyen, O(1) meilleur' },
+                                { flag: 'Espace', desc: 'O(1)' },
+                                { flag: 'Prerequis', desc: 'Aucun (fonctionne sur tout)' }
+                            ],
+                            examples: [
+                                { code: `def linear_search(arr, target):
+    for i, val in enumerate(arr):
+        if val == target:
+            return i
+    return -1
+
+# Utilisation
+arr = [4, 2, 7, 1, 9, 3]
+idx = linear_search(arr, 7)  # 2
+
+# En Python
+arr.index(7)  # 2 (leve ValueError si absent)
+7 in arr      # True - O(n)`, desc: 'Recherche lineaire' }
+                            ],
+                            tips: [
+                                'Simple mais inefficace pour grands datasets',
+                                'Necessaire si donnees non triees'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Recherche binaire',
+                        desc: 'Diviser pour regner O(log n)',
+                        details: {
+                            explanation: 'Divise l\'espace de recherche par 2 a chaque etape.',
+                            syntax: 'Prerequis: tableau trie',
+                            options: [
+                                { flag: 'Temps', desc: 'O(log n)' },
+                                { flag: 'Espace', desc: 'O(1) iteratif, O(log n) recursif' },
+                                { flag: 'Prerequis', desc: 'Donnees TRIEES' }
+                            ],
+                            examples: [
+                                { code: `def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+
+    while left <= right:
+        mid = left + (right - left) // 2  # Evite overflow
+
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1
+
+# Module bisect
+import bisect
+arr = [1, 3, 5, 7, 9]
+bisect.bisect_left(arr, 5)   # 2 - index pour inserer
+bisect.bisect_right(arr, 5)  # 3
+bisect.insort(arr, 4)        # [1, 3, 4, 5, 7, 9]`, desc: 'Recherche binaire' }
+                            ],
+                            tips: [
+                                'left + (right-left)//2 evite l\'overflow',
+                                'bisect pour insertion dans liste triee'
+                            ],
+                            warnings: ['Ne fonctionne que sur donnees TRIEES!']
+                        }
+                    },
+                    {
+                        cmd: 'BFS - Breadth First Search',
+                        desc: 'Parcours en largeur',
+                        details: {
+                            explanation: 'Explore les voisins avant d\'aller plus profond.',
+                            syntax: 'Utilise une file (queue)',
+                            options: [
+                                { flag: 'Temps', desc: 'O(V + E)' },
+                                { flag: 'Espace', desc: 'O(V)' },
+                                { flag: 'Usage', desc: 'Plus court chemin (non pondere)' }
+                            ],
+                            examples: [
+                                { code: `from collections import deque
+
+def bfs(graph, start):
+    visited = set([start])
+    queue = deque([start])
+    result = []
+
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+
+    return result
+
+# Plus court chemin
+def shortest_path(graph, start, end):
+    queue = deque([(start, [start])])
+    visited = set([start])
+
+    while queue:
+        node, path = queue.popleft()
+        if node == end:
+            return path
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append((neighbor, path + [neighbor]))
+
+    return None`, desc: 'BFS' }
+                            ],
+                            tips: [
+                                'BFS trouve le plus court chemin en nombre d\'aretes',
+                                'Ideal pour graphes non ponderes'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'DFS - Depth First Search',
+                        desc: 'Parcours en profondeur',
+                        details: {
+                            explanation: 'Explore le plus profond possible avant de revenir.',
+                            syntax: 'Utilise une pile (stack) ou recursion',
+                            options: [
+                                { flag: 'Temps', desc: 'O(V + E)' },
+                                { flag: 'Espace', desc: 'O(V) pour la pile' },
+                                { flag: 'Usage', desc: 'Detection de cycles, tri topologique' }
+                            ],
+                            examples: [
+                                { code: `# DFS recursif
+def dfs_recursive(graph, node, visited=None):
+    if visited is None:
+        visited = set()
+    visited.add(node)
+    result = [node]
+
+    for neighbor in graph[node]:
+        if neighbor not in visited:
+            result.extend(dfs_recursive(graph, neighbor, visited))
+
+    return result
+
+# DFS iteratif
+def dfs_iterative(graph, start):
+    visited = set()
+    stack = [start]
+    result = []
+
+    while stack:
+        node = stack.pop()
+        if node not in visited:
+            visited.add(node)
+            result.append(node)
+            # Ajouter voisins dans l'ordre inverse
+            stack.extend(reversed(graph[node]))
+
+    return result`, desc: 'DFS' }
+                            ],
+                            tips: [
+                                'Recursif est plus elegant mais limite par la pile',
+                                'Iteratif pour eviter stack overflow'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'A* Search',
+                        desc: 'Recherche heuristique',
+                        details: {
+                            explanation: 'Combine cout reel et heuristique pour chemin optimal.',
+                            syntax: '$$f(n) = g(n) + h(n)$$',
+                            options: [
+                                { flag: 'g(n)', desc: 'Cout du chemin depuis le depart' },
+                                { flag: 'h(n)', desc: 'Heuristique estimant le cout restant' },
+                                { flag: 'Admissible', desc: 'h ne surestime jamais' }
+                            ],
+                            examples: [
+                                { code: `import heapq
+
+def astar(graph, start, goal, h):
+    """
+    graph: dict de (noeud -> [(voisin, cout), ...])
+    h: fonction heuristique h(node) -> estimation
+    """
+    open_set = [(h(start), 0, start, [start])]
+    visited = set()
+
+    while open_set:
+        f, g, node, path = heapq.heappop(open_set)
+
+        if node == goal:
+            return path, g
+
+        if node in visited:
+            continue
+        visited.add(node)
+
+        for neighbor, cost in graph[node]:
+            if neighbor not in visited:
+                new_g = g + cost
+                new_f = new_g + h(neighbor)
+                heapq.heappush(open_set, (new_f, new_g, neighbor, path + [neighbor]))
+
+    return None, float('inf')
+
+# Heuristique: distance Manhattan pour grille
+def manhattan(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])`, desc: 'A* Search' }
+                            ],
+                            tips: [
+                                'Heuristique admissible garantit l\'optimalite',
+                                'Manhattan pour grilles, Euclidienne pour plans'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: ALGORITHMES DE TRI
+            // ===============================================================
+            {
+                id: 'sorting',
+                title: 'Algorithmes de Tri',
+                icon: 'fa-sort-amount-down',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Tris quadratiques',
+                        desc: 'Bubble, Selection, Insertion O(n^2)',
+                        details: {
+                            explanation: 'Tris simples mais inefficaces pour grandes donnees.',
+                            syntax: 'Temps O(n^2), Espace O(1)',
+                            options: [
+                                { flag: 'Bubble Sort', desc: 'Compare et echange elements adjacents' },
+                                { flag: 'Selection Sort', desc: 'Selectionne le min, le place au debut' },
+                                { flag: 'Insertion Sort', desc: 'Insere chaque element a sa place' }
+                            ],
+                            examples: [
+                                { code: `# Bubble Sort
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(n - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+
+# Selection Sort
+def selection_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        min_idx = i
+        for j in range(i + 1, n):
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+
+# Insertion Sort
+def insertion_sort(arr):
+    for i in range(1, len(arr)):
+        key = arr[i]
+        j = i - 1
+        while j >= 0 and arr[j] > key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key`, desc: 'Tris O(n^2)' }
+                            ],
+                            tips: [
+                                'Insertion sort est bon pour petites listes ou presque triees',
+                                'Selection sort fait moins d\'echanges que Bubble'
+                            ],
+                            warnings: ['Trop lents pour n > 1000']
+                        }
+                    },
+                    {
+                        cmd: 'Merge Sort',
+                        desc: 'Diviser pour regner O(n log n)',
+                        details: {
+                            explanation: 'Divise, trie recursivement, fusionne.',
+                            syntax: 'Temps O(n log n), Espace O(n)',
+                            options: [
+                                { flag: 'Stable', desc: 'Preserve l\'ordre des egaux' },
+                                { flag: 'Espace', desc: 'O(n) pour la fusion' },
+                                { flag: 'Temps garanti', desc: 'O(n log n) dans tous les cas' }
+                            ],
+                            examples: [
+                                { code: `def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+
+    return merge(left, right)
+
+def merge(left, right):
+    result = []
+    i = j = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result`, desc: 'Merge Sort' }
+                            ],
+                            tips: [
+                                'Stable et previsible (toujours O(n log n))',
+                                'Utilise O(n) espace supplementaire'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Quick Sort',
+                        desc: 'Tri rapide O(n log n) moyen',
+                        details: {
+                            explanation: 'Choisit un pivot, partitionne autour, recurse.',
+                            syntax: 'Temps O(n log n) moyen, O(n^2) pire | Espace O(log n)',
+                            options: [
+                                { flag: 'In-place', desc: 'Ne necessite pas d\'espace supplementaire' },
+                                { flag: 'Non stable', desc: 'Ne preserve pas l\'ordre des egaux' },
+                                { flag: 'Choix pivot', desc: 'Random ou median-of-three' }
+                            ],
+                            examples: [
+                                { code: `def quick_sort(arr, low=0, high=None):
+    if high is None:
+        high = len(arr) - 1
+
+    if low < high:
+        pivot_idx = partition(arr, low, high)
+        quick_sort(arr, low, pivot_idx - 1)
+        quick_sort(arr, pivot_idx + 1, high)
+
+def partition(arr, low, high):
+    pivot = arr[high]
+    i = low - 1
+
+    for j in range(low, high):
+        if arr[j] <= pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return i + 1
+
+# Avec random pivot (evite pire cas)
+import random
+def partition_random(arr, low, high):
+    pivot_idx = random.randint(low, high)
+    arr[pivot_idx], arr[high] = arr[high], arr[pivot_idx]
+    return partition(arr, low, high)`, desc: 'Quick Sort' }
+                            ],
+                            tips: [
+                                'Pivot aleatoire evite le pire cas',
+                                'En pratique souvent plus rapide que Merge Sort'
+                            ],
+                            warnings: ['Pire cas O(n^2) si pivot mal choisi']
+                        }
+                    },
+                    {
+                        cmd: 'Heap Sort',
+                        desc: 'Tri par tas O(n log n)',
+                        details: {
+                            explanation: 'Construit un heap puis extrait le max iterativement.',
+                            syntax: 'Temps O(n log n) garanti, Espace O(1)',
+                            options: [
+                                { flag: 'In-place', desc: 'Espace O(1)' },
+                                { flag: 'Non stable', desc: 'Ne preserve pas l\'ordre' },
+                                { flag: 'Temps garanti', desc: 'O(n log n) toujours' }
+                            ],
+                            examples: [
+                                { code: `def heap_sort(arr):
+    n = len(arr)
+
+    # Build max heap
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+
+    # Extract elements
+    for i in range(n - 1, 0, -1):
+        arr[0], arr[i] = arr[i], arr[0]
+        heapify(arr, i, 0)
+
+def heapify(arr, n, i):
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < n and arr[left] > arr[largest]:
+        largest = left
+    if right < n and arr[right] > arr[largest]:
+        largest = right
+
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest)`, desc: 'Heap Sort' }
+                            ],
+                            tips: [
+                                'Combine avantages: O(n log n) garanti ET in-place',
+                                'Moins cache-friendly que Quick Sort'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Tri Python natif',
+                        desc: 'Timsort - hybride O(n log n)',
+                        details: {
+                            explanation: 'Combine Merge Sort et Insertion Sort.',
+                            syntax: 'sorted() et list.sort()',
+                            options: [
+                                { flag: 'Timsort', desc: 'Hybride adaptatif, tres efficace' },
+                                { flag: 'Stable', desc: 'Preserve l\'ordre des egaux' },
+                                { flag: 'key', desc: 'Fonction de tri personnalisee' }
+                            ],
+                            examples: [
+                                { code: `# sorted() - retourne nouvelle liste
+arr = [3, 1, 4, 1, 5]
+sorted_arr = sorted(arr)  # [1, 1, 3, 4, 5]
+
+# list.sort() - trie en place
+arr.sort()
+
+# Tri inverse
+arr.sort(reverse=True)
+
+# Tri avec cle
+words = ['banana', 'apple', 'Cherry']
+words.sort(key=str.lower)  # ['apple', 'banana', 'Cherry']
+
+# Tri par attribut/element
+data = [('Alice', 25), ('Bob', 20), ('Charlie', 30)]
+data.sort(key=lambda x: x[1])  # par age
+
+# Tri stable: 2e critere si egalite
+from operator import itemgetter
+data.sort(key=itemgetter(1, 0))`, desc: 'Tri Python' }
+                            ],
+                            tips: [
+                                'Utilisez toujours sorted() ou .sort() en Python',
+                                'Timsort est O(n) si deja partiellement trie'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: DIVISER POUR REGNER
+            // ===============================================================
+            {
+                id: 'divide-conquer',
+                title: 'Diviser pour Regner',
+                icon: 'fa-code-branch',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Principe',
+                        desc: 'Divide and Conquer',
+                        details: {
+                            explanation: 'Divise le probleme, resout les sous-problemes, combine les solutions.',
+                            syntax: '$$T(n) = aT(n/b) + f(n)$$ (Master theorem)',
+                            options: [
+                                { flag: 'Diviser', desc: 'Decouper en sous-problemes' },
+                                { flag: 'Regner', desc: 'Resoudre recursivement' },
+                                { flag: 'Combiner', desc: 'Fusionner les solutions' }
+                            ],
+                            examples: [
+                                { code: `# Master Theorem
+# T(n) = aT(n/b) + f(n)
+# a = nombre de sous-problemes
+# b = facteur de reduction
+# f(n) = cout de division + combinaison
+
+# Merge Sort: T(n) = 2T(n/2) + O(n)
+# a=2, b=2, f(n)=n
+# log_b(a) = 1, f(n) = Theta(n^1)
+# Cas 2: T(n) = Theta(n log n)
+
+# Binary Search: T(n) = T(n/2) + O(1)
+# a=1, b=2, f(n)=1
+# log_b(a) = 0, f(n) = Theta(1)
+# Cas 2: T(n) = Theta(log n)`, desc: 'Master Theorem' }
+                            ],
+                            tips: [
+                                'Master Theorem pour calculer la complexite',
+                                'Sous-problemes independants = parallelisable'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Recherche binaire',
+                        desc: 'Division par 2',
+                        details: {
+                            explanation: 'Elimine la moitie de l\'espace de recherche a chaque etape.',
+                            syntax: 'T(n) = T(n/2) + O(1) = O(log n)',
+                            options: [
+                                { flag: 'Prerequis', desc: 'Donnees triees' },
+                                { flag: 'Variantes', desc: 'Lower bound, upper bound, rotated array' }
+                            ],
+                            examples: [
+                                { code: `# Trouver premiere/derniere occurrence
+def first_occurrence(arr, target):
+    left, right = 0, len(arr) - 1
+    result = -1
+
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            result = mid
+            right = mid - 1  # Continuer a gauche
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return result
+
+# Recherche dans array rotated
+def search_rotated(arr, target):
+    left, right = 0, len(arr) - 1
+
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+
+        # Moitie gauche triee
+        if arr[left] <= arr[mid]:
+            if arr[left] <= target < arr[mid]:
+                right = mid - 1
+            else:
+                left = mid + 1
+        # Moitie droite triee
+        else:
+            if arr[mid] < target <= arr[right]:
+                left = mid + 1
+            else:
+                right = mid - 1
+
+    return -1`, desc: 'Variantes de binary search' }
+                            ],
+                            tips: [
+                                'Pensez binary search pour problemes de recherche',
+                                'Fonctionne si condition monotone'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Exponentiation rapide',
+                        desc: 'Fast Power O(log n)',
+                        details: {
+                            explanation: 'Calcule x^n en log(n) multiplications.',
+                            syntax: '$$x^n = (x^{n/2})^2$$ si n pair',
+                            options: [
+                                { flag: 'Recursif', desc: 'x^n = x^(n/2) * x^(n/2)' },
+                                { flag: 'Iteratif', desc: 'Utilise representation binaire de n' }
+                            ],
+                            examples: [
+                                { code: `# Recursif
+def power(x, n):
+    if n == 0:
+        return 1
+    if n < 0:
+        return 1 / power(x, -n)
+
+    half = power(x, n // 2)
+    if n % 2 == 0:
+        return half * half
+    else:
+        return half * half * x
+
+# Iteratif
+def power_iterative(x, n):
+    if n < 0:
+        x = 1 / x
+        n = -n
+
+    result = 1
+    while n > 0:
+        if n & 1:  # n est impair
+            result *= x
+        x *= x
+        n >>= 1
+
+    return result
+
+# Modular exponentiation (cryptographie)
+def mod_pow(base, exp, mod):
+    result = 1
+    base %= mod
+    while exp > 0:
+        if exp & 1:
+            result = (result * base) % mod
+        exp >>= 1
+        base = (base * base) % mod
+    return result`, desc: 'Fast Power' }
+                            ],
+                            tips: [
+                                'Essentiel pour la cryptographie (RSA)',
+                                'pow(x, n, mod) en Python fait mod_pow'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: PROGRAMMATION DYNAMIQUE
+            // ===============================================================
+            {
+                id: 'dynamic-programming',
+                title: 'Programmation Dynamique',
+                icon: 'fa-table',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Principe',
+                        desc: 'Memoization et Tabulation',
+                        details: {
+                            explanation: 'Evite de recalculer les sous-problemes identiques.',
+                            syntax: 'Optimal substructure + Overlapping subproblems',
+                            options: [
+                                { flag: 'Top-down (Memo)', desc: 'Recursion + cache des resultats' },
+                                { flag: 'Bottom-up (Tab)', desc: 'Iteratif, remplit un tableau' }
+                            ],
+                            examples: [
+                                { code: `# Fibonacci - Exemple classique
+# Recursif naif: O(2^n)
+def fib_naive(n):
+    if n <= 1:
+        return n
+    return fib_naive(n-1) + fib_naive(n-2)
+
+# Memoization (top-down): O(n)
+from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib_memo(n):
+    if n <= 1:
+        return n
+    return fib_memo(n-1) + fib_memo(n-2)
+
+# Tabulation (bottom-up): O(n), espace O(n)
+def fib_tab(n):
+    if n <= 1:
+        return n
+    dp = [0] * (n + 1)
+    dp[1] = 1
+    for i in range(2, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+    return dp[n]
+
+# Optimise: espace O(1)
+def fib_opt(n):
+    if n <= 1:
+        return n
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+    return b`, desc: 'Fibonacci' }
+                            ],
+                            tips: [
+                                '@lru_cache pour memoization rapide',
+                                'Bottom-up souvent plus efficace en memoire'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Knapsack (Sac a dos)',
+                        desc: '0/1 Knapsack Problem',
+                        details: {
+                            explanation: 'Maximiser la valeur avec une contrainte de poids.',
+                            syntax: '$$dp[i][w] = max(dp[i-1][w], dp[i-1][w-w_i] + v_i)$$',
+                            options: [
+                                { flag: '0/1 Knapsack', desc: 'Prendre ou pas chaque objet' },
+                                { flag: 'Unbounded', desc: 'Quantite illimitee de chaque objet' }
+                            ],
+                            examples: [
+                                { code: `def knapsack_01(weights, values, capacity):
+    n = len(weights)
+    dp = [[0] * (capacity + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        for w in range(capacity + 1):
+            # Ne pas prendre l'objet i
+            dp[i][w] = dp[i-1][w]
+            # Prendre l'objet i si possible
+            if weights[i-1] <= w:
+                dp[i][w] = max(dp[i][w],
+                               dp[i-1][w - weights[i-1]] + values[i-1])
+
+    return dp[n][capacity]
+
+# Version espace optimisee O(W)
+def knapsack_optimized(weights, values, capacity):
+    dp = [0] * (capacity + 1)
+
+    for i in range(len(weights)):
+        for w in range(capacity, weights[i] - 1, -1):  # Inverse!
+            dp[w] = max(dp[w], dp[w - weights[i]] + values[i])
+
+    return dp[capacity]`, desc: 'Knapsack' }
+                            ],
+                            tips: [
+                                'Parcours inverse pour 0/1, normal pour unbounded',
+                                'Espace O(W) au lieu de O(nW)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Longest Common Subsequence',
+                        desc: 'LCS - Plus longue sous-sequence commune',
+                        details: {
+                            explanation: 'Trouver la plus longue sous-sequence commune a deux strings.',
+                            syntax: '$$dp[i][j] = \\begin{cases} dp[i-1][j-1] + 1 & \\text{si } s1[i] = s2[j] \\\\ max(dp[i-1][j], dp[i][j-1]) & \\text{sinon} \\end{cases}$$',
+                            options: [
+                                { flag: 'Temps', desc: 'O(mn)' },
+                                { flag: 'Espace', desc: 'O(mn) ou O(min(m,n)) optimise' }
+                            ],
+                            examples: [
+                                { code: `def lcs(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if s1[i-1] == s2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+    return dp[m][n]
+
+# Reconstruire la sequence
+def lcs_string(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if s1[i-1] == s2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+    # Backtrack
+    result = []
+    i, j = m, n
+    while i > 0 and j > 0:
+        if s1[i-1] == s2[j-1]:
+            result.append(s1[i-1])
+            i -= 1
+            j -= 1
+        elif dp[i-1][j] > dp[i][j-1]:
+            i -= 1
+        else:
+            j -= 1
+
+    return ''.join(reversed(result))`, desc: 'LCS' }
+                            ],
+                            tips: [
+                                'Similaire a edit distance',
+                                'Utile pour diff d\'algorithmes'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Edit Distance',
+                        desc: 'Levenshtein Distance',
+                        details: {
+                            explanation: 'Nombre minimum d\'operations pour transformer s1 en s2.',
+                            syntax: 'Operations: insert, delete, replace',
+                            options: [
+                                { flag: 'Insert', desc: 'Ajouter un caractere' },
+                                { flag: 'Delete', desc: 'Supprimer un caractere' },
+                                { flag: 'Replace', desc: 'Remplacer un caractere' }
+                            ],
+                            examples: [
+                                { code: `def edit_distance(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    # Cas de base
+    for i in range(m + 1):
+        dp[i][0] = i  # Supprimer i caracteres
+    for j in range(n + 1):
+        dp[0][j] = j  # Inserer j caracteres
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if s1[i-1] == s2[j-1]:
+                dp[i][j] = dp[i-1][j-1]  # Pas de cout
+            else:
+                dp[i][j] = 1 + min(
+                    dp[i-1][j],     # Delete
+                    dp[i][j-1],     # Insert
+                    dp[i-1][j-1]    # Replace
+                )
+
+    return dp[m][n]
+
+# Exemple
+edit_distance("kitten", "sitting")  # 3
+# kitten -> sitten (replace k->s)
+# sitten -> sittin (replace e->i)
+# sittin -> sitting (insert g)`, desc: 'Edit Distance' }
+                            ],
+                            tips: [
+                                'Utile pour spell checking, DNA sequencing',
+                                'Peut etre optimise en espace O(min(m,n))'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: ALGORITHMES DE GRAPHES
+            // ===============================================================
+            {
+                id: 'graph-algorithms',
+                title: 'Algorithmes de Graphes',
+                icon: 'fa-project-diagram',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Dijkstra',
+                        desc: 'Plus court chemin (poids positifs)',
+                        details: {
+                            explanation: 'Trouve le plus court chemin depuis une source vers tous les noeuds.',
+                            syntax: 'O((V + E) log V) avec heap',
+                            options: [
+                                { flag: 'Prerequis', desc: 'Poids non negatifs' },
+                                { flag: 'Output', desc: 'Distance minimale vers chaque noeud' }
+                            ],
+                            examples: [
+                                { code: `import heapq
+
+def dijkstra(graph, start):
+    """
+    graph: {node: [(neighbor, weight), ...]}
+    """
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    pq = [(0, start)]
+
+    while pq:
+        dist, node = heapq.heappop(pq)
+
+        if dist > distances[node]:
+            continue
+
+        for neighbor, weight in graph[node]:
+            new_dist = dist + weight
+            if new_dist < distances[neighbor]:
+                distances[neighbor] = new_dist
+                heapq.heappush(pq, (new_dist, neighbor))
+
+    return distances
+
+# Avec reconstruction du chemin
+def dijkstra_path(graph, start, end):
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    previous = {node: None for node in graph}
+    pq = [(0, start)]
+
+    while pq:
+        dist, node = heapq.heappop(pq)
+        if node == end:
+            break
+        if dist > distances[node]:
+            continue
+
+        for neighbor, weight in graph[node]:
+            new_dist = dist + weight
+            if new_dist < distances[neighbor]:
+                distances[neighbor] = new_dist
+                previous[neighbor] = node
+                heapq.heappush(pq, (new_dist, neighbor))
+
+    # Reconstruire le chemin
+    path = []
+    node = end
+    while node:
+        path.append(node)
+        node = previous[node]
+    return path[::-1], distances[end]`, desc: 'Dijkstra' }
+                            ],
+                            tips: [
+                                'Ne fonctionne pas avec poids negatifs',
+                                'Utilisez Bellman-Ford pour poids negatifs'
+                            ],
+                            warnings: ['Poids negatifs -> resultat incorrect!']
+                        }
+                    },
+                    {
+                        cmd: 'Bellman-Ford',
+                        desc: 'Plus court chemin (poids negatifs)',
+                        details: {
+                            explanation: 'Fonctionne avec poids negatifs, detecte les cycles negatifs.',
+                            syntax: 'O(VE)',
+                            options: [
+                                { flag: 'Poids negatifs', desc: 'Supporte, contrairement a Dijkstra' },
+                                { flag: 'Cycles negatifs', desc: 'Peut les detecter' }
+                            ],
+                            examples: [
+                                { code: `def bellman_ford(graph, V, start):
+    """
+    graph: liste d'aretes [(u, v, weight), ...]
+    V: nombre de sommets
+    """
+    distances = [float('inf')] * V
+    distances[start] = 0
+
+    # Relaxation V-1 fois
+    for _ in range(V - 1):
+        for u, v, weight in graph:
+            if distances[u] != float('inf') and distances[u] + weight < distances[v]:
+                distances[v] = distances[u] + weight
+
+    # Detection de cycle negatif
+    for u, v, weight in graph:
+        if distances[u] != float('inf') and distances[u] + weight < distances[v]:
+            return None  # Cycle negatif detecte
+
+    return distances`, desc: 'Bellman-Ford' }
+                            ],
+                            tips: [
+                                'Plus lent que Dijkstra mais plus general',
+                                'Utile pour detecter arbitrage (finance)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Floyd-Warshall',
+                        desc: 'Tous les plus courts chemins',
+                        details: {
+                            explanation: 'Trouve les plus courts chemins entre toutes les paires.',
+                            syntax: 'O(V^3), Espace O(V^2)',
+                            options: [
+                                { flag: 'All-pairs', desc: 'Distance entre chaque paire' },
+                                { flag: 'Dense graphs', desc: 'Efficace si E proche de V^2' }
+                            ],
+                            examples: [
+                                { code: `def floyd_warshall(graph):
+    """
+    graph: matrice d'adjacence (inf si pas d'arete)
+    """
+    V = len(graph)
+    dist = [row[:] for row in graph]  # Copie
+
+    for k in range(V):
+        for i in range(V):
+            for j in range(V):
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+
+    return dist
+
+# Exemple
+INF = float('inf')
+graph = [
+    [0, 5, INF, 10],
+    [INF, 0, 3, INF],
+    [INF, INF, 0, 1],
+    [INF, INF, INF, 0]
+]
+result = floyd_warshall(graph)
+# result[i][j] = distance de i a j`, desc: 'Floyd-Warshall' }
+                            ],
+                            tips: [
+                                'Simple a implementer',
+                                'Meilleur que Dijkstra repete si graphe dense'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Kruskal & Prim',
+                        desc: 'Arbre couvrant minimum (MST)',
+                        details: {
+                            explanation: 'Trouve l\'arbre connectant tous les noeuds avec poids minimum.',
+                            syntax: 'Kruskal O(E log E), Prim O((V+E) log V)',
+                            options: [
+                                { flag: 'Kruskal', desc: 'Trie aretes, Union-Find' },
+                                { flag: 'Prim', desc: 'Similaire a Dijkstra avec heap' }
+                            ],
+                            examples: [
+                                { code: `# Kruskal avec Union-Find
+class UnionFind:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        px, py = self.find(x), self.find(y)
+        if px == py:
+            return False
+        if self.rank[px] < self.rank[py]:
+            px, py = py, px
+        self.parent[py] = px
+        if self.rank[px] == self.rank[py]:
+            self.rank[px] += 1
+        return True
+
+def kruskal(n, edges):
+    """edges: [(weight, u, v), ...]"""
+    edges.sort()
+    uf = UnionFind(n)
+    mst = []
+    total_weight = 0
+
+    for weight, u, v in edges:
+        if uf.union(u, v):
+            mst.append((u, v, weight))
+            total_weight += weight
+            if len(mst) == n - 1:
+                break
+
+    return mst, total_weight`, desc: 'Kruskal' }
+                            ],
+                            tips: [
+                                'Kruskal pour graphes sparse',
+                                'Prim pour graphes denses'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: RECURSIVITE & BACKTRACKING
+            // ===============================================================
+            {
+                id: 'recursion',
+                title: 'Recursivite & Backtracking',
+                icon: 'fa-redo',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Recursivite',
+                        desc: 'Appel de fonction a elle-meme',
+                        details: {
+                            explanation: 'Resout un probleme en le decomposant en sous-problemes similaires.',
+                            syntax: 'Cas de base + Cas recursif',
+                            options: [
+                                { flag: 'Cas de base', desc: 'Condition d\'arret' },
+                                { flag: 'Cas recursif', desc: 'Appel avec sous-probleme' },
+                                { flag: 'Tail recursion', desc: 'Optimisable en iteratif' }
+                            ],
+                            examples: [
+                                { code: `# Factorielle
+def factorial(n):
+    if n <= 1:  # Cas de base
+        return 1
+    return n * factorial(n - 1)  # Cas recursif
+
+# Tail recursion (optimisable)
+def factorial_tail(n, acc=1):
+    if n <= 1:
+        return acc
+    return factorial_tail(n - 1, n * acc)
+
+# Parcours d'arbre
+def tree_sum(node):
+    if not node:
+        return 0
+    return node.val + tree_sum(node.left) + tree_sum(node.right)
+
+# Recursion mutuelle
+def is_even(n):
+    if n == 0:
+        return True
+    return is_odd(n - 1)
+
+def is_odd(n):
+    if n == 0:
+        return False
+    return is_even(n - 1)`, desc: 'Recursivite' }
+                            ],
+                            tips: [
+                                'Toujours definir un cas de base',
+                                'Verifier que chaque appel progresse vers le cas de base'
+                            ],
+                            warnings: ['Attention au stack overflow pour n grand']
+                        }
+                    },
+                    {
+                        cmd: 'Backtracking',
+                        desc: 'Exploration exhaustive avec pruning',
+                        details: {
+                            explanation: 'Explore toutes les solutions possibles, abandonne les branches invalides.',
+                            syntax: 'Construire solution incrementalement, revenir si invalide',
+                            options: [
+                                { flag: 'Choice', desc: 'Faire un choix' },
+                                { flag: 'Constraint', desc: 'Verifier validite' },
+                                { flag: 'Goal', desc: 'Solution trouvee?' }
+                            ],
+                            examples: [
+                                { code: `# N-Queens
+def solve_n_queens(n):
+    solutions = []
+
+    def backtrack(row, cols, diag1, diag2, board):
+        if row == n:
+            solutions.append([''.join(r) for r in board])
+            return
+
+        for col in range(n):
+            if col in cols or (row - col) in diag1 or (row + col) in diag2:
+                continue
+
+            board[row][col] = 'Q'
+            cols.add(col)
+            diag1.add(row - col)
+            diag2.add(row + col)
+
+            backtrack(row + 1, cols, diag1, diag2, board)
+
+            board[row][col] = '.'
+            cols.remove(col)
+            diag1.remove(row - col)
+            diag2.remove(row + col)
+
+    board = [['.' for _ in range(n)] for _ in range(n)]
+    backtrack(0, set(), set(), set(), board)
+    return solutions`, desc: 'N-Queens' }
+                            ],
+                            tips: [
+                                'Pattern: make choice, recurse, undo choice',
+                                'Le pruning early reduit l\'espace de recherche'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Subsets et Permutations',
+                        desc: 'Generation de combinaisons',
+                        details: {
+                            explanation: 'Generer tous les sous-ensembles ou permutations.',
+                            syntax: 'Subsets: 2^n | Permutations: n!',
+                            options: [
+                                { flag: 'Subsets', desc: 'Tous les sous-ensembles' },
+                                { flag: 'Permutations', desc: 'Tous les arrangements' },
+                                { flag: 'Combinations', desc: 'k elements parmi n' }
+                            ],
+                            examples: [
+                                { code: `# Tous les sous-ensembles
+def subsets(nums):
+    result = []
+
+    def backtrack(start, current):
+        result.append(current[:])
+        for i in range(start, len(nums)):
+            current.append(nums[i])
+            backtrack(i + 1, current)
+            current.pop()
+
+    backtrack(0, [])
+    return result
+
+# Toutes les permutations
+def permutations(nums):
+    result = []
+
+    def backtrack(current, remaining):
+        if not remaining:
+            result.append(current[:])
+            return
+        for i in range(len(remaining)):
+            current.append(remaining[i])
+            backtrack(current, remaining[:i] + remaining[i+1:])
+            current.pop()
+
+    backtrack([], nums)
+    return result
+
+# Itertools (Python)
+from itertools import permutations, combinations, product
+list(permutations([1,2,3]))     # 6 permutations
+list(combinations([1,2,3], 2))  # 3 combinaisons de 2`, desc: 'Subsets et Permutations' }
+                            ],
+                            tips: [
+                                'itertools pour generation efficace',
+                                'Attention a l\'explosion combinatoire'
+                            ],
+                            warnings: ['2^n ou n! explose rapidement!']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <!-- Logique commune -->
+    <script src="../js/cheatsheet.js"></script>
+
+    <!-- Initialisation KaTeX -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+
+        const originalShowModal = window.showModal;
+        if (originalShowModal) {
+            window.showModal = function(categoryId, commandIndex) {
+                originalShowModal(categoryId, commandIndex);
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        renderMathInElement(document.getElementById('modalContent'), {
+                            delimiters: [
+                                {left: '$$', right: '$$', display: true},
+                                {left: '$', right: '$', display: false}
+                            ],
+                            throwOnError: false
+                        });
+                    }
+                }, 100);
+            };
+        }
+    </script>
+</body>
+</html>

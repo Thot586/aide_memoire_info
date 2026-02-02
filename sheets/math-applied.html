@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Mathematiques Appliquees : algebre lineaire, calcul, deep learning, LLM et world models.">
+    <title>Mathematiques Appliquees - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- KaTeX pour les formules mathematiques -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        .formula {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+        .formula-inline {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .katex { font-size: 1.1em; }
+        .katex-display { margin: 0.5em 0; }
+        .formula-name {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-purple-500/20 mb-4 icon-glow">
+                    <i class="fas fa-square-root-alt text-3xl text-purple-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Mathematiques Appliquees</h1>
+                <p class="text-slate-400">Algebre lineaire, optimisation, fondations ML/DL et LLM</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: matrice, gradient, attention)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: ALGEBRE LINEAIRE
+            // ===============================================================
+            {
+                id: 'linear-algebra',
+                title: 'Algebre Lineaire',
+                icon: 'fa-th',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Operations matricielles',
+                        desc: 'Addition, multiplication, transpose',
+                        details: {
+                            explanation: 'Operations fondamentales sur les matrices, essentielles pour le calcul en ML.',
+                            syntax: '$$C = A \\cdot B \\quad \\text{ou} \\quad C_{ij} = \\sum_k A_{ik} B_{kj}$$',
+                            options: [
+                                { flag: 'Addition', desc: '$$(A + B)_{ij} = A_{ij} + B_{ij}$$' },
+                                { flag: 'Multiplication', desc: '$$(AB)_{ij} = \\sum_k A_{ik} B_{kj}$$' },
+                                { flag: 'Transpose', desc: '$$(A^T)_{ij} = A_{ji}$$' },
+                                { flag: 'Produit Hadamard', desc: '$$(A \\odot B)_{ij} = A_{ij} \\cdot B_{ij}$$' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+A = np.array([[1, 2], [3, 4]])
+B = np.array([[5, 6], [7, 8]])
+
+# Multiplication matricielle
+C = A @ B  # ou np.dot(A, B)
+
+# Transpose
+At = A.T
+
+# Produit element par element (Hadamard)
+H = A * B`, desc: 'Operations en NumPy' }
+                            ],
+                            tips: [
+                                'La multiplication matricielle n\'est pas commutative : AB != BA',
+                                'Utilisez @ en Python pour la multiplication matricielle'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Determinant et Inverse',
+                        desc: 'det(A), A^-1',
+                        details: {
+                            explanation: 'Le determinant indique si une matrice est inversible. L\'inverse permet de resoudre des systemes lineaires.',
+                            syntax: '$$A^{-1}A = AA^{-1} = I$$',
+                            options: [
+                                { flag: 'Determinant 2x2', desc: '$$\\det\\begin{pmatrix}a & b \\\\ c & d\\end{pmatrix} = ad - bc$$' },
+                                { flag: 'Inverse 2x2', desc: '$$A^{-1} = \\frac{1}{\\det(A)}\\begin{pmatrix}d & -b \\\\ -c & a\\end{pmatrix}$$' },
+                                { flag: 'Propriete', desc: '$$(AB)^{-1} = B^{-1}A^{-1}$$' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+A = np.array([[4, 7], [2, 6]])
+
+# Determinant
+det_A = np.linalg.det(A)  # 10
+
+# Inverse
+A_inv = np.linalg.inv(A)
+
+# Verification
+print(A @ A_inv)  # Matrice identite`, desc: 'Calcul en NumPy' }
+                            ],
+                            tips: [
+                                'det(A) = 0 signifie que A n\'est pas inversible (singuliere)',
+                                'Pour resoudre Ax = b, on peut calculer x = A^-1 * b'
+                            ],
+                            warnings: ['Evitez d\'inverser des matrices en pratique, preferez np.linalg.solve']
+                        }
+                    },
+                    {
+                        cmd: 'Valeurs et vecteurs propres',
+                        desc: 'Eigenvalues, eigenvectors',
+                        details: {
+                            explanation: 'Les valeurs propres et vecteurs propres caracterisent les transformations lineaires et sont fondamentaux en PCA.',
+                            syntax: '$$Av = \\lambda v$$',
+                            options: [
+                                { flag: 'Definition', desc: '$$Av = \\lambda v$$ ou $$\\lambda$$ est valeur propre et $$v$$ vecteur propre' },
+                                { flag: 'Equation caracteristique', desc: '$$\\det(A - \\lambda I) = 0$$' },
+                                { flag: 'Trace', desc: '$$\\text{tr}(A) = \\sum_i \\lambda_i$$' },
+                                { flag: 'Determinant', desc: '$$\\det(A) = \\prod_i \\lambda_i$$' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+A = np.array([[4, 2], [1, 3]])
+
+# Valeurs et vecteurs propres
+eigenvalues, eigenvectors = np.linalg.eig(A)
+
+print(f"Valeurs propres: {eigenvalues}")
+# [5. 2.]
+
+# Verification: Av = lambda * v
+v = eigenvectors[:, 0]
+print(A @ v)               # [5. 2.5]
+print(eigenvalues[0] * v)  # [5. 2.5]`, desc: 'Calcul en NumPy' }
+                            ],
+                            tips: [
+                                'Les vecteurs propres d\'une matrice symetrique sont orthogonaux',
+                                'PCA utilise les vecteurs propres de la matrice de covariance'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Decompositions matricielles',
+                        desc: 'SVD, QR, Cholesky, LU',
+                        details: {
+                            explanation: 'Les decompositions permettent d\'analyser et de manipuler efficacement les matrices.',
+                            syntax: '$$A = U\\Sigma V^T \\quad \\text{(SVD)}$$',
+                            options: [
+                                { flag: 'SVD', desc: '$$A = U\\Sigma V^T$$ - decomposition en valeurs singulieres' },
+                                { flag: 'QR', desc: '$$A = QR$$ - Q orthogonale, R triangulaire sup.' },
+                                { flag: 'Cholesky', desc: '$$A = LL^T$$ - pour matrices definies positives' },
+                                { flag: 'LU', desc: '$$A = LU$$ - L triangulaire inf., U triangulaire sup.' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+A = np.array([[1, 2], [3, 4], [5, 6]])
+
+# SVD
+U, S, Vt = np.linalg.svd(A)
+# A = U @ np.diag(S) @ Vt (pour matrice carree)
+
+# QR
+Q, R = np.linalg.qr(A)
+
+# Cholesky (matrice definie positive)
+B = np.array([[4, 2], [2, 3]])
+L = np.linalg.cholesky(B)
+
+# Reconstruction
+print(L @ L.T)  # Retourne B`, desc: 'Decompositions en NumPy' }
+                            ],
+                            tips: [
+                                'SVD est utilisee pour la reduction de dimension et la compression',
+                                'Cholesky est 2x plus rapide que LU pour les matrices definies positives'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Normes vectorielles et matricielles',
+                        desc: 'L1, L2, Frobenius',
+                        details: {
+                            explanation: 'Les normes mesurent la "taille" des vecteurs et matrices, essentielles pour la regularisation.',
+                            syntax: '$$\\|x\\|_2 = \\sqrt{\\sum_i x_i^2}$$',
+                            options: [
+                                { flag: 'Norme L1', desc: '$$\\|x\\|_1 = \\sum_i |x_i|$$' },
+                                { flag: 'Norme L2 (Euclidienne)', desc: '$$\\|x\\|_2 = \\sqrt{\\sum_i x_i^2}$$' },
+                                { flag: 'Norme L-infini', desc: '$$\\|x\\|_\\infty = \\max_i |x_i|$$' },
+                                { flag: 'Norme Frobenius', desc: '$$\\|A\\|_F = \\sqrt{\\sum_{i,j} A_{ij}^2}$$' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+x = np.array([3, -4, 5])
+
+# Normes vectorielles
+l1 = np.linalg.norm(x, ord=1)    # 12
+l2 = np.linalg.norm(x, ord=2)    # 7.07
+linf = np.linalg.norm(x, ord=np.inf)  # 5
+
+A = np.array([[1, 2], [3, 4]])
+
+# Norme Frobenius
+frob = np.linalg.norm(A, 'fro')  # 5.48`, desc: 'Normes en NumPy' }
+                            ],
+                            tips: [
+                                'L1 favorise la parcimonie (sparsity) en regularisation',
+                                'L2 est differentiable partout, L1 ne l\'est pas en 0'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: CALCUL & OPTIMISATION
+            // ===============================================================
+            {
+                id: 'calculus',
+                title: 'Calcul & Optimisation',
+                icon: 'fa-chart-line',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Derivees et Gradient',
+                        desc: 'Derivee partielle, gradient',
+                        details: {
+                            explanation: 'Le gradient indique la direction de plus grande pente, fondamental pour l\'optimisation.',
+                            syntax: '$$\\nabla f = \\left(\\frac{\\partial f}{\\partial x_1}, ..., \\frac{\\partial f}{\\partial x_n}\\right)$$',
+                            options: [
+                                { flag: 'Derivee partielle', desc: '$$\\frac{\\partial f}{\\partial x_i}$$ - derivee par rapport a $$x_i$$' },
+                                { flag: 'Gradient', desc: '$$\\nabla f$$ - vecteur des derivees partielles' },
+                                { flag: 'Regle de chaine', desc: '$$\\frac{\\partial f}{\\partial x} = \\frac{\\partial f}{\\partial g} \\cdot \\frac{\\partial g}{\\partial x}$$' }
+                            ],
+                            examples: [
+                                { code: `import torch
+
+# Calcul automatique du gradient
+x = torch.tensor([2.0, 3.0], requires_grad=True)
+f = x[0]**2 + 3*x[1]**2  # f(x) = x1^2 + 3*x2^2
+
+f.backward()
+print(x.grad)  # tensor([4., 18.])
+# gradient = [2*x1, 6*x2] = [4, 18]`, desc: 'Autograd avec PyTorch' }
+                            ],
+                            tips: [
+                                'Le gradient pointe vers la direction de croissance maximale',
+                                'Pour minimiser, on se deplace dans la direction opposee au gradient'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Matrice Hessienne',
+                        desc: 'Derivees secondes',
+                        details: {
+                            explanation: 'La Hessienne contient les derivees secondes et caracterise la courbure de la fonction.',
+                            syntax: '$$H_{ij} = \\frac{\\partial^2 f}{\\partial x_i \\partial x_j}$$',
+                            options: [
+                                { flag: 'Definition', desc: '$$H = \\nabla^2 f$$' },
+                                { flag: 'Minimum local', desc: 'Si $$\\nabla f = 0$$ et $$H$$ definie positive' },
+                                { flag: 'Maximum local', desc: 'Si $$\\nabla f = 0$$ et $$H$$ definie negative' },
+                                { flag: 'Point selle', desc: 'Si $$\\nabla f = 0$$ et $$H$$ indefinie' }
+                            ],
+                            examples: [
+                                { code: `import torch
+from torch.autograd.functional import hessian
+
+def f(x):
+    return x[0]**2 + 3*x[1]**2
+
+x = torch.tensor([1.0, 1.0])
+H = hessian(f, x)
+print(H)
+# tensor([[2., 0.],
+#         [0., 6.]])`, desc: 'Hessienne avec PyTorch' }
+                            ],
+                            tips: [
+                                'Une Hessienne definie positive indique un minimum local',
+                                'La Hessienne est symetrique si f est deux fois differentiable'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Descente de gradient',
+                        desc: 'GD, SGD, Mini-batch',
+                        details: {
+                            explanation: 'Algorithme iteratif pour minimiser une fonction en suivant la direction opposee au gradient.',
+                            syntax: '$$\\theta_{t+1} = \\theta_t - \\eta \\nabla L(\\theta_t)$$',
+                            options: [
+                                { flag: 'Batch GD', desc: 'Gradient sur tout le dataset' },
+                                { flag: 'SGD', desc: 'Gradient sur un seul exemple' },
+                                { flag: 'Mini-batch', desc: 'Gradient sur un sous-ensemble (batch)' },
+                                { flag: 'Learning rate', desc: '$$\\eta$$ controle la taille des pas' }
+                            ],
+                            examples: [
+                                { code: `import torch
+import torch.nn as nn
+
+model = nn.Linear(10, 1)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+criterion = nn.MSELoss()
+
+# Training loop
+for epoch in range(100):
+    optimizer.zero_grad()
+    output = model(X)
+    loss = criterion(output, y)
+    loss.backward()
+    optimizer.step()`, desc: 'SGD en PyTorch' }
+                            ],
+                            tips: [
+                                'Mini-batch est le meilleur compromis entre stabilite et vitesse',
+                                'Un learning rate trop grand fait diverger, trop petit est lent'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Backpropagation',
+                        desc: 'Retropropagation du gradient',
+                        details: {
+                            explanation: 'Algorithme efficace pour calculer les gradients dans un reseau de neurones via la regle de chaine.',
+                            syntax: '$$\\frac{\\partial L}{\\partial W^{(l)}} = \\frac{\\partial L}{\\partial a^{(l)}} \\cdot \\frac{\\partial a^{(l)}}{\\partial W^{(l)}}$$',
+                            options: [
+                                { flag: 'Forward pass', desc: 'Calcul des activations couche par couche' },
+                                { flag: 'Backward pass', desc: 'Propagation des gradients de la sortie vers l\'entree' },
+                                { flag: 'Regle de chaine', desc: 'Multiplication des gradients locaux' }
+                            ],
+                            examples: [
+                                { code: `# Backprop manuel simplifie
+# Forward pass
+z1 = W1 @ x + b1
+a1 = relu(z1)
+z2 = W2 @ a1 + b2
+y_pred = softmax(z2)
+
+# Backward pass
+dz2 = y_pred - y_true
+dW2 = dz2 @ a1.T
+db2 = dz2.sum(axis=1)
+da1 = W2.T @ dz2
+dz1 = da1 * relu_derivative(z1)
+dW1 = dz1 @ x.T
+db1 = dz1.sum(axis=1)`, desc: 'Backprop etape par etape' }
+                            ],
+                            tips: [
+                                'PyTorch et TensorFlow gerent automatiquement la backpropagation',
+                                'Comprendre la backprop aide a debugger les problemes d\'entrainement'
+                            ],
+                            warnings: ['Le vanishing gradient peut survenir avec des activations saturantes']
+                        }
+                    },
+                    {
+                        cmd: 'Fonctions de perte',
+                        desc: 'MSE, Cross-entropy, Hinge',
+                        details: {
+                            explanation: 'Les fonctions de perte mesurent l\'ecart entre predictions et valeurs reelles.',
+                            syntax: '$$L = -\\sum_i y_i \\log(\\hat{y}_i) \\quad \\text{(Cross-entropy)}$$',
+                            options: [
+                                { flag: 'MSE', desc: '$$L = \\frac{1}{n}\\sum_i (y_i - \\hat{y}_i)^2$$' },
+                                { flag: 'MAE', desc: '$$L = \\frac{1}{n}\\sum_i |y_i - \\hat{y}_i|$$' },
+                                { flag: 'Cross-entropy binaire', desc: '$$L = -[y\\log(\\hat{y}) + (1-y)\\log(1-\\hat{y})]$$' },
+                                { flag: 'Cross-entropy multi-classe', desc: '$$L = -\\sum_c y_c \\log(\\hat{y}_c)$$' },
+                                { flag: 'Hinge Loss', desc: '$$L = \\max(0, 1 - y \\cdot \\hat{y})$$' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+# Regression
+mse_loss = nn.MSELoss()
+mae_loss = nn.L1Loss()
+
+# Classification binaire
+bce_loss = nn.BCEWithLogitsLoss()
+
+# Classification multi-classe
+ce_loss = nn.CrossEntropyLoss()
+
+# Utilisation
+loss = ce_loss(predictions, targets)`, desc: 'Fonctions de perte PyTorch' }
+                            ],
+                            tips: [
+                                'MSE pour la regression, Cross-entropy pour la classification',
+                                'BCEWithLogitsLoss combine sigmoid + BCE pour plus de stabilite'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: RESEAUX DE NEURONES
+            // ===============================================================
+            {
+                id: 'neural-networks',
+                title: 'Reseaux de Neurones',
+                icon: 'fa-brain',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Perceptron multicouche (MLP)',
+                        desc: 'Architecture feedforward',
+                        details: {
+                            explanation: 'Le MLP est la brique de base des reseaux de neurones, avec des couches entierement connectees.',
+                            syntax: '$$a^{(l)} = \\sigma(W^{(l)} a^{(l-1)} + b^{(l)})$$',
+                            options: [
+                                { flag: 'Couche lineaire', desc: '$$z = Wx + b$$' },
+                                { flag: 'Activation', desc: '$$a = \\sigma(z)$$' },
+                                { flag: 'Output', desc: 'Softmax pour classification, lineaire pour regression' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+class MLP(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, output_dim)
+        )
+
+    def forward(self, x):
+        return self.layers(x)`, desc: 'MLP en PyTorch' }
+                            ],
+                            tips: [
+                                'Ajoutez des couches cachees pour capturer des patterns complexes',
+                                'ReLU est l\'activation par defaut pour les couches cachees'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Fonctions d\'activation',
+                        desc: 'ReLU, Sigmoid, Tanh, GELU',
+                        details: {
+                            explanation: 'Les activations introduisent de la non-linearite, permettant d\'apprendre des fonctions complexes.',
+                            syntax: '$$\\text{ReLU}(x) = \\max(0, x)$$',
+                            options: [
+                                { flag: 'ReLU', desc: '$$\\max(0, x)$$ - standard, rapide' },
+                                { flag: 'Leaky ReLU', desc: '$$\\max(\\alpha x, x)$$ - evite les "dead neurons"' },
+                                { flag: 'Sigmoid', desc: '$$\\sigma(x) = \\frac{1}{1+e^{-x}}$$ - sortie [0,1]' },
+                                { flag: 'Tanh', desc: '$$\\tanh(x) = \\frac{e^x - e^{-x}}{e^x + e^{-x}}$$ - sortie [-1,1]' },
+                                { flag: 'GELU', desc: '$$x \\cdot \\Phi(x)$$ - utilisee dans BERT/GPT' },
+                                { flag: 'Softmax', desc: '$$\\frac{e^{x_i}}{\\sum_j e^{x_j}}$$ - derniere couche classification' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn.functional as F
+
+x = torch.tensor([-1.0, 0.0, 1.0, 2.0])
+
+relu = F.relu(x)        # [0, 0, 1, 2]
+sigmoid = torch.sigmoid(x)  # [0.27, 0.5, 0.73, 0.88]
+tanh = torch.tanh(x)    # [-0.76, 0, 0.76, 0.96]
+gelu = F.gelu(x)        # [-0.16, 0, 0.84, 1.95]`, desc: 'Activations en PyTorch' }
+                            ],
+                            tips: [
+                                'ReLU est le choix par defaut pour les couches cachees',
+                                'GELU est prefere pour les Transformers'
+                            ],
+                            warnings: ['Sigmoid/Tanh peuvent causer du vanishing gradient']
+                        }
+                    },
+                    {
+                        cmd: 'Convolutions (CNN)',
+                        desc: 'Couches convolutionnelles',
+                        details: {
+                            explanation: 'Les CNN exploitent la structure spatiale des images via des filtres appris.',
+                            syntax: '$$(I * K)(i,j) = \\sum_m \\sum_n I(i+m, j+n) K(m, n)$$',
+                            options: [
+                                { flag: 'Conv2D', desc: 'Convolution 2D pour images' },
+                                { flag: 'Padding', desc: 'Ajout de zeros sur les bords' },
+                                { flag: 'Stride', desc: 'Pas de deplacement du filtre' },
+                                { flag: 'Pooling', desc: 'Sous-echantillonnage (max, average)' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+class CNN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv_layers = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+        )
+        self.fc = nn.Linear(64 * 8 * 8, 10)
+
+    def forward(self, x):
+        x = self.conv_layers(x)
+        x = x.view(x.size(0), -1)
+        return self.fc(x)`, desc: 'CNN simple en PyTorch' }
+                            ],
+                            tips: [
+                                'Kernel 3x3 est le plus courant',
+                                'Padding "same" conserve les dimensions spatiales'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Reseaux recurrents (RNN/LSTM)',
+                        desc: 'Sequences temporelles',
+                        details: {
+                            explanation: 'Les RNN traitent des sequences en maintenant un etat cache qui capture l\'historique.',
+                            syntax: '$$h_t = \\tanh(W_{hh}h_{t-1} + W_{xh}x_t + b)$$',
+                            options: [
+                                { flag: 'RNN vanilla', desc: '$$h_t = \\tanh(Wh_{t-1} + Ux_t)$$' },
+                                { flag: 'LSTM', desc: 'Portes (forget, input, output) pour memoire longue' },
+                                { flag: 'GRU', desc: 'LSTM simplifie avec 2 portes' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+# LSTM
+lstm = nn.LSTM(
+    input_size=128,
+    hidden_size=256,
+    num_layers=2,
+    batch_first=True,
+    bidirectional=True
+)
+
+# Forward
+output, (h_n, c_n) = lstm(x)
+# output: (batch, seq_len, 2*hidden_size)
+# h_n: (2*num_layers, batch, hidden_size)`, desc: 'LSTM en PyTorch' }
+                            ],
+                            tips: [
+                                'LSTM/GRU resolvent le probleme du vanishing gradient',
+                                'Bidirectional double la capacite mais aussi le cout'
+                            ],
+                            warnings: ['Les Transformers ont largement remplace les RNN']
+                        }
+                    },
+                    {
+                        cmd: 'Initialisation des poids',
+                        desc: 'Xavier, He, orthogonal',
+                        details: {
+                            explanation: 'Une bonne initialisation previent le vanishing/exploding gradient et accelere la convergence.',
+                            syntax: '$$W \\sim \\mathcal{N}\\left(0, \\frac{2}{n_{in}}\\right) \\quad \\text{(He)}$$',
+                            options: [
+                                { flag: 'Xavier/Glorot', desc: '$$W \\sim \\mathcal{U}\\left(-\\sqrt{\\frac{6}{n_{in}+n_{out}}}, \\sqrt{\\frac{6}{n_{in}+n_{out}}}\\right)$$' },
+                                { flag: 'He (Kaiming)', desc: '$$W \\sim \\mathcal{N}\\left(0, \\sqrt{\\frac{2}{n_{in}}}\\right)$$ - pour ReLU' },
+                                { flag: 'Orthogonal', desc: 'Matrice orthogonale - bon pour RNN' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+import torch.nn.init as init
+
+layer = nn.Linear(256, 128)
+
+# Xavier (Glorot)
+init.xavier_uniform_(layer.weight)
+
+# He (Kaiming) - pour ReLU
+init.kaiming_normal_(layer.weight, mode='fan_in')
+
+# Orthogonal - pour RNN
+init.orthogonal_(layer.weight)`, desc: 'Initialisations en PyTorch' }
+                            ],
+                            tips: [
+                                'Xavier pour tanh/sigmoid, He pour ReLU',
+                                'PyTorch utilise Kaiming par defaut pour nn.Linear'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: DEEP LEARNING AVANCE
+            // ===============================================================
+            {
+                id: 'deep-learning',
+                title: 'Deep Learning Avance',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Optimiseurs avances',
+                        desc: 'Adam, RMSprop, AdaGrad',
+                        details: {
+                            explanation: 'Les optimiseurs adaptatifs ajustent le learning rate par parametre pour une meilleure convergence.',
+                            syntax: '$$m_t = \\beta_1 m_{t-1} + (1-\\beta_1)g_t \\quad \\text{(Adam)}$$',
+                            options: [
+                                { flag: 'SGD + Momentum', desc: '$$v_t = \\gamma v_{t-1} + \\eta \\nabla L$$' },
+                                { flag: 'AdaGrad', desc: 'Adapte le LR selon l\'historique des gradients' },
+                                { flag: 'RMSprop', desc: 'Moyenne mobile exponentielle des gradients carres' },
+                                { flag: 'Adam', desc: 'Combine Momentum + RMSprop avec correction de biais' }
+                            ],
+                            examples: [
+                                { code: `import torch.optim as optim
+
+# Adam (le plus utilise)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
+
+# AdamW (avec weight decay decouple)
+optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.01)
+
+# SGD avec momentum
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+
+# Scheduler pour reduire le LR
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)`, desc: 'Optimiseurs PyTorch' }
+                            ],
+                            tips: [
+                                'Adam est un bon choix par defaut',
+                                'AdamW est prefere pour les Transformers'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Regularisation',
+                        desc: 'Dropout, BatchNorm, L2',
+                        details: {
+                            explanation: 'La regularisation reduit l\'overfitting en contraignant le modele.',
+                            syntax: '$$L_{reg} = L + \\lambda \\|W\\|_2^2$$',
+                            options: [
+                                { flag: 'L2 (Weight decay)', desc: 'Penalise les grands poids' },
+                                { flag: 'Dropout', desc: 'Desactive aleatoirement des neurones pendant l\'entrainement' },
+                                { flag: 'Batch Normalization', desc: 'Normalise les activations par batch' },
+                                { flag: 'Layer Normalization', desc: 'Normalise par couche (prefere pour Transformers)' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+class RegularizedModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(784, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(256, 10)
+        )
+
+# L2 via weight_decay dans l'optimiseur
+optimizer = optim.Adam(model.parameters(), weight_decay=1e-4)`, desc: 'Regularisation en PyTorch' }
+                            ],
+                            tips: [
+                                'Dropout typique : 0.2-0.5',
+                                'BatchNorm accelere aussi l\'entrainement'
+                            ],
+                            warnings: ['Desactivez Dropout en mode eval()']
+                        }
+                    },
+                    {
+                        cmd: 'Data Augmentation',
+                        desc: 'Transformations pour l\'entrainement',
+                        details: {
+                            explanation: 'L\'augmentation de donnees genere des variations pour ameliorer la generalisation.',
+                            syntax: 'Transformations geometriques, color jittering, mixup',
+                            options: [
+                                { flag: 'Flip/Rotation', desc: 'Transformations geometriques' },
+                                { flag: 'Color jittering', desc: 'Variations de couleur' },
+                                { flag: 'Mixup', desc: '$$\\tilde{x} = \\lambda x_i + (1-\\lambda) x_j$$' },
+                                { flag: 'CutMix', desc: 'Decoupe et melange des regions' }
+                            ],
+                            examples: [
+                                { code: `from torchvision import transforms
+
+train_transform = transforms.Compose([
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(10),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+    transforms.RandomResizedCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225])
+])`, desc: 'Augmentation torchvision' }
+                            ],
+                            tips: [
+                                'Augmentation uniquement sur le train set',
+                                'Mixup aide a la calibration des probabilites'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Transfer Learning',
+                        desc: 'Fine-tuning de modeles pre-entraines',
+                        details: {
+                            explanation: 'Reutiliser un modele entraine sur une grande base pour une tache specifique.',
+                            syntax: 'Charger pretrained -> Geler couches -> Entrainer tete',
+                            options: [
+                                { flag: 'Feature extraction', desc: 'Geler tout sauf la derniere couche' },
+                                { flag: 'Fine-tuning', desc: 'Entrainer toutes les couches avec petit LR' },
+                                { flag: 'Gradual unfreezing', desc: 'Degeler progressivement les couches' }
+                            ],
+                            examples: [
+                                { code: `from torchvision import models
+
+# Charger ResNet pre-entraine
+model = models.resnet50(pretrained=True)
+
+# Geler les poids
+for param in model.parameters():
+    param.requires_grad = False
+
+# Remplacer la tete
+model.fc = nn.Linear(model.fc.in_features, num_classes)
+
+# Fine-tuning complet (optionnel)
+for param in model.parameters():
+    param.requires_grad = True
+optimizer = optim.Adam(model.parameters(), lr=1e-5)`, desc: 'Transfer learning PyTorch' }
+                            ],
+                            tips: [
+                                'Utilisez un petit learning rate pour le fine-tuning',
+                                'ImageNet pretrained fonctionne bien meme pour d\'autres domaines'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: TRANSFORMERS & ATTENTION
+            // ===============================================================
+            {
+                id: 'transformers',
+                title: 'Transformers & Attention',
+                icon: 'fa-project-diagram',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Mecanisme d\'attention',
+                        desc: 'Scaled dot-product attention',
+                        details: {
+                            explanation: 'L\'attention permet au modele de se focaliser sur les parties pertinentes de l\'entree.',
+                            syntax: '$$\\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V$$',
+                            options: [
+                                { flag: 'Query (Q)', desc: 'Ce qu\'on cherche' },
+                                { flag: 'Key (K)', desc: 'Ce avec quoi on compare' },
+                                { flag: 'Value (V)', desc: 'L\'information a extraire' },
+                                { flag: 'Scaling', desc: '$$\\sqrt{d_k}$$ stabilise les gradients' }
+                            ],
+                            examples: [
+                                { code: `import torch
+import torch.nn.functional as F
+
+def scaled_dot_product_attention(Q, K, V, mask=None):
+    d_k = Q.size(-1)
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / (d_k ** 0.5)
+
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -1e9)
+
+    attention_weights = F.softmax(scores, dim=-1)
+    return torch.matmul(attention_weights, V)`, desc: 'Attention from scratch' }
+                            ],
+                            tips: [
+                                'Le scaling previent les gradients qui explosent',
+                                'Le masque est utilise pour l\'attention causale (GPT)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Multi-Head Attention',
+                        desc: 'Attention parallele sur plusieurs representations',
+                        details: {
+                            explanation: 'Plusieurs tetes d\'attention capturent differents types de relations.',
+                            syntax: '$$\\text{MultiHead}(Q, K, V) = \\text{Concat}(\\text{head}_1, ..., \\text{head}_h)W^O$$',
+                            options: [
+                                { flag: 'Heads', desc: 'Nombre de tetes paralleles (8, 12, 16...)' },
+                                { flag: 'Projection', desc: 'Q, K, V projetes par des matrices apprises' },
+                                { flag: 'Concatenation', desc: 'Sorties concatenees puis projetees' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, num_heads):
+        super().__init__()
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads
+
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)
+
+    def forward(self, Q, K, V, mask=None):
+        batch_size = Q.size(0)
+
+        # Projection et reshape
+        Q = self.W_q(Q).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        K = self.W_k(K).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        V = self.W_v(V).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+
+        # Attention
+        attn = scaled_dot_product_attention(Q, K, V, mask)
+
+        # Concat et projection
+        attn = attn.transpose(1, 2).contiguous().view(batch_size, -1, self.num_heads * self.d_k)
+        return self.W_o(attn)`, desc: 'Multi-Head Attention' }
+                            ],
+                            tips: [
+                                'd_model doit etre divisible par num_heads',
+                                'Plus de tetes = plus de patterns captures'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Architecture Transformer',
+                        desc: 'Encoder-Decoder complet',
+                        details: {
+                            explanation: 'Le Transformer est compose de blocs encoder/decoder avec attention et FFN.',
+                            syntax: 'Encoder: Self-Attention -> FFN, Decoder: Masked Self-Attn -> Cross-Attn -> FFN',
+                            options: [
+                                { flag: 'Encoder', desc: 'Self-attention bidirectionnelle' },
+                                { flag: 'Decoder', desc: 'Masked self-attention + cross-attention' },
+                                { flag: 'FFN', desc: '2 couches lineaires avec activation' },
+                                { flag: 'Add & Norm', desc: 'Connexions residuelles + Layer Norm' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+class TransformerBlock(nn.Module):
+    def __init__(self, d_model, num_heads, d_ff, dropout=0.1):
+        super().__init__()
+        self.attention = nn.MultiheadAttention(d_model, num_heads)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.ffn = nn.Sequential(
+            nn.Linear(d_model, d_ff),
+            nn.GELU(),
+            nn.Linear(d_ff, d_model)
+        )
+        self.norm2 = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x, mask=None):
+        # Self-attention avec residual
+        attn_out, _ = self.attention(x, x, x, attn_mask=mask)
+        x = self.norm1(x + self.dropout(attn_out))
+
+        # FFN avec residual
+        ffn_out = self.ffn(x)
+        x = self.norm2(x + self.dropout(ffn_out))
+        return x`, desc: 'Bloc Transformer' }
+                            ],
+                            tips: [
+                                'Pre-norm (LN avant attention) est plus stable que post-norm',
+                                'd_ff est generalement 4 * d_model'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Positional Encoding',
+                        desc: 'Encodage de position',
+                        details: {
+                            explanation: 'Les Transformers n\'ont pas de notion d\'ordre, le positional encoding ajoute cette information.',
+                            syntax: '$$PE_{(pos, 2i)} = \\sin(pos / 10000^{2i/d})$$\n$$PE_{(pos, 2i+1)} = \\cos(pos / 10000^{2i/d})$$',
+                            options: [
+                                { flag: 'Sinusoidal', desc: 'Encodage fixe avec sin/cos' },
+                                { flag: 'Learned', desc: 'Embeddings de position appris' },
+                                { flag: 'Relative', desc: 'Position relative entre tokens' },
+                                { flag: 'RoPE', desc: 'Rotary Position Embedding (Llama)' }
+                            ],
+                            examples: [
+                                { code: `import torch
+import math
+
+def sinusoidal_positional_encoding(max_len, d_model):
+    pe = torch.zeros(max_len, d_model)
+    position = torch.arange(0, max_len).unsqueeze(1).float()
+    div_term = torch.exp(torch.arange(0, d_model, 2).float() *
+                         (-math.log(10000.0) / d_model))
+
+    pe[:, 0::2] = torch.sin(position * div_term)
+    pe[:, 1::2] = torch.cos(position * div_term)
+
+    return pe.unsqueeze(0)  # (1, max_len, d_model)`, desc: 'Positional Encoding sinusoidal' }
+                            ],
+                            tips: [
+                                'Sinusoidal permet de generaliser a des longueurs non vues',
+                                'RoPE est prefere dans les modeles recents'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: LLM FONDATIONS
+            // ===============================================================
+            {
+                id: 'llm',
+                title: 'LLM Fondations',
+                icon: 'fa-robot',
+                color: 'border-l-4 border-violet-500',
+                commands: [
+                    {
+                        cmd: 'Tokenization',
+                        desc: 'BPE, SentencePiece, WordPiece',
+                        details: {
+                            explanation: 'La tokenization decoupe le texte en unites traitables par le modele.',
+                            syntax: 'Texte -> Tokens -> IDs',
+                            options: [
+                                { flag: 'BPE', desc: 'Byte Pair Encoding - fusionne les paires frequentes' },
+                                { flag: 'WordPiece', desc: 'Similaire a BPE, utilise par BERT' },
+                                { flag: 'SentencePiece', desc: 'Tokenization indep. de la langue' },
+                                { flag: 'Byte-level', desc: 'Travaille directement sur les bytes (GPT-2)' }
+                            ],
+                            examples: [
+                                { code: `from transformers import AutoTokenizer
+
+# Charger un tokenizer
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
+text = "Hello, how are you?"
+tokens = tokenizer.tokenize(text)
+# ['Hello', ',', ' how', ' are', ' you', '?']
+
+# Encoder
+ids = tokenizer.encode(text)
+# [15496, 11, 703, 389, 345, 30]
+
+# Decoder
+decoded = tokenizer.decode(ids)
+# "Hello, how are you?"`, desc: 'Tokenization avec HuggingFace' }
+                            ],
+                            tips: [
+                                'Le vocabulaire typique est 30k-100k tokens',
+                                'Les espaces sont souvent inclus dans les tokens'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Embeddings',
+                        desc: 'Token, position, segment embeddings',
+                        details: {
+                            explanation: 'Les embeddings convertissent les tokens discrets en vecteurs continus.',
+                            syntax: '$$E = E_{token} + E_{position} [+ E_{segment}]$$',
+                            options: [
+                                { flag: 'Token embedding', desc: 'Representation apprise par token' },
+                                { flag: 'Position embedding', desc: 'Information de position' },
+                                { flag: 'Segment embedding', desc: 'Distingue les segments (BERT)' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+class Embeddings(nn.Module):
+    def __init__(self, vocab_size, d_model, max_len):
+        super().__init__()
+        self.token_emb = nn.Embedding(vocab_size, d_model)
+        self.pos_emb = nn.Embedding(max_len, d_model)
+        self.dropout = nn.Dropout(0.1)
+
+    def forward(self, x):
+        seq_len = x.size(1)
+        positions = torch.arange(seq_len, device=x.device)
+
+        token_embeddings = self.token_emb(x)
+        position_embeddings = self.pos_emb(positions)
+
+        return self.dropout(token_embeddings + position_embeddings)`, desc: 'Embeddings layer' }
+                            ],
+                            tips: [
+                                'd_model typique : 768 (BERT-base), 1024 (GPT-2), 4096 (GPT-3)',
+                                'Les embeddings sont partages entre input et output dans GPT'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Architecture GPT vs BERT',
+                        desc: 'Decoder-only vs Encoder-only',
+                        details: {
+                            explanation: 'GPT utilise un decoder (autoregressive), BERT un encoder (bidirectionnel).',
+                            syntax: 'GPT: Masked self-attention, BERT: Full self-attention',
+                            options: [
+                                { flag: 'GPT (Decoder)', desc: 'Prediction du token suivant, gauche-a-droite' },
+                                { flag: 'BERT (Encoder)', desc: 'Masked LM, attention bidirectionnelle' },
+                                { flag: 'T5 (Enc-Dec)', desc: 'Seq2seq pour toutes les taches' }
+                            ],
+                            examples: [
+                                { code: `from transformers import AutoModel, AutoModelForCausalLM
+
+# BERT (encoder) - pour classification, NER, etc.
+bert = AutoModel.from_pretrained("bert-base-uncased")
+
+# GPT (decoder) - pour generation de texte
+gpt = AutoModelForCausalLM.from_pretrained("gpt2")
+
+# Utilisation
+outputs = bert(input_ids, attention_mask=attention_mask)
+last_hidden = outputs.last_hidden_state  # (batch, seq, hidden)
+
+generated = gpt.generate(input_ids, max_length=100)`, desc: 'BERT vs GPT avec HuggingFace' }
+                            ],
+                            tips: [
+                                'GPT pour la generation, BERT pour la comprehension',
+                                'Les modeles recents (GPT-4, Claude) sont decoder-only'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Fine-tuning LLM',
+                        desc: 'Full, LoRA, Prefix-tuning',
+                        details: {
+                            explanation: 'Adapter un LLM pre-entraine a une tache specifique.',
+                            syntax: 'Full fine-tuning vs Parameter-efficient methods',
+                            options: [
+                                { flag: 'Full fine-tuning', desc: 'Tous les poids sont mis a jour' },
+                                { flag: 'LoRA', desc: '$$W\' = W + BA$$ - matrices low-rank' },
+                                { flag: 'Prefix-tuning', desc: 'Ajoute des prefixes appris' },
+                                { flag: 'QLoRA', desc: 'LoRA + quantization 4-bit' }
+                            ],
+                            examples: [
+                                { code: `from peft import LoraConfig, get_peft_model
+
+# Configuration LoRA
+config = LoraConfig(
+    r=8,  # rang
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.05,
+    bias="none"
+)
+
+# Appliquer LoRA
+model = get_peft_model(base_model, config)
+print(f"Trainable params: {model.num_parameters(only_trainable=True)}")`, desc: 'LoRA avec PEFT' }
+                            ],
+                            tips: [
+                                'LoRA reduit drastiquement la memoire requise',
+                                'r=8 ou r=16 sont de bons points de depart'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Prompt Engineering',
+                        desc: 'Zero-shot, few-shot, chain-of-thought',
+                        details: {
+                            explanation: 'Techniques pour guider le comportement du LLM via le prompt.',
+                            syntax: 'Instruction + Contexte + Exemples + Question',
+                            options: [
+                                { flag: 'Zero-shot', desc: 'Sans exemple, juste l\'instruction' },
+                                { flag: 'Few-shot', desc: 'Quelques exemples dans le prompt' },
+                                { flag: 'Chain-of-thought', desc: '"Let\'s think step by step"' },
+                                { flag: 'System prompt', desc: 'Instructions de role/comportement' }
+                            ],
+                            examples: [
+                                { code: `# Zero-shot
+prompt = "Translate to French: Hello, how are you?"
+
+# Few-shot
+prompt = """Translate to French:
+Hello -> Bonjour
+Goodbye -> Au revoir
+Thank you -> Merci
+How are you? ->"""
+
+# Chain-of-thought
+prompt = """Question: If I have 3 apples and buy 2 more,
+then give away 1, how many do I have?
+
+Let's solve this step by step:
+1. Start with 3 apples
+2. Buy 2 more: 3 + 2 = 5
+3. Give away 1: 5 - 1 = 4
+
+Answer: 4 apples"""`, desc: 'Exemples de prompts' }
+                            ],
+                            tips: [
+                                'Few-shot ameliore souvent la qualite des reponses',
+                                'CoT aide pour les problemes de raisonnement'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: WORLD MODELS
+            // ===============================================================
+            {
+                id: 'world-models',
+                title: 'World Models',
+                icon: 'fa-globe',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Espace latent',
+                        desc: 'Representations compressee',
+                        details: {
+                            explanation: 'L\'espace latent est une representation compressee capturant les facteurs essentiels.',
+                            syntax: '$$z = E(x) \\quad x\' = D(z)$$',
+                            options: [
+                                { flag: 'Encodeur', desc: 'Compresse x en representation z' },
+                                { flag: 'Decodeur', desc: 'Reconstruit x a partir de z' },
+                                { flag: 'Dimension', desc: 'Taille de l\'espace latent (bottleneck)' }
+                            ],
+                            examples: [
+                                { code: `import torch.nn as nn
+
+class Autoencoder(nn.Module):
+    def __init__(self, input_dim, latent_dim):
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(input_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, latent_dim)
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(latent_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, input_dim)
+        )
+
+    def forward(self, x):
+        z = self.encoder(x)  # Latent
+        return self.decoder(z)`, desc: 'Autoencoder simple' }
+                            ],
+                            tips: [
+                                'La dimension latente controle le compromis compression/qualite',
+                                'L\'espace latent peut etre utilise pour l\'interpolation'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Variational Autoencoder (VAE)',
+                        desc: 'Autoencoder probabiliste',
+                        details: {
+                            explanation: 'Le VAE apprend une distribution latente, permettant la generation de nouvelles donnees.',
+                            syntax: '$$\\mathcal{L} = \\mathbb{E}[\\log p(x|z)] - D_{KL}(q(z|x) || p(z))$$',
+                            options: [
+                                { flag: 'Reconstruction', desc: '$$\\mathbb{E}[\\log p(x|z)]$$' },
+                                { flag: 'KL divergence', desc: 'Regularise z vers N(0, I)' },
+                                { flag: 'Reparametrization', desc: '$$z = \\mu + \\sigma \\cdot \\epsilon$$' }
+                            ],
+                            examples: [
+                                { code: `class VAE(nn.Module):
+    def __init__(self, input_dim, latent_dim):
+        super().__init__()
+        self.encoder = nn.Linear(input_dim, 256)
+        self.fc_mu = nn.Linear(256, latent_dim)
+        self.fc_var = nn.Linear(256, latent_dim)
+        self.decoder = nn.Sequential(
+            nn.Linear(latent_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, input_dim)
+        )
+
+    def encode(self, x):
+        h = F.relu(self.encoder(x))
+        return self.fc_mu(h), self.fc_var(h)
+
+    def reparameterize(self, mu, log_var):
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def forward(self, x):
+        mu, log_var = self.encode(x)
+        z = self.reparameterize(mu, log_var)
+        return self.decoder(z), mu, log_var`, desc: 'VAE implementation' }
+                            ],
+                            tips: [
+                                'Le reparametrization trick permet la backpropagation',
+                                'beta-VAE utilise un coefficient sur la KL pour mieux disentangle'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Modeles generatifs',
+                        desc: 'GAN, Diffusion, Flow',
+                        details: {
+                            explanation: 'Modeles capables de generer de nouvelles donnees realistes.',
+                            syntax: 'Apprendre la distribution des donnees p(x)',
+                            options: [
+                                { flag: 'GAN', desc: 'Generator vs Discriminator adversarial' },
+                                { flag: 'Diffusion', desc: 'Debruitage iteratif (DALL-E, Stable Diffusion)' },
+                                { flag: 'Normalizing Flow', desc: 'Transformations inversibles' },
+                                { flag: 'Autoregressive', desc: 'Generation token par token' }
+                            ],
+                            examples: [
+                                { code: `# GAN simplifie
+class Generator(nn.Module):
+    def __init__(self, latent_dim, img_dim):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Linear(latent_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, img_dim),
+            nn.Tanh()
+        )
+
+    def forward(self, z):
+        return self.model(z)
+
+class Discriminator(nn.Module):
+    def __init__(self, img_dim):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Linear(img_dim, 256),
+            nn.LeakyReLU(0.2),
+            nn.Linear(256, 1),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        return self.model(x)`, desc: 'GAN basique' }
+                            ],
+                            tips: [
+                                'Les modeles de diffusion dominent actuellement la generation d\'images',
+                                'Les GANs sont difficiles a entrainer (mode collapse)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'JEPA / Representation Learning',
+                        desc: 'Joint Embedding Predictive Architecture',
+                        details: {
+                            explanation: 'JEPA apprend des representations en predisant dans l\'espace latent plutot que pixel.',
+                            syntax: '$$\\min \\|s_y - \\text{Predictor}(s_x, z)\\|^2$$',
+                            options: [
+                                { flag: 'Encoder', desc: 'Extrait representation de l\'observation' },
+                                { flag: 'Predictor', desc: 'Predit la representation future/cible' },
+                                { flag: 'Target encoder', desc: 'EMA de l\'encoder (pas de gradient)' }
+                            ],
+                            examples: [
+                                { code: `# I-JEPA concept
+class JEPA(nn.Module):
+    def __init__(self, encoder, predictor):
+        super().__init__()
+        self.encoder = encoder
+        self.predictor = predictor
+        # Target encoder = EMA of encoder
+        self.target_encoder = copy.deepcopy(encoder)
+
+    def forward(self, x, target_x, mask_info):
+        # Encode context
+        context_repr = self.encoder(x)
+
+        # Target representation (no gradient)
+        with torch.no_grad():
+            target_repr = self.target_encoder(target_x)
+
+        # Predict target from context
+        predicted = self.predictor(context_repr, mask_info)
+
+        return F.mse_loss(predicted, target_repr)`, desc: 'JEPA conceptuel' }
+                            ],
+                            tips: [
+                                'JEPA evite les predictions pixel qui sont trop detaillees',
+                                'Approche auto-supervisee sans labels'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: APPROCHES PROBABILISTES ML
+            // ===============================================================
+            {
+                id: 'probabilistic-ml',
+                title: 'Approches Probabilistes ML',
+                icon: 'fa-dice',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'Maximum Likelihood Estimation',
+                        desc: 'Estimation par vraisemblance',
+                        details: {
+                            explanation: 'MLE trouve les parametres qui maximisent la probabilite des donnees observees.',
+                            syntax: '$$\\hat{\\theta}_{MLE} = \\arg\\max_\\theta \\prod_i p(x_i | \\theta)$$',
+                            options: [
+                                { flag: 'Log-likelihood', desc: '$$\\mathcal{L}(\\theta) = \\sum_i \\log p(x_i | \\theta)$$' },
+                                { flag: 'NLL', desc: 'Negative log-likelihood (a minimiser)' },
+                                { flag: 'Cross-entropy', desc: 'Equivalent a NLL pour classification' }
+                            ],
+                            examples: [
+                                { code: `import torch
+import torch.nn.functional as F
+
+# Classification: Cross-entropy = NLL
+logits = model(X)  # Non normalise
+loss = F.cross_entropy(logits, y)
+
+# Equivalent a:
+# log_probs = F.log_softmax(logits, dim=-1)
+# loss = F.nll_loss(log_probs, y)
+
+# Regression: MSE correspond a MLE avec bruit gaussien
+loss = F.mse_loss(predictions, targets)`, desc: 'MLE en pratique' }
+                            ],
+                            tips: [
+                                'Cross-entropy pour classification = MLE',
+                                'MSE pour regression = MLE avec bruit gaussien'
+                            ],
+                            warnings: ['MLE peut overfitter sans regularisation']
+                        }
+                    },
+                    {
+                        cmd: 'Maximum A Posteriori (MAP)',
+                        desc: 'MLE avec prior',
+                        details: {
+                            explanation: 'MAP ajoute un prior sur les parametres, equivalent a la regularisation.',
+                            syntax: '$$\\hat{\\theta}_{MAP} = \\arg\\max_\\theta p(\\theta | X) = \\arg\\max_\\theta p(X|\\theta) p(\\theta)$$',
+                            options: [
+                                { flag: 'Prior gaussien', desc: 'Equivalent a regularisation L2' },
+                                { flag: 'Prior Laplace', desc: 'Equivalent a regularisation L1' }
+                            ],
+                            examples: [
+                                { code: `# MAP avec prior gaussien = L2 regularization
+# p(theta) ~ N(0, sigma^2)
+# -log p(theta) = lambda * ||theta||^2
+
+optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=1e-3,
+    weight_decay=1e-4  # = lambda pour L2
+)
+
+# La loss totale devient:
+# L_MAP = L_data + lambda * ||W||^2`, desc: 'MAP = regularisation' }
+                            ],
+                            tips: [
+                                'weight_decay dans les optimiseurs = prior gaussien',
+                                'MAP donne une estimation ponctuelle, pas l\'incertitude'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Inference Bayesienne',
+                        desc: 'Distribution posterieure complete',
+                        details: {
+                            explanation: 'L\'inference bayesienne calcule la distribution complete des parametres, pas juste un point.',
+                            syntax: '$$p(\\theta | X) = \\frac{p(X | \\theta) p(\\theta)}{p(X)}$$',
+                            options: [
+                                { flag: 'Prior', desc: '$$p(\\theta)$$ - croyance initiale' },
+                                { flag: 'Likelihood', desc: '$$p(X|\\theta)$$ - vraisemblance' },
+                                { flag: 'Posterior', desc: '$$p(\\theta|X)$$ - croyance mise a jour' },
+                                { flag: 'Evidence', desc: '$$p(X) = \\int p(X|\\theta)p(\\theta)d\\theta$$' }
+                            ],
+                            examples: [
+                                { code: `# Inference variationelle (approximation)
+import pyro
+import pyro.distributions as dist
+
+def model(x, y):
+    # Prior sur les poids
+    w = pyro.sample("w", dist.Normal(0, 1))
+    b = pyro.sample("b", dist.Normal(0, 1))
+
+    # Likelihood
+    mean = w * x + b
+    pyro.sample("y", dist.Normal(mean, 0.1), obs=y)
+
+def guide(x, y):
+    # Variational posterior q(w, b)
+    w_loc = pyro.param("w_loc", torch.tensor(0.))
+    w_scale = pyro.param("w_scale", torch.tensor(1.))
+    pyro.sample("w", dist.Normal(w_loc, w_scale))`, desc: 'Inference bayesienne avec Pyro' }
+                            ],
+                            tips: [
+                                'L\'inference exacte est souvent intractable',
+                                'MCMC et inference variationnelle sont des approximations'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Uncertainty Quantification',
+                        desc: 'Estimation de l\'incertitude',
+                        details: {
+                            explanation: 'Quantifier l\'incertitude des predictions du modele.',
+                            syntax: 'Incertitude aleatoire vs epistemique',
+                            options: [
+                                { flag: 'MC Dropout', desc: 'Dropout au test time + moyenne' },
+                                { flag: 'Ensemble', desc: 'Plusieurs modeles, variance des predictions' },
+                                { flag: 'Aleatoire', desc: 'Bruit inherent aux donnees' },
+                                { flag: 'Epistemique', desc: 'Incertitude du modele (manque de donnees)' }
+                            ],
+                            examples: [
+                                { code: `# MC Dropout
+model.train()  # Active dropout
+predictions = []
+
+with torch.no_grad():
+    for _ in range(100):
+        pred = model(x)
+        predictions.append(pred)
+
+predictions = torch.stack(predictions)
+mean = predictions.mean(dim=0)
+uncertainty = predictions.std(dim=0)
+
+# Ensemble
+models = [Model() for _ in range(5)]
+predictions = [m(x) for m in models]
+mean = torch.stack(predictions).mean(dim=0)
+uncertainty = torch.stack(predictions).std(dim=0)`, desc: 'Quantification d\'incertitude' }
+                            ],
+                            tips: [
+                                'L\'incertitude epistemique diminue avec plus de donnees',
+                                'L\'incertitude aleatoire est irreductible'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <!-- Logique commune -->
+    <script src="../js/cheatsheet.js"></script>
+
+    <!-- Initialisation KaTeX -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Attendre que KaTeX soit charge
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+
+        // Re-render KaTeX quand le modal s'ouvre
+        const originalShowModal = window.showModal;
+        if (originalShowModal) {
+            window.showModal = function(categoryId, commandIndex) {
+                originalShowModal(categoryId, commandIndex);
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        renderMathInElement(document.getElementById('modalContent'), {
+                            delimiters: [
+                                {left: '$$', right: '$$', display: true},
+                                {left: '$', right: '$', display: false}
+                            ],
+                            throwOnError: false
+                        });
+                    }
+                }, 100);
+            };
+        }
+    </script>
+</body>
+</html>

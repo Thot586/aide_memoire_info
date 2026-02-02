@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-mémoire HTML5 : structure sémantique, formulaires avancés avec GPS et multimédia.">
+    <title>HTML5 & Formulaires - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-orange-500/20 mb-4 icon-glow">
+                    <i class="fab fa-html5 text-3xl text-orange-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">HTML5 & Formulaires</h1>
+                <p class="text-slate-400">Structure sémantique et formulaires avancés avec GPS et multimédia</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: form, input, video)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 1: STRUCTURE DE BASE
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'structure',
+                title: '📄 Structure de Base',
+                icon: 'fa-code',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Structure HTML5 complète',
+                        desc: 'Template de départ pour tout projet',
+                        details: {
+                            explanation: 'La structure de base HTML5 inclut le doctype, les meta tags essentiels et les balises sémantiques principales.',
+                            syntax: '<!DOCTYPE html>\n<html lang="fr">\n<head>...</head>\n<body>...</body>\n</html>',
+                            options: [
+                                { flag: '<!DOCTYPE html>', desc: 'Déclare le document comme HTML5' },
+                                { flag: 'lang="fr"', desc: 'Langue du document (SEO + accessibilité)' },
+                                { flag: '<meta charset>', desc: 'Encodage des caractères' },
+                                { flag: '<meta viewport>', desc: 'Responsive design mobile' }
+                            ],
+                            examples: [
+                                { code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Description pour SEO">
+    <title>Mon Site</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav><!-- Navigation --></nav>
+    </header>
+
+    <main>
+        <article><!-- Contenu principal --></article>
+    </main>
+
+    <footer><!-- Pied de page --></footer>
+
+    <script src="app.js"><\/script>
+</body>
+</html>`, desc: 'Template complet' }
+                            ],
+                            tips: [
+                                'Toujours déclarer lang pour l\'accessibilité',
+                                'Le viewport est obligatoire pour le responsive',
+                                'Scripts en fin de body pour performance'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Balises sémantiques HTML5',
+                        desc: 'header, nav, main, section, article, aside, footer',
+                        details: {
+                            explanation: 'Les balises sémantiques donnent du sens au contenu et améliorent l\'accessibilité et le SEO.',
+                            syntax: '<header> <nav> <main> <section> <article> <aside> <footer>',
+                            options: [
+                                { flag: '<header>', desc: 'En-tête de page ou de section' },
+                                { flag: '<nav>', desc: 'Navigation principale' },
+                                { flag: '<main>', desc: 'Contenu principal (unique par page)' },
+                                { flag: '<section>', desc: 'Section thématique' },
+                                { flag: '<article>', desc: 'Contenu autonome (blog, news)' },
+                                { flag: '<aside>', desc: 'Contenu secondaire (sidebar)' },
+                                { flag: '<footer>', desc: 'Pied de page ou de section' }
+                            ],
+                            examples: [
+                                { code: `<body>
+    <header>
+        <h1>Mon Blog</h1>
+        <nav>
+            <ul>
+                <li><a href="/">Accueil</a></li>
+                <li><a href="/articles">Articles</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <article>
+            <header>
+                <h2>Titre de l'article</h2>
+                <time datetime="2024-01-15">15 janvier 2024</time>
+            </header>
+            <p>Contenu de l'article...</p>
+            <footer>
+                <p>Par Jean Dupont</p>
+            </footer>
+        </article>
+
+        <aside>
+            <h3>Articles populaires</h3>
+            <!-- Sidebar -->
+        </aside>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mon Blog</p>
+    </footer>
+</body>`, desc: 'Structure blog complète' }
+                            ],
+                            tips: [
+                                'Un seul <main> par page',
+                                '<article> doit avoir du sens seul (RSS)',
+                                'Utilisez <section> pour regrouper du contenu lié'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Meta tags essentiels',
+                        desc: 'SEO, Open Graph, Twitter Cards',
+                        details: {
+                            explanation: 'Les meta tags fournissent des informations aux navigateurs, moteurs de recherche et réseaux sociaux.',
+                            syntax: '<meta name="..." content="...">\n<meta property="og:..." content="...">',
+                            options: [
+                                { flag: 'description', desc: 'Description pour Google (150-160 chars)' },
+                                { flag: 'og:title', desc: 'Titre pour Facebook/LinkedIn' },
+                                { flag: 'og:image', desc: 'Image de partage social' },
+                                { flag: 'twitter:card', desc: 'Type de carte Twitter' }
+                            ],
+                            examples: [
+                                { code: `<head>
+    <!-- Basiques -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Description de ma page pour Google">
+    <meta name="keywords" content="mot-clé1, mot-clé2">
+    <meta name="author" content="Jean Dupont">
+
+    <!-- Open Graph (Facebook, LinkedIn) -->
+    <meta property="og:title" content="Titre pour les réseaux sociaux">
+    <meta property="og:description" content="Description pour partage">
+    <meta property="og:image" content="https://monsite.com/image.jpg">
+    <meta property="og:url" content="https://monsite.com/page">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Titre Twitter">
+    <meta name="twitter:description" content="Description Twitter">
+    <meta name="twitter:image" content="https://monsite.com/image.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <title>Titre de la page | Mon Site</title>
+</head>`, desc: 'Meta tags complets' }
+                            ],
+                            tips: [
+                                'Description : 150-160 caractères max',
+                                'og:image : 1200x630px recommandé',
+                                'Testez avec Facebook Debugger et Twitter Card Validator'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 2: FORMULAIRES - TYPES DE BASE
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'forms-basic',
+                title: '📝 Formulaires - Types de Base',
+                icon: 'fa-keyboard',
+                color: 'border-l-4 border-emerald-500',
+                commands: [
+                    {
+                        cmd: 'Structure de formulaire',
+                        desc: 'form, label, input avec accessibilité',
+                        details: {
+                            explanation: 'Un formulaire accessible lie chaque input à son label via l\'attribut for/id.',
+                            syntax: '<form action="" method="">\n  <label for="id">Label</label>\n  <input type="" id="" name="">\n</form>',
+                            options: [
+                                { flag: 'action', desc: 'URL de soumission' },
+                                { flag: 'method', desc: 'GET (URL) ou POST (corps)' },
+                                { flag: 'for/id', desc: 'Lie label et input' },
+                                { flag: 'name', desc: 'Nom du champ envoyé au serveur' }
+                            ],
+                            examples: [
+                                { code: `<form action="/api/contact" method="POST">
+    <div class="field">
+        <label for="nom">Nom complet</label>
+        <input type="text" id="nom" name="nom" required>
+    </div>
+
+    <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+
+    <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5"></textarea>
+    </div>
+
+    <button type="submit">Envoyer</button>
+</form>`, desc: 'Formulaire de contact' }
+                            ],
+                            tips: [
+                                'Toujours lier label et input (accessibilité)',
+                                'name est obligatoire pour envoyer les données',
+                                'Utilisez POST pour données sensibles'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'input type="text"',
+                        desc: 'Champ texte simple avec variantes',
+                        details: {
+                            explanation: 'Le type text est la base pour tout texte libre. Utilisez les attributs pour contraindre la saisie.',
+                            syntax: '<input type="text" placeholder="" maxlength="" pattern="">',
+                            options: [
+                                { flag: 'placeholder', desc: 'Texte indicatif (disparaît)' },
+                                { flag: 'maxlength', desc: 'Nombre max de caractères' },
+                                { flag: 'minlength', desc: 'Nombre min de caractères' },
+                                { flag: 'pattern', desc: 'Regex de validation' },
+                                { flag: 'autocomplete', desc: 'Suggestions navigateur' }
+                            ],
+                            examples: [
+                                { code: `<!-- Texte simple -->
+<input type="text" id="nom" name="nom"
+       placeholder="Jean Dupont" required>
+
+<!-- Avec contraintes -->
+<input type="text" id="code" name="code"
+       minlength="4" maxlength="8"
+       pattern="[A-Z0-9]+"
+       placeholder="CODE1234"
+       title="4-8 caractères, majuscules et chiffres">
+
+<!-- Autocomplete navigateur -->
+<input type="text" id="prenom" name="prenom"
+       autocomplete="given-name">
+<input type="text" id="nom" name="nom"
+       autocomplete="family-name">
+<input type="text" id="adresse" name="adresse"
+       autocomplete="street-address">`, desc: 'Variantes de text' }
+                            ],
+                            tips: [
+                                'title apparaît comme tooltip d\'erreur',
+                                'autocomplete aide au remplissage automatique',
+                                'pattern utilise les regex JavaScript'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'input type="email" / "password"',
+                        desc: 'Email avec validation et mot de passe',
+                        details: {
+                            explanation: 'Le type email valide automatiquement le format. Password masque la saisie.',
+                            syntax: '<input type="email">\n<input type="password">',
+                            options: [
+                                { flag: 'type="email"', desc: 'Validation format email' },
+                                { flag: 'type="password"', desc: 'Masque les caractères' },
+                                { flag: 'multiple', desc: 'Plusieurs emails (séparés par virgule)' },
+                                { flag: 'autocomplete', desc: 'current-password, new-password' }
+                            ],
+                            examples: [
+                                { code: `<!-- Email simple -->
+<label for="email">Email</label>
+<input type="email" id="email" name="email"
+       placeholder="jean@exemple.com" required>
+
+<!-- Emails multiples -->
+<input type="email" id="cc" name="cc" multiple
+       placeholder="a@ex.com, b@ex.com">
+
+<!-- Mot de passe actuel (connexion) -->
+<label for="pwd">Mot de passe</label>
+<input type="password" id="pwd" name="password"
+       autocomplete="current-password" required>
+
+<!-- Nouveau mot de passe (inscription) -->
+<input type="password" id="new-pwd" name="new_password"
+       minlength="8"
+       pattern="(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+       title="8+ caractères, 1 majuscule, 1 minuscule, 1 chiffre"
+       autocomplete="new-password" required>
+
+<!-- Confirmation -->
+<input type="password" id="confirm-pwd" name="confirm_password"
+       autocomplete="new-password" required>`, desc: 'Email et password' }
+                            ],
+                            tips: [
+                                'autocomplete="new-password" suggère un mot de passe fort',
+                                'La validation email est basique, validez côté serveur aussi',
+                                'Utilisez pattern pour exiger un mot de passe fort'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'input type="number" / "tel" / "url"',
+                        desc: 'Nombres, téléphone et URL',
+                        details: {
+                            explanation: 'Ces types activent le clavier approprié sur mobile et ajoutent des validations.',
+                            syntax: '<input type="number" min="" max="" step="">',
+                            options: [
+                                { flag: 'min/max', desc: 'Valeurs limites (number)' },
+                                { flag: 'step', desc: 'Incrément (1, 0.01, any)' },
+                                { flag: 'inputmode', desc: 'Clavier mobile (numeric, tel, url)' }
+                            ],
+                            examples: [
+                                { code: `<!-- Nombre entier -->
+<label for="age">Âge</label>
+<input type="number" id="age" name="age"
+       min="0" max="150" step="1">
+
+<!-- Nombre décimal (prix) -->
+<label for="prix">Prix</label>
+<input type="number" id="prix" name="prix"
+       min="0" step="0.01" placeholder="19.99">
+
+<!-- Quantité avec valeur par défaut -->
+<input type="number" id="qty" name="quantity"
+       min="1" max="100" value="1">
+
+<!-- Téléphone -->
+<label for="tel">Téléphone</label>
+<input type="tel" id="tel" name="telephone"
+       pattern="[0-9]{10}"
+       placeholder="0612345678"
+       autocomplete="tel">
+
+<!-- Téléphone international -->
+<input type="tel" id="tel-int" name="phone"
+       pattern="\\+[0-9]{11,15}"
+       placeholder="+33612345678">
+
+<!-- URL -->
+<label for="site">Site web</label>
+<input type="url" id="site" name="website"
+       placeholder="https://exemple.com"
+       autocomplete="url">`, desc: 'Nombres, tél, URL' }
+                            ],
+                            tips: [
+                                'type="tel" n\'a pas de validation par défaut',
+                                'step="any" accepte tout nombre décimal',
+                                'inputmode="numeric" force clavier numérique sans spinner'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 3: FORMULAIRES - DATE & HEURE
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'forms-datetime',
+                title: '📅 Formulaires - Date & Heure',
+                icon: 'fa-calendar-alt',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'input type="date"',
+                        desc: 'Sélecteur de date avec min/max',
+                        details: {
+                            explanation: 'Le type date affiche un calendrier natif. Le format envoyé est YYYY-MM-DD.',
+                            syntax: '<input type="date" min="YYYY-MM-DD" max="YYYY-MM-DD">',
+                            options: [
+                                { flag: 'min', desc: 'Date minimum sélectionnable' },
+                                { flag: 'max', desc: 'Date maximum sélectionnable' },
+                                { flag: 'value', desc: 'Date par défaut (YYYY-MM-DD)' }
+                            ],
+                            examples: [
+                                { code: `<!-- Date simple -->
+<label for="naissance">Date de naissance</label>
+<input type="date" id="naissance" name="birthdate">
+
+<!-- Date avec limites -->
+<label for="rdv">Date de rendez-vous</label>
+<input type="date" id="rdv" name="appointment"
+       min="2024-01-01" max="2024-12-31">
+
+<!-- Date par défaut (aujourd'hui en JS) -->
+<input type="date" id="today" name="date" value="">
+<script>
+    document.getElementById('today').valueAsDate = new Date();
+<\/script>
+
+<!-- Limiter à partir d'aujourd'hui -->
+<input type="date" id="future" name="future_date">
+<script>
+    const input = document.getElementById('future');
+    input.min = new Date().toISOString().split('T')[0];
+<\/script>`, desc: 'Sélecteur de date' }
+                            ],
+                            tips: [
+                                'Le format est toujours YYYY-MM-DD en valeur',
+                                'L\'affichage dépend de la locale du navigateur',
+                                'Utilisez valueAsDate pour manipuler en JS'
+                            ],
+                            warnings: [
+                                'Support variable sur anciens navigateurs'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'input type="time" / "datetime-local"',
+                        desc: 'Heure et date+heure combinées',
+                        details: {
+                            explanation: 'time pour l\'heure seule, datetime-local pour date et heure combinées.',
+                            syntax: '<input type="time">\n<input type="datetime-local">',
+                            options: [
+                                { flag: 'step', desc: 'Intervalle en secondes (60=minutes, 1=secondes)' },
+                                { flag: 'min/max', desc: 'Limites horaires' }
+                            ],
+                            examples: [
+                                { code: `<!-- Heure simple -->
+<label for="heure">Heure de rendez-vous</label>
+<input type="time" id="heure" name="time">
+
+<!-- Heure avec intervalle de 30min -->
+<input type="time" id="slot" name="slot"
+       min="09:00" max="18:00" step="1800">
+
+<!-- Heure avec secondes -->
+<input type="time" id="precise" name="precise_time"
+       step="1">
+
+<!-- Date et heure combinées -->
+<label for="event">Date et heure de l'événement</label>
+<input type="datetime-local" id="event" name="event_datetime">
+
+<!-- Avec limites -->
+<input type="datetime-local" id="booking" name="booking"
+       min="2024-01-01T09:00"
+       max="2024-12-31T18:00">`, desc: 'Time et datetime-local' }
+                            ],
+                            tips: [
+                                'step="1800" = intervalles de 30 minutes',
+                                'datetime-local n\'inclut PAS le fuseau horaire',
+                                'Format envoyé : HH:MM ou YYYY-MM-DDTHH:MM'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'input type="month" / "week"',
+                        desc: 'Sélecteur de mois et semaine',
+                        details: {
+                            explanation: 'Permet de sélectionner un mois entier ou une semaine de l\'année.',
+                            syntax: '<input type="month">\n<input type="week">',
+                            options: [
+                                { flag: 'type="month"', desc: 'Format: YYYY-MM' },
+                                { flag: 'type="week"', desc: 'Format: YYYY-Www (ex: 2024-W01)' }
+                            ],
+                            examples: [
+                                { code: `<!-- Sélecteur de mois -->
+<label for="mois">Mois de facturation</label>
+<input type="month" id="mois" name="billing_month"
+       min="2024-01" max="2024-12">
+
+<!-- Sélecteur de semaine -->
+<label for="semaine">Semaine de congés</label>
+<input type="week" id="semaine" name="vacation_week"
+       min="2024-W01" max="2024-W52">
+
+<!-- Mois avec valeur par défaut -->
+<input type="month" id="current" name="month">
+<script>
+    const now = new Date();
+    const month = now.toISOString().slice(0, 7); // "2024-01"
+    document.getElementById('current').value = month;
+<\/script>`, desc: 'Month et week' }
+                            ],
+                            tips: [
+                                'Utile pour rapports mensuels/hebdomadaires',
+                                'Le format semaine suit la norme ISO 8601',
+                                'Support limité sur certains navigateurs mobiles'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 4: FORMULAIRES - SÉLECTION & CHOIX
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'forms-selection',
+                title: '🎨 Formulaires - Sélection & Choix',
+                icon: 'fa-list',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'checkbox et radio',
+                        desc: 'Cases à cocher et boutons radio',
+                        details: {
+                            explanation: 'checkbox pour choix multiples, radio pour choix unique dans un groupe.',
+                            syntax: '<input type="checkbox">\n<input type="radio" name="groupe">',
+                            options: [
+                                { flag: 'checked', desc: 'Coché par défaut' },
+                                { flag: 'name', desc: 'Groupe pour radio (même name = même groupe)' },
+                                { flag: 'value', desc: 'Valeur envoyée au serveur' }
+                            ],
+                            examples: [
+                                { code: `<!-- Checkbox simple -->
+<label>
+    <input type="checkbox" name="newsletter" value="1">
+    S'inscrire à la newsletter
+</label>
+
+<!-- Checkbox multiples -->
+<fieldset>
+    <legend>Centres d'intérêt</legend>
+    <label>
+        <input type="checkbox" name="interests[]" value="sport"> Sport
+    </label>
+    <label>
+        <input type="checkbox" name="interests[]" value="music"> Musique
+    </label>
+    <label>
+        <input type="checkbox" name="interests[]" value="tech" checked> Tech
+    </label>
+</fieldset>
+
+<!-- Radio buttons (choix unique) -->
+<fieldset>
+    <legend>Civilité</legend>
+    <label>
+        <input type="radio" name="civility" value="mr" required> M.
+    </label>
+    <label>
+        <input type="radio" name="civility" value="mme"> Mme
+    </label>
+    <label>
+        <input type="radio" name="civility" value="other"> Autre
+    </label>
+</fieldset>`, desc: 'Checkbox et radio' }
+                            ],
+                            tips: [
+                                'name="xxx[]" pour envoyer un tableau (checkbox)',
+                                'Les radio du même name sont mutuellement exclusifs',
+                                'Utilisez fieldset/legend pour grouper'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'select et optgroup',
+                        desc: 'Liste déroulante avec groupes',
+                        details: {
+                            explanation: 'select crée une liste déroulante. optgroup permet de regrouper les options.',
+                            syntax: '<select>\n  <optgroup label="">\n    <option value="">Texte</option>\n  </optgroup>\n</select>',
+                            options: [
+                                { flag: 'multiple', desc: 'Sélection multiple (Ctrl+clic)' },
+                                { flag: 'size', desc: 'Nombre d\'options visibles' },
+                                { flag: 'selected', desc: 'Option sélectionnée par défaut' },
+                                { flag: 'disabled', desc: 'Option non sélectionnable' }
+                            ],
+                            examples: [
+                                { code: `<!-- Select simple -->
+<label for="pays">Pays</label>
+<select id="pays" name="country" required>
+    <option value="">-- Choisir --</option>
+    <option value="FR">France</option>
+    <option value="BE">Belgique</option>
+    <option value="CH" selected>Suisse</option>
+</select>
+
+<!-- Avec optgroup -->
+<label for="voiture">Voiture</label>
+<select id="voiture" name="car">
+    <option value="">-- Choisir --</option>
+    <optgroup label="Françaises">
+        <option value="renault">Renault</option>
+        <option value="peugeot">Peugeot</option>
+    </optgroup>
+    <optgroup label="Allemandes">
+        <option value="bmw">BMW</option>
+        <option value="mercedes">Mercedes</option>
+    </optgroup>
+</select>
+
+<!-- Sélection multiple -->
+<label for="skills">Compétences (Ctrl+clic)</label>
+<select id="skills" name="skills[]" multiple size="5">
+    <option value="html">HTML</option>
+    <option value="css">CSS</option>
+    <option value="js">JavaScript</option>
+    <option value="python">Python</option>
+    <option value="sql">SQL</option>
+</select>`, desc: 'Select et options' }
+                            ],
+                            tips: [
+                                'Première option vide avec required force le choix',
+                                'multiple nécessite name avec []',
+                                'size="1" = dropdown, size>1 = listbox'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'datalist (autocomplete)',
+                        desc: 'Suggestions de saisie avec input',
+                        details: {
+                            explanation: 'datalist propose des suggestions tout en permettant une saisie libre.',
+                            syntax: '<input list="id">\n<datalist id="id">\n  <option value="">\n</datalist>',
+                            options: [
+                                { flag: 'list', desc: 'Lie l\'input au datalist' },
+                                { flag: 'value', desc: 'Valeur suggérée' }
+                            ],
+                            examples: [
+                                { code: `<!-- Autocomplete simple -->
+<label for="navigateur">Navigateur préféré</label>
+<input type="text" id="navigateur" name="browser" list="browsers">
+<datalist id="browsers">
+    <option value="Chrome">
+    <option value="Firefox">
+    <option value="Safari">
+    <option value="Edge">
+</datalist>
+
+<!-- Avec descriptions -->
+<input type="text" id="lang" name="language" list="languages">
+<datalist id="languages">
+    <option value="JavaScript">Web frontend & backend</option>
+    <option value="Python">Data Science & AI</option>
+    <option value="Rust">Systèmes performants</option>
+</datalist>
+
+<!-- Autocomplete dynamique (JS) -->
+<input type="text" id="ville" name="city" list="cities">
+<datalist id="cities"></datalist>
+<script>
+    document.getElementById('ville').addEventListener('input', async (e) => {
+        if (e.target.value.length < 2) return;
+        const response = await fetch(\`/api/cities?q=\${e.target.value}\`);
+        const cities = await response.json();
+        const datalist = document.getElementById('cities');
+        datalist.innerHTML = cities.map(c => \`<option value="\${c}">\`).join('');
+    });
+<\/script>`, desc: 'Datalist autocomplete' }
+                            ],
+                            tips: [
+                                'L\'utilisateur peut taper une valeur non listée',
+                                'Combinable avec type="email", "url", etc.',
+                                'Idéal pour suggestions sans forcer le choix'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'input type="range" / "color"',
+                        desc: 'Curseur et sélecteur de couleur',
+                        details: {
+                            explanation: 'range affiche un curseur, color ouvre un sélecteur de couleur natif.',
+                            syntax: '<input type="range" min="" max="" step="">\n<input type="color">',
+                            options: [
+                                { flag: 'min/max', desc: 'Valeurs limites du range' },
+                                { flag: 'step', desc: 'Incrément du curseur' },
+                                { flag: 'value', desc: 'Valeur par défaut' }
+                            ],
+                            examples: [
+                                { code: `<!-- Curseur simple -->
+<label for="volume">Volume: <output id="vol-val">50</output>%</label>
+<input type="range" id="volume" name="volume"
+       min="0" max="100" value="50"
+       oninput="document.getElementById('vol-val').value = this.value">
+
+<!-- Curseur avec graduations -->
+<label for="note">Note: <output id="note-val">5</output>/10</label>
+<input type="range" id="note" name="rating"
+       min="0" max="10" step="1" value="5" list="tickmarks"
+       oninput="document.getElementById('note-val').value = this.value">
+<datalist id="tickmarks">
+    <option value="0" label="0">
+    <option value="5" label="5">
+    <option value="10" label="10">
+</datalist>
+
+<!-- Sélecteur de couleur -->
+<label for="couleur">Couleur du thème</label>
+<input type="color" id="couleur" name="theme_color" value="#3498db">
+
+<!-- Couleur avec preview -->
+<input type="color" id="bg-color" name="bg" value="#ffffff"
+       onchange="document.body.style.backgroundColor = this.value">`, desc: 'Range et color' }
+                            ],
+                            tips: [
+                                'Utilisez <output> pour afficher la valeur',
+                                'datalist ajoute des graduations au range',
+                                'Le color retourne toujours un hex (#rrggbb)'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 5: FORMULAIRES - GPS & GÉOLOCALISATION
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'forms-gps',
+                title: '📍 Formulaires - GPS & Géolocalisation',
+                icon: 'fa-map-marker-alt',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'API Geolocation - Position actuelle',
+                        desc: 'Récupérer latitude et longitude',
+                        details: {
+                            explanation: 'L\'API Geolocation permet d\'obtenir la position GPS de l\'utilisateur (avec son consentement).',
+                            syntax: 'navigator.geolocation.getCurrentPosition(success, error, options)',
+                            options: [
+                                { flag: 'enableHighAccuracy', desc: 'GPS précis (plus lent, plus de batterie)' },
+                                { flag: 'timeout', desc: 'Délai max en ms' },
+                                { flag: 'maximumAge', desc: 'Cache de position en ms' }
+                            ],
+                            examples: [
+                                { code: `<!-- Bouton de géolocalisation -->
+<button type="button" onclick="getLocation()">
+    📍 Utiliser ma position
+</button>
+
+<input type="hidden" id="latitude" name="latitude">
+<input type="hidden" id="longitude" name="longitude">
+<p id="location-status"></p>
+
+<script>
+function getLocation() {
+    const status = document.getElementById('location-status');
+
+    if (!navigator.geolocation) {
+        status.textContent = 'Géolocalisation non supportée';
+        return;
+    }
+
+    status.textContent = 'Localisation en cours...';
+
+    navigator.geolocation.getCurrentPosition(
+        // Succès
+        (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+
+            status.textContent = \`Position: \${lat.toFixed(6)}, \${lng.toFixed(6)} (±\${accuracy}m)\`;
+        },
+        // Erreur
+        (error) => {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    status.textContent = 'Permission refusée';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    status.textContent = 'Position non disponible';
+                    break;
+                case error.TIMEOUT:
+                    status.textContent = 'Délai dépassé';
+                    break;
+            }
+        },
+        // Options
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+<\/script>`, desc: 'Géolocalisation basique' }
+                            ],
+                            tips: [
+                                'HTTPS obligatoire pour la géolocalisation',
+                                'L\'utilisateur doit accepter la permission',
+                                'enableHighAccuracy: true pour GPS, false pour WiFi/IP'
+                            ],
+                            warnings: [
+                                'Ne fonctionne pas en HTTP (sauf localhost)'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Suivi de position en temps réel',
+                        desc: 'watchPosition pour tracking continu',
+                        details: {
+                            explanation: 'watchPosition permet de suivre les déplacements en temps réel.',
+                            syntax: 'navigator.geolocation.watchPosition(success, error, options)',
+                            options: [
+                                { flag: 'watchPosition', desc: 'Suivi continu' },
+                                { flag: 'clearWatch', desc: 'Arrêter le suivi' }
+                            ],
+                            examples: [
+                                { code: `<button onclick="startTracking()">▶️ Démarrer le suivi</button>
+<button onclick="stopTracking()">⏹️ Arrêter</button>
+<div id="tracking-info"></div>
+
+<script>
+let watchId = null;
+
+function startTracking() {
+    if (watchId) return; // Déjà en cours
+
+    watchId = navigator.geolocation.watchPosition(
+        (position) => {
+            const info = document.getElementById('tracking-info');
+            info.innerHTML = \`
+                <p>Latitude: \${position.coords.latitude}</p>
+                <p>Longitude: \${position.coords.longitude}</p>
+                <p>Vitesse: \${position.coords.speed || 'N/A'} m/s</p>
+                <p>Direction: \${position.coords.heading || 'N/A'}°</p>
+                <p>Altitude: \${position.coords.altitude || 'N/A'} m</p>
+                <p>Précision: ±\${position.coords.accuracy} m</p>
+                <p>Mise à jour: \${new Date().toLocaleTimeString()}</p>
+            \`;
+        },
+        (error) => console.error(error),
+        { enableHighAccuracy: true }
+    );
+}
+
+function stopTracking() {
+    if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+    }
+}
+<\/script>`, desc: 'Tracking GPS continu' }
+                            ],
+                            tips: [
+                                'Utilisez clearWatch pour économiser la batterie',
+                                'speed et heading disponibles en mouvement',
+                                'altitude nécessite GPS (pas WiFi)'
+                            ],
+                            warnings: [
+                                'Forte consommation de batterie avec enableHighAccuracy'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Afficher sur une carte',
+                        desc: 'Intégration OpenStreetMap / Google Maps',
+                        details: {
+                            explanation: 'Affichez la position sur une carte interactive avec Leaflet ou Google Maps.',
+                            syntax: 'iframe ou bibliothèque JS (Leaflet)',
+                            options: [
+                                { flag: 'iframe', desc: 'Simple, pas de JS' },
+                                { flag: 'Leaflet', desc: 'Open source, gratuit' },
+                                { flag: 'Google Maps', desc: 'Nécessite API key' }
+                            ],
+                            examples: [
+                                { code: `<!-- Méthode 1: iframe OpenStreetMap (simple) -->
+<iframe id="map-frame" width="100%" height="300" frameborder="0"
+        style="border:0"></iframe>
+
+<script>
+function showOnMap(lat, lng) {
+    const frame = document.getElementById('map-frame');
+    frame.src = \`https://www.openstreetmap.org/export/embed.html?bbox=\${lng-0.01},\${lat-0.01},\${lng+0.01},\${lat+0.01}&layer=mapnik&marker=\${lat},\${lng}\`;
+}
+<\/script>
+
+<!-- Méthode 2: Leaflet (interactif) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+
+<div id="map" style="height: 400px;"></div>
+
+<script>
+// Initialiser la carte
+const map = L.map('map').setView([48.8566, 2.3522], 13);
+
+// Ajouter le fond de carte
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// Ajouter un marqueur
+let marker = null;
+
+function updateMap(lat, lng) {
+    map.setView([lat, lng], 15);
+
+    if (marker) {
+        marker.setLatLng([lat, lng]);
+    } else {
+        marker = L.marker([lat, lng]).addTo(map);
+    }
+}
+
+// Avec géolocalisation
+navigator.geolocation.getCurrentPosition((pos) => {
+    updateMap(pos.coords.latitude, pos.coords.longitude);
+});
+<\/script>`, desc: 'Carte avec position' }
+                            ],
+                            tips: [
+                                'Leaflet est gratuit et open source',
+                                'L\'iframe est plus simple mais moins interactive',
+                                'Google Maps nécessite une clé API et facturation'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Reverse geocoding',
+                        desc: 'Convertir coordonnées en adresse',
+                        details: {
+                            explanation: 'Le reverse geocoding transforme des coordonnées GPS en adresse lisible.',
+                            syntax: 'API Nominatim (gratuit) ou Google Geocoding API',
+                            options: [
+                                { flag: 'Nominatim', desc: 'OpenStreetMap, gratuit, 1 req/sec' },
+                                { flag: 'Google', desc: 'Plus précis, payant' }
+                            ],
+                            examples: [
+                                { code: `<button onclick="getAddressFromGPS()">📍 Ma position → Adresse</button>
+<p id="address-result"></p>
+
+<input type="hidden" name="address" id="address-field">
+<input type="hidden" name="city" id="city-field">
+<input type="hidden" name="country" id="country-field">
+
+<script>
+async function getAddressFromGPS() {
+    const result = document.getElementById('address-result');
+    result.textContent = 'Localisation...';
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        result.textContent = 'Recherche de l\\'adresse...';
+
+        try {
+            // API Nominatim (OpenStreetMap) - GRATUIT
+            const response = await fetch(
+                \`https://nominatim.openstreetmap.org/reverse?lat=\${lat}&lon=\${lng}&format=json\`,
+                { headers: { 'Accept-Language': 'fr' } }
+            );
+            const data = await response.json();
+
+            // Remplir les champs
+            const addr = data.address;
+            document.getElementById('address-field').value = data.display_name;
+            document.getElementById('city-field').value = addr.city || addr.town || addr.village || '';
+            document.getElementById('country-field').value = addr.country || '';
+
+            result.innerHTML = \`
+                <strong>\${data.display_name}</strong><br>
+                Ville: \${addr.city || addr.town || 'N/A'}<br>
+                Code postal: \${addr.postcode || 'N/A'}<br>
+                Pays: \${addr.country}
+            \`;
+        } catch (error) {
+            result.textContent = 'Erreur: ' + error.message;
+        }
+    });
+}
+<\/script>`, desc: 'Reverse geocoding' }
+                            ],
+                            tips: [
+                                'Nominatim limite à 1 requête/seconde',
+                                'Ajoutez un User-Agent pour les gros volumes',
+                                'Cachez les résultats pour éviter les requêtes'
+                            ],
+                            warnings: [
+                                'Respectez les CGU de l\'API utilisée'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Formulaire complet avec GPS',
+                        desc: 'Exemple de formulaire de livraison',
+                        details: {
+                            explanation: 'Exemple complet combinant géolocalisation, reverse geocoding et formulaire.',
+                            syntax: 'Combinaison des techniques précédentes',
+                            options: [],
+                            examples: [
+                                { code: `<form id="delivery-form" action="/api/order" method="POST">
+    <h3>Adresse de livraison</h3>
+
+    <button type="button" onclick="autoFillAddress()">
+        📍 Utiliser ma position actuelle
+    </button>
+
+    <div class="field">
+        <label for="street">Rue</label>
+        <input type="text" id="street" name="street" required>
+    </div>
+
+    <div class="field">
+        <label for="city">Ville</label>
+        <input type="text" id="city" name="city" required>
+    </div>
+
+    <div class="field">
+        <label for="postal">Code postal</label>
+        <input type="text" id="postal" name="postal_code"
+               pattern="[0-9]{5}" required>
+    </div>
+
+    <div class="field">
+        <label for="country">Pays</label>
+        <select id="country" name="country" required>
+            <option value="FR" selected>France</option>
+            <option value="BE">Belgique</option>
+            <option value="CH">Suisse</option>
+        </select>
+    </div>
+
+    <!-- Coordonnées GPS cachées -->
+    <input type="hidden" id="lat" name="latitude">
+    <input type="hidden" id="lng" name="longitude">
+
+    <button type="submit">Valider la commande</button>
+</form>
+
+<script>
+async function autoFillAddress() {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        // Stocker les coordonnées
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+
+        // Reverse geocoding
+        const resp = await fetch(
+            \`https://nominatim.openstreetmap.org/reverse?lat=\${lat}&lon=\${lng}&format=json\`
+        );
+        const data = await resp.json();
+        const addr = data.address;
+
+        // Remplir le formulaire
+        document.getElementById('street').value =
+            \`\${addr.house_number || ''} \${addr.road || ''}\`.trim();
+        document.getElementById('city').value =
+            addr.city || addr.town || addr.village || '';
+        document.getElementById('postal').value = addr.postcode || '';
+
+        // Sélectionner le pays
+        const countryCode = addr.country_code?.toUpperCase();
+        const countrySelect = document.getElementById('country');
+        if ([...countrySelect.options].some(o => o.value === countryCode)) {
+            countrySelect.value = countryCode;
+        }
+    });
+}
+<\/script>`, desc: 'Formulaire livraison GPS' }
+                            ],
+                            tips: [
+                                'Permettez toujours la saisie manuelle en fallback',
+                                'Stockez les coordonnées pour la carte de livraison',
+                                'Validez l\'adresse côté serveur aussi'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 6: FORMULAIRES - MULTIMÉDIA
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'forms-media',
+                title: '🎬 Formulaires - Multimédia',
+                icon: 'fa-photo-video',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'input type="file" - Upload',
+                        desc: 'Upload de fichiers avec filtres',
+                        details: {
+                            explanation: 'Le type file permet de sélectionner des fichiers. Utilisez accept pour filtrer les types.',
+                            syntax: '<input type="file" accept="" multiple>',
+                            options: [
+                                { flag: 'accept', desc: 'Types MIME ou extensions autorisés' },
+                                { flag: 'multiple', desc: 'Sélection multiple' },
+                                { flag: '.jpg,.png', desc: 'Par extension' },
+                                { flag: 'image/*', desc: 'Toutes les images' },
+                                { flag: 'video/*', desc: 'Toutes les vidéos' },
+                                { flag: 'audio/*', desc: 'Tous les audios' }
+                            ],
+                            examples: [
+                                { code: `<!-- Upload image simple -->
+<label for="photo">Photo de profil</label>
+<input type="file" id="photo" name="avatar"
+       accept="image/jpeg,image/png,image/webp">
+
+<!-- Upload images multiples -->
+<label for="gallery">Galerie (max 10 images)</label>
+<input type="file" id="gallery" name="images[]"
+       accept="image/*" multiple>
+
+<!-- Upload document -->
+<label for="cv">CV (PDF uniquement)</label>
+<input type="file" id="cv" name="resume"
+       accept=".pdf,application/pdf">
+
+<!-- Upload vidéo -->
+<label for="video">Vidéo</label>
+<input type="file" id="video" name="video"
+       accept="video/mp4,video/webm">
+
+<!-- Upload audio -->
+<label for="audio">Fichier audio</label>
+<input type="file" id="audio" name="audio"
+       accept="audio/mpeg,audio/wav,audio/ogg">
+
+<!-- Tout type avec taille max côté JS -->
+<input type="file" id="doc" name="document"
+       onchange="checkFileSize(this, 5)"> <!-- 5 MB max -->
+
+<script>
+function checkFileSize(input, maxMB) {
+    const file = input.files[0];
+    if (file && file.size > maxMB * 1024 * 1024) {
+        alert(\`Fichier trop volumineux (max \${maxMB} MB)\`);
+        input.value = '';
+    }
+}
+<\/script>`, desc: 'Upload fichiers' }
+                            ],
+                            tips: [
+                                'accept filtre l\'explorateur mais validez côté serveur',
+                                'Utilisez name[] pour fichiers multiples',
+                                'Limitez la taille côté client ET serveur'
+                            ],
+                            warnings: [
+                                'La validation accept est contournable'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Capture photo avec caméra',
+                        desc: 'Prendre une photo directement',
+                        details: {
+                            explanation: 'L\'attribut capture sur mobile ouvre directement la caméra.',
+                            syntax: '<input type="file" accept="image/*" capture="user">',
+                            options: [
+                                { flag: 'capture="user"', desc: 'Caméra frontale (selfie)' },
+                                { flag: 'capture="environment"', desc: 'Caméra arrière' },
+                                { flag: 'capture', desc: 'Caméra par défaut' }
+                            ],
+                            examples: [
+                                { code: `<!-- Capture photo (caméra arrière par défaut) -->
+<label for="photo">Prendre une photo</label>
+<input type="file" id="photo" name="photo"
+       accept="image/*" capture="environment">
+
+<!-- Selfie (caméra frontale) -->
+<label for="selfie">Selfie pour vérification</label>
+<input type="file" id="selfie" name="selfie"
+       accept="image/*" capture="user">
+
+<!-- Avec prévisualisation -->
+<input type="file" id="camera" name="image"
+       accept="image/*" capture="environment"
+       onchange="previewImage(this)">
+<img id="preview" src="" alt="Aperçu" style="max-width:300px;display:none">
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('preview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+<\/script>`, desc: 'Capture photo' }
+                            ],
+                            tips: [
+                                'capture fonctionne surtout sur mobile',
+                                'Sur desktop, ouvre le sélecteur de fichiers',
+                                'Combinez avec prévisualisation pour UX'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Capture vidéo et audio',
+                        desc: 'Enregistrer vidéo et audio directement',
+                        details: {
+                            explanation: 'Même principe que pour les photos, avec les types video et audio.',
+                            syntax: '<input type="file" accept="video/*" capture>\n<input type="file" accept="audio/*" capture>',
+                            options: [
+                                { flag: 'accept="video/*"', desc: 'Tous formats vidéo' },
+                                { flag: 'accept="audio/*"', desc: 'Tous formats audio' },
+                                { flag: 'capture', desc: 'Ouvre caméra/micro' }
+                            ],
+                            examples: [
+                                { code: `<!-- Capture vidéo -->
+<label for="video">Enregistrer une vidéo</label>
+<input type="file" id="video" name="video"
+       accept="video/*" capture="environment">
+
+<!-- Capture audio (note vocale) -->
+<label for="voice">Message vocal</label>
+<input type="file" id="voice" name="voice_message"
+       accept="audio/*" capture>
+
+<!-- Vidéo avec prévisualisation -->
+<input type="file" id="vid-capture" name="video"
+       accept="video/*" capture
+       onchange="previewVideo(this)">
+<video id="vid-preview" controls style="max-width:100%;display:none"></video>
+
+<script>
+function previewVideo(input) {
+    const preview = document.getElementById('vid-preview');
+    if (input.files && input.files[0]) {
+        preview.src = URL.createObjectURL(input.files[0]);
+        preview.style.display = 'block';
+    }
+}
+<\/script>`, desc: 'Capture vidéo/audio' }
+                            ],
+                            tips: [
+                                'La durée max dépend du navigateur',
+                                'Les fichiers peuvent être volumineux',
+                                'Pensez à compresser côté serveur'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'API MediaDevices - Accès caméra/micro',
+                        desc: 'Accès direct au flux vidéo/audio',
+                        details: {
+                            explanation: 'MediaDevices permet un contrôle avancé sur la caméra et le microphone.',
+                            syntax: 'navigator.mediaDevices.getUserMedia({ video: true, audio: true })',
+                            options: [
+                                { flag: 'video: true', desc: 'Activer la caméra' },
+                                { flag: 'audio: true', desc: 'Activer le micro' },
+                                { flag: 'facingMode', desc: '"user" ou "environment"' }
+                            ],
+                            examples: [
+                                { code: `<!-- Flux vidéo en direct -->
+<video id="camera-feed" autoplay playsinline></video>
+<button onclick="startCamera()">📷 Démarrer caméra</button>
+<button onclick="takeSnapshot()">📸 Prendre photo</button>
+<button onclick="stopCamera()">⏹️ Arrêter</button>
+<canvas id="snapshot" style="display:none"></canvas>
+<img id="captured" style="max-width:300px">
+
+<script>
+let stream = null;
+
+async function startCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment', // Caméra arrière
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        });
+        document.getElementById('camera-feed').srcObject = stream;
+    } catch (err) {
+        alert('Erreur caméra: ' + err.message);
+    }
+}
+
+function takeSnapshot() {
+    const video = document.getElementById('camera-feed');
+    const canvas = document.getElementById('snapshot');
+    const img = document.getElementById('captured');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    // Convertir en image
+    img.src = canvas.toDataURL('image/jpeg', 0.8);
+
+    // Pour upload: convertir en Blob
+    canvas.toBlob((blob) => {
+        // blob peut être envoyé via FormData
+        console.log('Taille:', blob.size, 'bytes');
+    }, 'image/jpeg', 0.8);
+}
+
+function stopCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+}
+<\/script>`, desc: 'Accès caméra direct' }
+                            ],
+                            tips: [
+                                'HTTPS obligatoire',
+                                'Toujours gérer le refus de permission',
+                                'Arrêtez les tracks pour libérer la caméra'
+                            ],
+                            warnings: [
+                                'Demande une permission utilisateur'
+                            ]
+                        }
+                    },
+                    {
+                        cmd: 'Enregistrement audio/vidéo',
+                        desc: 'MediaRecorder pour enregistrer des flux',
+                        details: {
+                            explanation: 'MediaRecorder permet d\'enregistrer le flux de la caméra ou du micro.',
+                            syntax: 'new MediaRecorder(stream, options)',
+                            options: [
+                                { flag: 'mimeType', desc: 'Format: video/webm, audio/webm' },
+                                { flag: 'audioBitsPerSecond', desc: 'Qualité audio' },
+                                { flag: 'videoBitsPerSecond', desc: 'Qualité vidéo' }
+                            ],
+                            examples: [
+                                { code: `<!-- Enregistreur vidéo complet -->
+<video id="preview" autoplay playsinline muted></video>
+<video id="recording" controls style="display:none"></video>
+
+<button onclick="startRecording()">⏺️ Enregistrer</button>
+<button onclick="stopRecording()">⏹️ Arrêter</button>
+
+<script>
+let mediaRecorder;
+let recordedChunks = [];
+
+async function startRecording() {
+    // Obtenir le flux
+    const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+    });
+
+    document.getElementById('preview').srcObject = stream;
+
+    // Créer le recorder
+    mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9'
+    });
+
+    // Collecter les données
+    mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+        }
+    };
+
+    // À l'arrêt
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+
+        // Afficher la vidéo enregistrée
+        const recording = document.getElementById('recording');
+        recording.src = url;
+        recording.style.display = 'block';
+
+        // Préparer pour upload
+        uploadVideo(blob);
+
+        // Reset
+        recordedChunks = [];
+    };
+
+    mediaRecorder.start();
+}
+
+function stopRecording() {
+    mediaRecorder.stop();
+    // Arrêter le flux
+    document.getElementById('preview').srcObject
+        .getTracks().forEach(t => t.stop());
+}
+
+async function uploadVideo(blob) {
+    const formData = new FormData();
+    formData.append('video', blob, 'recording.webm');
+
+    await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+    });
+}
+<\/script>`, desc: 'Enregistrement vidéo' }
+                            ],
+                            tips: [
+                                'webm est le format le mieux supporté',
+                                'Ajoutez timeslice pour chunks réguliers',
+                                'Compressez côté serveur pour MP4'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Prévisualisation avant envoi',
+                        desc: 'Afficher images/vidéos sélectionnées',
+                        details: {
+                            explanation: 'FileReader et URL.createObjectURL permettent de prévisualiser les fichiers.',
+                            syntax: 'FileReader.readAsDataURL(file)\nURL.createObjectURL(file)',
+                            options: [
+                                { flag: 'FileReader', desc: 'Lit en base64 (utilisable partout)' },
+                                { flag: 'createObjectURL', desc: 'URL temporaire (plus performant)' }
+                            ],
+                            examples: [
+                                { code: `<!-- Galerie avec prévisualisation -->
+<input type="file" id="photos" name="photos[]"
+       accept="image/*" multiple
+       onchange="previewGallery(this)">
+<div id="gallery" style="display:flex;flex-wrap:wrap;gap:10px"></div>
+
+<script>
+function previewGallery(input) {
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = '';
+
+    [...input.files].forEach((file, index) => {
+        // Vérifier le type
+        if (!file.type.startsWith('image/')) return;
+
+        const container = document.createElement('div');
+        container.style.position = 'relative';
+
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.cssText = 'width:150px;height:150px;object-fit:cover;border-radius:8px';
+        img.onload = () => URL.revokeObjectURL(img.src); // Libérer mémoire
+
+        // Infos fichier
+        const info = document.createElement('small');
+        info.textContent = \`\${file.name} (\${(file.size/1024).toFixed(1)} KB)\`;
+
+        // Bouton supprimer
+        const btn = document.createElement('button');
+        btn.textContent = '×';
+        btn.style.cssText = 'position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer';
+        btn.onclick = () => {
+            container.remove();
+            // Note: on ne peut pas modifier input.files directement
+        };
+
+        container.append(img, btn, info);
+        gallery.appendChild(container);
+    });
+}
+<\/script>
+
+<!-- Drag & Drop zone -->
+<div id="dropzone" style="border:2px dashed #ccc;padding:40px;text-align:center">
+    Glissez vos fichiers ici ou
+    <input type="file" multiple>
+</div>
+
+<script>
+const dropzone = document.getElementById('dropzone');
+
+dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = '#007bff';
+});
+
+dropzone.addEventListener('dragleave', () => {
+    dropzone.style.borderColor = '#ccc';
+});
+
+dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = '#ccc';
+    const files = e.dataTransfer.files;
+    // Traiter les fichiers...
+    console.log('Fichiers déposés:', files);
+});
+<\/script>`, desc: 'Prévisualisation et drag-drop' }
+                            ],
+                            tips: [
+                                'revokeObjectURL libère la mémoire',
+                                'FileReader est asynchrone',
+                                'Drag & drop améliore l\'UX sur desktop'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 7: VALIDATION DE FORMULAIRES
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'forms-validation',
+                title: '✅ Validation de Formulaires',
+                icon: 'fa-check-circle',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Attributs de validation HTML5',
+                        desc: 'required, pattern, min, max, etc.',
+                        details: {
+                            explanation: 'HTML5 offre des attributs de validation natifs sans JavaScript.',
+                            syntax: '<input required pattern="" minlength="" maxlength="">',
+                            options: [
+                                { flag: 'required', desc: 'Champ obligatoire' },
+                                { flag: 'pattern', desc: 'Regex de validation' },
+                                { flag: 'minlength/maxlength', desc: 'Longueur min/max' },
+                                { flag: 'min/max', desc: 'Valeur min/max (number, date)' },
+                                { flag: 'step', desc: 'Incrément valide' }
+                            ],
+                            examples: [
+                                { code: `<!-- Obligatoire -->
+<input type="text" name="nom" required>
+
+<!-- Pattern (regex) -->
+<input type="text" name="code"
+       pattern="[A-Z]{3}[0-9]{3}"
+       title="Format: ABC123">
+
+<!-- Longueur -->
+<input type="text" name="username"
+       minlength="3" maxlength="20" required>
+
+<!-- Nombre avec limites -->
+<input type="number" name="age"
+       min="18" max="120" required>
+
+<!-- Email avec domaine spécifique -->
+<input type="email" name="email"
+       pattern=".+@entreprise\\.com"
+       title="Email @entreprise.com requis">
+
+<!-- Mot de passe fort -->
+<input type="password" name="password"
+       pattern="(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}"
+       title="8+ car., majuscule, minuscule, chiffre, symbole"
+       required>
+
+<!-- URL avec protocole -->
+<input type="url" name="site"
+       pattern="https?://.+"
+       placeholder="https://...">`, desc: 'Validation HTML5' }
+                            ],
+                            tips: [
+                                'title s\'affiche comme message d\'erreur',
+                                'pattern utilise regex JavaScript (sans /)',
+                                'Validez TOUJOURS côté serveur aussi'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Styles :valid / :invalid',
+                        desc: 'CSS pour feedback visuel',
+                        details: {
+                            explanation: 'Les pseudo-classes CSS permettent de styliser les champs selon leur état de validation.',
+                            syntax: 'input:valid { }\ninput:invalid { }',
+                            options: [
+                                { flag: ':valid', desc: 'Champ valide' },
+                                { flag: ':invalid', desc: 'Champ invalide' },
+                                { flag: ':required', desc: 'Champ obligatoire' },
+                                { flag: ':optional', desc: 'Champ optionnel' },
+                                { flag: ':user-invalid', desc: 'Invalid après interaction' }
+                            ],
+                            examples: [
+                                { code: `<style>
+/* Feedback visuel basique */
+input:valid {
+    border-color: #28a745;
+    background-image: url("data:image/svg+xml,..."); /* checkmark */
+}
+
+input:invalid {
+    border-color: #dc3545;
+}
+
+/* Seulement après interaction (évite rouge au chargement) */
+input:user-invalid,
+input:focus:invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+input:focus:valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
+}
+
+/* Message d'erreur custom */
+.field {
+    position: relative;
+}
+
+.field input:user-invalid + .error-msg {
+    display: block;
+}
+
+.error-msg {
+    display: none;
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 4px;
+}
+</style>
+
+<div class="field">
+    <input type="email" required>
+    <span class="error-msg">Email invalide</span>
+</div>`, desc: 'CSS validation' }
+                            ],
+                            tips: [
+                                ':user-invalid attend l\'interaction utilisateur',
+                                'Combinez avec :focus pour feedback immédiat',
+                                'Utilisez des icônes pour accessibilité'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Validation JavaScript custom',
+                        desc: 'setCustomValidity et reportValidity',
+                        details: {
+                            explanation: 'JavaScript permet des validations complexes et des messages personnalisés.',
+                            syntax: 'input.setCustomValidity(message)\nform.reportValidity()',
+                            options: [
+                                { flag: 'setCustomValidity', desc: 'Définir message d\'erreur' },
+                                { flag: 'reportValidity', desc: 'Déclencher la validation' },
+                                { flag: 'checkValidity', desc: 'Vérifier sans afficher' },
+                                { flag: 'validity', desc: 'État de validation détaillé' }
+                            ],
+                            examples: [
+                                { code: `<!-- Confirmation mot de passe -->
+<form id="signup">
+    <input type="password" id="pwd" name="password" required>
+    <input type="password" id="pwd-confirm" name="password_confirm" required>
+    <button type="submit">S'inscrire</button>
+</form>
+
+<script>
+const pwd = document.getElementById('pwd');
+const confirm = document.getElementById('pwd-confirm');
+
+confirm.addEventListener('input', () => {
+    if (confirm.value !== pwd.value) {
+        confirm.setCustomValidity('Les mots de passe ne correspondent pas');
+    } else {
+        confirm.setCustomValidity(''); // Valide
+    }
+});
+
+// Validation async (ex: vérifier si email existe)
+const email = document.getElementById('email');
+email.addEventListener('blur', async () => {
+    const response = await fetch(\`/api/check-email?email=\${email.value}\`);
+    const { exists } = await response.json();
+
+    if (exists) {
+        email.setCustomValidity('Cet email est déjà utilisé');
+    } else {
+        email.setCustomValidity('');
+    }
+    email.reportValidity();
+});
+
+// Validation complète du formulaire
+document.getElementById('signup').addEventListener('submit', (e) => {
+    const form = e.target;
+
+    // Vérifications custom
+    if (!form.checkValidity()) {
+        e.preventDefault();
+        form.reportValidity();
+        return;
+    }
+
+    // Tout est valide, continuer...
+});
+<\/script>`, desc: 'Validation JS custom' }
+                            ],
+                            tips: [
+                                'setCustomValidity("") = valide',
+                                'Utilisez validity.* pour connaître le type d\'erreur',
+                                'reportValidity() affiche le message natif'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 8: LIENS & NAVIGATION
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'links-nav',
+                title: '🔗 Liens & Navigation',
+                icon: 'fa-link',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Liens et ancres',
+                        desc: 'Liens internes, externes et ancres',
+                        details: {
+                            explanation: 'La balise <a> crée des hyperliens vers d\'autres pages ou sections.',
+                            syntax: '<a href="url" target="" rel="">Texte</a>',
+                            options: [
+                                { flag: 'href', desc: 'URL de destination' },
+                                { flag: 'target="_blank"', desc: 'Nouvel onglet' },
+                                { flag: 'rel="noopener"', desc: 'Sécurité avec _blank' },
+                                { flag: 'download', desc: 'Télécharger au lieu d\'ouvrir' }
+                            ],
+                            examples: [
+                                { code: `<!-- Lien interne -->
+<a href="/contact">Contact</a>
+<a href="./page.html">Page relative</a>
+
+<!-- Lien externe (nouvel onglet) -->
+<a href="https://example.com"
+   target="_blank"
+   rel="noopener noreferrer">
+    Site externe
+</a>
+
+<!-- Ancre (scroll vers id) -->
+<a href="#section-2">Aller à la section 2</a>
+...
+<section id="section-2">Contenu section 2</section>
+
+<!-- Retour en haut -->
+<a href="#top">↑ Haut de page</a>
+
+<!-- Lien téléchargement -->
+<a href="/files/doc.pdf" download>
+    Télécharger le PDF
+</a>
+<a href="/files/doc.pdf" download="nouveau-nom.pdf">
+    Télécharger (renommé)
+</a>
+
+<!-- Liens spéciaux -->
+<a href="mailto:contact@site.com">Envoyer un email</a>
+<a href="mailto:a@b.com?subject=Sujet&body=Message">Email pré-rempli</a>
+<a href="tel:+33612345678">Appeler</a>
+<a href="sms:+33612345678">Envoyer SMS</a>`, desc: 'Types de liens' }
+                            ],
+                            tips: [
+                                'rel="noopener noreferrer" obligatoire avec _blank',
+                                'Ancres avec # scrollent en douceur avec CSS scroll-behavior',
+                                'download ne fonctionne que same-origin'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Navigation accessible',
+                        desc: 'nav, aria-label, aria-current',
+                        details: {
+                            explanation: 'Une navigation accessible aide les lecteurs d\'écran et le SEO.',
+                            syntax: '<nav aria-label="...">\n  <a aria-current="page">...',
+                            options: [
+                                { flag: 'aria-label', desc: 'Nom de la navigation' },
+                                { flag: 'aria-current="page"', desc: 'Page actuelle' },
+                                { flag: 'role="navigation"', desc: 'Implicite avec <nav>' }
+                            ],
+                            examples: [
+                                { code: `<!-- Navigation principale -->
+<nav aria-label="Navigation principale">
+    <ul>
+        <li><a href="/" aria-current="page">Accueil</a></li>
+        <li><a href="/products">Produits</a></li>
+        <li><a href="/about">À propos</a></li>
+        <li><a href="/contact">Contact</a></li>
+    </ul>
+</nav>
+
+<!-- Fil d'Ariane (breadcrumb) -->
+<nav aria-label="Fil d'Ariane">
+    <ol>
+        <li><a href="/">Accueil</a></li>
+        <li><a href="/products">Produits</a></li>
+        <li><a href="/products/phones" aria-current="page">Téléphones</a></li>
+    </ol>
+</nav>
+
+<!-- Skip link (accessibilité) -->
+<a href="#main-content" class="skip-link">
+    Aller au contenu principal
+</a>
+
+<style>
+.skip-link {
+    position: absolute;
+    left: -9999px;
+}
+.skip-link:focus {
+    left: 10px;
+    top: 10px;
+    z-index: 9999;
+    background: #000;
+    color: #fff;
+    padding: 10px;
+}
+</style>`, desc: 'Navigation accessible' }
+                            ],
+                            tips: [
+                                'Un seul <nav> principal par page (ou aria-label distinct)',
+                                'aria-current="page" aide les lecteurs d\'écran',
+                                'Skip link essentiel pour l\'accessibilité clavier'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 9: TABLEAUX & LISTES
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'tables-lists',
+                title: '📊 Tableaux & Listes',
+                icon: 'fa-table',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Tableaux accessibles',
+                        desc: 'thead, tbody, th scope, caption',
+                        details: {
+                            explanation: 'Un tableau bien structuré est accessible et compréhensible.',
+                            syntax: '<table>\n  <caption>Titre</caption>\n  <thead><tr><th scope="col">...</th></tr></thead>\n  <tbody>...</tbody>\n</table>',
+                            options: [
+                                { flag: '<caption>', desc: 'Titre du tableau' },
+                                { flag: '<thead>', desc: 'En-tête du tableau' },
+                                { flag: '<tbody>', desc: 'Corps du tableau' },
+                                { flag: '<tfoot>', desc: 'Pied du tableau' },
+                                { flag: 'scope="col"', desc: 'En-tête de colonne' },
+                                { flag: 'scope="row"', desc: 'En-tête de ligne' }
+                            ],
+                            examples: [
+                                { code: `<table>
+    <caption>Ventes mensuelles 2024</caption>
+    <thead>
+        <tr>
+            <th scope="col">Mois</th>
+            <th scope="col">Ventes</th>
+            <th scope="col">Objectif</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">Janvier</th>
+            <td>15 000 €</td>
+            <td>12 000 €</td>
+        </tr>
+        <tr>
+            <th scope="row">Février</th>
+            <td>18 000 €</td>
+            <td>15 000 €</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th scope="row">Total</th>
+            <td>33 000 €</td>
+            <td>27 000 €</td>
+        </tr>
+    </tfoot>
+</table>
+
+<!-- Tableau avec fusion de cellules -->
+<table>
+    <tr>
+        <th colspan="2">En-tête fusionné</th>
+    </tr>
+    <tr>
+        <td rowspan="2">Cellule fusionnée verticalement</td>
+        <td>Cellule 1</td>
+    </tr>
+    <tr>
+        <td>Cellule 2</td>
+    </tr>
+</table>`, desc: 'Tableau accessible' }
+                            ],
+                            tips: [
+                                'caption est lu en premier par les lecteurs d\'écran',
+                                'scope aide à comprendre la relation en-tête/données',
+                                'N\'utilisez pas les tableaux pour la mise en page'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Listes HTML',
+                        desc: 'ul, ol, dl avec imbrication',
+                        details: {
+                            explanation: 'Les listes structurent le contenu de manière sémantique.',
+                            syntax: '<ul>/<ol>\n  <li>Item</li>\n</ul>\n\n<dl>\n  <dt>Terme</dt>\n  <dd>Définition</dd>\n</dl>',
+                            options: [
+                                { flag: '<ul>', desc: 'Liste non ordonnée (puces)' },
+                                { flag: '<ol>', desc: 'Liste ordonnée (numéros)' },
+                                { flag: '<dl>', desc: 'Liste de définitions' },
+                                { flag: 'type', desc: 'Style de numérotation (ol)' },
+                                { flag: 'start', desc: 'Numéro de départ (ol)' },
+                                { flag: 'reversed', desc: 'Ordre décroissant (ol)' }
+                            ],
+                            examples: [
+                                { code: `<!-- Liste non ordonnée -->
+<ul>
+    <li>Élément 1</li>
+    <li>Élément 2
+        <ul>
+            <li>Sous-élément 2.1</li>
+            <li>Sous-élément 2.2</li>
+        </ul>
+    </li>
+    <li>Élément 3</li>
+</ul>
+
+<!-- Liste ordonnée avec options -->
+<ol type="A" start="3">
+    <li>Troisième (C)</li>
+    <li>Quatrième (D)</li>
+</ol>
+
+<ol reversed>
+    <li>Troisième</li>
+    <li>Deuxième</li>
+    <li>Premier</li>
+</ol>
+
+<!-- Liste de définitions (FAQ, glossaire) -->
+<dl>
+    <dt>HTML</dt>
+    <dd>HyperText Markup Language - structure des pages web</dd>
+
+    <dt>CSS</dt>
+    <dd>Cascading Style Sheets - mise en forme des pages</dd>
+
+    <dt>JavaScript</dt>
+    <dd>Langage de programmation pour l'interactivité</dd>
+</dl>`, desc: 'Types de listes' }
+                            ],
+                            tips: [
+                                'type="1|a|A|i|I" pour ol (1, a, A, i, I)',
+                                'dl idéal pour FAQ, glossaires, métadonnées',
+                                'Les listes peuvent être imbriquées'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // CATÉGORIE 10: MÉDIAS
+            // ═══════════════════════════════════════════════════════════════
+            {
+                id: 'media',
+                title: '🖼️ Médias',
+                icon: 'fa-image',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Images responsive',
+                        desc: 'img, picture, srcset pour tous écrans',
+                        details: {
+                            explanation: 'Les images responsive s\'adaptent à la taille de l\'écran et à la densité de pixels.',
+                            syntax: '<img srcset="..." sizes="...">\n<picture><source>...</picture>',
+                            options: [
+                                { flag: 'srcset', desc: 'Liste d\'images avec taille/densité' },
+                                { flag: 'sizes', desc: 'Taille d\'affichage selon viewport' },
+                                { flag: '<picture>', desc: 'Conteneur pour sources multiples' },
+                                { flag: '<source>', desc: 'Source alternative (format, media)' },
+                                { flag: 'loading="lazy"', desc: 'Chargement différé' }
+                            ],
+                            examples: [
+                                { code: `<!-- Image basique avec alt obligatoire -->
+<img src="photo.jpg" alt="Description de l'image" width="800" height="600">
+
+<!-- Image responsive par densité (2x, 3x) -->
+<img src="image.jpg"
+     srcset="image.jpg 1x,
+             image@2x.jpg 2x,
+             image@3x.jpg 3x"
+     alt="Photo responsive">
+
+<!-- Image responsive par largeur -->
+<img src="image-800.jpg"
+     srcset="image-400.jpg 400w,
+             image-800.jpg 800w,
+             image-1200.jpg 1200w"
+     sizes="(max-width: 600px) 100vw,
+            (max-width: 900px) 50vw,
+            800px"
+     alt="Image adaptive">
+
+<!-- Picture pour formats modernes -->
+<picture>
+    <source srcset="image.avif" type="image/avif">
+    <source srcset="image.webp" type="image/webp">
+    <img src="image.jpg" alt="Image avec fallback">
+</picture>
+
+<!-- Picture pour art direction -->
+<picture>
+    <source media="(max-width: 600px)" srcset="photo-mobile.jpg">
+    <source media="(max-width: 1200px)" srcset="photo-tablet.jpg">
+    <img src="photo-desktop.jpg" alt="Photo responsive">
+</picture>
+
+<!-- Lazy loading natif -->
+<img src="image.jpg" alt="Image" loading="lazy">`, desc: 'Images responsive' }
+                            ],
+                            tips: [
+                                'alt="" pour images décoratives',
+                                'width/height évitent le layout shift',
+                                'loading="lazy" économise la bande passante'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Vidéo HTML5',
+                        desc: 'video avec contrôles et sources multiples',
+                        details: {
+                            explanation: 'La balise video permet d\'intégrer des vidéos avec contrôles natifs.',
+                            syntax: '<video controls>\n  <source src="..." type="...">\n</video>',
+                            options: [
+                                { flag: 'controls', desc: 'Affiche les contrôles' },
+                                { flag: 'autoplay', desc: 'Lecture auto (muet requis)' },
+                                { flag: 'muted', desc: 'Sans son' },
+                                { flag: 'loop', desc: 'Boucle' },
+                                { flag: 'poster', desc: 'Image avant lecture' },
+                                { flag: 'playsinline', desc: 'Pas plein écran sur iOS' }
+                            ],
+                            examples: [
+                                { code: `<!-- Vidéo basique -->
+<video controls width="640" height="360">
+    <source src="video.mp4" type="video/mp4">
+    <source src="video.webm" type="video/webm">
+    Votre navigateur ne supporte pas la vidéo.
+</video>
+
+<!-- Vidéo avec poster et options -->
+<video controls
+       poster="thumbnail.jpg"
+       width="100%"
+       preload="metadata">
+    <source src="video.mp4" type="video/mp4">
+    <track kind="subtitles" src="subs-fr.vtt" srclang="fr" label="Français">
+    <track kind="subtitles" src="subs-en.vtt" srclang="en" label="English">
+</video>
+
+<!-- Vidéo en arrière-plan (hero) -->
+<video autoplay muted loop playsinline
+       class="hero-video">
+    <source src="background.mp4" type="video/mp4">
+</video>
+
+<!-- Contrôle JS -->
+<video id="player" src="video.mp4"></video>
+<button onclick="document.getElementById('player').play()">▶️</button>
+<button onclick="document.getElementById('player').pause()">⏸️</button>`, desc: 'Vidéo HTML5' }
+                            ],
+                            tips: [
+                                'autoplay nécessite muted sur la plupart des navigateurs',
+                                'preload="none" économise la bande passante',
+                                'Ajoutez des sous-titres avec <track>'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Audio HTML5',
+                        desc: 'audio avec contrôles et sources',
+                        details: {
+                            explanation: 'La balise audio intègre des fichiers sonores.',
+                            syntax: '<audio controls>\n  <source src="..." type="...">\n</audio>',
+                            options: [
+                                { flag: 'controls', desc: 'Affiche les contrôles' },
+                                { flag: 'autoplay', desc: 'Lecture auto' },
+                                { flag: 'loop', desc: 'Boucle' },
+                                { flag: 'preload', desc: 'none|metadata|auto' }
+                            ],
+                            examples: [
+                                { code: `<!-- Audio basique -->
+<audio controls>
+    <source src="audio.mp3" type="audio/mpeg">
+    <source src="audio.ogg" type="audio/ogg">
+    Votre navigateur ne supporte pas l'audio.
+</audio>
+
+<!-- Podcast avec preload -->
+<audio controls preload="metadata">
+    <source src="podcast.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Player custom -->
+<audio id="music" src="song.mp3"></audio>
+<div class="player">
+    <button onclick="document.getElementById('music').play()">▶️</button>
+    <button onclick="document.getElementById('music').pause()">⏸️</button>
+    <input type="range" min="0" max="100" value="100"
+           onchange="document.getElementById('music').volume = this.value/100">
+</div>`, desc: 'Audio HTML5' }
+                            ],
+                            tips: [
+                                'MP3 est universellement supporté',
+                                'preload="none" pour les pages avec beaucoup d\'audios',
+                                'Évitez autoplay pour l\'audio (UX)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'iframes',
+                        desc: 'Intégration de contenu externe',
+                        details: {
+                            explanation: 'iframe intègre une page externe (YouTube, Google Maps, etc.).',
+                            syntax: '<iframe src="..." width="" height="" loading="lazy"></iframe>',
+                            options: [
+                                { flag: 'src', desc: 'URL à intégrer' },
+                                { flag: 'loading="lazy"', desc: 'Chargement différé' },
+                                { flag: 'allow', desc: 'Permissions (fullscreen, camera...)' },
+                                { flag: 'sandbox', desc: 'Restrictions de sécurité' }
+                            ],
+                            examples: [
+                                { code: `<!-- YouTube -->
+<iframe width="560" height="315"
+        src="https://www.youtube.com/embed/VIDEO_ID"
+        title="Titre de la vidéo"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        loading="lazy">
+</iframe>
+
+<!-- Google Maps -->
+<iframe src="https://www.google.com/maps/embed?pb=..."
+        width="600" height="450"
+        style="border:0"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+</iframe>
+
+<!-- iframe sécurisée -->
+<iframe src="https://external.com"
+        sandbox="allow-scripts allow-same-origin"
+        loading="lazy">
+</iframe>`, desc: 'iframes' }
+                            ],
+                            tips: [
+                                'title obligatoire pour accessibilité',
+                                'loading="lazy" pour performance',
+                                'sandbox restreint les capacités de l\'iframe'
+                            ],
+                            warnings: [
+                                'Attention aux contenus tiers non fiables'
+                            ]
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

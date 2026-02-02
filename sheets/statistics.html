@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Statistiques : statistiques descriptives, tests d'hypotheses, regression et metriques.">
+    <title>Statistiques - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- KaTeX pour les formules mathematiques -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        .formula {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+        .formula-inline {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .katex { font-size: 1.1em; }
+        .katex-display { margin: 0.5em 0; }
+        .formula-name {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-cyan-500/20 mb-4 icon-glow">
+                    <i class="fas fa-chart-bar text-3xl text-cyan-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Statistiques</h1>
+                <p class="text-slate-400">Stats descriptives, tests d'hypotheses, regression et metriques</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: variance, t-test, R2)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: STATISTIQUES DESCRIPTIVES
+            // ===============================================================
+            {
+                id: 'descriptive',
+                title: 'Statistiques Descriptives',
+                icon: 'fa-chart-bar',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Mesures de tendance centrale',
+                        desc: 'Moyenne, mediane, mode',
+                        details: {
+                            explanation: 'Les mesures de tendance centrale decrivent la valeur "typique" d\'un ensemble de donnees.',
+                            syntax: '$$\\bar{x} = \\frac{1}{n}\\sum_{i=1}^{n} x_i$$',
+                            options: [
+                                { flag: 'Moyenne arithmetique', desc: '$$\\bar{x} = \\frac{x_1 + x_2 + ... + x_n}{n}$$' },
+                                { flag: 'Moyenne ponderee', desc: '$$\\bar{x}_w = \\frac{\\sum w_i x_i}{\\sum w_i}$$' },
+                                { flag: 'Moyenne geometrique', desc: '$$\\bar{x}_g = \\sqrt[n]{x_1 \\cdot x_2 \\cdot ... \\cdot x_n}$$' },
+                                { flag: 'Mediane', desc: 'Valeur centrale quand les donnees sont ordonnees' },
+                                { flag: 'Mode', desc: 'Valeur la plus frequente' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+from scipy import stats
+
+data = [12, 15, 18, 22, 25, 28, 30, 35]
+
+moyenne = np.mean(data)           # 23.125
+mediane = np.median(data)         # 23.5
+mode = stats.mode(data).mode      # 12
+
+# Moyenne geometrique (pour taux de croissance)
+geo_mean = stats.gmean(data)      # 21.76
+
+# Moyenne harmonique (pour moyennes de ratios)
+harm_mean = stats.hmean(data)     # 20.37`, desc: 'Calcul en Python' }
+                            ],
+                            tips: [
+                                'La mediane est robuste aux valeurs extremes',
+                                'Utilisez la moyenne geometrique pour les taux de croissance',
+                                'La moyenne harmonique est utile pour les vitesses moyennes'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Mesures de dispersion',
+                        desc: 'Variance, ecart-type, etendue',
+                        details: {
+                            explanation: 'Les mesures de dispersion indiquent comment les donnees sont reparties autour de la moyenne.',
+                            syntax: '$$\\sigma^2 = \\frac{1}{n}\\sum_{i=1}^{n}(x_i - \\bar{x})^2$$',
+                            options: [
+                                { flag: 'Variance population', desc: '$$\\sigma^2 = \\frac{1}{N}\\sum_{i=1}^{N}(x_i - \\mu)^2$$' },
+                                { flag: 'Variance echantillon', desc: '$$s^2 = \\frac{1}{n-1}\\sum_{i=1}^{n}(x_i - \\bar{x})^2$$' },
+                                { flag: 'Ecart-type', desc: '$$\\sigma = \\sqrt{\\sigma^2}$$ ou $$s = \\sqrt{s^2}$$' },
+                                { flag: 'Coefficient de variation', desc: '$$CV = \\frac{\\sigma}{\\mu} \\times 100\\%$$' },
+                                { flag: 'Etendue', desc: '$$R = x_{max} - x_{min}$$' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+data = [12, 15, 18, 22, 25, 28, 30, 35]
+
+# Variance et ecart-type (echantillon, ddof=1)
+variance = np.var(data, ddof=1)    # 63.27
+ecart_type = np.std(data, ddof=1)  # 7.95
+
+# Population (ddof=0)
+var_pop = np.var(data, ddof=0)     # 55.36
+
+# Coefficient de variation
+cv = (ecart_type / np.mean(data)) * 100  # 34.4%
+
+# Etendue
+etendue = np.ptp(data)  # 23`, desc: 'Calcul en Python' }
+                            ],
+                            tips: [
+                                'ddof=1 pour echantillon, ddof=0 pour population',
+                                'Le CV permet de comparer la dispersion entre variables d\'echelles differentes'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Quartiles et percentiles',
+                        desc: 'Q1, Q2, Q3, IQR',
+                        details: {
+                            explanation: 'Les quartiles divisent les donnees en 4 parties egales, utiles pour detecter les outliers.',
+                            syntax: '$$IQR = Q_3 - Q_1$$',
+                            options: [
+                                { flag: 'Q1 (25e percentile)', desc: '25% des donnees sont inferieures' },
+                                { flag: 'Q2 (Mediane)', desc: '50% des donnees sont inferieures' },
+                                { flag: 'Q3 (75e percentile)', desc: '75% des donnees sont inferieures' },
+                                { flag: 'IQR', desc: 'Ecart interquartile = Q3 - Q1' },
+                                { flag: 'Outliers', desc: 'x < Q1 - 1.5*IQR ou x > Q3 + 1.5*IQR' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+data = [12, 15, 18, 22, 25, 28, 30, 35, 100]
+
+Q1 = np.percentile(data, 25)  # 16.5
+Q2 = np.percentile(data, 50)  # 25
+Q3 = np.percentile(data, 75)  # 31.25
+IQR = Q3 - Q1                 # 14.75
+
+# Detection des outliers
+lower_bound = Q1 - 1.5 * IQR  # -5.625
+upper_bound = Q3 + 1.5 * IQR  # 53.375
+
+outliers = [x for x in data if x < lower_bound or x > upper_bound]
+# [100]`, desc: 'Quartiles et outliers' }
+                            ],
+                            tips: [
+                                'IQR est robuste aux valeurs extremes',
+                                'La regle 1.5*IQR detecte les outliers moderes'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Forme de la distribution',
+                        desc: 'Skewness, Kurtosis',
+                        details: {
+                            explanation: 'Skewness mesure l\'asymetrie, kurtosis mesure l\'aplatissement par rapport a une normale.',
+                            syntax: '$$\\text{Skewness} = \\frac{E[(X-\\mu)^3]}{\\sigma^3}$$',
+                            options: [
+                                { flag: 'Skewness = 0', desc: 'Distribution symetrique' },
+                                { flag: 'Skewness > 0', desc: 'Queue a droite (right-skewed)' },
+                                { flag: 'Skewness < 0', desc: 'Queue a gauche (left-skewed)' },
+                                { flag: 'Kurtosis = 3', desc: 'Normale (mesokurtic)' },
+                                { flag: 'Kurtosis > 3', desc: 'Queues lourdes (leptokurtic)' },
+                                { flag: 'Kurtosis < 3', desc: 'Queues legeres (platykurtic)' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+import numpy as np
+
+data = np.random.normal(0, 1, 1000)
+
+skewness = stats.skew(data)      # ~0
+kurtosis = stats.kurtosis(data)  # ~0 (excess kurtosis)
+
+# Kurtosis de Fisher (excess) = kurtosis - 3
+# scipy renvoie l'excess kurtosis par defaut
+
+# Test de normalite
+stat, p_value = stats.normaltest(data)`, desc: 'Skewness et Kurtosis' }
+                            ],
+                            tips: [
+                                'scipy.stats.kurtosis renvoie l\'excess kurtosis (normale = 0)',
+                                'Skewness et kurtosis proches de 0 suggerent une distribution normale'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: TESTS D'HYPOTHESES
+            // ===============================================================
+            {
+                id: 'hypothesis-tests',
+                title: 'Tests d\'Hypotheses',
+                icon: 'fa-vials',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Concepts fondamentaux',
+                        desc: 'H0, H1, p-value, erreurs',
+                        details: {
+                            explanation: 'Un test d\'hypothese permet de prendre une decision statistique basee sur les donnees.',
+                            syntax: 'Rejeter $$H_0$$ si p-value < $$\\alpha$$',
+                            options: [
+                                { flag: 'H0 (Null)', desc: 'Hypothese nulle - pas d\'effet' },
+                                { flag: 'H1 (Alternative)', desc: 'Hypothese alternative - effet existe' },
+                                { flag: 'p-value', desc: 'Probabilite d\'observer les donnees si H0 vraie' },
+                                { flag: 'alpha', desc: 'Seuil de signification (souvent 0.05)' },
+                                { flag: 'Erreur Type I', desc: 'Rejeter H0 alors qu\'elle est vraie ($$\\alpha$$)' },
+                                { flag: 'Erreur Type II', desc: 'Ne pas rejeter H0 alors qu\'elle est fausse ($$\\beta$$)' },
+                                { flag: 'Puissance', desc: '$$1 - \\beta$$ = P(rejeter H0 | H0 fausse)' }
+                            ],
+                            examples: [
+                                { code: `# Interpretation de la p-value
+alpha = 0.05
+
+if p_value < alpha:
+    print("Rejet de H0 - Resultat significatif")
+else:
+    print("Pas de rejet de H0 - Pas assez d'evidence")
+
+# Attention: p < 0.05 ne signifie PAS que l'effet est important
+# Regardez aussi la taille de l'effet (effect size)`, desc: 'Interpretation' }
+                            ],
+                            tips: [
+                                'p-value n\'est PAS la probabilite que H0 soit vraie',
+                                'Significatif statistiquement != significatif pratiquement',
+                                'Rapportez toujours la taille d\'effet avec la p-value'
+                            ],
+                            warnings: ['Ne pas confondre absence de preuve et preuve d\'absence']
+                        }
+                    },
+                    {
+                        cmd: 'Test t de Student',
+                        desc: 'Comparer des moyennes',
+                        details: {
+                            explanation: 'Le test t compare les moyennes de groupes quand la variance est inconnue.',
+                            syntax: '$$t = \\frac{\\bar{x}_1 - \\bar{x}_2}{s_p\\sqrt{\\frac{1}{n_1} + \\frac{1}{n_2}}}$$',
+                            options: [
+                                { flag: 'One-sample', desc: 'Compare une moyenne a une valeur theorique' },
+                                { flag: 'Two-sample independant', desc: 'Compare les moyennes de 2 groupes' },
+                                { flag: 'Paired (apparie)', desc: 'Compare avant/apres sur memes sujets' },
+                                { flag: 'Welch', desc: 'Variances inegales (par defaut recommande)' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Test t pour un echantillon
+t_stat, p_value = stats.ttest_1samp(sample, popmean=100)
+
+# Test t pour deux echantillons independants
+t_stat, p_value = stats.ttest_ind(group1, group2)
+
+# Test de Welch (variances inegales)
+t_stat, p_value = stats.ttest_ind(group1, group2, equal_var=False)
+
+# Test t apparie (paired)
+t_stat, p_value = stats.ttest_rel(before, after)`, desc: 'Tests t en Python' }
+                            ],
+                            tips: [
+                                'Utilisez Welch par defaut (equal_var=False)',
+                                'Verifiez la normalite pour petits echantillons'
+                            ],
+                            warnings: ['Sensible aux outliers et a la non-normalite']
+                        }
+                    },
+                    {
+                        cmd: 'Test du Chi-deux',
+                        desc: 'Variables categoriques',
+                        details: {
+                            explanation: 'Le test Chi-deux teste l\'independance entre variables categoriques ou l\'adequation a une distribution.',
+                            syntax: '$$\\chi^2 = \\sum \\frac{(O_i - E_i)^2}{E_i}$$',
+                            options: [
+                                { flag: 'Test d\'independance', desc: 'Les variables sont-elles liees?' },
+                                { flag: 'Test d\'adequation (GOF)', desc: 'Les donnees suivent-elles une distribution?' },
+                                { flag: 'Degres de liberte', desc: '(lignes-1) * (colonnes-1)' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+import numpy as np
+
+# Table de contingence
+observed = np.array([[10, 20, 30],
+                     [15, 25, 35]])
+
+# Test d'independance
+chi2, p_value, dof, expected = stats.chi2_contingency(observed)
+
+# Test d'adequation (goodness of fit)
+observed_freq = [16, 18, 16, 14, 12, 12]
+expected_freq = [15, 15, 15, 15, 15, 15]  # Uniforme
+chi2, p_value = stats.chisquare(observed_freq, expected_freq)`, desc: 'Tests Chi-deux' }
+                            ],
+                            tips: [
+                                'Les effectifs attendus doivent etre >= 5',
+                                'Pour petits echantillons, utilisez le test exact de Fisher'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'ANOVA',
+                        desc: 'Comparer plusieurs groupes',
+                        details: {
+                            explanation: 'ANOVA teste si au moins un groupe a une moyenne differente des autres.',
+                            syntax: '$$F = \\frac{\\text{Variance inter-groupes}}{\\text{Variance intra-groupes}}$$',
+                            options: [
+                                { flag: 'One-way ANOVA', desc: 'Un facteur, plusieurs groupes' },
+                                { flag: 'Two-way ANOVA', desc: 'Deux facteurs avec interaction possible' },
+                                { flag: 'Post-hoc tests', desc: 'Tukey HSD, Bonferroni pour comparaisons multiples' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+import scikit_posthocs as sp
+
+# One-way ANOVA
+f_stat, p_value = stats.f_oneway(group1, group2, group3)
+
+# Post-hoc Tukey HSD
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+tukey = pairwise_tukeyhsd(
+    endog=data['value'],
+    groups=data['group'],
+    alpha=0.05
+)
+print(tukey)`, desc: 'ANOVA et post-hoc' }
+                            ],
+                            tips: [
+                                'ANOVA suppose: normalite, homogeneite des variances, independance',
+                                'Kruskal-Wallis est l\'alternative non-parametrique'
+                            ],
+                            warnings: ['Un F significatif ne dit pas QUELS groupes different']
+                        }
+                    },
+                    {
+                        cmd: 'Tests non-parametriques',
+                        desc: 'Mann-Whitney, Wilcoxon, Kruskal-Wallis',
+                        details: {
+                            explanation: 'Tests qui ne supposent pas de distribution particuliere des donnees.',
+                            syntax: 'Basees sur les rangs plutot que les valeurs',
+                            options: [
+                                { flag: 'Mann-Whitney U', desc: 'Alternative au t-test independant' },
+                                { flag: 'Wilcoxon signed-rank', desc: 'Alternative au t-test apparie' },
+                                { flag: 'Kruskal-Wallis', desc: 'Alternative a l\'ANOVA' },
+                                { flag: 'Spearman', desc: 'Correlation non-parametrique' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Mann-Whitney U (2 groupes independants)
+stat, p_value = stats.mannwhitneyu(group1, group2)
+
+# Wilcoxon signed-rank (echantillons apparies)
+stat, p_value = stats.wilcoxon(before, after)
+
+# Kruskal-Wallis (plusieurs groupes)
+stat, p_value = stats.kruskal(group1, group2, group3)
+
+# Correlation de Spearman
+rho, p_value = stats.spearmanr(x, y)`, desc: 'Tests non-parametriques' }
+                            ],
+                            tips: [
+                                'Utilisez ces tests quand les hypotheses parametriques ne sont pas verifiees',
+                                'Moins puissants que les tests parametriques si les hypotheses sont verifiees'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: REGRESSION
+            // ===============================================================
+            {
+                id: 'regression',
+                title: 'Regression',
+                icon: 'fa-chart-line',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Regression lineaire simple',
+                        desc: 'y = a + bx',
+                        details: {
+                            explanation: 'Modelise une relation lineaire entre une variable dependante et une independante.',
+                            syntax: '$$y = \\beta_0 + \\beta_1 x + \\epsilon$$',
+                            options: [
+                                { flag: 'Pente (b)', desc: '$$\\beta_1 = \\frac{\\sum(x_i - \\bar{x})(y_i - \\bar{y})}{\\sum(x_i - \\bar{x})^2}$$' },
+                                { flag: 'Intercept (a)', desc: '$$\\beta_0 = \\bar{y} - \\beta_1 \\bar{x}$$' },
+                                { flag: 'Moindres carres', desc: 'Minimise $$\\sum (y_i - \\hat{y}_i)^2$$' }
+                            ],
+                            examples: [
+                                { code: `from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
+
+X = data[['feature']].values
+y = data['target'].values
+
+# Avec sklearn
+model = LinearRegression()
+model.fit(X, y)
+print(f"Pente: {model.coef_[0]}, Intercept: {model.intercept_}")
+
+# Avec statsmodels (plus de stats)
+X_sm = sm.add_constant(X)  # Ajoute intercept
+model_sm = sm.OLS(y, X_sm).fit()
+print(model_sm.summary())`, desc: 'Regression lineaire simple' }
+                            ],
+                            tips: [
+                                'statsmodels fournit les p-values et intervalles de confiance',
+                                'Verifiez les hypotheses: linearite, homoscedasticite, normalite des residus'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Regression lineaire multiple',
+                        desc: 'y = b0 + b1*x1 + b2*x2 + ...',
+                        details: {
+                            explanation: 'Extension avec plusieurs variables independantes.',
+                            syntax: '$$y = \\beta_0 + \\sum_{j=1}^{p} \\beta_j x_j + \\epsilon$$',
+                            options: [
+                                { flag: 'Coefficients', desc: 'Interpretation: changement de y pour 1 unite de x, autres fixes' },
+                                { flag: 'R2 ajuste', desc: 'Penalise l\'ajout de variables non utiles' },
+                                { flag: 'Multicolinearite', desc: 'Variables X correlees entre elles' }
+                            ],
+                            examples: [
+                                { code: `import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+X = data[['x1', 'x2', 'x3']]
+y = data['target']
+
+# Regression multiple
+X_sm = sm.add_constant(X)
+model = sm.OLS(y, X_sm).fit()
+print(model.summary())
+
+# VIF pour detecter la multicolinearite
+vif_data = pd.DataFrame()
+vif_data["Variable"] = X.columns
+vif_data["VIF"] = [variance_inflation_factor(X.values, i)
+                   for i in range(X.shape[1])]
+# VIF > 5-10 indique multicolinearite`, desc: 'Regression multiple avec VIF' }
+                            ],
+                            tips: [
+                                'VIF > 10 suggere une multicolinearite problematique',
+                                'Standardisez les variables pour comparer les coefficients'
+                            ],
+                            warnings: ['Plus de variables != meilleur modele']
+                        }
+                    },
+                    {
+                        cmd: 'Regression logistique',
+                        desc: 'Classification binaire',
+                        details: {
+                            explanation: 'Modelise la probabilite d\'appartenance a une classe.',
+                            syntax: '$$P(Y=1) = \\frac{1}{1 + e^{-(\\beta_0 + \\beta_1 x)}}$$',
+                            options: [
+                                { flag: 'Logit', desc: '$$\\log\\frac{p}{1-p} = \\beta_0 + \\beta_1 x$$' },
+                                { flag: 'Odds ratio', desc: '$$e^{\\beta_j}$$ = effet multiplicatif sur les odds' },
+                                { flag: 'Seuil', desc: 'Generalement 0.5 pour classification' }
+                            ],
+                            examples: [
+                                { code: `from sklearn.linear_model import LogisticRegression
+import statsmodels.api as sm
+
+# Avec sklearn
+model = LogisticRegression()
+model.fit(X_train, y_train)
+probs = model.predict_proba(X_test)[:, 1]
+
+# Avec statsmodels (pour les stats)
+X_sm = sm.add_constant(X)
+model_sm = sm.Logit(y, X_sm).fit()
+print(model_sm.summary())
+
+# Odds ratios
+odds_ratios = np.exp(model_sm.params)`, desc: 'Regression logistique' }
+                            ],
+                            tips: [
+                                'Interpretez les coefficients comme log-odds',
+                                'exp(coef) donne l\'odds ratio'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Analyse des residus',
+                        desc: 'Diagnostic du modele',
+                        details: {
+                            explanation: 'Les residus permettent de verifier les hypotheses du modele.',
+                            syntax: '$$e_i = y_i - \\hat{y}_i$$',
+                            options: [
+                                { flag: 'Normalite', desc: 'QQ-plot, test de Shapiro-Wilk' },
+                                { flag: 'Homoscedasticite', desc: 'Variance constante des residus' },
+                                { flag: 'Independance', desc: 'Pas d\'autocorrelation (Durbin-Watson)' },
+                                { flag: 'Linearite', desc: 'Residus vs fitted sans pattern' }
+                            ],
+                            examples: [
+                                { code: `import matplotlib.pyplot as plt
+from scipy import stats
+
+# Residus
+residuals = model.resid
+fitted = model.fittedvalues
+
+# QQ-plot pour normalite
+stats.probplot(residuals, plot=plt)
+
+# Residus vs Fitted
+plt.scatter(fitted, residuals)
+plt.axhline(y=0, color='r', linestyle='--')
+plt.xlabel('Fitted values')
+plt.ylabel('Residuals')
+
+# Test de Shapiro-Wilk
+stat, p = stats.shapiro(residuals)
+
+# Durbin-Watson (autocorrelation)
+from statsmodels.stats.stattools import durbin_watson
+dw = durbin_watson(residuals)  # ~2 = pas d'autocorrelation`, desc: 'Diagnostic des residus' }
+                            ],
+                            tips: [
+                                'Durbin-Watson proche de 2 = pas d\'autocorrelation',
+                                'Pattern en entonnoir dans residus = heteroscedasticite'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: CORRELATION & COVARIANCE
+            // ===============================================================
+            {
+                id: 'correlation',
+                title: 'Correlation & Covariance',
+                icon: 'fa-link',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Covariance',
+                        desc: 'Mesure de variation conjointe',
+                        details: {
+                            explanation: 'La covariance mesure comment deux variables varient ensemble.',
+                            syntax: '$$\\text{Cov}(X,Y) = E[(X - \\mu_X)(Y - \\mu_Y)]$$',
+                            options: [
+                                { flag: 'Cov > 0', desc: 'Les variables evoluent dans le meme sens' },
+                                { flag: 'Cov < 0', desc: 'Les variables evoluent en sens oppose' },
+                                { flag: 'Cov = 0', desc: 'Pas de relation lineaire (pas d\'independance!)' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+x = [1, 2, 3, 4, 5]
+y = [2, 4, 5, 4, 5]
+
+# Matrice de covariance
+cov_matrix = np.cov(x, y)
+# [[2.5, 1.75],
+#  [1.75, 1.3]]
+
+covariance_xy = np.cov(x, y)[0, 1]  # 1.75`, desc: 'Calcul de covariance' }
+                            ],
+                            tips: [
+                                'La covariance depend de l\'echelle des variables',
+                                'Utilisez la correlation pour une mesure standardisee'
+                            ],
+                            warnings: ['Cov = 0 n\'implique pas independance (juste pas de relation lineaire)']
+                        }
+                    },
+                    {
+                        cmd: 'Correlation de Pearson',
+                        desc: 'Relation lineaire',
+                        details: {
+                            explanation: 'Le coefficient de correlation de Pearson mesure la force de la relation lineaire.',
+                            syntax: '$$r = \\frac{\\text{Cov}(X,Y)}{\\sigma_X \\sigma_Y}$$',
+                            options: [
+                                { flag: 'r = 1', desc: 'Correlation positive parfaite' },
+                                { flag: 'r = -1', desc: 'Correlation negative parfaite' },
+                                { flag: 'r = 0', desc: 'Pas de correlation lineaire' },
+                                { flag: '|r| < 0.3', desc: 'Faible' },
+                                { flag: '0.3 <= |r| < 0.7', desc: 'Moderee' },
+                                { flag: '|r| >= 0.7', desc: 'Forte' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+import numpy as np
+
+x = [1, 2, 3, 4, 5]
+y = [2, 4, 5, 4, 5]
+
+# Correlation de Pearson avec p-value
+r, p_value = stats.pearsonr(x, y)
+# r = 0.75, p = 0.14
+
+# Matrice de correlation
+df.corr()  # pandas
+
+# Coefficient de determination
+r_squared = r ** 2  # 0.56 = 56% de variance expliquee`, desc: 'Correlation de Pearson' }
+                            ],
+                            tips: [
+                                'r^2 indique le pourcentage de variance expliquee',
+                                'Correlation != Causalite'
+                            ],
+                            warnings: ['Sensible aux outliers et suppose une relation lineaire']
+                        }
+                    },
+                    {
+                        cmd: 'Correlation de Spearman',
+                        desc: 'Relation monotone (rangs)',
+                        details: {
+                            explanation: 'Correlation de Spearman est basee sur les rangs, detecte les relations monotones non-lineaires.',
+                            syntax: '$$\\rho = 1 - \\frac{6\\sum d_i^2}{n(n^2-1)}$$',
+                            options: [
+                                { flag: 'Rangs', desc: 'Basee sur les rangs, pas les valeurs' },
+                                { flag: 'Monotone', desc: 'Detecte relations monotones (croissantes/decroissantes)' },
+                                { flag: 'Robuste', desc: 'Moins sensible aux outliers' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Relation non-lineaire mais monotone
+x = [1, 2, 3, 4, 5]
+y = [1, 4, 9, 16, 25]  # y = x^2
+
+# Pearson (sous-estime la relation)
+pearson_r, _ = stats.pearsonr(x, y)  # 0.98
+
+# Spearman (capture parfaitement)
+spearman_rho, _ = stats.spearmanr(x, y)  # 1.0
+
+# Kendall (autre alternative)
+tau, _ = stats.kendalltau(x, y)`, desc: 'Spearman vs Pearson' }
+                            ],
+                            tips: [
+                                'Utilisez Spearman quand la relation n\'est pas strictement lineaire',
+                                'Plus robuste que Pearson pour les donnees ordinales'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Correlation vs Causalite',
+                        desc: 'Pieges a eviter',
+                        details: {
+                            explanation: 'Une correlation n\'implique pas une relation de cause a effet.',
+                            syntax: 'Correlation != Causalite',
+                            options: [
+                                { flag: 'Confondeur', desc: 'Variable cachee qui cause les deux' },
+                                { flag: 'Causalite inverse', desc: 'Y cause X, pas X cause Y' },
+                                { flag: 'Coincidence', desc: 'Correlation due au hasard' },
+                                { flag: 'Biais de selection', desc: 'Echantillon non representatif' }
+                            ],
+                            examples: [
+                                { code: `# Exemple classique de confondeur:
+# Correlation: ventes de glaces et noyades
+# Cause commune: temperature elevee
+
+# Pour etablir la causalite:
+# 1. Experiment randomise (RCT)
+# 2. Analyse causale (DAGs, do-calculus)
+# 3. Variables instrumentales
+# 4. Difference-in-differences
+
+# Criteres de Bradford Hill:
+# - Force, Coherence, Temporalite, Gradient...`, desc: 'Causalite' }
+                            ],
+                            tips: [
+                                'Toujours chercher des confondeurs potentiels',
+                                'La temporalite est necessaire mais pas suffisante'
+                            ],
+                            warnings: ['Ne jamais conclure a la causalite sur la seule base de correlation']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: INTERVALLES DE CONFIANCE
+            // ===============================================================
+            {
+                id: 'confidence-intervals',
+                title: 'Intervalles de Confiance',
+                icon: 'fa-arrows-alt-h',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'IC pour la moyenne',
+                        desc: 'Intervalle de confiance',
+                        details: {
+                            explanation: 'L\'IC donne une plage de valeurs plausibles pour le parametre estime.',
+                            syntax: '$$\\bar{x} \\pm t_{\\alpha/2} \\cdot \\frac{s}{\\sqrt{n}}$$',
+                            options: [
+                                { flag: 'IC 95%', desc: 'Niveau de confiance le plus courant' },
+                                { flag: 't-distribution', desc: 'Pour petits echantillons (n < 30)' },
+                                { flag: 'z-distribution', desc: 'Pour grands echantillons (n >= 30)' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+import numpy as np
+
+data = [23, 25, 28, 30, 32, 35, 37]
+n = len(data)
+mean = np.mean(data)
+se = stats.sem(data)  # Erreur standard
+
+# IC 95%
+confidence = 0.95
+alpha = 1 - confidence
+t_crit = stats.t.ppf(1 - alpha/2, df=n-1)
+
+lower = mean - t_crit * se
+upper = mean + t_crit * se
+
+# Ou directement
+ci = stats.t.interval(confidence, df=n-1, loc=mean, scale=se)`, desc: 'IC pour la moyenne' }
+                            ],
+                            tips: [
+                                'IC plus large = plus d\'incertitude',
+                                'Augmenter n reduit la largeur de l\'IC'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'IC pour une proportion',
+                        desc: 'Intervalle pour pourcentage',
+                        details: {
+                            explanation: 'IC pour une proportion ou pourcentage dans la population.',
+                            syntax: '$$\\hat{p} \\pm z_{\\alpha/2} \\sqrt{\\frac{\\hat{p}(1-\\hat{p})}{n}}$$',
+                            options: [
+                                { flag: 'Wald', desc: 'Formule classique, peut donner des bornes hors [0,1]' },
+                                { flag: 'Wilson', desc: 'Plus precis pour petits n ou p proche de 0/1' },
+                                { flag: 'Clopper-Pearson', desc: 'Exact, conservateur' }
+                            ],
+                            examples: [
+                                { code: `from statsmodels.stats.proportion import proportion_confint
+
+# 45 succes sur 100 essais
+successes = 45
+n = 100
+p_hat = successes / n
+
+# Methode Wilson (recommandee)
+ci = proportion_confint(successes, n, method='wilson')
+# (0.354, 0.549)
+
+# Methode Wald (classique)
+ci_wald = proportion_confint(successes, n, method='normal')
+
+# Methode exacte (Clopper-Pearson)
+ci_exact = proportion_confint(successes, n, method='binom_test')`, desc: 'IC pour proportion' }
+                            ],
+                            tips: [
+                                'Wilson est recommande pour les petits echantillons',
+                                'Wald peut donner des IC hors [0,1]'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Taille d\'echantillon',
+                        desc: 'Calculer n necessaire',
+                        details: {
+                            explanation: 'Determiner la taille d\'echantillon pour une precision souhaitee.',
+                            syntax: '$$n = \\left(\\frac{z_{\\alpha/2} \\cdot \\sigma}{E}\\right)^2$$',
+                            options: [
+                                { flag: 'E', desc: 'Marge d\'erreur souhaitee' },
+                                { flag: 'sigma', desc: 'Ecart-type (estime ou connu)' },
+                                { flag: 'z', desc: '1.96 pour 95%, 2.58 pour 99%' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+import math
+
+# Pour estimer une moyenne
+confidence = 0.95
+z = stats.norm.ppf(1 - (1-confidence)/2)  # 1.96
+sigma = 10  # ecart-type estime
+margin_error = 2  # precision souhaitee
+
+n = (z * sigma / margin_error) ** 2
+n = math.ceil(n)  # 97
+
+# Pour estimer une proportion
+p = 0.5  # cas le plus conservateur
+margin_error = 0.05  # 5%
+
+n = (z ** 2) * p * (1-p) / (margin_error ** 2)
+n = math.ceil(n)  # 385`, desc: 'Calcul de taille d\'echantillon' }
+                            ],
+                            tips: [
+                                'p = 0.5 donne la taille maximale pour une proportion',
+                                'Doublez n pour diviser la marge d\'erreur par sqrt(2)'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: DIAGNOSTIC DES MODELES
+            // ===============================================================
+            {
+                id: 'model-diagnostic',
+                title: 'Diagnostic des Modeles',
+                icon: 'fa-stethoscope',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Homoscedasticite',
+                        desc: 'Variance constante',
+                        details: {
+                            explanation: 'Hypothese que la variance des erreurs est constante pour toutes les valeurs de X.',
+                            syntax: '$$\\text{Var}(\\epsilon_i) = \\sigma^2 \\quad \\forall i$$',
+                            options: [
+                                { flag: 'Homoscedasticite', desc: 'Variance constante (souhaite)' },
+                                { flag: 'Heteroscedasticite', desc: 'Variance non constante (probleme)' },
+                                { flag: 'Test de Breusch-Pagan', desc: 'Test formel d\'heteroscedasticite' }
+                            ],
+                            examples: [
+                                { code: `import statsmodels.api as sm
+from statsmodels.stats.diagnostic import het_breuschpagan
+
+# Ajuster le modele
+model = sm.OLS(y, X).fit()
+
+# Test de Breusch-Pagan
+bp_test = het_breuschpagan(model.resid, model.model.exog)
+# (LM stat, LM p-value, F stat, F p-value)
+
+if bp_test[1] < 0.05:
+    print("Heteroscedasticite detectee")
+
+# Solutions:
+# 1. Transformation log
+# 2. Erreurs standards robustes (HC)
+model_robust = sm.OLS(y, X).fit(cov_type='HC3')`, desc: 'Test d\'homoscedasticite' }
+                            ],
+                            tips: [
+                                'Graphique residus vs fitted: pattern en entonnoir = heteroscedasticite',
+                                'HC3 est recommande pour les erreurs robustes'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Normalite des residus',
+                        desc: 'Test de normalite',
+                        details: {
+                            explanation: 'Verifier que les residus suivent une distribution normale.',
+                            syntax: '$$\\epsilon_i \\sim \\mathcal{N}(0, \\sigma^2)$$',
+                            options: [
+                                { flag: 'QQ-plot', desc: 'Visualisation: points sur la diagonale' },
+                                { flag: 'Shapiro-Wilk', desc: 'Test formel, puissant pour n < 50' },
+                                { flag: 'Kolmogorov-Smirnov', desc: 'Alternative pour grands echantillons' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+import matplotlib.pyplot as plt
+
+residuals = model.resid
+
+# QQ-plot
+fig, ax = plt.subplots()
+stats.probplot(residuals, plot=ax)
+plt.title('Q-Q Plot')
+
+# Test de Shapiro-Wilk
+stat, p_value = stats.shapiro(residuals)
+if p_value > 0.05:
+    print("Residus normalement distribues")
+
+# Test de Jarque-Bera
+jb_stat, jb_p, skew, kurt = stats.jarque_bera(residuals)`, desc: 'Tests de normalite' }
+                            ],
+                            tips: [
+                                'La normalite est moins critique pour grands echantillons (TCL)',
+                                'Shapiro-Wilk est le plus puissant pour petits n'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Points influents et outliers',
+                        desc: 'Levier, Cook\'s D',
+                        details: {
+                            explanation: 'Identifier les observations qui influencent fortement le modele.',
+                            syntax: '$$D_i = \\frac{e_i^2}{p \\cdot MSE} \\cdot \\frac{h_{ii}}{(1-h_{ii})^2}$$',
+                            options: [
+                                { flag: 'Levier (h_ii)', desc: 'Influence de x_i sur sa propre prediction' },
+                                { flag: 'Residus studentises', desc: 'Residus standardises avec variance estimee sans l\'observation' },
+                                { flag: 'Distance de Cook', desc: 'Influence globale sur tous les coefficients' }
+                            ],
+                            examples: [
+                                { code: `import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import OLSInfluence
+
+model = sm.OLS(y, X).fit()
+influence = OLSInfluence(model)
+
+# Distance de Cook
+cooks_d = influence.cooks_distance[0]
+# Seuil: 4/n ou 1
+
+# Levier
+leverage = influence.hat_matrix_diag
+# Seuil: 2(p+1)/n
+
+# Residus studentises
+student_resid = influence.resid_studentized_external
+# Seuil: |t| > 2 ou 3
+
+# Identifier les points problematiques
+influential = np.where(cooks_d > 4/len(y))[0]`, desc: 'Points influents' }
+                            ],
+                            tips: [
+                                'Un point peut etre outlier en X (levier) ou en Y (residu)',
+                                'Cook\'s D > 1 suggere un point tres influent'
+                            ],
+                            warnings: ['Ne supprimez pas systematiquement les outliers sans justification']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: METRIQUES DE PERFORMANCE
+            // ===============================================================
+            {
+                id: 'metrics',
+                title: 'Metriques de Performance',
+                icon: 'fa-bullseye',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Metriques de regression',
+                        desc: 'MSE, RMSE, MAE, R2',
+                        details: {
+                            explanation: 'Metriques pour evaluer les modeles de regression.',
+                            syntax: '$$R^2 = 1 - \\frac{SS_{res}}{SS_{tot}} = 1 - \\frac{\\sum(y_i - \\hat{y}_i)^2}{\\sum(y_i - \\bar{y})^2}$$',
+                            options: [
+                                { flag: 'MSE', desc: '$$\\frac{1}{n}\\sum(y - \\hat{y})^2$$ - penalise fortement les grandes erreurs' },
+                                { flag: 'RMSE', desc: '$$\\sqrt{MSE}$$ - meme unite que y' },
+                                { flag: 'MAE', desc: '$$\\frac{1}{n}\\sum|y - \\hat{y}|$$ - robuste aux outliers' },
+                                { flag: 'R2', desc: 'Proportion de variance expliquee [0,1]' },
+                                { flag: 'R2 ajuste', desc: 'Penalise l\'ajout de variables' },
+                                { flag: 'MAPE', desc: '$$\\frac{100}{n}\\sum|\\frac{y - \\hat{y}}{y}|$$ - erreur en %' }
+                            ],
+                            examples: [
+                                { code: `from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+import numpy as np
+
+y_true = [3, 5, 2, 7]
+y_pred = [2.5, 5, 4, 8]
+
+mse = mean_squared_error(y_true, y_pred)      # 1.3125
+rmse = np.sqrt(mse)                           # 1.145
+mae = mean_absolute_error(y_true, y_pred)     # 1.0
+r2 = r2_score(y_true, y_pred)                 # 0.80
+
+# MAPE
+mape = np.mean(np.abs((y_true - y_pred) / y_true)) * 100`, desc: 'Metriques regression' }
+                            ],
+                            tips: [
+                                'RMSE est plus sensible aux grandes erreurs que MAE',
+                                'R2 peut etre negatif si le modele est pire que la moyenne'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Metriques de classification',
+                        desc: 'Accuracy, Precision, Recall, F1',
+                        details: {
+                            explanation: 'Metriques pour evaluer les modeles de classification.',
+                            syntax: '$$F_1 = 2 \\cdot \\frac{\\text{Precision} \\cdot \\text{Recall}}{\\text{Precision} + \\text{Recall}}$$',
+                            options: [
+                                { flag: 'Accuracy', desc: '$$\\frac{TP + TN}{Total}$$ - taux global' },
+                                { flag: 'Precision', desc: '$$\\frac{TP}{TP + FP}$$ - parmi les positifs predits' },
+                                { flag: 'Recall (Sensitivity)', desc: '$$\\frac{TP}{TP + FN}$$ - parmi les vrais positifs' },
+                                { flag: 'Specificity', desc: '$$\\frac{TN}{TN + FP}$$ - parmi les vrais negatifs' },
+                                { flag: 'F1-score', desc: 'Moyenne harmonique precision/recall' }
+                            ],
+                            examples: [
+                                { code: `from sklearn.metrics import (accuracy_score, precision_score,
+    recall_score, f1_score, classification_report, confusion_matrix)
+
+y_true = [1, 0, 1, 1, 0, 1, 0, 0]
+y_pred = [1, 0, 1, 0, 0, 1, 1, 0]
+
+acc = accuracy_score(y_true, y_pred)      # 0.75
+prec = precision_score(y_true, y_pred)    # 0.75
+rec = recall_score(y_true, y_pred)        # 0.75
+f1 = f1_score(y_true, y_pred)             # 0.75
+
+# Rapport complet
+print(classification_report(y_true, y_pred))
+
+# Matrice de confusion
+cm = confusion_matrix(y_true, y_pred)`, desc: 'Metriques classification' }
+                            ],
+                            tips: [
+                                'Classes desequilibrees: utilisez F1 plutot qu\'accuracy',
+                                'Precision importante si FP couteux, Recall si FN couteux'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Courbe ROC et AUC',
+                        desc: 'Performance a tous les seuils',
+                        details: {
+                            explanation: 'La courbe ROC montre le compromis entre sensibilite et specificite.',
+                            syntax: 'AUC = Aire sous la courbe ROC [0.5, 1]',
+                            options: [
+                                { flag: 'ROC', desc: 'TPR (Recall) vs FPR (1-Specificity)' },
+                                { flag: 'AUC = 0.5', desc: 'Classificateur aleatoire' },
+                                { flag: 'AUC = 1', desc: 'Classificateur parfait' },
+                                { flag: 'AUC ~ 0.7-0.8', desc: 'Acceptable' },
+                                { flag: 'AUC > 0.9', desc: 'Excellent' }
+                            ],
+                            examples: [
+                                { code: `from sklearn.metrics import roc_curve, roc_auc_score, auc
+import matplotlib.pyplot as plt
+
+# Probabilites predites
+y_proba = model.predict_proba(X_test)[:, 1]
+
+# Courbe ROC
+fpr, tpr, thresholds = roc_curve(y_test, y_proba)
+roc_auc = auc(fpr, tpr)
+
+# Visualisation
+plt.plot(fpr, tpr, label=f'AUC = {roc_auc:.3f}')
+plt.plot([0, 1], [0, 1], 'k--', label='Random')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.legend()
+
+# AUC directement
+auc_score = roc_auc_score(y_test, y_proba)`, desc: 'ROC et AUC' }
+                            ],
+                            tips: [
+                                'AUC est independant du seuil de classification',
+                                'Pour multi-classe, utilisez One-vs-Rest ou One-vs-One'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: ANALYSE MULTIVARIEE
+            // ===============================================================
+            {
+                id: 'multivariate',
+                title: 'Analyse Multivariee',
+                icon: 'fa-cubes',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Analyse en Composantes Principales',
+                        desc: 'PCA - Reduction de dimension',
+                        details: {
+                            explanation: 'PCA projette les donnees sur les axes de variance maximale.',
+                            syntax: '$$\\text{max } w^T \\Sigma w \\quad \\text{s.t. } \\|w\\| = 1$$',
+                            options: [
+                                { flag: 'Composantes', desc: 'Vecteurs propres de la matrice de covariance' },
+                                { flag: 'Variance expliquee', desc: 'Valeurs propres / somme des valeurs propres' },
+                                { flag: 'Loadings', desc: 'Correlation entre variables et composantes' }
+                            ],
+                            examples: [
+                                { code: `from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+# Standardiser (important pour PCA)
+X_scaled = StandardScaler().fit_transform(X)
+
+# PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+# Variance expliquee
+print(pca.explained_variance_ratio_)
+# [0.72, 0.18] -> PC1 explique 72%, PC2 18%
+
+# Variance cumulee
+cum_var = np.cumsum(pca.explained_variance_ratio_)
+
+# Loadings (composantes)
+loadings = pca.components_`, desc: 'PCA en Python' }
+                            ],
+                            tips: [
+                                'Toujours standardiser avant PCA',
+                                'Garder les composantes qui expliquent 80-95% de la variance'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Clustering K-Means',
+                        desc: 'Regroupement non supervise',
+                        details: {
+                            explanation: 'K-Means partitionne les donnees en k clusters en minimisant l\'inertie.',
+                            syntax: '$$\\text{min } \\sum_{i=1}^{k} \\sum_{x \\in C_i} \\|x - \\mu_i\\|^2$$',
+                            options: [
+                                { flag: 'Inertie', desc: 'Somme des distances au centroide' },
+                                { flag: 'Elbow method', desc: 'Choisir k ou l\'inertie se stabilise' },
+                                { flag: 'Silhouette', desc: 'Mesure de qualite des clusters [-1, 1]' }
+                            ],
+                            examples: [
+                                { code: `from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+# Elbow method
+inertias = []
+K_range = range(1, 11)
+for k in K_range:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(X_scaled)
+    inertias.append(kmeans.inertia_)
+
+# Silhouette score
+scores = []
+for k in range(2, 11):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    labels = kmeans.fit_predict(X_scaled)
+    scores.append(silhouette_score(X_scaled, labels))
+
+# Meilleur K
+best_k = K_range[np.argmax(scores)]`, desc: 'K-Means et choix de k' }
+                            ],
+                            tips: [
+                                'Standardiser les donnees avant clustering',
+                                'Silhouette proche de 1 = clusters bien separes'
+                            ],
+                            warnings: ['K-Means suppose des clusters spheriques']
+                        }
+                    },
+                    {
+                        cmd: 'MANOVA',
+                        desc: 'ANOVA multivariee',
+                        details: {
+                            explanation: 'MANOVA teste si les groupes different sur plusieurs variables dependantes.',
+                            syntax: 'Test simultanee sur plusieurs variables Y',
+                            options: [
+                                { flag: 'Wilks\' Lambda', desc: 'Statistique de test la plus courante' },
+                                { flag: 'Pillai\'s Trace', desc: 'Plus robuste aux violations' },
+                                { flag: 'Hotelling\'s Trace', desc: 'Pour 2 groupes' }
+                            ],
+                            examples: [
+                                { code: `from statsmodels.multivariate.manova import MANOVA
+import pandas as pd
+
+# Donnees avec plusieurs Y
+df = pd.DataFrame({
+    'y1': [...],
+    'y2': [...],
+    'group': [...]
+})
+
+# MANOVA
+maov = MANOVA.from_formula('y1 + y2 ~ group', data=df)
+print(maov.mv_test())
+
+# Resultats:
+# Wilks' lambda, Pillai's trace, etc.`, desc: 'MANOVA' }
+                            ],
+                            tips: [
+                                'Suivez d\'ANOVA separees si MANOVA significative',
+                                'Verifiez l\'homogeneite des matrices de covariance'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Analyse Discriminante',
+                        desc: 'LDA - Classification supervisee',
+                        details: {
+                            explanation: 'LDA trouve les axes qui maximisent la separation entre classes.',
+                            syntax: '$$\\text{max } \\frac{w^T S_B w}{w^T S_W w}$$',
+                            options: [
+                                { flag: 'S_B', desc: 'Matrice de variance inter-classes' },
+                                { flag: 'S_W', desc: 'Matrice de variance intra-classes' },
+                                { flag: 'Reduction', desc: 'Max k-1 composantes pour k classes' }
+                            ],
+                            examples: [
+                                { code: `from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
+# LDA pour classification
+lda = LinearDiscriminantAnalysis()
+lda.fit(X_train, y_train)
+y_pred = lda.predict(X_test)
+
+# LDA pour reduction de dimension
+lda_dim = LinearDiscriminantAnalysis(n_components=2)
+X_lda = lda_dim.fit_transform(X, y)
+
+# Variance expliquee
+print(lda_dim.explained_variance_ratio_)`, desc: 'LDA en Python' }
+                            ],
+                            tips: [
+                                'LDA est supervisee (utilise les labels), PCA non',
+                                'LDA suppose des distributions normales par classe'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <!-- Logique commune -->
+    <script src="../js/cheatsheet.js"></script>
+
+    <!-- Initialisation KaTeX -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+
+        const originalShowModal = window.showModal;
+        if (originalShowModal) {
+            window.showModal = function(categoryId, commandIndex) {
+                originalShowModal(categoryId, commandIndex);
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        renderMathInElement(document.getElementById('modalContent'), {
+                            delimiters: [
+                                {left: '$$', right: '$$', display: true},
+                                {left: '$', right: '$', display: false}
+                            ],
+                            throwOnError: false
+                        });
+                    }
+                }, 100);
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Probabilites : distributions, Bayes, theoremes fondamentaux et inference.">
+    <title>Probabilites - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- KaTeX pour les formules mathematiques -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        .formula {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+        .formula-inline {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .katex { font-size: 1.1em; }
+        .katex-display { margin: 0.5em 0; }
+        .formula-name {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-rose-500/20 mb-4 icon-glow">
+                    <i class="fas fa-dice text-3xl text-rose-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Probabilites</h1>
+                <p class="text-slate-400">Distributions, Bayes, theoremes fondamentaux et inference</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: bayes, normale, esperance)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: FONDATIONS
+            // ===============================================================
+            {
+                id: 'foundations',
+                title: 'Fondations',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Axiomes de Kolmogorov',
+                        desc: 'Definition formelle des probabilites',
+                        details: {
+                            explanation: 'Les trois axiomes fondamentaux qui definissent une mesure de probabilite.',
+                            syntax: '$$P: \\mathcal{F} \\to [0, 1]$$',
+                            options: [
+                                { flag: 'Axiome 1', desc: '$$P(A) \\geq 0$$ pour tout evenement A' },
+                                { flag: 'Axiome 2', desc: '$$P(\\Omega) = 1$$ (certitude)' },
+                                { flag: 'Axiome 3', desc: '$$P(A \\cup B) = P(A) + P(B)$$ si A et B disjoints' }
+                            ],
+                            examples: [
+                                { code: `# Consequences des axiomes
+# P(complementaire) = 1 - P(A)
+# P(impossible) = 0
+# P(A) <= 1
+
+# Exemple: lancer de de
+omega = {1, 2, 3, 4, 5, 6}
+P_pair = 3/6  # P({2,4,6}) = 0.5`, desc: 'Proprietes de base' }
+                            ],
+                            tips: [
+                                'Omega est l\'espace des possibles (univers)',
+                                'L\'axiome 3 s\'etend a une union denombrable'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Operations ensemblistes',
+                        desc: 'Union, intersection, complementaire',
+                        details: {
+                            explanation: 'Operations de base sur les evenements.',
+                            syntax: '$$P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$$',
+                            options: [
+                                { flag: 'Union', desc: '$$A \\cup B$$ - A ou B (au moins un)' },
+                                { flag: 'Intersection', desc: '$$A \\cap B$$ - A et B (les deux)' },
+                                { flag: 'Complementaire', desc: '$$\\bar{A}$$ ou $$A^c$$ - non A' },
+                                { flag: 'Difference', desc: '$$A \\setminus B = A \\cap \\bar{B}$$' }
+                            ],
+                            examples: [
+                                { code: `# Formule d'inclusion-exclusion
+# P(A ou B) = P(A) + P(B) - P(A et B)
+
+# Exemple: cartes
+# A = tirer un coeur, B = tirer un roi
+P_A = 13/52  # 13 coeurs
+P_B = 4/52   # 4 rois
+P_A_et_B = 1/52  # roi de coeur
+
+P_A_ou_B = P_A + P_B - P_A_et_B  # 16/52`, desc: 'Inclusion-exclusion' }
+                            ],
+                            tips: [
+                                'Toujours soustraire l\'intersection pour eviter le double comptage',
+                                'Pour 3 evenements: P(A+B+C) = P(A)+P(B)+P(C)-P(AB)-P(AC)-P(BC)+P(ABC)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Independance',
+                        desc: 'Evenements independants',
+                        details: {
+                            explanation: 'Deux evenements sont independants si l\'occurrence de l\'un n\'affecte pas l\'autre.',
+                            syntax: '$$P(A \\cap B) = P(A) \\cdot P(B)$$',
+                            options: [
+                                { flag: 'Definition', desc: '$$P(A \\cap B) = P(A) \\cdot P(B)$$' },
+                                { flag: 'Consequence', desc: '$$P(A|B) = P(A)$$' },
+                                { flag: 'Attention', desc: 'Independance != Disjoints' }
+                            ],
+                            examples: [
+                                { code: `# Deux lancers de pieces
+P_face_1 = 0.5
+P_face_2 = 0.5
+
+# Independance: P(Face1 ET Face2)
+P_deux_faces = P_face_1 * P_face_2  # 0.25
+
+# Attention: disjoints implique NON independants
+# Si A et B disjoints: P(A et B) = 0
+# Mais P(A)*P(B) > 0 (si P(A), P(B) > 0)
+# Donc P(A et B) != P(A)*P(B)`, desc: 'Independance vs disjoints' }
+                            ],
+                            tips: [
+                                'Disjoints = ne peuvent pas arriver ensemble',
+                                'Independants = l\'un n\'influence pas l\'autre'
+                            ],
+                            warnings: ['Independance et disjonction sont des concepts differents!']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: PROBABILITES CONDITIONNELLES
+            // ===============================================================
+            {
+                id: 'conditional',
+                title: 'Probabilites Conditionnelles',
+                icon: 'fa-code-branch',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Probabilite conditionnelle',
+                        desc: 'P(A|B) - A sachant B',
+                        details: {
+                            explanation: 'Probabilite d\'un evenement sachant qu\'un autre s\'est produit.',
+                            syntax: '$$P(A|B) = \\frac{P(A \\cap B)}{P(B)}$$',
+                            options: [
+                                { flag: 'Definition', desc: '$$P(A|B) = \\frac{P(A \\cap B)}{P(B)}$$ si $$P(B) > 0$$' },
+                                { flag: 'Regle du produit', desc: '$$P(A \\cap B) = P(A|B) \\cdot P(B)$$' },
+                                { flag: 'Chaine', desc: '$$P(A \\cap B \\cap C) = P(A) \\cdot P(B|A) \\cdot P(C|A,B)$$' }
+                            ],
+                            examples: [
+                                { code: `# Exemple: maladie et test
+# P(malade) = 0.01
+# P(test+|malade) = 0.99
+# P(test+|sain) = 0.05
+
+P_malade = 0.01
+P_test_pos_si_malade = 0.99
+P_test_pos_si_sain = 0.05
+
+# P(malade ET test+)
+P_malade_et_test_pos = P_malade * P_test_pos_si_malade
+# = 0.01 * 0.99 = 0.0099`, desc: 'Probabilite conditionnelle' }
+                            ],
+                            tips: [
+                                'P(A|B) != P(B|A) en general',
+                                'La regle du produit s\'enchaine pour plusieurs evenements'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Formule des probabilites totales',
+                        desc: 'Partition de l\'espace',
+                        details: {
+                            explanation: 'Decompose une probabilite selon une partition de l\'espace.',
+                            syntax: '$$P(A) = \\sum_i P(A|B_i) \\cdot P(B_i)$$',
+                            options: [
+                                { flag: 'Partition', desc: '$$B_1, B_2, ...,$$ disjoints et couvrent $$\\Omega$$' },
+                                { flag: 'Formule', desc: '$$P(A) = \\sum_i P(A|B_i) P(B_i)$$' }
+                            ],
+                            examples: [
+                                { code: `# Exemple: 3 machines produisent des pieces
+# Machine 1: 50% de la prod, 3% defaut
+# Machine 2: 30% de la prod, 4% defaut
+# Machine 3: 20% de la prod, 5% defaut
+
+# P(piece defectueuse) = ?
+P_defaut = (0.50 * 0.03 +
+            0.30 * 0.04 +
+            0.20 * 0.05)
+# = 0.015 + 0.012 + 0.010 = 0.037 = 3.7%`, desc: 'Probabilites totales' }
+                            ],
+                            tips: [
+                                'Utile pour calculer P(A) quand on connait P(A|conditions)',
+                                'La partition doit etre exhaustive et mutuellement exclusive'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: THEOREME DE BAYES
+            // ===============================================================
+            {
+                id: 'bayes',
+                title: 'Theoreme de Bayes',
+                icon: 'fa-exchange-alt',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Formule de Bayes',
+                        desc: 'Inverser les conditionnelles',
+                        details: {
+                            explanation: 'Permet de calculer P(cause|effet) a partir de P(effet|cause).',
+                            syntax: '$$P(A|B) = \\frac{P(B|A) \\cdot P(A)}{P(B)}$$',
+                            options: [
+                                { flag: 'Prior', desc: '$$P(A)$$ - croyance initiale' },
+                                { flag: 'Likelihood', desc: '$$P(B|A)$$ - vraisemblance' },
+                                { flag: 'Evidence', desc: '$$P(B)$$ - normalisation' },
+                                { flag: 'Posterior', desc: '$$P(A|B)$$ - croyance mise a jour' }
+                            ],
+                            examples: [
+                                { code: `# Test medical (suite de l'exemple)
+P_malade = 0.01       # Prior
+P_test_pos_si_malade = 0.99  # Likelihood (sensibilite)
+P_test_pos_si_sain = 0.05    # Faux positifs
+
+# P(test+) par proba totales
+P_test_pos = (P_malade * P_test_pos_si_malade +
+              (1-P_malade) * P_test_pos_si_sain)
+# = 0.0099 + 0.0495 = 0.0594
+
+# P(malade | test+) par Bayes
+P_malade_si_test_pos = (P_test_pos_si_malade * P_malade) / P_test_pos
+# = 0.0099 / 0.0594 = 0.167 = 16.7%
+
+# Meme avec un test a 99%, seulement 16.7% de chance d'etre malade!`, desc: 'Bayes applique au diagnostic' }
+                            ],
+                            tips: [
+                                'Le paradoxe du test: un bon test peut donner beaucoup de faux positifs si la maladie est rare',
+                                'Posterior est proportionnel a Prior x Likelihood'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Inference bayesienne',
+                        desc: 'Mise a jour des croyances',
+                        details: {
+                            explanation: 'Processus iteratif de mise a jour des probabilites avec de nouvelles donnees.',
+                            syntax: '$$P(\\theta|D) \\propto P(D|\\theta) \\cdot P(\\theta)$$',
+                            options: [
+                                { flag: 'Mise a jour sequentielle', desc: 'Le posterior devient le prior pour la prochaine observation' },
+                                { flag: 'Prior conjugue', desc: 'Prior et posterior de meme famille' }
+                            ],
+                            examples: [
+                                { code: `# Estimation de la probabilite d'une piece
+# Prior: Beta(1,1) = Uniforme
+
+from scipy import stats
+import numpy as np
+
+# Observations: 7 faces sur 10 lancers
+faces = 7
+lancers = 10
+
+# Prior Beta(1,1)
+alpha_prior, beta_prior = 1, 1
+
+# Posterior Beta(alpha + faces, beta + piles)
+alpha_post = alpha_prior + faces
+beta_post = beta_prior + (lancers - faces)
+
+# Posterior: Beta(8, 4)
+posterior = stats.beta(alpha_post, beta_post)
+print(f"E[p] = {posterior.mean():.3f}")  # 0.667
+print(f"IC 95% = {posterior.interval(0.95)}")`, desc: 'Inference bayesienne Beta-Binomial' }
+                            ],
+                            tips: [
+                                'Beta est le prior conjugue pour la binomiale',
+                                'Normale est le prior conjugue pour la normale (variance connue)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Odds et Bayes Factor',
+                        desc: 'Forme multiplicative de Bayes',
+                        details: {
+                            explanation: 'Forme alternative utilisant les odds (cotes) au lieu des probabilites.',
+                            syntax: '$$\\frac{P(H|D)}{P(\\neg H|D)} = \\frac{P(D|H)}{P(D|\\neg H)} \\cdot \\frac{P(H)}{P(\\neg H)}$$',
+                            options: [
+                                { flag: 'Prior odds', desc: '$$\\frac{P(H)}{P(\\neg H)}$$' },
+                                { flag: 'Bayes factor', desc: '$$\\frac{P(D|H)}{P(D|\\neg H)}$$ = likelihood ratio' },
+                                { flag: 'Posterior odds', desc: 'Prior odds x Bayes factor' }
+                            ],
+                            examples: [
+                                { code: `# Exemple: detection de spam
+# Prior: P(spam) = 0.4
+prior_odds = 0.4 / 0.6  # 2:3
+
+# Le mot "gratuit" apparait
+# P("gratuit"|spam) = 0.8
+# P("gratuit"|ham) = 0.1
+bayes_factor = 0.8 / 0.1  # 8
+
+# Posterior odds
+posterior_odds = prior_odds * bayes_factor  # 5.33
+
+# Convertir en probabilite
+# odds = p/(1-p) => p = odds/(1+odds)
+P_spam_posterior = posterior_odds / (1 + posterior_odds)
+# = 0.842 = 84.2%`, desc: 'Odds et Bayes Factor' }
+                            ],
+                            tips: [
+                                'Bayes factor > 10: forte evidence',
+                                'Bayes factor 3-10: evidence moderee'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: VARIABLES ALEATOIRES
+            // ===============================================================
+            {
+                id: 'random-variables',
+                title: 'Variables Aleatoires',
+                icon: 'fa-random',
+                color: 'border-l-4 border-yellow-500',
+                commands: [
+                    {
+                        cmd: 'Esperance',
+                        desc: 'E[X] - Valeur moyenne',
+                        details: {
+                            explanation: 'L\'esperance est la moyenne ponderee par les probabilites.',
+                            syntax: '$$E[X] = \\sum_x x \\cdot P(X=x) \\quad \\text{ou} \\quad E[X] = \\int x \\cdot f(x) dx$$',
+                            options: [
+                                { flag: 'Linearite', desc: '$$E[aX + b] = a \\cdot E[X] + b$$' },
+                                { flag: 'Somme', desc: '$$E[X + Y] = E[X] + E[Y]$$ (toujours)' },
+                                { flag: 'Produit', desc: '$$E[XY] = E[X] \\cdot E[Y]$$ (si independants)' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+from scipy import stats
+
+# Variable discrete
+valeurs = [1, 2, 3, 4, 5, 6]
+proba = [1/6] * 6
+E_X = np.sum([x * p for x, p in zip(valeurs, proba)])  # 3.5
+
+# Variable continue (distribution)
+normal = stats.norm(loc=5, scale=2)
+E_X = normal.mean()  # 5
+
+# Loi des grands nombres
+n = 10000
+samples = normal.rvs(n)
+print(np.mean(samples))  # ~5`, desc: 'Calcul d\'esperance' }
+                            ],
+                            tips: [
+                                'L\'esperance peut ne pas exister (ex: Cauchy)',
+                                'E[X] n\'est pas forcement une valeur possible de X'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Variance et ecart-type',
+                        desc: 'Var(X), dispersion',
+                        details: {
+                            explanation: 'La variance mesure la dispersion autour de l\'esperance.',
+                            syntax: '$$\\text{Var}(X) = E[(X - \\mu)^2] = E[X^2] - E[X]^2$$',
+                            options: [
+                                { flag: 'Definition', desc: '$$\\text{Var}(X) = E[(X - E[X])^2]$$' },
+                                { flag: 'Formule de Konig', desc: '$$\\text{Var}(X) = E[X^2] - (E[X])^2$$' },
+                                { flag: 'Transformation', desc: '$$\\text{Var}(aX + b) = a^2 \\cdot \\text{Var}(X)$$' },
+                                { flag: 'Somme independants', desc: '$$\\text{Var}(X + Y) = \\text{Var}(X) + \\text{Var}(Y)$$' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+from scipy import stats
+
+# De a 6 faces
+valeurs = [1, 2, 3, 4, 5, 6]
+proba = [1/6] * 6
+
+E_X = np.sum([x * p for x, p in zip(valeurs, proba)])  # 3.5
+E_X2 = np.sum([x**2 * p for x, p in zip(valeurs, proba)])  # 15.17
+
+Var_X = E_X2 - E_X**2  # 2.92
+std_X = np.sqrt(Var_X)  # 1.71
+
+# Avec scipy
+normal = stats.norm(loc=5, scale=2)
+print(normal.var())  # 4
+print(normal.std())  # 2`, desc: 'Calcul de variance' }
+                            ],
+                            tips: [
+                                'La variance de constante est 0',
+                                'Var(X+Y) = Var(X) + Var(Y) + 2Cov(X,Y) en general'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Fonctions de distribution',
+                        desc: 'PDF, CDF, PMF',
+                        details: {
+                            explanation: 'Differentes facons de decrire une distribution de probabilite.',
+                            syntax: '$$F(x) = P(X \\leq x) = \\int_{-\\infty}^{x} f(t) dt$$',
+                            options: [
+                                { flag: 'PMF (discrete)', desc: '$$p(x) = P(X = x)$$' },
+                                { flag: 'PDF (continue)', desc: '$$f(x)$$ telle que $$P(a \\leq X \\leq b) = \\int_a^b f(x)dx$$' },
+                                { flag: 'CDF', desc: '$$F(x) = P(X \\leq x)$$' },
+                                { flag: 'Quantile', desc: '$$F^{-1}(p) = x$$ tel que $$F(x) = p$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Distribution normale
+normal = stats.norm(loc=0, scale=1)
+
+# PDF (densite)
+pdf_value = normal.pdf(0)  # 0.399
+
+# CDF (probabilite cumulee)
+cdf_value = normal.cdf(1.96)  # 0.975
+
+# Quantile (inverse de CDF)
+quantile = normal.ppf(0.975)  # 1.96
+
+# P(a < X < b)
+prob = normal.cdf(1) - normal.cdf(-1)  # 0.683 (68%)`, desc: 'PDF, CDF, Quantiles' }
+                            ],
+                            tips: [
+                                'PDF n\'est pas une probabilite (peut etre > 1)',
+                                'CDF est toujours croissante de 0 a 1'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: LOIS DISCRETES
+            // ===============================================================
+            {
+                id: 'discrete',
+                title: 'Lois Discretes',
+                icon: 'fa-dice',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Bernoulli',
+                        desc: 'Succes/Echec',
+                        details: {
+                            explanation: 'Experience avec deux issues possibles (succes avec probabilite p).',
+                            syntax: '$$P(X = k) = p^k (1-p)^{1-k}$$ pour $$k \\in \\{0, 1\\}$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = p$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = p(1-p)$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Piece truquee: P(face) = 0.6
+p = 0.6
+bernoulli = stats.bernoulli(p)
+
+E_X = bernoulli.mean()  # 0.6
+Var_X = bernoulli.var()  # 0.24
+
+# Simulation
+samples = bernoulli.rvs(1000)
+print(samples.mean())  # ~0.6`, desc: 'Bernoulli' }
+                            ],
+                            tips: [
+                                'La somme de n Bernoulli donne une binomiale',
+                                'Variance max quand p = 0.5'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Binomiale',
+                        desc: 'Nombre de succes sur n essais',
+                        details: {
+                            explanation: 'Nombre de succes parmi n essais independants de Bernoulli.',
+                            syntax: '$$P(X = k) = \\binom{n}{k} p^k (1-p)^{n-k}$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = np$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = np(1-p)$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# 20 lancers de piece, P(face) = 0.5
+n, p = 20, 0.5
+binom = stats.binom(n, p)
+
+# P(exactement 10 faces)
+P_10 = binom.pmf(10)  # 0.176
+
+# P(au moins 15 faces)
+P_15_plus = 1 - binom.cdf(14)  # 0.021
+
+E_X = binom.mean()  # 10
+Var_X = binom.var()  # 5`, desc: 'Binomiale' }
+                            ],
+                            tips: [
+                                'Approximation normale si np >= 5 et n(1-p) >= 5',
+                                'Approximation Poisson si n grand et p petit (np ~ lambda)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Poisson',
+                        desc: 'Evenements rares',
+                        details: {
+                            explanation: 'Nombre d\'evenements dans un intervalle quand le taux moyen est lambda.',
+                            syntax: '$$P(X = k) = \\frac{\\lambda^k e^{-\\lambda}}{k!}$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = \\lambda$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = \\lambda$$' },
+                                { flag: 'Additivite', desc: '$$X_1 + X_2 \\sim \\text{Poisson}(\\lambda_1 + \\lambda_2)$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Moyenne de 5 appels par heure
+lambda_ = 5
+poisson = stats.poisson(lambda_)
+
+# P(exactement 3 appels)
+P_3 = poisson.pmf(3)  # 0.140
+
+# P(plus de 8 appels)
+P_8_plus = 1 - poisson.cdf(8)  # 0.068
+
+# E[X] = Var(X) = lambda
+print(poisson.mean(), poisson.var())  # 5, 5`, desc: 'Poisson' }
+                            ],
+                            tips: [
+                                'E[X] = Var(X) est caracteristique de Poisson',
+                                'Modele les evenements rares: arrivees, defauts, etc.'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Geometrique',
+                        desc: 'Attente du premier succes',
+                        details: {
+                            explanation: 'Nombre d\'essais jusqu\'au premier succes.',
+                            syntax: '$$P(X = k) = (1-p)^{k-1} p$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = \\frac{1}{p}$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = \\frac{1-p}{p^2}$$' },
+                                { flag: 'Sans memoire', desc: '$$P(X > m+n | X > m) = P(X > n)$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# P(succes) = 0.2, combien d'essais?
+p = 0.2
+geom = stats.geom(p)
+
+# P(premier succes au 5e essai)
+P_5 = geom.pmf(5)  # 0.082
+
+# Esperance: 1/p
+E_X = geom.mean()  # 5
+Var_X = geom.var()  # 20
+
+# P(plus de 10 essais necessaires)
+P_plus_10 = 1 - geom.cdf(10)  # 0.107`, desc: 'Geometrique' }
+                            ],
+                            tips: [
+                                'La propriete sans memoire: le passe n\'influence pas le futur',
+                                'Scipy utilise la convention k = nombre d\'essais (pas d\'echecs)'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: LOIS CONTINUES
+            // ===============================================================
+            {
+                id: 'continuous',
+                title: 'Lois Continues',
+                icon: 'fa-wave-square',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Uniforme',
+                        desc: 'Equiprobable sur [a, b]',
+                        details: {
+                            explanation: 'Toutes les valeurs dans l\'intervalle ont la meme densite.',
+                            syntax: '$$f(x) = \\frac{1}{b-a}$$ pour $$x \\in [a, b]$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = \\frac{a+b}{2}$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = \\frac{(b-a)^2}{12}$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Uniforme sur [0, 10]
+uniform = stats.uniform(loc=0, scale=10)  # scale = b-a
+
+E_X = uniform.mean()  # 5
+Var_X = uniform.var()  # 8.33
+
+# P(3 < X < 7)
+prob = uniform.cdf(7) - uniform.cdf(3)  # 0.4
+
+# Generation aleatoire
+samples = uniform.rvs(1000)`, desc: 'Uniforme continue' }
+                            ],
+                            tips: [
+                                'Utile pour generer des nombres aleatoires',
+                                'Transformation: si U ~ Uniform(0,1), F^-1(U) ~ F'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Normale (Gaussienne)',
+                        desc: 'La distribution la plus importante',
+                        details: {
+                            explanation: 'Distribution en cloche, caracterisee par sa moyenne et son ecart-type.',
+                            syntax: '$$f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = \\mu$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = \\sigma^2$$' },
+                                { flag: 'Regle 68-95-99.7', desc: '68% dans $$\\mu \\pm \\sigma$$, 95% dans $$\\mu \\pm 2\\sigma$$' },
+                                { flag: 'Standardisation', desc: '$$Z = \\frac{X - \\mu}{\\sigma} \\sim N(0,1)$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# N(mu=100, sigma=15)
+normal = stats.norm(loc=100, scale=15)
+
+# P(X < 115)
+prob = normal.cdf(115)  # 0.841
+
+# Quantile 95%
+q95 = normal.ppf(0.95)  # 124.67
+
+# Z-score
+x = 130
+z = (x - 100) / 15  # 2.0
+
+# Intervalles
+print(f"68%: [{normal.ppf(0.16):.1f}, {normal.ppf(0.84):.1f}]")
+# 68%: [85.1, 114.9]`, desc: 'Normale' }
+                            ],
+                            tips: [
+                                'La somme de normales est normale',
+                                'TCL: la moyenne d\'echantillon tend vers normale'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Exponentielle',
+                        desc: 'Temps d\'attente',
+                        details: {
+                            explanation: 'Temps jusqu\'au prochain evenement dans un processus de Poisson.',
+                            syntax: '$$f(x) = \\lambda e^{-\\lambda x}$$ pour $$x \\geq 0$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = \\frac{1}{\\lambda}$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = \\frac{1}{\\lambda^2}$$' },
+                                { flag: 'Sans memoire', desc: '$$P(X > s+t | X > s) = P(X > t)$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Taux lambda = 2 evenements/heure
+# = temps moyen 1/2 = 0.5 heure
+lambda_ = 2
+exp = stats.expon(scale=1/lambda_)  # scale = 1/lambda
+
+E_X = exp.mean()  # 0.5
+Var_X = exp.var()  # 0.25
+
+# P(attente > 1 heure)
+P_plus_1 = 1 - exp.cdf(1)  # 0.135 = e^(-2)
+
+# Propriete sans memoire
+# Avoir attendu 30 min ne change pas la proba de devoir
+# attendre encore 30 min`, desc: 'Exponentielle' }
+                            ],
+                            tips: [
+                                'Liee au processus de Poisson: si arrivees ~ Poisson, inter-arrivees ~ Exp',
+                                'Seule distribution continue sans memoire'
+                            ],
+                            warnings: ['Attention: scipy utilise scale=1/lambda']
+                        }
+                    },
+                    {
+                        cmd: 'Beta',
+                        desc: 'Distribution sur [0, 1]',
+                        details: {
+                            explanation: 'Distribution flexible sur [0, 1], souvent utilisee comme prior en bayesien.',
+                            syntax: '$$f(x) = \\frac{x^{\\alpha-1}(1-x)^{\\beta-1}}{B(\\alpha, \\beta)}$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = \\frac{\\alpha}{\\alpha + \\beta}$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = \\frac{\\alpha\\beta}{(\\alpha+\\beta)^2(\\alpha+\\beta+1)}$$' },
+                                { flag: 'Cas speciaux', desc: 'Beta(1,1) = Uniforme' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+import matplotlib.pyplot as plt
+
+# Differentes formes
+beta_11 = stats.beta(1, 1)    # Uniforme
+beta_25 = stats.beta(2, 5)    # Asymetrique gauche
+beta_52 = stats.beta(5, 2)    # Asymetrique droite
+beta_55 = stats.beta(5, 5)    # Symetrique, pic au centre
+
+# Comme prior pour probabilite
+# 8 succes, 3 echecs -> posterior Beta(1+8, 1+3) = Beta(9, 4)
+posterior = stats.beta(9, 4)
+print(f"E[p] = {posterior.mean():.3f}")  # 0.692
+print(f"IC 95% = {posterior.interval(0.95)}")`, desc: 'Beta' }
+                            ],
+                            tips: [
+                                'Prior conjugue de la binomiale',
+                                'alpha et beta sont des "pseudo-observations"'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Gamma',
+                        desc: 'Generalisation de l\'exponentielle',
+                        details: {
+                            explanation: 'Temps d\'attente pour k evenements dans un processus de Poisson.',
+                            syntax: '$$f(x) = \\frac{\\lambda^k x^{k-1} e^{-\\lambda x}}{\\Gamma(k)}$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[X] = \\frac{k}{\\lambda} = k \\cdot \\theta$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(X) = \\frac{k}{\\lambda^2} = k \\cdot \\theta^2$$' },
+                                { flag: 'Cas special', desc: 'Gamma(1, lambda) = Exponentielle(lambda)' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Attente pour 3 evenements, taux = 2/h
+k = 3  # shape
+lambda_ = 2
+theta = 1/lambda_  # scale
+
+gamma = stats.gamma(a=k, scale=theta)
+
+E_X = gamma.mean()  # 1.5 heures
+Var_X = gamma.var()  # 0.75
+
+# P(attente > 2 heures)
+P_plus_2 = 1 - gamma.cdf(2)  # 0.323`, desc: 'Gamma' }
+                            ],
+                            tips: [
+                                'Prior conjugue de Poisson',
+                                'Chi2(n) = Gamma(n/2, 2)'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: DISTRIBUTIONS D'INFERENCE
+            // ===============================================================
+            {
+                id: 'inference-dist',
+                title: 'Distributions d\'Inference',
+                icon: 'fa-superscript',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'Student t',
+                        desc: 'Inference sur la moyenne',
+                        details: {
+                            explanation: 'Utilisee quand la variance est estimee a partir de l\'echantillon.',
+                            syntax: '$$t = \\frac{\\bar{X} - \\mu}{s/\\sqrt{n}} \\sim t_{n-1}$$',
+                            options: [
+                                { flag: 'df', desc: 'Degres de liberte = n - 1' },
+                                { flag: 'Convergence', desc: 'Tend vers N(0,1) quand df -> infini' },
+                                { flag: 'Queues lourdes', desc: 'Plus de variance que la normale' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# t avec 10 degres de liberte
+t_dist = stats.t(df=10)
+
+# Quantiles critiques (bilateral 5%)
+t_crit = t_dist.ppf(0.975)  # 2.228 (vs 1.96 pour normale)
+
+# Test t
+sample = [23, 25, 28, 30, 32]
+t_stat, p_value = stats.ttest_1samp(sample, popmean=25)
+
+# Comparaison avec normale
+print(f"t(10) 97.5%: {t_dist.ppf(0.975):.3f}")  # 2.228
+print(f"N(0,1) 97.5%: {stats.norm.ppf(0.975):.3f}")  # 1.960`, desc: 'Distribution t' }
+                            ],
+                            tips: [
+                                'Utilisez t pour petits echantillons (n < 30)',
+                                'Avec df > 30, t ~ normale'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Chi-deux',
+                        desc: 'Inference sur la variance',
+                        details: {
+                            explanation: 'Somme de carres de normales standard independantes.',
+                            syntax: '$$\\chi^2_n = Z_1^2 + Z_2^2 + ... + Z_n^2$$',
+                            options: [
+                                { flag: 'Esperance', desc: '$$E[\\chi^2_n] = n$$' },
+                                { flag: 'Variance', desc: '$$\\text{Var}(\\chi^2_n) = 2n$$' },
+                                { flag: 'Variance echantillon', desc: '$$\\frac{(n-1)s^2}{\\sigma^2} \\sim \\chi^2_{n-1}$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# Chi-deux avec 5 df
+chi2 = stats.chi2(df=5)
+
+E_X = chi2.mean()  # 5
+Var_X = chi2.var()  # 10
+
+# Quantiles pour test
+chi2_lower = chi2.ppf(0.025)  # 0.831
+chi2_upper = chi2.ppf(0.975)  # 12.83
+
+# Test d'adequation (goodness of fit)
+observed = [16, 18, 16, 14, 12, 12]
+expected = [15, 15, 15, 15, 15, 15]
+chi2_stat, p_value = stats.chisquare(observed, expected)`, desc: 'Chi-deux' }
+                            ],
+                            tips: [
+                                'Toujours positive (somme de carres)',
+                                'Chi2_1 = Z^2 ou Z ~ N(0,1)'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Fisher F',
+                        desc: 'Rapport de variances',
+                        details: {
+                            explanation: 'Rapport de deux Chi-deux independantes.',
+                            syntax: '$$F_{d_1, d_2} = \\frac{\\chi^2_{d_1}/d_1}{\\chi^2_{d_2}/d_2}$$',
+                            options: [
+                                { flag: 'ANOVA', desc: 'Comparer variances inter/intra groupes' },
+                                { flag: 'Regression', desc: 'Test F global du modele' },
+                                { flag: 'Relation', desc: '$$t^2_{n} = F_{1,n}$$' }
+                            ],
+                            examples: [
+                                { code: `from scipy import stats
+
+# F avec df1=5, df2=20
+f_dist = stats.f(dfn=5, dfd=20)
+
+# Quantile 95%
+f_crit = f_dist.ppf(0.95)  # 2.71
+
+# Test F pour egalite de variances
+sample1 = [23, 25, 28, 30, 32]
+sample2 = [20, 24, 27, 31, 35]
+f_stat, p_value = stats.levene(sample1, sample2)
+
+# ANOVA
+f_stat, p_value = stats.f_oneway(group1, group2, group3)`, desc: 'Distribution F' }
+                            ],
+                            tips: [
+                                'F toujours positive',
+                                'df1 = numerateur, df2 = denominateur'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: THEOREMES FONDAMENTAUX
+            // ===============================================================
+            {
+                id: 'theorems',
+                title: 'Theoremes Fondamentaux',
+                icon: 'fa-scroll',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Theoreme Central Limite',
+                        desc: 'Convergence vers la normale',
+                        details: {
+                            explanation: 'La moyenne d\'echantillon tend vers une normale quand n augmente.',
+                            syntax: '$$\\frac{\\bar{X}_n - \\mu}{\\sigma/\\sqrt{n}} \\xrightarrow{d} N(0, 1)$$',
+                            options: [
+                                { flag: 'Conditions', desc: 'Variables iid avec variance finie' },
+                                { flag: 'Approximation', desc: '$$\\bar{X}_n \\approx N(\\mu, \\sigma^2/n)$$' },
+                                { flag: 'Regle pratique', desc: 'n >= 30 souvent suffisant' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Demonstration du TCL avec une loi exponentielle
+lambda_ = 1
+n_samples = 1000
+sample_sizes = [1, 5, 30, 100]
+
+for n in sample_sizes:
+    means = [np.mean(np.random.exponential(1/lambda_, n))
+             for _ in range(n_samples)]
+    plt.hist(means, bins=30, alpha=0.5, label=f'n={n}')
+
+# Les moyennes deviennent normales quand n augmente`, desc: 'Demonstration du TCL' }
+                            ],
+                            tips: [
+                                'Le TCL justifie l\'utilisation de la normale en inference',
+                                'Meme pour distributions tres asymetriques, n=30 suffit souvent'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Loi des Grands Nombres',
+                        desc: 'Convergence de la moyenne',
+                        details: {
+                            explanation: 'La moyenne empirique converge vers l\'esperance quand n tend vers l\'infini.',
+                            syntax: '$$\\bar{X}_n \\xrightarrow{p} \\mu$$',
+                            options: [
+                                { flag: 'LGN faible', desc: 'Convergence en probabilite' },
+                                { flag: 'LGN forte', desc: 'Convergence presque sure' },
+                                { flag: 'Conditions', desc: 'Variables iid avec esperance finie' }
+                            ],
+                            examples: [
+                                { code: `import numpy as np
+
+# Simulation: lancer de de
+np.random.seed(42)
+true_mean = 3.5  # E[X] pour un de
+
+# Moyenne cumulee
+n_rolls = 10000
+rolls = np.random.randint(1, 7, n_rolls)
+cumulative_mean = np.cumsum(rolls) / np.arange(1, n_rolls + 1)
+
+# Convergence vers 3.5
+print(f"Moyenne apres 10: {cumulative_mean[9]:.2f}")
+print(f"Moyenne apres 100: {cumulative_mean[99]:.2f}")
+print(f"Moyenne apres 10000: {cumulative_mean[-1]:.4f}")`, desc: 'LGN en action' }
+                            ],
+                            tips: [
+                                'Fondement de la methode Monte Carlo',
+                                'Justifie l\'estimation de probabilites par frequences'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Inegalites de concentration',
+                        desc: 'Markov, Chebyshev, Hoeffding',
+                        details: {
+                            explanation: 'Bornes sur les probabilites de deviation.',
+                            syntax: '$$P(|X - \\mu| \\geq k\\sigma) \\leq \\frac{1}{k^2} \\quad \\text{(Chebyshev)}$$',
+                            options: [
+                                { flag: 'Markov', desc: '$$P(X \\geq a) \\leq \\frac{E[X]}{a}$$ (X >= 0)' },
+                                { flag: 'Chebyshev', desc: '$$P(|X - \\mu| \\geq k\\sigma) \\leq \\frac{1}{k^2}$$' },
+                                { flag: 'Hoeffding', desc: '$$P(|\\bar{X} - \\mu| \\geq t) \\leq 2e^{-2nt^2}$$ (bornes)' }
+                            ],
+                            examples: [
+                                { code: `# Chebyshev: au moins 75% dans mu +/- 2*sigma
+# P(|X - mu| >= 2*sigma) <= 1/4 = 25%
+
+# Comparaison avec la normale:
+# P(|Z| >= 2) = 0.046 ~ 5% (bien mieux que 25%)
+
+# Hoeffding pour X dans [0, 1]
+import numpy as np
+
+n = 100  # echantillon
+t = 0.1  # deviation
+
+bound = 2 * np.exp(-2 * n * t**2)
+print(f"P(|Xbar - mu| >= {t}) <= {bound:.4f}")  # 0.27`, desc: 'Inegalites' }
+                            ],
+                            tips: [
+                                'Chebyshev est faible mais general',
+                                'Hoeffding est plus precis pour variables bornees'
+                            ],
+                            warnings: []
+                        }
+                    },
+                    {
+                        cmd: 'Convergence',
+                        desc: 'Types de convergence',
+                        details: {
+                            explanation: 'Differentes notions de convergence pour les suites de variables aleatoires.',
+                            syntax: '$$X_n \\to X$$ (en quel sens?)',
+                            options: [
+                                { flag: 'En probabilite', desc: '$$P(|X_n - X| > \\epsilon) \\to 0$$' },
+                                { flag: 'Presque sure', desc: '$$P(\\lim X_n = X) = 1$$' },
+                                { flag: 'En loi (distribution)', desc: '$$F_{X_n}(x) \\to F_X(x)$$' },
+                                { flag: 'En moyenne (L2)', desc: '$$E[(X_n - X)^2] \\to 0$$' }
+                            ],
+                            examples: [
+                                { code: `# Hierarchie:
+# Presque sure => En probabilite => En loi
+# En L2 => En probabilite => En loi
+
+# Exemples:
+# - LGN forte: convergence p.s.
+# - LGN faible: convergence en proba
+# - TCL: convergence en loi
+
+# Theoreme de Slutsky:
+# Si Xn -> X en loi et Yn -> c en proba
+# Alors Xn + Yn -> X + c en loi
+# Et Xn * Yn -> c * X en loi`, desc: 'Types de convergence' }
+                            ],
+                            tips: [
+                                'Convergence en loi est la plus faible',
+                                'Pour les estimateurs, on cherche la convergence en probabilite'
+                            ],
+                            warnings: []
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <!-- Logique commune -->
+    <script src="../js/cheatsheet.js"></script>
+
+    <!-- Initialisation KaTeX -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+
+        const originalShowModal = window.showModal;
+        if (originalShowModal) {
+            window.showModal = function(categoryId, commandIndex) {
+                originalShowModal(categoryId, commandIndex);
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        renderMathInElement(document.getElementById('modalContent'), {
+                            delimiters: [
+                                {left: '$$', right: '$$', display: true},
+                                {left: '$', right: '$', display: false}
+                            ],
+                            throwOnError: false
+                        });
+                    }
+                }, 100);
+            };
+        }
+    </script>
+</body>
+</html>
