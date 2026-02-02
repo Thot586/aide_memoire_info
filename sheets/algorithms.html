@@ -1693,10 +1693,10 @@ list(combinations([1,2,3], 2))  # 3 combinaisons de 2`, desc: 'Subsets et Permut
             }
         });
 
-        const originalShowModal = window.showModal;
-        if (originalShowModal) {
-            window.showModal = function(categoryId, commandIndex) {
-                originalShowModal(categoryId, commandIndex);
+        const originalShowDetails = window.showDetails;
+        if (originalShowDetails) {
+            window.showDetails = function(categoryId, commandIndex) {
+                originalShowDetails(categoryId, commandIndex);
                 setTimeout(() => {
                     if (typeof renderMathInElement !== 'undefined') {
                         renderMathInElement(document.getElementById('modalContent'), {

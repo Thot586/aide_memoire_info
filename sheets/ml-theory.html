@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Theorie ML/DL : bias-variance, regularisation, validation, ensemble methods.">
+    <title>Theorie ML/DL - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- KaTeX pour les formules mathematiques -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        .formula {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+        .formula-inline {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .katex { font-size: 1.1em; }
+        .katex-display { margin: 0.5em 0; }
+        .formula-name {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-pink-500/20 mb-4 icon-glow">
+                    <i class="fas fa-brain text-3xl text-pink-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Theorie ML/DL</h1>
+                <p class="text-slate-400">Bias-variance, regularisation, validation, ensemble methods</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: overfitting, cross-validation, boosting)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: APPRENTISSAGE SUPERVISE
+            // ===============================================================
+            {
+                id: 'supervised',
+                title: 'Apprentissage Supervise',
+                icon: 'fa-graduation-cap',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Classification',
+                        desc: 'Predire une classe discrete',
+                        details: {
+                            explanation: 'Probleme ou la variable cible est categorielle (classes discretes).',
+                            syntax: '$\\hat{y} = \\arg\\max_k P(y=k|x)$',
+                            options: [
+                                { flag: 'Binaire', desc: '$y \\in \\{0, 1\\}$ - Deux classes' },
+                                { flag: 'Multi-classe', desc: '$y \\in \\{1, ..., K\\}$ - K classes' },
+                                { flag: 'Multi-label', desc: '$y \\in \\{0,1\\}^K$ - Plusieurs labels' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import LogisticRegression\nclf = LogisticRegression()\nclf.fit(X_train, y_train)\ny_pred = clf.predict(X_test)', desc: 'Classification avec Logistic Regression' }
+                            ],
+                            tips: ['Utiliser softmax pour multi-classe', 'Sigmoid pour binaire']
+                        }
+                    },
+                    {
+                        cmd: 'Regression',
+                        desc: 'Predire une valeur continue',
+                        details: {
+                            explanation: 'Probleme ou la variable cible est continue (valeur reelle).',
+                            syntax: '$\\hat{y} = f(x; \\theta)$',
+                            options: [
+                                { flag: 'Lineaire', desc: '$\\hat{y} = w^T x + b$' },
+                                { flag: 'Polynomiale', desc: '$\\hat{y} = \\sum_i w_i x^i$' },
+                                { flag: 'Non-lineaire', desc: 'Reseaux de neurones, arbres' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import LinearRegression\nreg = LinearRegression()\nreg.fit(X_train, y_train)\ny_pred = reg.predict(X_test)', desc: 'Regression lineaire' }
+                            ],
+                            tips: ['Normaliser les features pour de meilleurs resultats']
+                        }
+                    },
+                    {
+                        cmd: 'Fonction de cout',
+                        desc: 'Mesure de l\'erreur a minimiser',
+                        details: {
+                            explanation: 'Fonction objective que l\'algorithme cherche a minimiser.',
+                            syntax: '$J(\\theta) = \\frac{1}{n} \\sum_{i=1}^{n} L(y_i, \\hat{y}_i)$',
+                            options: [
+                                { flag: 'MSE', desc: '$L = (y - \\hat{y})^2$' },
+                                { flag: 'Cross-Entropy', desc: '$L = -y\\log(\\hat{y}) - (1-y)\\log(1-\\hat{y})$' },
+                                { flag: 'Hinge Loss', desc: '$L = \\max(0, 1 - y \\cdot \\hat{y})$' }
+                            ],
+                            examples: [
+                                { code: 'import torch.nn as nn\nmse_loss = nn.MSELoss()\nce_loss = nn.CrossEntropyLoss()', desc: 'Fonctions de perte en PyTorch' }
+                            ],
+                            tips: ['MSE pour regression', 'Cross-entropy pour classification']
+                        }
+                    },
+                    {
+                        cmd: 'Descente de gradient',
+                        desc: 'Optimisation iterative',
+                        details: {
+                            explanation: 'Algorithme iteratif pour trouver le minimum de la fonction de cout.',
+                            syntax: '$\\theta_{t+1} = \\theta_t - \\eta \\nabla_\\theta J(\\theta)$',
+                            options: [
+                                { flag: 'Batch GD', desc: 'Utilise tout le dataset' },
+                                { flag: 'SGD', desc: 'Un echantillon a la fois' },
+                                { flag: 'Mini-batch', desc: 'Petit lot d\'echantillons' }
+                            ],
+                            examples: [
+                                { code: 'optimizer = torch.optim.SGD(model.parameters(), lr=0.01)\noptimizer.zero_grad()\nloss.backward()\noptimizer.step()', desc: 'SGD en PyTorch' }
+                            ],
+                            tips: ['Learning rate crucial', 'Mini-batch souvent optimal']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: APPRENTISSAGE NON-SUPERVISE
+            // ===============================================================
+            {
+                id: 'unsupervised',
+                title: 'Apprentissage Non-Supervise',
+                icon: 'fa-puzzle-piece',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Clustering',
+                        desc: 'Regrouper des donnees similaires',
+                        details: {
+                            explanation: 'Partitionner les donnees en groupes homogenes sans labels.',
+                            syntax: '$\\min \\sum_{k=1}^{K} \\sum_{x \\in C_k} \\|x - \\mu_k\\|^2$',
+                            options: [
+                                { flag: 'K-Means', desc: 'Partitionnement par centroides' },
+                                { flag: 'DBSCAN', desc: 'Basee sur la densite' },
+                                { flag: 'Hierarchique', desc: 'Arbre de clusters' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.cluster import KMeans\nkmeans = KMeans(n_clusters=3)\nlabels = kmeans.fit_predict(X)', desc: 'K-Means clustering' }
+                            ],
+                            tips: ['Elbow method pour choisir K', 'Silhouette score pour evaluer']
+                        }
+                    },
+                    {
+                        cmd: 'Reduction de dimension',
+                        desc: 'Reduire le nombre de features',
+                        details: {
+                            explanation: 'Projeter les donnees dans un espace de dimension inferieure.',
+                            syntax: '$X_{reduced} = X \\cdot W$',
+                            options: [
+                                { flag: 'PCA', desc: 'Projection lineaire sur axes principaux' },
+                                { flag: 't-SNE', desc: 'Visualisation non-lineaire' },
+                                { flag: 'UMAP', desc: 'Preservation de la topologie' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.decomposition import PCA\npca = PCA(n_components=2)\nX_reduced = pca.fit_transform(X)', desc: 'PCA reduction' }
+                            ],
+                            tips: ['PCA pour preprocessing', 't-SNE/UMAP pour visualisation']
+                        }
+                    },
+                    {
+                        cmd: 'PCA (Principal Component Analysis)',
+                        desc: 'Axes de variance maximale',
+                        details: {
+                            explanation: 'Trouve les directions de variance maximale dans les donnees.',
+                            syntax: '$\\max_w \\frac{w^T \\Sigma w}{w^T w}$',
+                            options: [
+                                { flag: 'Variance expliquee', desc: '$\\frac{\\lambda_k}{\\sum_i \\lambda_i}$' },
+                                { flag: 'n_components', desc: 'Nombre de composantes a garder' },
+                                { flag: 'Whitening', desc: 'Normalisation des composantes' }
+                            ],
+                            examples: [
+                                { code: 'pca = PCA(n_components=0.95)  # 95% variance\nX_reduced = pca.fit_transform(X)\nprint(f"Components: {pca.n_components_}")', desc: 'PCA avec seuil de variance' }
+                            ],
+                            tips: ['Centrer les donnees avant PCA', 'Utiliser explained_variance_ratio_']
+                        }
+                    },
+                    {
+                        cmd: 'Autoencodeurs',
+                        desc: 'Compression par reseau de neurones',
+                        details: {
+                            explanation: 'Reseau qui apprend a compresser puis reconstruire les donnees.',
+                            syntax: '$\\min \\|x - D(E(x))\\|^2$',
+                            options: [
+                                { flag: 'Encoder', desc: '$z = E(x)$ - Compression' },
+                                { flag: 'Decoder', desc: '$\\hat{x} = D(z)$ - Reconstruction' },
+                                { flag: 'Latent space', desc: 'Representation compressee' }
+                            ],
+                            examples: [
+                                { code: 'encoder = nn.Sequential(nn.Linear(784, 128), nn.ReLU(), nn.Linear(128, 32))\ndecoder = nn.Sequential(nn.Linear(32, 128), nn.ReLU(), nn.Linear(128, 784))', desc: 'Autoencoder simple' }
+                            ],
+                            tips: ['VAE pour generation', 'Denoising AE plus robuste']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: BIAS-VARIANCE TRADEOFF
+            // ===============================================================
+            {
+                id: 'bias-variance',
+                title: 'Bias-Variance Tradeoff',
+                icon: 'fa-balance-scale',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Decomposition de l\'erreur',
+                        desc: 'Erreur = Bias + Variance + Bruit',
+                        details: {
+                            explanation: 'L\'erreur de generalisation se decompose en trois composantes.',
+                            syntax: '$E[(y - \\hat{f}(x))^2] = \\text{Bias}^2 + \\text{Var} + \\sigma^2$',
+                            options: [
+                                { flag: 'Bias', desc: '$E[\\hat{f}(x)] - f(x)$ - Erreur systematique' },
+                                { flag: 'Variance', desc: '$E[(\\hat{f}(x) - E[\\hat{f}(x)])^2]$' },
+                                { flag: 'Bruit', desc: '$\\sigma^2$ - Irreductible' }
+                            ],
+                            examples: [
+                                { code: '# High bias: modele trop simple (underfitting)\n# High variance: modele trop complexe (overfitting)\n# Objectif: trouver le bon equilibre', desc: 'Compromis bias-variance' }
+                            ],
+                            tips: ['Modele simple = high bias, low variance', 'Modele complexe = low bias, high variance']
+                        }
+                    },
+                    {
+                        cmd: 'Underfitting (Sous-apprentissage)',
+                        desc: 'Modele trop simple',
+                        details: {
+                            explanation: 'Le modele ne capture pas la structure des donnees.',
+                            syntax: '$\\text{Train Error} \\approx \\text{Test Error} \\gg 0$',
+                            options: [
+                                { flag: 'Symptomes', desc: 'Erreur elevee sur train et test' },
+                                { flag: 'Causes', desc: 'Modele trop simple, features insuffisantes' },
+                                { flag: 'Solutions', desc: 'Modele plus complexe, plus de features' }
+                            ],
+                            examples: [
+                                { code: '# Signes d\'underfitting:\n# - Training accuracy faible\n# - Validation accuracy faible\n# - Les deux erreurs sont similaires', desc: 'Detection d\'underfitting' }
+                            ],
+                            tips: ['Augmenter la capacite du modele', 'Ajouter des features pertinentes']
+                        }
+                    },
+                    {
+                        cmd: 'Overfitting (Sur-apprentissage)',
+                        desc: 'Modele trop complexe',
+                        details: {
+                            explanation: 'Le modele memorise les donnees au lieu de generaliser.',
+                            syntax: '$\\text{Train Error} \\ll \\text{Test Error}$',
+                            options: [
+                                { flag: 'Symptomes', desc: 'Grand ecart train/test error' },
+                                { flag: 'Causes', desc: 'Modele trop complexe, peu de donnees' },
+                                { flag: 'Solutions', desc: 'Regularisation, plus de donnees, dropout' }
+                            ],
+                            examples: [
+                                { code: '# Signes d\'overfitting:\n# - Training accuracy ~100%\n# - Validation accuracy beaucoup plus basse\n# - Gap qui augmente avec les epochs', desc: 'Detection d\'overfitting' }
+                            ],
+                            tips: ['Early stopping', 'Data augmentation', 'Regularisation']
+                        }
+                    },
+                    {
+                        cmd: 'Capacite du modele',
+                        desc: 'Complexite et expressivite',
+                        details: {
+                            explanation: 'Capacite du modele a representer des fonctions complexes.',
+                            syntax: '$\\text{Capacite} \\propto \\text{Nombre de parametres}$',
+                            options: [
+                                { flag: 'VC dimension', desc: 'Mesure theorique de capacite' },
+                                { flag: 'Parametres', desc: 'Plus de params = plus de capacite' },
+                                { flag: 'Profondeur', desc: 'Plus de couches = plus expressif' }
+                            ],
+                            examples: [
+                                { code: '# Capacite croissante:\n# Linear < Polynomial < Decision Tree < Random Forest < Deep NN', desc: 'Hierarchie de capacite' }
+                            ],
+                            tips: ['Capacite adaptee a la complexite du probleme']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: REGULARISATION
+            // ===============================================================
+            {
+                id: 'regularization',
+                title: 'Regularisation',
+                icon: 'fa-shield-alt',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'L1 Regularisation (Lasso)',
+                        desc: 'Penalite sur la somme des valeurs absolues',
+                        details: {
+                            explanation: 'Encourage la parcimonie (poids a zero).',
+                            syntax: '$J_{reg} = J + \\lambda \\sum_i |w_i|$',
+                            options: [
+                                { flag: 'Effet', desc: 'Feature selection automatique' },
+                                { flag: 'Lambda', desc: 'Force de regularisation' },
+                                { flag: 'Sparse', desc: 'Produit des poids exactement nuls' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import Lasso\nlasso = Lasso(alpha=0.1)\nlasso.fit(X_train, y_train)', desc: 'Lasso regression' }
+                            ],
+                            tips: ['Bon pour la selection de features', 'Utile quand beaucoup de features']
+                        }
+                    },
+                    {
+                        cmd: 'L2 Regularisation (Ridge)',
+                        desc: 'Penalite sur la somme des carres',
+                        details: {
+                            explanation: 'Penalise les grands poids sans les annuler.',
+                            syntax: '$J_{reg} = J + \\lambda \\sum_i w_i^2$',
+                            options: [
+                                { flag: 'Effet', desc: 'Poids plus petits mais non nuls' },
+                                { flag: 'Weight decay', desc: 'Equivalent en deep learning' },
+                                { flag: 'Lambda', desc: 'Hyperparametre a tuner' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.linear_model import Ridge\nridge = Ridge(alpha=1.0)\nridge.fit(X_train, y_train)', desc: 'Ridge regression' }
+                            ],
+                            tips: ['Plus stable que L1', 'Standard en deep learning']
+                        }
+                    },
+                    {
+                        cmd: 'Dropout',
+                        desc: 'Desactiver aleatoirement des neurones',
+                        details: {
+                            explanation: 'Regularisation pour reseaux de neurones.',
+                            syntax: '$h_i = h_i \\cdot m_i, \\quad m_i \\sim \\text{Bernoulli}(p)$',
+                            options: [
+                                { flag: 'Rate', desc: 'Probabilite de desactivation (0.2-0.5)' },
+                                { flag: 'Training only', desc: 'Desactive pendant inference' },
+                                { flag: 'Scaling', desc: 'Division par (1-p) a l\'inference' }
+                            ],
+                            examples: [
+                                { code: 'model = nn.Sequential(\n    nn.Linear(100, 50),\n    nn.ReLU(),\n    nn.Dropout(0.5),\n    nn.Linear(50, 10)\n)', desc: 'Dropout en PyTorch' }
+                            ],
+                            tips: ['Plus eleve pour grandes couches', 'Pas sur la derniere couche']
+                        }
+                    },
+                    {
+                        cmd: 'Early Stopping',
+                        desc: 'Arreter avant l\'overfitting',
+                        details: {
+                            explanation: 'Arreter l\'entrainement quand la validation stagne.',
+                            syntax: '$\\text{Stop si } \\text{val\\_loss}_{t} > \\text{val\\_loss}_{t-p}$',
+                            options: [
+                                { flag: 'Patience', desc: 'Nombre d\'epochs sans amelioration' },
+                                { flag: 'Monitor', desc: 'Metrique a surveiller' },
+                                { flag: 'Restore best', desc: 'Revenir aux meilleurs poids' }
+                            ],
+                            examples: [
+                                { code: 'from keras.callbacks import EarlyStopping\nearly_stop = EarlyStopping(\n    monitor="val_loss",\n    patience=10,\n    restore_best_weights=True\n)', desc: 'Early stopping en Keras' }
+                            ],
+                            tips: ['Patience de 5-20 epochs typique', 'Toujours restore best weights']
+                        }
+                    },
+                    {
+                        cmd: 'Batch Normalization',
+                        desc: 'Normaliser les activations',
+                        details: {
+                            explanation: 'Normalise les sorties de chaque couche.',
+                            syntax: '$\\hat{x} = \\frac{x - \\mu}{\\sqrt{\\sigma^2 + \\epsilon}} \\cdot \\gamma + \\beta$',
+                            options: [
+                                { flag: 'Mu, Sigma', desc: 'Moyenne et variance du batch' },
+                                { flag: 'Gamma, Beta', desc: 'Parametres apprenables' },
+                                { flag: 'Momentum', desc: 'Pour running stats' }
+                            ],
+                            examples: [
+                                { code: 'model = nn.Sequential(\n    nn.Linear(100, 50),\n    nn.BatchNorm1d(50),\n    nn.ReLU()\n)', desc: 'BatchNorm en PyTorch' }
+                            ],
+                            tips: ['Permet learning rates plus eleves', 'Avant ou apres activation (debat)']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: VALIDATION & EVALUATION
+            // ===============================================================
+            {
+                id: 'validation',
+                title: 'Validation & Evaluation',
+                icon: 'fa-check-double',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Train/Val/Test Split',
+                        desc: 'Division du dataset',
+                        details: {
+                            explanation: 'Separer les donnees pour entrainement, validation et test.',
+                            syntax: '$D = D_{train} \\cup D_{val} \\cup D_{test}$',
+                            options: [
+                                { flag: 'Train (60-80%)', desc: 'Entrainement du modele' },
+                                { flag: 'Validation (10-20%)', desc: 'Tuning des hyperparametres' },
+                                { flag: 'Test (10-20%)', desc: 'Evaluation finale' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import train_test_split\nX_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3)\nX_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5)', desc: 'Split en 3 parties' }
+                            ],
+                            tips: ['Ne jamais toucher au test set avant evaluation finale', 'Stratified split pour classification']
+                        }
+                    },
+                    {
+                        cmd: 'Cross-Validation',
+                        desc: 'Validation croisee K-fold',
+                        details: {
+                            explanation: 'Evaluer le modele sur K partitions differentes.',
+                            syntax: '$\\text{CV Score} = \\frac{1}{K} \\sum_{k=1}^{K} \\text{Score}_k$',
+                            options: [
+                                { flag: 'K-Fold', desc: 'K partitions de taille egale' },
+                                { flag: 'Stratified', desc: 'Preserve la distribution des classes' },
+                                { flag: 'Leave-One-Out', desc: 'K = n (extreme)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import cross_val_score\nscores = cross_val_score(model, X, y, cv=5)\nprint(f"Mean: {scores.mean():.3f} (+/- {scores.std():.3f})")', desc: '5-fold cross-validation' }
+                            ],
+                            tips: ['K=5 ou K=10 standard', 'Plus robuste que simple split']
+                        }
+                    },
+                    {
+                        cmd: 'Metriques de Classification',
+                        desc: 'Evaluer un classifieur',
+                        details: {
+                            explanation: 'Differentes mesures pour evaluer la classification.',
+                            syntax: '$\\text{Accuracy} = \\frac{TP + TN}{TP + TN + FP + FN}$',
+                            options: [
+                                { flag: 'Precision', desc: '$\\frac{TP}{TP + FP}$' },
+                                { flag: 'Recall', desc: '$\\frac{TP}{TP + FN}$' },
+                                { flag: 'F1-Score', desc: '$2 \\cdot \\frac{P \\cdot R}{P + R}$' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import classification_report\nprint(classification_report(y_true, y_pred))', desc: 'Rapport complet' }
+                            ],
+                            tips: ['Accuracy trompeuse si classes desequilibrees', 'F1 pour compromis precision/recall']
+                        }
+                    },
+                    {
+                        cmd: 'Metriques de Regression',
+                        desc: 'Evaluer une regression',
+                        details: {
+                            explanation: 'Mesures d\'erreur pour les predictions continues.',
+                            syntax: '$\\text{MSE} = \\frac{1}{n} \\sum_i (y_i - \\hat{y}_i)^2$',
+                            options: [
+                                { flag: 'MSE', desc: 'Mean Squared Error' },
+                                { flag: 'RMSE', desc: '$\\sqrt{MSE}$ - Meme unite que y' },
+                                { flag: 'MAE', desc: '$\\frac{1}{n}\\sum|y_i - \\hat{y}_i|$ - Robuste aux outliers' },
+                                { flag: 'R2', desc: '$1 - \\frac{SS_{res}}{SS_{tot}}$ - Variance expliquee' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import mean_squared_error, r2_score\nmse = mean_squared_error(y_true, y_pred)\nr2 = r2_score(y_true, y_pred)', desc: 'Metriques de regression' }
+                            ],
+                            tips: ['RMSE interpretable', 'R2 entre 0 et 1 (proche de 1 = bon)']
+                        }
+                    },
+                    {
+                        cmd: 'Courbe ROC et AUC',
+                        desc: 'Performance a differents seuils',
+                        details: {
+                            explanation: 'Courbe TPR vs FPR pour differents seuils de decision.',
+                            syntax: '$\\text{AUC} = \\int_0^1 TPR(FPR^{-1}(x)) dx$',
+                            options: [
+                                { flag: 'TPR (Recall)', desc: '$\\frac{TP}{TP + FN}$' },
+                                { flag: 'FPR', desc: '$\\frac{FP}{FP + TN}$' },
+                                { flag: 'AUC', desc: 'Aire sous la courbe (0.5 = random, 1 = parfait)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.metrics import roc_auc_score, roc_curve\nfpr, tpr, thresholds = roc_curve(y_true, y_proba)\nauc = roc_auc_score(y_true, y_proba)', desc: 'Calcul ROC-AUC' }
+                            ],
+                            tips: ['AUC > 0.8 generalement bon', 'Utiliser y_proba pas y_pred']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: FEATURE ENGINEERING
+            // ===============================================================
+            {
+                id: 'features',
+                title: 'Feature Engineering',
+                icon: 'fa-cogs',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Normalisation / Standardisation',
+                        desc: 'Mettre les features a la meme echelle',
+                        details: {
+                            explanation: 'Transformer les features pour avoir des echelles comparables.',
+                            syntax: '$x_{std} = \\frac{x - \\mu}{\\sigma}$',
+                            options: [
+                                { flag: 'StandardScaler', desc: '$\\frac{x - \\mu}{\\sigma}$ (mean=0, std=1)' },
+                                { flag: 'MinMaxScaler', desc: '$\\frac{x - x_{min}}{x_{max} - x_{min}}$ [0, 1]' },
+                                { flag: 'RobustScaler', desc: 'Utilise median et IQR (robuste aux outliers)' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import StandardScaler\nscaler = StandardScaler()\nX_scaled = scaler.fit_transform(X_train)\nX_test_scaled = scaler.transform(X_test)', desc: 'Standardisation' }
+                            ],
+                            tips: ['Fit sur train, transform sur test', 'Essentiel pour SVM, NN, KNN']
+                        }
+                    },
+                    {
+                        cmd: 'Encoding Categoriel',
+                        desc: 'Convertir les categories en nombres',
+                        details: {
+                            explanation: 'Transformer les variables categorielles pour le ML.',
+                            syntax: '$\\text{One-Hot: } [A, B, C] \\rightarrow [[1,0,0], [0,1,0], [0,0,1]]$',
+                            options: [
+                                { flag: 'One-Hot', desc: 'Vecteur binaire par categorie' },
+                                { flag: 'Label Encoding', desc: 'Entier par categorie (ordinal)' },
+                                { flag: 'Target Encoding', desc: 'Moyenne de la cible par categorie' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.preprocessing import OneHotEncoder\nenc = OneHotEncoder(sparse=False)\nX_encoded = enc.fit_transform(X_cat)', desc: 'One-Hot encoding' }
+                            ],
+                            tips: ['One-Hot pour categories nominales', 'Label pour ordinales']
+                        }
+                    },
+                    {
+                        cmd: 'Feature Selection',
+                        desc: 'Selectionner les features importantes',
+                        details: {
+                            explanation: 'Reduire le nombre de features en gardant les plus informatives.',
+                            syntax: '$X_{selected} \\subset X$',
+                            options: [
+                                { flag: 'Filter', desc: 'Correlation, variance, chi2' },
+                                { flag: 'Wrapper', desc: 'RFE, forward/backward selection' },
+                                { flag: 'Embedded', desc: 'L1, feature importance des arbres' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.feature_selection import SelectKBest, f_classif\nselector = SelectKBest(f_classif, k=10)\nX_selected = selector.fit_transform(X, y)', desc: 'Selection par score' }
+                            ],
+                            tips: ['RFE pour resultats robustes', 'Attention a la fuite de donnees']
+                        }
+                    },
+                    {
+                        cmd: 'Gestion des valeurs manquantes',
+                        desc: 'Traiter les NaN',
+                        details: {
+                            explanation: 'Strategies pour gerer les donnees manquantes.',
+                            syntax: '$x_{imputed} = f(X_{observed})$',
+                            options: [
+                                { flag: 'Suppression', desc: 'Retirer lignes/colonnes' },
+                                { flag: 'Imputation simple', desc: 'Mean, median, mode' },
+                                { flag: 'Imputation avancee', desc: 'KNN, regression, MICE' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.impute import SimpleImputer\nimputer = SimpleImputer(strategy="median")\nX_imputed = imputer.fit_transform(X)', desc: 'Imputation par mediane' }
+                            ],
+                            tips: ['Analyser le pattern de missing', 'MICE pour missing complexe']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: ENSEMBLE METHODS
+            // ===============================================================
+            {
+                id: 'ensemble',
+                title: 'Ensemble Methods',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Bagging',
+                        desc: 'Bootstrap Aggregating',
+                        details: {
+                            explanation: 'Entrainer plusieurs modeles sur des echantillons bootstrap et moyenner.',
+                            syntax: '$\\hat{f}(x) = \\frac{1}{B} \\sum_{b=1}^{B} \\hat{f}_b(x)$',
+                            options: [
+                                { flag: 'Bootstrap', desc: 'Echantillonnage avec remplacement' },
+                                { flag: 'Aggregation', desc: 'Moyenne (reg) ou vote (classif)' },
+                                { flag: 'Effet', desc: 'Reduit la variance' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import BaggingClassifier\nbagging = BaggingClassifier(n_estimators=100)\nbagging.fit(X_train, y_train)', desc: 'Bagging classifier' }
+                            ],
+                            tips: ['Efficace avec modeles a haute variance', 'Base pour Random Forest']
+                        }
+                    },
+                    {
+                        cmd: 'Random Forest',
+                        desc: 'Foret d\'arbres decoreles',
+                        details: {
+                            explanation: 'Bagging d\'arbres avec selection aleatoire de features.',
+                            syntax: '$\\hat{f}(x) = \\frac{1}{B} \\sum_{b=1}^{B} T_b(x)$',
+                            options: [
+                                { flag: 'n_estimators', desc: 'Nombre d\'arbres' },
+                                { flag: 'max_features', desc: 'Features par split (sqrt pour classif)' },
+                                { flag: 'max_depth', desc: 'Profondeur max des arbres' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import RandomForestClassifier\nrf = RandomForestClassifier(n_estimators=100, max_depth=10)\nrf.fit(X_train, y_train)', desc: 'Random Forest' }
+                            ],
+                            tips: ['Feature importance disponible', 'Robuste aux outliers']
+                        }
+                    },
+                    {
+                        cmd: 'Boosting',
+                        desc: 'Apprentissage sequentiel',
+                        details: {
+                            explanation: 'Entrainer des modeles sequentiellement en corrigeant les erreurs.',
+                            syntax: '$\\hat{f}(x) = \\sum_{m=1}^{M} \\alpha_m h_m(x)$',
+                            options: [
+                                { flag: 'AdaBoost', desc: 'Reponderer les erreurs' },
+                                { flag: 'Gradient Boosting', desc: 'Apprendre le gradient residuel' },
+                                { flag: 'Effet', desc: 'Reduit le biais' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import GradientBoostingClassifier\ngb = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1)\ngb.fit(X_train, y_train)', desc: 'Gradient Boosting' }
+                            ],
+                            tips: ['Plus prone a l\'overfitting que bagging', 'Tuner learning_rate']
+                        }
+                    },
+                    {
+                        cmd: 'XGBoost / LightGBM',
+                        desc: 'Boosting optimise',
+                        details: {
+                            explanation: 'Implementations efficaces de gradient boosting.',
+                            syntax: '$\\text{obj} = \\sum_i L(y_i, \\hat{y}_i) + \\sum_k \\Omega(f_k)$',
+                            options: [
+                                { flag: 'XGBoost', desc: 'Regularisation L1/L2, parallelisation' },
+                                { flag: 'LightGBM', desc: 'Leaf-wise, histogram-based' },
+                                { flag: 'CatBoost', desc: 'Gestion native des categoriques' }
+                            ],
+                            examples: [
+                                { code: 'import xgboost as xgb\nmodel = xgb.XGBClassifier(n_estimators=100, max_depth=5, learning_rate=0.1)\nmodel.fit(X_train, y_train)', desc: 'XGBoost classifier' }
+                            ],
+                            tips: ['State-of-the-art sur donnees tabulaires', 'early_stopping_rounds important']
+                        }
+                    },
+                    {
+                        cmd: 'Stacking',
+                        desc: 'Meta-apprentissage',
+                        details: {
+                            explanation: 'Combiner les predictions de plusieurs modeles avec un meta-modele.',
+                            syntax: '$\\hat{y} = g(\\hat{y}_1, \\hat{y}_2, ..., \\hat{y}_M)$',
+                            options: [
+                                { flag: 'Base learners', desc: 'Modeles de premiere couche' },
+                                { flag: 'Meta-learner', desc: 'Modele qui combine' },
+                                { flag: 'Out-of-fold', desc: 'Predictions cross-validated' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.ensemble import StackingClassifier\nstack = StackingClassifier(\n    estimators=[("rf", rf), ("gb", gb)],\n    final_estimator=LogisticRegression()\n)', desc: 'Stacking de modeles' }
+                            ],
+                            tips: ['Diversifier les base learners', 'CV pour eviter overfitting']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: HYPERPARAMETER TUNING
+            // ===============================================================
+            {
+                id: 'tuning',
+                title: 'Hyperparameter Tuning',
+                icon: 'fa-sliders-h',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'Grid Search',
+                        desc: 'Recherche exhaustive',
+                        details: {
+                            explanation: 'Tester toutes les combinaisons d\'hyperparametres.',
+                            syntax: '$\\text{Best} = \\arg\\max_{\\theta \\in \\Theta} \\text{Score}(\\theta)$',
+                            options: [
+                                { flag: 'param_grid', desc: 'Dictionnaire des valeurs a tester' },
+                                { flag: 'cv', desc: 'Nombre de folds de cross-validation' },
+                                { flag: 'scoring', desc: 'Metrique a optimiser' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import GridSearchCV\nparam_grid = {"C": [0.1, 1, 10], "kernel": ["rbf", "linear"]}\ngrid = GridSearchCV(SVC(), param_grid, cv=5)\ngrid.fit(X, y)\nprint(grid.best_params_)', desc: 'Grid search pour SVM' }
+                            ],
+                            tips: ['Couteux en temps', 'Commencer avec peu de valeurs']
+                        }
+                    },
+                    {
+                        cmd: 'Random Search',
+                        desc: 'Recherche aleatoire',
+                        details: {
+                            explanation: 'Echantillonner aleatoirement l\'espace des hyperparametres.',
+                            syntax: '$\\theta \\sim P(\\Theta)$',
+                            options: [
+                                { flag: 'param_distributions', desc: 'Distributions a echantillonner' },
+                                { flag: 'n_iter', desc: 'Nombre d\'iterations' },
+                                { flag: 'Avantage', desc: 'Explore mieux l\'espace' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import RandomizedSearchCV\nfrom scipy.stats import uniform, randint\nparam_dist = {"C": uniform(0.1, 10), "gamma": uniform(0.01, 1)}\nrandom_search = RandomizedSearchCV(SVC(), param_dist, n_iter=50, cv=5)', desc: 'Random search' }
+                            ],
+                            tips: ['Souvent aussi bon que grid search', 'Plus efficace en haute dimension']
+                        }
+                    },
+                    {
+                        cmd: 'Bayesian Optimization',
+                        desc: 'Optimisation guidee par modele',
+                        details: {
+                            explanation: 'Utiliser un modele probabiliste pour guider la recherche.',
+                            syntax: '$\\theta_{next} = \\arg\\max_{\\theta} \\alpha(\\theta | D)$',
+                            options: [
+                                { flag: 'Surrogate', desc: 'Gaussian Process ou TPE' },
+                                { flag: 'Acquisition', desc: 'EI, UCB, PI' },
+                                { flag: 'Efficient', desc: 'Moins d\'evaluations necessaires' }
+                            ],
+                            examples: [
+                                { code: 'import optuna\ndef objective(trial):\n    C = trial.suggest_float("C", 0.1, 10)\n    model = SVC(C=C)\n    return cross_val_score(model, X, y).mean()\nstudy = optuna.create_study(direction="maximize")\nstudy.optimize(objective, n_trials=100)', desc: 'Optuna pour tuning' }
+                            ],
+                            tips: ['Optuna, Hyperopt populaires', 'Ideal pour evaluations couteuses']
+                        }
+                    },
+                    {
+                        cmd: 'Learning Curves',
+                        desc: 'Diagnostiquer le modele',
+                        details: {
+                            explanation: 'Visualiser performance vs taille du dataset.',
+                            syntax: '$\\text{Score}(n_{train})$',
+                            options: [
+                                { flag: 'Convergence', desc: 'Train et val convergent = bon' },
+                                { flag: 'Gap', desc: 'Grand ecart = overfitting' },
+                                { flag: 'Plateau', desc: 'Plus de donnees n\'aide pas' }
+                            ],
+                            examples: [
+                                { code: 'from sklearn.model_selection import learning_curve\ntrain_sizes, train_scores, val_scores = learning_curve(\n    model, X, y, train_sizes=np.linspace(0.1, 1, 10), cv=5\n)', desc: 'Learning curves' }
+                            ],
+                            tips: ['Utile pour diagnostiquer', 'Indique si plus de donnees aiderait']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <script src="../js/cheatsheet.js"></script>
+
+    <script>
+        // Rendu KaTeX au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+
+        const originalShowDetails = window.showDetails;
+        if (originalShowDetails) {
+            window.showDetails = function(categoryId, commandIndex) {
+                originalShowDetails(categoryId, commandIndex);
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        renderMathInElement(document.getElementById('modalContent'), {
+                            delimiters: [
+                                {left: '$$', right: '$$', display: true},
+                                {left: '$', right: '$', display: false}
+                            ],
+                            throwOnError: false
+                        });
+                    }
+                }, 100);
+            };
+        }
+    </script>
+</body>
+</html>

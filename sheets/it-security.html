@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Securite Informatique : CIA triad, authentification, OWASP, securite reseau et application.">
+    <title>Securite Informatique - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-red-500/20 mb-4 icon-glow">
+                    <i class="fas fa-shield-alt text-3xl text-red-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Securite Informatique</h1>
+                <p class="text-slate-400">CIA triad, authentification, OWASP, securite reseau</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: XSS, JWT, firewall, OWASP)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: FONDAMENTAUX
+            // ===============================================================
+            {
+                id: 'fundamentals',
+                title: 'Fondamentaux',
+                icon: 'fa-shield-alt',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'CIA Triad',
+                        desc: 'Confidentialite, Integrite, Disponibilite',
+                        details: {
+                            explanation: 'Les trois piliers fondamentaux de la securite de l\'information.',
+                            syntax: 'Confidentiality + Integrity + Availability',
+                            options: [
+                                { flag: 'Confidentialite', desc: 'Seuls les autorises accedent aux donnees' },
+                                { flag: 'Integrite', desc: 'Donnees non modifiees sans autorisation' },
+                                { flag: 'Disponibilite', desc: 'Systeme accessible quand necessaire' }
+                            ],
+                            examples: [
+                                { code: '# Confidentialite: chiffrement, controle d\'acces\n# Integrite: hachage, signatures, checksums\n# Disponibilite: redondance, backups, DDoS protection', desc: 'CIA en pratique' }
+                            ],
+                            tips: ['Equilibrer les trois selon le contexte']
+                        }
+                    },
+                    {
+                        cmd: 'AAA Framework',
+                        desc: 'Authentication, Authorization, Accounting',
+                        details: {
+                            explanation: 'Framework pour controler et auditer les acces.',
+                            syntax: 'Authn -> Authz -> Audit',
+                            options: [
+                                { flag: 'Authentication', desc: 'Verifier l\'identite (qui?)' },
+                                { flag: 'Authorization', desc: 'Verifier les permissions (quoi?)' },
+                                { flag: 'Accounting', desc: 'Tracer les actions (quand?)' }
+                            ],
+                            examples: [
+                                { code: '# 1. Authentication\nuser = authenticate(username, password)\n# 2. Authorization\nif not user.has_permission("admin:read"):\n    raise PermissionDenied()\n# 3. Accounting\naudit_log.info(f"{user.id} accessed admin")', desc: 'AAA flow' }
+                            ],
+                            tips: ['Toujours authentifier avant autoriser']
+                        }
+                    },
+                    {
+                        cmd: 'Defense in Depth',
+                        desc: 'Securite en couches',
+                        details: {
+                            explanation: 'Plusieurs couches de securite pour proteger les actifs.',
+                            syntax: 'Layer1 -> Layer2 -> Layer3 -> Asset',
+                            options: [
+                                { flag: 'Perimetre', desc: 'Firewall, WAF' },
+                                { flag: 'Reseau', desc: 'Segmentation, IDS' },
+                                { flag: 'Application', desc: 'Input validation, auth' },
+                                { flag: 'Donnees', desc: 'Chiffrement, backups' }
+                            ],
+                            examples: [
+                                { code: '# Couches de defense pour une app web:\n# 1. CDN/WAF - filtre DDoS, bots\n# 2. Firewall - ports 80/443 uniquement\n# 3. App server - input validation\n# 4. Database - chiffrement at rest', desc: 'Defense en profondeur' }
+                            ],
+                            tips: ['Ne pas se fier a une seule mesure']
+                        }
+                    },
+                    {
+                        cmd: 'Least Privilege',
+                        desc: 'Privileges minimaux',
+                        details: {
+                            explanation: 'Accorder uniquement les permissions strictement necessaires.',
+                            syntax: 'Grant minimum required access',
+                            options: [
+                                { flag: 'Need to know', desc: 'Acces aux donnees necessaires' },
+                                { flag: 'Role-based', desc: 'RBAC pour grouper' }
+                            ],
+                            examples: [
+                                { code: '# BON\nuser.permissions = [\n    "orders:read",\n    "orders:create",\n    "profile:update"\n]', desc: 'Least privilege' }
+                            ],
+                            tips: ['Revue reguliere des permissions']
+                        }
+                    },
+                    {
+                        cmd: 'Zero Trust',
+                        desc: 'Ne jamais faire confiance',
+                        details: {
+                            explanation: 'Aucune confiance implicite, verification continue.',
+                            syntax: 'Never trust, always verify',
+                            options: [
+                                { flag: 'Verify explicitly', desc: 'Toujours authentifier' },
+                                { flag: 'Assume breach', desc: 'Supposer compromis' }
+                            ],
+                            examples: [
+                                { code: '# Principes Zero Trust:\n# - Pas de perimetre de confiance\n# - Verifier chaque requete\n# - mTLS entre services', desc: 'Zero Trust' }
+                            ],
+                            tips: ['Le reseau interne n\'est pas sur']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: AUTHENTIFICATION
+            // ===============================================================
+            {
+                id: 'authentication',
+                title: 'Authentification',
+                icon: 'fa-user-shield',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'MFA (Multi-Factor)',
+                        desc: 'Plusieurs facteurs d\'authentification',
+                        details: {
+                            explanation: 'Combiner plusieurs facteurs pour renforcer l\'authentification.',
+                            syntax: 'Something you know + have + are',
+                            options: [
+                                { flag: 'Know', desc: 'Mot de passe, PIN' },
+                                { flag: 'Have', desc: 'Token, telephone' },
+                                { flag: 'Are', desc: 'Biometrie' }
+                            ],
+                            examples: [
+                                { code: 'import pyotp\ntotp = pyotp.TOTP(secret)\nif totp.verify(user_code):\n    print("MFA valid")', desc: 'TOTP MFA' }
+                            ],
+                            tips: ['TOTP > SMS (SIM swap)']
+                        }
+                    },
+                    {
+                        cmd: 'OAuth 2.0 / OIDC',
+                        desc: 'Delegation d\'autorisation',
+                        details: {
+                            explanation: 'Framework pour autoriser l\'acces sans partager les credentials.',
+                            syntax: 'Client -> AuthServer -> Resource',
+                            options: [
+                                { flag: 'Authorization Code', desc: 'Flow standard (backend)' },
+                                { flag: 'PKCE', desc: 'Pour SPA/mobile' }
+                            ],
+                            examples: [
+                                { code: '# Authorization Code Flow avec PKCE\nverifier = secrets.token_urlsafe(32)\nchallenge = base64.urlsafe_b64encode(\n    hashlib.sha256(verifier.encode()).digest()\n)', desc: 'OAuth 2.0 PKCE' }
+                            ],
+                            tips: ['Toujours PKCE pour public clients']
+                        }
+                    },
+                    {
+                        cmd: 'JWT (JSON Web Token)',
+                        desc: 'Token auto-contenu',
+                        details: {
+                            explanation: 'Token signe contenant des claims verifiables.',
+                            syntax: 'header.payload.signature',
+                            options: [
+                                { flag: 'Header', desc: 'Algorithme, type' },
+                                { flag: 'Payload', desc: 'Claims (sub, exp)' },
+                                { flag: 'Signature', desc: 'HMAC ou RSA' }
+                            ],
+                            examples: [
+                                { code: 'import jwt\ntoken = jwt.encode({"sub": "user123", "exp": exp}, SECRET, algorithm="HS256")\ndecoded = jwt.decode(token, SECRET, algorithms=["HS256"])', desc: 'JWT' }
+                            ],
+                            tips: ['Courte duree de vie'],
+                            warnings: ['Verifier alg (eviter "none")']
+                        }
+                    },
+                    {
+                        cmd: 'Session Security',
+                        desc: 'Gestion securisee des sessions',
+                        details: {
+                            explanation: 'Maintenir l\'etat d\'authentification de maniere securisee.',
+                            syntax: 'Session ID -> Server-side state',
+                            options: [
+                                { flag: 'HttpOnly', desc: 'Pas accessible en JS' },
+                                { flag: 'Secure', desc: 'HTTPS only' },
+                                { flag: 'SameSite', desc: 'Protection CSRF' }
+                            ],
+                            examples: [
+                                { code: 'app.config.update(\n    SESSION_COOKIE_SECURE=True,\n    SESSION_COOKIE_HTTPONLY=True,\n    SESSION_COOKIE_SAMESITE="Lax"\n)', desc: 'Secure session config' }
+                            ],
+                            tips: ['Regenerer apres login']
+                        }
+                    },
+                    {
+                        cmd: 'Password Storage',
+                        desc: 'Stockage securise des mots de passe',
+                        details: {
+                            explanation: 'Hacher les mots de passe avec des fonctions lentes.',
+                            syntax: 'hash = slow_hash(password, salt)',
+                            options: [
+                                { flag: 'Argon2', desc: 'Recommande' },
+                                { flag: 'bcrypt', desc: 'Alternative solide' }
+                            ],
+                            examples: [
+                                { code: 'from argon2 import PasswordHasher\nph = PasswordHasher()\nhash = ph.hash("password")\nph.verify(hash, "password")', desc: 'Argon2' }
+                            ],
+                            warnings: ['JAMAIS SHA/MD5 pour passwords']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: OWASP TOP 10
+            // ===============================================================
+            {
+                id: 'owasp',
+                title: 'OWASP Top 10',
+                icon: 'fa-bug',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'A01 - Broken Access Control',
+                        desc: 'Controle d\'acces defaillant',
+                        details: {
+                            explanation: 'Les utilisateurs accedent a des ressources non autorisees.',
+                            syntax: 'Verify permissions on every request',
+                            options: [
+                                { flag: 'IDOR', desc: 'Insecure Direct Object Reference' },
+                                { flag: 'Privilege escalation', desc: 'User devient admin' }
+                            ],
+                            examples: [
+                                { code: '# SECURISE\nif current_user.id != id and not current_user.is_admin:\n    abort(403)', desc: 'Fix IDOR' }
+                            ],
+                            warnings: ['#1 des vulnerabilites']
+                        }
+                    },
+                    {
+                        cmd: 'A03 - Injection',
+                        desc: 'SQL, Command injection',
+                        details: {
+                            explanation: 'Donnees non fiables interpretees comme commandes.',
+                            syntax: 'Parameterized queries',
+                            options: [
+                                { flag: 'SQL Injection', desc: '\' OR 1=1 --' },
+                                { flag: 'Command Injection', desc: '; rm -rf /' }
+                            ],
+                            examples: [
+                                { code: '# SECURISE - Requete parametree\ncursor.execute("SELECT * FROM users WHERE name = %s", (user_input,))', desc: 'Prevent SQL injection' }
+                            ],
+                            warnings: ['Jamais de concatenation SQL']
+                        }
+                    },
+                    {
+                        cmd: 'A07 - XSS',
+                        desc: 'Cross-Site Scripting',
+                        details: {
+                            explanation: 'Scripts malveillants executes dans le navigateur.',
+                            syntax: 'Escape output, CSP',
+                            options: [
+                                { flag: 'Reflected', desc: 'Via URL' },
+                                { flag: 'Stored', desc: 'Stocke en DB' }
+                            ],
+                            examples: [
+                                { code: 'from markupsafe import escape\nsafe_output = escape(user_input)', desc: 'Prevent XSS' }
+                            ],
+                            tips: ['CSP comme defense supplementaire']
+                        }
+                    },
+                    {
+                        cmd: 'A08 - CSRF',
+                        desc: 'Cross-Site Request Forgery',
+                        details: {
+                            explanation: 'Forcer un utilisateur a executer des actions.',
+                            syntax: 'CSRF token, SameSite cookies',
+                            options: [
+                                { flag: 'CSRF Token', desc: 'Token unique par form' },
+                                { flag: 'SameSite', desc: 'Cookie attribute' }
+                            ],
+                            examples: [
+                                { code: '<form method="post">\n    {{ csrf_token() }}\n    ...\n</form>', desc: 'CSRF protection' }
+                            ],
+                            tips: ['SameSite=Strict pour actions sensibles']
+                        }
+                    },
+                    {
+                        cmd: 'A10 - SSRF',
+                        desc: 'Server-Side Request Forgery',
+                        details: {
+                            explanation: 'Forcer le serveur a faire des requetes internes.',
+                            syntax: 'Validate and restrict URLs',
+                            options: [
+                                { flag: 'Internal access', desc: 'Reseau interne' },
+                                { flag: 'Cloud metadata', desc: '169.254.169.254' }
+                            ],
+                            examples: [
+                                { code: 'def is_safe_url(url):\n    ip = ipaddress.ip_address(parsed.hostname)\n    return not (ip.is_private or ip.is_loopback)', desc: 'SSRF prevention' }
+                            ],
+                            warnings: ['Bloquer metadata endpoints cloud']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: SECURITE RESEAU
+            // ===============================================================
+            {
+                id: 'network',
+                title: 'Securite Reseau',
+                icon: 'fa-network-wired',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Firewall',
+                        desc: 'Filtrage du trafic',
+                        details: {
+                            explanation: 'Controler le trafic entrant et sortant.',
+                            syntax: 'Rules: allow/deny src dst port',
+                            options: [
+                                { flag: 'Stateful', desc: 'Suit les connexions' },
+                                { flag: 'WAF', desc: 'Web Application Firewall (L7)' }
+                            ],
+                            examples: [
+                                { code: 'ufw default deny incoming\nufw allow ssh\nufw allow http\nufw allow https\nufw enable', desc: 'UFW firewall' }
+                            ],
+                            tips: ['Default deny']
+                        }
+                    },
+                    {
+                        cmd: 'TLS/HTTPS',
+                        desc: 'Chiffrement du transport',
+                        details: {
+                            explanation: 'Securiser les communications reseau.',
+                            syntax: 'TLS 1.3 minimum',
+                            options: [
+                                { flag: 'Certificate', desc: 'Verifie l\'identite' },
+                                { flag: 'HSTS', desc: 'Force HTTPS' }
+                            ],
+                            examples: [
+                                { code: 'Strict-Transport-Security: max-age=31536000; includeSubDomains; preload', desc: 'HSTS header' }
+                            ],
+                            tips: ['Let\'s Encrypt pour certs gratuits']
+                        }
+                    },
+                    {
+                        cmd: 'Network Segmentation',
+                        desc: 'Isolation des reseaux',
+                        details: {
+                            explanation: 'Diviser le reseau en zones.',
+                            syntax: 'DMZ, Internal, Management',
+                            options: [
+                                { flag: 'DMZ', desc: 'Serveurs exposes' },
+                                { flag: 'Internal', desc: 'Reseau interne' }
+                            ],
+                            examples: [
+                                { code: '# Internet -> [Firewall] -> DMZ -> [Firewall] -> Internal', desc: 'Network zones' }
+                            ],
+                            tips: ['Limiter les flux entre zones']
+                        }
+                    },
+                    {
+                        cmd: 'IDS/IPS',
+                        desc: 'Detection et prevention d\'intrusion',
+                        details: {
+                            explanation: 'Detecter et bloquer les activites malveillantes.',
+                            syntax: 'Monitor traffic -> Alert/Block',
+                            options: [
+                                { flag: 'IDS', desc: 'Detection, alerte' },
+                                { flag: 'IPS', desc: 'Prevention, bloque' }
+                            ],
+                            examples: [
+                                { code: 'alert tcp any any -> $HOME_NET 80 (\n    msg:"SQL Injection";\n    content:"UNION SELECT";\n)', desc: 'Snort rule' }
+                            ],
+                            tips: ['Tuner pour reduire faux positifs']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: SECURITE APPLICATION
+            // ===============================================================
+            {
+                id: 'application',
+                title: 'Securite Application',
+                icon: 'fa-code',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Input Validation',
+                        desc: 'Valider toutes les entrees',
+                        details: {
+                            explanation: 'Ne jamais faire confiance aux donnees utilisateur.',
+                            syntax: 'Whitelist, type check, length',
+                            options: [
+                                { flag: 'Whitelist', desc: 'Accepter uniquement le valide' },
+                                { flag: 'Type check', desc: 'Verifier le type attendu' }
+                            ],
+                            examples: [
+                                { code: 'from pydantic import BaseModel, EmailStr\nclass UserInput(BaseModel):\n    email: EmailStr\n    age: int = Field(ge=0, le=150)', desc: 'Pydantic validation' }
+                            ],
+                            tips: ['Valider cote serveur']
+                        }
+                    },
+                    {
+                        cmd: 'Output Encoding',
+                        desc: 'Encoder les sorties',
+                        details: {
+                            explanation: 'Encoder selon le contexte de sortie.',
+                            syntax: 'HTML, JS, URL encoding',
+                            options: [
+                                { flag: 'HTML', desc: '&lt; &gt; &amp;' },
+                                { flag: 'URL', desc: '%20 pour espace' }
+                            ],
+                            examples: [
+                                { code: 'from markupsafe import escape\nsafe_html = escape(user_input)', desc: 'HTML encoding' }
+                            ],
+                            tips: ['Contexte different = encoding different']
+                        }
+                    },
+                    {
+                        cmd: 'CSP (Content Security Policy)',
+                        desc: 'Politique de securite du contenu',
+                        details: {
+                            explanation: 'Controler les sources autorisees.',
+                            syntax: 'Content-Security-Policy: directive source',
+                            options: [
+                                { flag: 'default-src', desc: 'Fallback' },
+                                { flag: 'script-src', desc: 'Sources de scripts' }
+                            ],
+                            examples: [
+                                { code: 'Content-Security-Policy: default-src \'self\'; script-src \'self\' \'nonce-abc123\'', desc: 'CSP header' }
+                            ],
+                            tips: ['Commencer en report-only']
+                        }
+                    },
+                    {
+                        cmd: 'Security Headers',
+                        desc: 'En-tetes de securite HTTP',
+                        details: {
+                            explanation: 'Headers HTTP pour renforcer la securite.',
+                            syntax: 'X-Header: value',
+                            options: [
+                                { flag: 'X-Frame-Options', desc: 'Anti-clickjacking' },
+                                { flag: 'X-Content-Type-Options', desc: 'nosniff' }
+                            ],
+                            examples: [
+                                { code: 'X-Frame-Options: DENY\nX-Content-Type-Options: nosniff\nReferrer-Policy: strict-origin-when-cross-origin', desc: 'Security headers' }
+                            ],
+                            tips: ['securityheaders.com pour tester']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: GESTION DES SECRETS
+            // ===============================================================
+            {
+                id: 'secrets',
+                title: 'Gestion des Secrets',
+                icon: 'fa-key',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'Vault (HashiCorp)',
+                        desc: 'Gestionnaire de secrets',
+                        details: {
+                            explanation: 'Stockage centralise et securise des secrets.',
+                            syntax: 'vault kv get/put secret/path',
+                            options: [
+                                { flag: 'KV Store', desc: 'Key-value secrets' },
+                                { flag: 'Dynamic', desc: 'Credentials temporaires' }
+                            ],
+                            examples: [
+                                { code: 'import hvac\nclient = hvac.Client(url="https://vault.example.com")\nsecret = client.secrets.kv.v2.read_secret_version(path="myapp/db")', desc: 'Vault usage' }
+                            ],
+                            tips: ['Rotation automatique']
+                        }
+                    },
+                    {
+                        cmd: 'Environment Variables',
+                        desc: 'Variables d\'environnement',
+                        details: {
+                            explanation: 'Methode simple pour injecter des secrets.',
+                            syntax: 'export SECRET=value',
+                            options: [
+                                { flag: '.env', desc: 'Fichier local (dev)' },
+                                { flag: 'K8s Secrets', desc: 'Kubernetes' }
+                            ],
+                            examples: [
+                                { code: 'from dotenv import load_dotenv\nload_dotenv()\ndb_url = os.environ["DATABASE_URL"]', desc: 'Env vars' }
+                            ],
+                            tips: ['.env dans .gitignore']
+                        }
+                    },
+                    {
+                        cmd: 'Secret Rotation',
+                        desc: 'Rotation des secrets',
+                        details: {
+                            explanation: 'Changer regulierement les secrets.',
+                            syntax: 'Old -> New -> Remove old',
+                            options: [
+                                { flag: 'Automatique', desc: 'Vault, AWS SM' },
+                                { flag: 'Zero-downtime', desc: 'Support deux secrets' }
+                            ],
+                            examples: [
+                                { code: '# Rotation strategy\n# 1. Generer nouveau secret\n# 2. Deployer (support ancien ET nouveau)\n# 3. Migrer vers nouveau\n# 4. Supprimer ancien', desc: 'Rotation' }
+                            ],
+                            tips: ['Rotation tous les 90 jours']
+                        }
+                    },
+                    {
+                        cmd: 'Git Secrets Detection',
+                        desc: 'Eviter les secrets dans Git',
+                        details: {
+                            explanation: 'Detecter et prevenir les secrets commites.',
+                            syntax: 'pre-commit hooks, scanning',
+                            options: [
+                                { flag: 'gitleaks', desc: 'Detection moderne' },
+                                { flag: 'truffleHog', desc: 'Scan historique' }
+                            ],
+                            examples: [
+                                { code: 'gitleaks detect --source . --verbose', desc: 'Scan repo' }
+                            ],
+                            warnings: ['Secret commite = secret compromis']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: AUDIT & LOGGING
+            // ===============================================================
+            {
+                id: 'audit',
+                title: 'Audit & Logging',
+                icon: 'fa-clipboard-list',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Security Logging',
+                        desc: 'Journalisation securite',
+                        details: {
+                            explanation: 'Logger les evenements de securite.',
+                            syntax: 'log(timestamp, user, action, result)',
+                            options: [
+                                { flag: 'Authentication', desc: 'Login success/failure' },
+                                { flag: 'Authorization', desc: 'Access granted/denied' }
+                            ],
+                            examples: [
+                                { code: 'security_logger.info(json.dumps({\n    "event_type": "LOGIN",\n    "user_id": user.id,\n    "ip_address": request.remote_addr,\n    "success": True\n}))', desc: 'Security logging' }
+                            ],
+                            tips: ['Ne pas logger de secrets']
+                        }
+                    },
+                    {
+                        cmd: 'SIEM',
+                        desc: 'Security Information Management',
+                        details: {
+                            explanation: 'Centraliser et analyser les logs.',
+                            syntax: 'Collect -> Normalize -> Analyze -> Alert',
+                            options: [
+                                { flag: 'Splunk', desc: 'Enterprise' },
+                                { flag: 'ELK Stack', desc: 'Open source' }
+                            ],
+                            examples: [
+                                { code: '# Alert: > 5 failed logins in 5 minutes\n{\n  "query": "event_type:LOGIN AND success:false",\n  "threshold": 5,\n  "window": "5m"\n}', desc: 'SIEM rule' }
+                            ],
+                            tips: ['Alertes sur anomalies']
+                        }
+                    },
+                    {
+                        cmd: 'Audit Trail',
+                        desc: 'Piste d\'audit',
+                        details: {
+                            explanation: 'Historique immutable des actions.',
+                            syntax: 'Who did what, when, from where',
+                            options: [
+                                { flag: 'Immutable', desc: 'Ne peut pas etre modifie' },
+                                { flag: 'Complete', desc: 'Before/after values' }
+                            ],
+                            examples: [
+                                { code: 'class AuditLog(db.Model):\n    timestamp = db.Column(db.DateTime)\n    user_id = db.Column(db.Integer)\n    action = db.Column(db.String(50))\n    old_value = db.Column(db.JSON)\n    new_value = db.Column(db.JSON)', desc: 'Audit trail' }
+                            ],
+                            tips: ['Stockage separe et protege']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: THREAT MODELING
+            // ===============================================================
+            {
+                id: 'threats',
+                title: 'Threat Modeling',
+                icon: 'fa-exclamation-triangle',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'STRIDE',
+                        desc: 'Categories de menaces',
+                        details: {
+                            explanation: 'Framework pour identifier les types de menaces.',
+                            syntax: 'S-T-R-I-D-E analysis',
+                            options: [
+                                { flag: 'Spoofing', desc: 'Usurpation d\'identite' },
+                                { flag: 'Tampering', desc: 'Modification non autorisee' },
+                                { flag: 'Repudiation', desc: 'Nier une action' },
+                                { flag: 'Info Disclosure', desc: 'Fuite de donnees' },
+                                { flag: 'DoS', desc: 'Denial of Service' },
+                                { flag: 'Elevation', desc: 'Escalade de privileges' }
+                            ],
+                            examples: [
+                                { code: '# STRIDE pour une API\n# Spoofing: valider JWT\n# Tampering: HTTPS, HMAC\n# Repudiation: audit logging\n# Info Disclosure: messages generiques\n# DoS: rate limiting\n# Elevation: authz checks', desc: 'STRIDE analysis' }
+                            ],
+                            tips: ['Appliquer a chaque composant']
+                        }
+                    },
+                    {
+                        cmd: 'DREAD Scoring',
+                        desc: 'Evaluer la severite',
+                        details: {
+                            explanation: 'Scorer la severite des menaces.',
+                            syntax: 'Score = (D+R+E+A+D) / 5',
+                            options: [
+                                { flag: 'Damage', desc: 'Impact (0-10)' },
+                                { flag: 'Reproducibility', desc: 'Facilite a reproduire' },
+                                { flag: 'Exploitability', desc: 'Facilite a exploiter' },
+                                { flag: 'Affected', desc: 'Utilisateurs touches' },
+                                { flag: 'Discoverability', desc: 'Facilite a decouvrir' }
+                            ],
+                            examples: [
+                                { code: '# SQL Injection\n# D:10 R:10 E:8 A:10 D:8\n# Score = 9.2 -> CRITIQUE', desc: 'DREAD scoring' }
+                            ],
+                            tips: ['Prioriser les risques']
+                        }
+                    },
+                    {
+                        cmd: 'Attack Trees',
+                        desc: 'Arbres d\'attaque',
+                        details: {
+                            explanation: 'Decomposer les objectifs d\'attaque.',
+                            syntax: 'Goal -> Sub-goals -> Attacks',
+                            options: [
+                                { flag: 'OR nodes', desc: 'Une branche suffit' },
+                                { flag: 'AND nodes', desc: 'Toutes necessaires' }
+                            ],
+                            examples: [
+                                { code: '# [Voler credentials] (OR)\n# |-- [Phishing]\n# |-- [Brute force]\n# |-- [Social engineering]', desc: 'Attack tree' }
+                            ],
+                            tips: ['Identifie ou bloquer']
+                        }
+                    },
+                    {
+                        cmd: 'Security Requirements',
+                        desc: 'Exigences de securite',
+                        details: {
+                            explanation: 'Definir les exigences du systeme.',
+                            syntax: 'REQ-SEC-XXX: description',
+                            options: [
+                                { flag: 'Authentication', desc: 'Comment s\'authentifier' },
+                                { flag: 'Data protection', desc: 'Chiffrement, retention' }
+                            ],
+                            examples: [
+                                { code: '# REQ-AUTH-001: MFA obligatoire pour admins\n# REQ-DATA-001: Chiffrement at-rest AES-256\n# REQ-AUDIT-001: Logger tous les acces admin', desc: 'Requirements' }
+                            ],
+                            tips: ['Definir tot dans le projet']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

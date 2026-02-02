@@ -1505,10 +1505,10 @@ uncertainty = torch.stack(predictions).std(dim=0)`, desc: 'Quantification d\'inc
         });
 
         // Re-render KaTeX quand le modal s'ouvre
-        const originalShowModal = window.showModal;
-        if (originalShowModal) {
-            window.showModal = function(categoryId, commandIndex) {
-                originalShowModal(categoryId, commandIndex);
+        const originalShowDetails = window.showDetails;
+        if (originalShowDetails) {
+            window.showDetails = function(categoryId, commandIndex) {
+                originalShowDetails(categoryId, commandIndex);
                 setTimeout(() => {
                     if (typeof renderMathInElement !== 'undefined') {
                         renderMathInElement(document.getElementById('modalContent'), {

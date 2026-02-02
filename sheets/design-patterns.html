@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Design Patterns : creational, structural, behavioral patterns et anti-patterns.">
+    <title>Design Patterns - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-indigo-500/20 mb-4 icon-glow">
+                    <i class="fas fa-cubes text-3xl text-indigo-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Design Patterns</h1>
+                <p class="text-slate-400">Patterns creationnels, structurels, comportementaux</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: singleton, observer, factory)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: PATTERNS CREATIONNELS
+            // ===============================================================
+            {
+                id: 'creational',
+                title: 'Patterns Creationnels',
+                icon: 'fa-plus-circle',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'Singleton',
+                        desc: 'Instance unique globale',
+                        details: {
+                            explanation: 'Garantit qu\'une classe n\'a qu\'une seule instance avec un point d\'acces global.',
+                            syntax: 'getInstance() -> unique instance',
+                            options: [
+                                { flag: 'Lazy', desc: 'Instance creee au premier appel' },
+                                { flag: 'Eager', desc: 'Instance creee au chargement' },
+                                { flag: 'Thread-safe', desc: 'Double-checked locking' }
+                            ],
+                            examples: [
+                                { code: 'class Singleton:\n    _instance = None\n    \n    def __new__(cls):\n        if cls._instance is None:\n            cls._instance = super().__new__(cls)\n        return cls._instance', desc: 'Singleton en Python' }
+                            ],
+                            tips: ['Utiliser avec parcimonie', 'Difficile a tester (etat global)'],
+                            warnings: ['Anti-pattern si surutilise']
+                        }
+                    },
+                    {
+                        cmd: 'Factory Method',
+                        desc: 'Deleguer la creation aux sous-classes',
+                        details: {
+                            explanation: 'Definit une interface pour creer un objet, laissant les sous-classes decider.',
+                            syntax: 'createProduct() -> Product',
+                            options: [
+                                { flag: 'Creator', desc: 'Classe abstraite avec factory method' },
+                                { flag: 'ConcreteCreator', desc: 'Implemente la creation' },
+                                { flag: 'Product', desc: 'Interface du produit' }
+                            ],
+                            examples: [
+                                { code: 'class AnimalFactory:\n    def create_animal(self, animal_type):\n        if animal_type == "dog":\n            return Dog()\n        elif animal_type == "cat":\n            return Cat()\n        raise ValueError(f"Unknown: {animal_type}")', desc: 'Factory simple' }
+                            ],
+                            tips: ['Favorise l\'extensibilite', 'Respecte Open/Closed']
+                        }
+                    },
+                    {
+                        cmd: 'Abstract Factory',
+                        desc: 'Familles d\'objets lies',
+                        details: {
+                            explanation: 'Creer des familles d\'objets sans specifier leurs classes concretes.',
+                            syntax: 'createProductA(), createProductB()',
+                            options: [
+                                { flag: 'AbstractFactory', desc: 'Interface pour creer la famille' },
+                                { flag: 'ConcreteFactory', desc: 'Cree une variante specifique' },
+                                { flag: 'Coherence', desc: 'Produits compatibles entre eux' }
+                            ],
+                            examples: [
+                                { code: 'class GUIFactory:\n    def create_button(self): pass\n    def create_checkbox(self): pass\n\nclass WindowsFactory(GUIFactory):\n    def create_button(self):\n        return WindowsButton()\n    def create_checkbox(self):\n        return WindowsCheckbox()', desc: 'Abstract Factory GUI' }
+                            ],
+                            tips: ['Ideal pour UI multi-plateforme', 'Garantit la coherence']
+                        }
+                    },
+                    {
+                        cmd: 'Builder',
+                        desc: 'Construction etape par etape',
+                        details: {
+                            explanation: 'Separe la construction d\'un objet complexe de sa representation.',
+                            syntax: 'builder.setA().setB().build()',
+                            options: [
+                                { flag: 'Builder', desc: 'Interface de construction' },
+                                { flag: 'Director', desc: 'Orchestre la construction' },
+                                { flag: 'Fluent', desc: 'Methodes chainables' }
+                            ],
+                            examples: [
+                                { code: 'class PizzaBuilder:\n    def __init__(self):\n        self.pizza = Pizza()\n    \n    def add_cheese(self):\n        self.pizza.cheese = True\n        return self\n    \n    def add_pepperoni(self):\n        self.pizza.pepperoni = True\n        return self\n    \n    def build(self):\n        return self.pizza', desc: 'Builder fluent' }
+                            ],
+                            tips: ['Ideal pour objets avec beaucoup de parametres', 'Alternative aux constructeurs telescopiques']
+                        }
+                    },
+                    {
+                        cmd: 'Prototype',
+                        desc: 'Cloner des objets existants',
+                        details: {
+                            explanation: 'Creer de nouveaux objets en copiant un prototype existant.',
+                            syntax: 'prototype.clone()',
+                            options: [
+                                { flag: 'Shallow copy', desc: 'Copie de surface' },
+                                { flag: 'Deep copy', desc: 'Copie profonde recursive' },
+                                { flag: 'Registry', desc: 'Catalogue de prototypes' }
+                            ],
+                            examples: [
+                                { code: 'import copy\n\nclass Prototype:\n    def clone(self):\n        return copy.deepcopy(self)\n\noriginal = Prototype()\nclone = original.clone()', desc: 'Prototype en Python' }
+                            ],
+                            tips: ['Utile quand la creation est couteuse', 'Attention aux references partagees']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: PATTERNS STRUCTURELS
+            // ===============================================================
+            {
+                id: 'structural',
+                title: 'Patterns Structurels',
+                icon: 'fa-project-diagram',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Adapter',
+                        desc: 'Convertir une interface en une autre',
+                        details: {
+                            explanation: 'Permet a des interfaces incompatibles de travailler ensemble.',
+                            syntax: 'Adapter wraps Adaptee',
+                            options: [
+                                { flag: 'Object Adapter', desc: 'Composition (prefere)' },
+                                { flag: 'Class Adapter', desc: 'Heritage multiple' },
+                                { flag: 'Target', desc: 'Interface attendue par le client' }
+                            ],
+                            examples: [
+                                { code: 'class EuropeanPlug:\n    def plug_in(self): return "220V"\n\nclass USAdapter:\n    def __init__(self, european):\n        self.european = european\n    \n    def connect(self):\n        return f"Adapted: {self.european.plug_in()}"', desc: 'Adapter de prise electrique' }
+                            ],
+                            tips: ['Ideal pour integrer du code legacy', 'Respecte Single Responsibility']
+                        }
+                    },
+                    {
+                        cmd: 'Decorator',
+                        desc: 'Ajouter des responsabilites dynamiquement',
+                        details: {
+                            explanation: 'Attache des comportements supplementaires a un objet dynamiquement.',
+                            syntax: 'new Decorator(component)',
+                            options: [
+                                { flag: 'Component', desc: 'Interface commune' },
+                                { flag: 'ConcreteComponent', desc: 'Objet de base' },
+                                { flag: 'Decorator', desc: 'Wrapper avec meme interface' }
+                            ],
+                            examples: [
+                                { code: 'class Coffee:\n    def cost(self): return 5\n\nclass MilkDecorator:\n    def __init__(self, coffee):\n        self._coffee = coffee\n    \n    def cost(self):\n        return self._coffee.cost() + 2\n\ncoffee = MilkDecorator(Coffee())\nprint(coffee.cost())  # 7', desc: 'Decorator cafe' }
+                            ],
+                            tips: ['Alternative flexible a l\'heritage', 'Decorateurs Python @decorator']
+                        }
+                    },
+                    {
+                        cmd: 'Facade',
+                        desc: 'Interface simplifiee pour un sous-systeme',
+                        details: {
+                            explanation: 'Fournit une interface unifiee a un ensemble d\'interfaces.',
+                            syntax: 'facade.simpleOperation()',
+                            options: [
+                                { flag: 'Facade', desc: 'Interface simplifiee' },
+                                { flag: 'Subsystem', desc: 'Classes complexes cachees' },
+                                { flag: 'Client', desc: 'Utilise uniquement la facade' }
+                            ],
+                            examples: [
+                                { code: 'class ComputerFacade:\n    def __init__(self):\n        self.cpu = CPU()\n        self.memory = Memory()\n        self.disk = HardDrive()\n    \n    def start(self):\n        self.cpu.freeze()\n        self.memory.load()\n        self.cpu.execute()', desc: 'Facade demarrage ordinateur' }
+                            ],
+                            tips: ['Reduit le couplage', 'Point d\'entree unique']
+                        }
+                    },
+                    {
+                        cmd: 'Proxy',
+                        desc: 'Substitut controlant l\'acces',
+                        details: {
+                            explanation: 'Fournit un substitut pour controler l\'acces a un objet.',
+                            syntax: 'proxy.request() -> realSubject.request()',
+                            options: [
+                                { flag: 'Virtual Proxy', desc: 'Lazy loading' },
+                                { flag: 'Protection Proxy', desc: 'Controle d\'acces' },
+                                { flag: 'Remote Proxy', desc: 'Objet distant' },
+                                { flag: 'Caching Proxy', desc: 'Cache des resultats' }
+                            ],
+                            examples: [
+                                { code: 'class ImageProxy:\n    def __init__(self, filename):\n        self.filename = filename\n        self._image = None\n    \n    def display(self):\n        if self._image is None:\n            self._image = RealImage(self.filename)\n        self._image.display()', desc: 'Virtual Proxy lazy loading' }
+                            ],
+                            tips: ['Transparent pour le client', 'Ajoute du controle sans modifier le sujet']
+                        }
+                    },
+                    {
+                        cmd: 'Composite',
+                        desc: 'Structures arborescentes',
+                        details: {
+                            explanation: 'Compose des objets en structures arborescentes pour traiter uniformement.',
+                            syntax: 'component.operation() // leaf or composite',
+                            options: [
+                                { flag: 'Component', desc: 'Interface commune' },
+                                { flag: 'Leaf', desc: 'Element terminal' },
+                                { flag: 'Composite', desc: 'Conteneur d\'elements' }
+                            ],
+                            examples: [
+                                { code: 'class File:\n    def __init__(self, name):\n        self.name = name\n    def size(self): return 100\n\nclass Folder:\n    def __init__(self, name):\n        self.children = []\n    def add(self, child):\n        self.children.append(child)\n    def size(self):\n        return sum(c.size() for c in self.children)', desc: 'Composite fichiers/dossiers' }
+                            ],
+                            tips: ['Ideal pour hierarchies', 'Traitement uniforme']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: PATTERNS COMPORTEMENTAUX
+            // ===============================================================
+            {
+                id: 'behavioral',
+                title: 'Patterns Comportementaux',
+                icon: 'fa-exchange-alt',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Observer',
+                        desc: 'Notification de changements',
+                        details: {
+                            explanation: 'Definit une dependance un-a-plusieurs pour notifier les changements.',
+                            syntax: 'subject.attach(observer)',
+                            options: [
+                                { flag: 'Subject', desc: 'Maintient la liste des observers' },
+                                { flag: 'Observer', desc: 'Interface de notification' },
+                                { flag: 'Push vs Pull', desc: 'Donnees envoyees ou recuperees' }
+                            ],
+                            examples: [
+                                { code: 'class Subject:\n    def __init__(self):\n        self._observers = []\n    \n    def attach(self, observer):\n        self._observers.append(observer)\n    \n    def notify(self):\n        for obs in self._observers:\n            obs.update(self)', desc: 'Observer basique' }
+                            ],
+                            tips: ['Base des systemes reactifs', 'Attention aux memory leaks']
+                        }
+                    },
+                    {
+                        cmd: 'Strategy',
+                        desc: 'Algorithmes interchangeables',
+                        details: {
+                            explanation: 'Definit une famille d\'algorithmes interchangeables.',
+                            syntax: 'context.setStrategy(strategy)',
+                            options: [
+                                { flag: 'Strategy', desc: 'Interface commune' },
+                                { flag: 'ConcreteStrategy', desc: 'Implementation specifique' },
+                                { flag: 'Context', desc: 'Utilise une strategy' }
+                            ],
+                            examples: [
+                                { code: 'class PaymentContext:\n    def __init__(self, strategy):\n        self._strategy = strategy\n    \n    def pay(self, amount):\n        return self._strategy.pay(amount)\n\nclass CreditCard:\n    def pay(self, amount): return f"Card: {amount}"\n\nclass PayPal:\n    def pay(self, amount): return f"PayPal: {amount}"', desc: 'Strategy paiement' }
+                            ],
+                            tips: ['Elimine les conditionnels', 'Open/Closed principle']
+                        }
+                    },
+                    {
+                        cmd: 'Command',
+                        desc: 'Encapsuler une requete',
+                        details: {
+                            explanation: 'Encapsule une requete comme un objet pour parametrer et defaire.',
+                            syntax: 'command.execute() / command.undo()',
+                            options: [
+                                { flag: 'Command', desc: 'Interface execute()' },
+                                { flag: 'Invoker', desc: 'Declenche la commande' },
+                                { flag: 'Receiver', desc: 'Execute l\'action reelle' }
+                            ],
+                            examples: [
+                                { code: 'class Command:\n    def execute(self): pass\n    def undo(self): pass\n\nclass LightOnCommand(Command):\n    def __init__(self, light):\n        self.light = light\n    \n    def execute(self):\n        self.light.on()\n    \n    def undo(self):\n        self.light.off()', desc: 'Command avec undo' }
+                            ],
+                            tips: ['Ideal pour undo/redo', 'Historique des actions']
+                        }
+                    },
+                    {
+                        cmd: 'State',
+                        desc: 'Comportement selon l\'etat',
+                        details: {
+                            explanation: 'Permet a un objet de changer de comportement selon son etat.',
+                            syntax: 'context.request() // depends on state',
+                            options: [
+                                { flag: 'State', desc: 'Interface des etats' },
+                                { flag: 'ConcreteState', desc: 'Comportement specifique' },
+                                { flag: 'Context', desc: 'Maintient l\'etat courant' }
+                            ],
+                            examples: [
+                                { code: 'class TrafficLight:\n    def __init__(self):\n        self.state = RedState()\n    \n    def change(self):\n        self.state = self.state.next()\n\nclass RedState:\n    def next(self): return GreenState()\n\nclass GreenState:\n    def next(self): return YellowState()', desc: 'State machine feu tricolore' }
+                            ],
+                            tips: ['Elimine les switch/case', 'Transitions explicites']
+                        }
+                    },
+                    {
+                        cmd: 'Template Method',
+                        desc: 'Squelette d\'algorithme',
+                        details: {
+                            explanation: 'Definit le squelette d\'un algorithme, laissant les etapes aux sous-classes.',
+                            syntax: 'templateMethod() calls step1(), step2()...',
+                            options: [
+                                { flag: 'AbstractClass', desc: 'Definit le template' },
+                                { flag: 'ConcreteClass', desc: 'Implemente les etapes' },
+                                { flag: 'Hook', desc: 'Etape optionnelle' }
+                            ],
+                            examples: [
+                                { code: 'class DataMiner:\n    def mine(self):  # template method\n        self.open_file()\n        self.extract_data()\n        self.parse_data()\n        self.analyze()\n        self.close_file()\n    \n    def extract_data(self):  # a implementer\n        raise NotImplementedError', desc: 'Template Method mining' }
+                            ],
+                            tips: ['Reutilisation du squelette', 'Hollywood Principle']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: PATTERNS ARCHITECTURAUX
+            // ===============================================================
+            {
+                id: 'architectural',
+                title: 'Patterns Architecturaux',
+                icon: 'fa-sitemap',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'MVC (Model-View-Controller)',
+                        desc: 'Separation presentation/logique',
+                        details: {
+                            explanation: 'Separe l\'application en trois composants interconnectes.',
+                            syntax: 'Model <-> Controller <-> View',
+                            options: [
+                                { flag: 'Model', desc: 'Donnees et logique metier' },
+                                { flag: 'View', desc: 'Presentation a l\'utilisateur' },
+                                { flag: 'Controller', desc: 'Gere les interactions' }
+                            ],
+                            examples: [
+                                { code: '# Model\nclass User:\n    def __init__(self, name): self.name = name\n\n# View\nclass UserView:\n    def show(self, user): print(user.name)\n\n# Controller\nclass UserController:\n    def __init__(self, model, view):\n        self.model = model\n        self.view = view', desc: 'MVC simple' }
+                            ],
+                            tips: ['Standard pour web apps', 'Facilite les tests']
+                        }
+                    },
+                    {
+                        cmd: 'MVP (Model-View-Presenter)',
+                        desc: 'Presenter comme intermediaire',
+                        details: {
+                            explanation: 'Le Presenter gere toute la logique de presentation.',
+                            syntax: 'View <-> Presenter <-> Model',
+                            options: [
+                                { flag: 'View', desc: 'Passive, affiche seulement' },
+                                { flag: 'Presenter', desc: 'Logique de presentation' },
+                                { flag: 'Model', desc: 'Donnees' }
+                            ],
+                            examples: [
+                                { code: 'class Presenter:\n    def __init__(self, view, model):\n        self.view = view\n        self.model = model\n    \n    def load_user(self, id):\n        user = self.model.get(id)\n        self.view.display_name(user.name)\n        self.view.display_email(user.email)', desc: 'MVP pattern' }
+                            ],
+                            tips: ['View tres testable', 'Populaire en Android']
+                        }
+                    },
+                    {
+                        cmd: 'MVVM (Model-View-ViewModel)',
+                        desc: 'Data binding bidirectionnel',
+                        details: {
+                            explanation: 'ViewModel expose des donnees observables pour la View.',
+                            syntax: 'View <-binding-> ViewModel <-> Model',
+                            options: [
+                                { flag: 'View', desc: 'UI avec data binding' },
+                                { flag: 'ViewModel', desc: 'Etat et commandes' },
+                                { flag: 'Binding', desc: 'Synchronisation automatique' }
+                            ],
+                            examples: [
+                                { code: '# Avec PyQt ou framework reactif\nclass ViewModel:\n    def __init__(self):\n        self.name = Observable("")\n        self.is_valid = Computed(\n            lambda: len(self.name.value) > 0\n        )', desc: 'ViewModel avec observables' }
+                            ],
+                            tips: ['Ideal avec frameworks reactifs', 'Angular, Vue, WPF']
+                        }
+                    },
+                    {
+                        cmd: 'Repository',
+                        desc: 'Abstraction de l\'acces aux donnees',
+                        details: {
+                            explanation: 'Mediateur entre domaine et couche de donnees.',
+                            syntax: 'repository.find(id), repository.save(entity)',
+                            options: [
+                                { flag: 'Interface', desc: 'Contrat d\'acces' },
+                                { flag: 'Implementation', desc: 'SQL, NoSQL, API...' },
+                                { flag: 'Unit of Work', desc: 'Gestion des transactions' }
+                            ],
+                            examples: [
+                                { code: 'class UserRepository:\n    def find_by_id(self, id): pass\n    def find_all(self): pass\n    def save(self, user): pass\n    def delete(self, user): pass\n\nclass SQLUserRepository(UserRepository):\n    def find_by_id(self, id):\n        return self.db.query(User).get(id)', desc: 'Repository pattern' }
+                            ],
+                            tips: ['Testable avec mocks', 'Decouple du storage']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: PATTERNS CONCURRENCE
+            // ===============================================================
+            {
+                id: 'concurrency',
+                title: 'Patterns Concurrence',
+                icon: 'fa-sync-alt',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'Producer-Consumer',
+                        desc: 'Queue entre producteurs et consommateurs',
+                        details: {
+                            explanation: 'Decouple la production de la consommation via une queue.',
+                            syntax: 'producer -> queue -> consumer',
+                            options: [
+                                { flag: 'Queue', desc: 'Buffer thread-safe' },
+                                { flag: 'Blocking', desc: 'Attente si vide/plein' },
+                                { flag: 'Bounded', desc: 'Limite de taille' }
+                            ],
+                            examples: [
+                                { code: 'from queue import Queue\nfrom threading import Thread\n\nq = Queue(maxsize=10)\n\ndef producer():\n    for i in range(100):\n        q.put(i)\n\ndef consumer():\n    while True:\n        item = q.get()\n        process(item)\n        q.task_done()', desc: 'Producer-Consumer Python' }
+                            ],
+                            tips: ['Decouplage temporel', 'Gestion de la charge']
+                        }
+                    },
+                    {
+                        cmd: 'Thread Pool',
+                        desc: 'Pool de workers reutilisables',
+                        details: {
+                            explanation: 'Groupe de threads prets a executer des taches.',
+                            syntax: 'pool.submit(task)',
+                            options: [
+                                { flag: 'Workers', desc: 'Nombre de threads' },
+                                { flag: 'Queue', desc: 'File des taches' },
+                                { flag: 'Executor', desc: 'Interface d\'execution' }
+                            ],
+                            examples: [
+                                { code: 'from concurrent.futures import ThreadPoolExecutor\n\nwith ThreadPoolExecutor(max_workers=4) as executor:\n    futures = [executor.submit(task, arg) for arg in args]\n    results = [f.result() for f in futures]', desc: 'ThreadPoolExecutor' }
+                            ],
+                            tips: ['Evite le cout de creation', 'ProcessPoolExecutor pour CPU-bound']
+                        }
+                    },
+                    {
+                        cmd: 'Future / Promise',
+                        desc: 'Resultat asynchrone',
+                        details: {
+                            explanation: 'Represente un resultat qui sera disponible plus tard.',
+                            syntax: 'future = async_call(); result = future.result()',
+                            options: [
+                                { flag: 'Pending', desc: 'En cours d\'execution' },
+                                { flag: 'Fulfilled', desc: 'Resultat disponible' },
+                                { flag: 'Rejected', desc: 'Erreur survenue' }
+                            ],
+                            examples: [
+                                { code: 'import asyncio\n\nasync def fetch_data():\n    await asyncio.sleep(1)\n    return "data"\n\nasync def main():\n    result = await fetch_data()\n    print(result)\n\nasyncio.run(main())', desc: 'Async/await Python' }
+                            ],
+                            tips: ['Base de la programmation asynchrone', 'Composable avec then/map']
+                        }
+                    },
+                    {
+                        cmd: 'Semaphore',
+                        desc: 'Limiter l\'acces concurrent',
+                        details: {
+                            explanation: 'Controle le nombre d\'acces simultanes a une ressource.',
+                            syntax: 'semaphore.acquire(); ... semaphore.release()',
+                            options: [
+                                { flag: 'Count', desc: 'Nombre d\'acces autorises' },
+                                { flag: 'Binary', desc: 'Mutex (count=1)' },
+                                { flag: 'Counting', desc: 'Multiple acces' }
+                            ],
+                            examples: [
+                                { code: 'from threading import Semaphore\n\n# Max 3 connexions simultanees\ndb_semaphore = Semaphore(3)\n\ndef access_db():\n    with db_semaphore:\n        # acces a la DB\n        perform_query()', desc: 'Semaphore pour DB' }
+                            ],
+                            tips: ['Rate limiting', 'Pool de connexions']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: ANTI-PATTERNS
+            // ===============================================================
+            {
+                id: 'antipatterns',
+                title: 'Anti-Patterns',
+                icon: 'fa-exclamation-triangle',
+                color: 'border-l-4 border-red-500',
+                commands: [
+                    {
+                        cmd: 'God Object',
+                        desc: 'Classe qui fait tout',
+                        details: {
+                            explanation: 'Une classe qui concentre trop de responsabilites.',
+                            syntax: 'class Application { /* everything */ }',
+                            options: [
+                                { flag: 'Symptomes', desc: 'Classe enorme, difficile a maintenir' },
+                                { flag: 'Cause', desc: 'Mauvaise separation des responsabilites' },
+                                { flag: 'Solution', desc: 'Decomposer en classes specialisees' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS\nclass UserManager:\n    def create_user(self): ...\n    def send_email(self): ...\n    def generate_report(self): ...\n    def backup_database(self): ...\n    # fait TOUT!', desc: 'God Object a eviter' }
+                            ],
+                            tips: ['Appliquer Single Responsibility', 'Une classe = une raison de changer'],
+                            warnings: ['Viole tous les principes SOLID']
+                        }
+                    },
+                    {
+                        cmd: 'Spaghetti Code',
+                        desc: 'Code non structure',
+                        details: {
+                            explanation: 'Code avec flux de controle emmele et difficile a suivre.',
+                            syntax: 'goto, global variables, deep nesting',
+                            options: [
+                                { flag: 'Symptomes', desc: 'Imbrications profondes, gotos' },
+                                { flag: 'Cause', desc: 'Manque de planification' },
+                                { flag: 'Solution', desc: 'Refactoring, fonctions courtes' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS\nif a:\n    if b:\n        if c:\n            if d:\n                # 10 niveaux plus tard...\n                do_something()', desc: 'Nesting excessif' }
+                            ],
+                            tips: ['Early return', 'Extraire en fonctions', 'Guard clauses'],
+                            warnings: ['Maintenance nightmare']
+                        }
+                    },
+                    {
+                        cmd: 'Golden Hammer',
+                        desc: 'Meme solution pour tout',
+                        details: {
+                            explanation: 'Utiliser le meme outil/pattern pour tous les problemes.',
+                            syntax: '"Si tout ce que tu as est un marteau..."',
+                            options: [
+                                { flag: 'Symptomes', desc: 'Meme techno partout' },
+                                { flag: 'Cause', desc: 'Zone de confort, manque d\'exploration' },
+                                { flag: 'Solution', desc: 'Evaluer les alternatives' }
+                            ],
+                            examples: [
+                                { code: '# Utiliser MongoDB pour TOUT\n# meme quand SQL serait mieux\n# ou Redis pour du cache simple\n# ou Kubernetes pour un petit projet', desc: 'Over-engineering' }
+                            ],
+                            tips: ['Right tool for the job', 'Evaluer les trade-offs'],
+                            warnings: ['Solutions sous-optimales']
+                        }
+                    },
+                    {
+                        cmd: 'Premature Optimization',
+                        desc: 'Optimiser trop tot',
+                        details: {
+                            explanation: 'Optimiser avant de savoir ou sont les vrais goulots.',
+                            syntax: '"Root of all evil" - Knuth',
+                            options: [
+                                { flag: 'Symptomes', desc: 'Code complexe pour gains minimes' },
+                                { flag: 'Cause', desc: 'Assumptions non verifiees' },
+                                { flag: 'Solution', desc: 'Profiler d\'abord, optimiser ensuite' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS: optimiser sans mesurer\n# Passer des heures a micro-optimiser\n# une fonction appelee 1 fois\n\n# BON: profiler d\'abord\nimport cProfile\ncProfile.run("main()")', desc: 'Profiler avant d\'optimiser' }
+                            ],
+                            tips: ['Make it work, make it right, make it fast', 'Measure first'],
+                            warnings: ['Complexite inutile']
+                        }
+                    },
+                    {
+                        cmd: 'Copy-Paste Programming',
+                        desc: 'Duplication de code',
+                        details: {
+                            explanation: 'Copier du code au lieu de le reutiliser.',
+                            syntax: 'Ctrl+C, Ctrl+V, repeat',
+                            options: [
+                                { flag: 'Symptomes', desc: 'Code duplique partout' },
+                                { flag: 'Cause', desc: 'Facilite apparente, deadline' },
+                                { flag: 'Solution', desc: 'DRY - Extract function/class' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS: code duplique\ndef process_user():\n    validate()\n    save()\n    notify()\n\ndef process_order():\n    validate()  # meme code!\n    save()      # meme code!\n    notify()    # meme code!', desc: 'Duplication a eviter' }
+                            ],
+                            tips: ['Rule of Three', 'Extract quand duplique'],
+                            warnings: ['Bugs dupliques aussi']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: PATTERNS FONCTIONNELS
+            // ===============================================================
+            {
+                id: 'functional',
+                title: 'Patterns Fonctionnels',
+                icon: 'fa-code',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Map / Filter / Reduce',
+                        desc: 'Transformations de collections',
+                        details: {
+                            explanation: 'Operations fonctionnelles sur les sequences.',
+                            syntax: 'map(f, list), filter(p, list), reduce(f, list)',
+                            options: [
+                                { flag: 'Map', desc: 'Transformer chaque element' },
+                                { flag: 'Filter', desc: 'Garder selon predicat' },
+                                { flag: 'Reduce', desc: 'Agreger en une valeur' }
+                            ],
+                            examples: [
+                                { code: 'numbers = [1, 2, 3, 4, 5]\n\n# Map: doubler\ndoubled = list(map(lambda x: x * 2, numbers))\n\n# Filter: pairs\nevens = list(filter(lambda x: x % 2 == 0, numbers))\n\n# Reduce: somme\nfrom functools import reduce\ntotal = reduce(lambda a, b: a + b, numbers)', desc: 'Map/Filter/Reduce' }
+                            ],
+                            tips: ['List comprehensions en Python', 'Chainable']
+                        }
+                    },
+                    {
+                        cmd: 'Composition',
+                        desc: 'Combiner des fonctions',
+                        details: {
+                            explanation: 'Creer de nouvelles fonctions en combinant des existantes.',
+                            syntax: '(f . g)(x) = f(g(x))',
+                            options: [
+                                { flag: 'compose', desc: 'f(g(x)) - droite a gauche' },
+                                { flag: 'pipe', desc: 'g(f(x)) - gauche a droite' },
+                                { flag: 'Point-free', desc: 'Sans mentionner les arguments' }
+                            ],
+                            examples: [
+                                { code: 'def compose(*funcs):\n    def inner(x):\n        result = x\n        for f in reversed(funcs):\n            result = f(result)\n        return result\n    return inner\n\nprocess = compose(str.upper, str.strip)\nprint(process("  hello  "))  # "HELLO"', desc: 'Composition de fonctions' }
+                            ],
+                            tips: ['Fonctions pures preferees', 'Pipeline de transformations']
+                        }
+                    },
+                    {
+                        cmd: 'Currying',
+                        desc: 'Application partielle',
+                        details: {
+                            explanation: 'Transformer une fonction multi-arguments en sequence de fonctions.',
+                            syntax: 'f(a, b, c) -> f(a)(b)(c)',
+                            options: [
+                                { flag: 'Partial', desc: 'Fixer certains arguments' },
+                                { flag: 'Curried', desc: 'Un argument a la fois' },
+                                { flag: 'Closure', desc: 'Capture les arguments' }
+                            ],
+                            examples: [
+                                { code: 'from functools import partial\n\ndef multiply(a, b):\n    return a * b\n\ndouble = partial(multiply, 2)\nprint(double(5))  # 10\n\n# Currying manuel\ndef curry_multiply(a):\n    def inner(b):\n        return a * b\n    return inner\n\ntriple = curry_multiply(3)\nprint(triple(4))  # 12', desc: 'Partial application' }
+                            ],
+                            tips: ['Creer des fonctions specialisees', 'Configuration']
+                        }
+                    },
+                    {
+                        cmd: 'Monad (Option/Result)',
+                        desc: 'Gestion des cas speciaux',
+                        details: {
+                            explanation: 'Encapsule une valeur avec un contexte (absence, erreur, etc.).',
+                            syntax: 'Option.map(f).flatMap(g).getOrElse(default)',
+                            options: [
+                                { flag: 'Option/Maybe', desc: 'Valeur ou absence' },
+                                { flag: 'Result/Either', desc: 'Succes ou erreur' },
+                                { flag: 'flatMap/bind', desc: 'Chainer les operations' }
+                            ],
+                            examples: [
+                                { code: 'from typing import Optional\n\ndef safe_divide(a: float, b: float) -> Optional[float]:\n    if b == 0:\n        return None\n    return a / b\n\ndef safe_sqrt(x: float) -> Optional[float]:\n    if x < 0:\n        return None\n    return x ** 0.5\n\n# Chainer avec des checks None\nresult = safe_divide(10, 2)\nif result is not None:\n    result = safe_sqrt(result)', desc: 'Pattern Option' }
+                            ],
+                            tips: ['Evite les null checks explicites', 'Railway-oriented programming']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: PATTERNS DE TEST
+            // ===============================================================
+            {
+                id: 'testing',
+                title: 'Patterns de Test',
+                icon: 'fa-vial',
+                color: 'border-l-4 border-pink-500',
+                commands: [
+                    {
+                        cmd: 'Dependency Injection',
+                        desc: 'Injecter les dependances',
+                        details: {
+                            explanation: 'Fournir les dependances de l\'exterieur plutot que les creer.',
+                            syntax: 'class Service(dependency): ...',
+                            options: [
+                                { flag: 'Constructor', desc: 'Via le constructeur' },
+                                { flag: 'Setter', desc: 'Via une methode' },
+                                { flag: 'Interface', desc: 'Via abstraction' }
+                            ],
+                            examples: [
+                                { code: '# Sans DI (difficile a tester)\nclass UserService:\n    def __init__(self):\n        self.db = Database()  # couplage fort\n\n# Avec DI (testable)\nclass UserService:\n    def __init__(self, db):\n        self.db = db  # injection\n\n# Test avec mock\nmock_db = Mock()\nservice = UserService(mock_db)', desc: 'Dependency Injection' }
+                            ],
+                            tips: ['Fondamental pour les tests', 'Inversion of Control']
+                        }
+                    },
+                    {
+                        cmd: 'Mock / Stub / Fake',
+                        desc: 'Doubles de test',
+                        details: {
+                            explanation: 'Remplacer les vraies dependances par des doubles.',
+                            syntax: 'mock = Mock(); mock.method.return_value = x',
+                            options: [
+                                { flag: 'Stub', desc: 'Retourne des valeurs predefinies' },
+                                { flag: 'Mock', desc: 'Verifie les interactions' },
+                                { flag: 'Fake', desc: 'Implementation simplifiee' }
+                            ],
+                            examples: [
+                                { code: 'from unittest.mock import Mock, patch\n\n# Mock simple\nmock_api = Mock()\nmock_api.get_user.return_value = {"id": 1, "name": "John"}\n\n# Patch decorator\n@patch("mymodule.requests.get")\ndef test_fetch(mock_get):\n    mock_get.return_value.json.return_value = {"data": "test"}\n    result = fetch_data()\n    assert result == {"data": "test"}', desc: 'Mocking en Python' }
+                            ],
+                            tips: ['Mock ce que tu ne controles pas', 'Ne pas sur-mocker']
+                        }
+                    },
+                    {
+                        cmd: 'Arrange-Act-Assert (AAA)',
+                        desc: 'Structure de test',
+                        details: {
+                            explanation: 'Organiser les tests en trois sections claires.',
+                            syntax: '# Arrange -> # Act -> # Assert',
+                            options: [
+                                { flag: 'Arrange', desc: 'Setup des preconditions' },
+                                { flag: 'Act', desc: 'Executer l\'action testee' },
+                                { flag: 'Assert', desc: 'Verifier le resultat' }
+                            ],
+                            examples: [
+                                { code: 'def test_user_creation():\n    # Arrange\n    name = "John"\n    email = "john@test.com"\n    \n    # Act\n    user = User.create(name, email)\n    \n    # Assert\n    assert user.name == name\n    assert user.email == email\n    assert user.id is not None', desc: 'Pattern AAA' }
+                            ],
+                            tips: ['Un Act par test', 'Tests lisibles']
+                        }
+                    },
+                    {
+                        cmd: 'Test Fixtures',
+                        desc: 'Donnees de test reutilisables',
+                        details: {
+                            explanation: 'Preparer un etat connu pour les tests.',
+                            syntax: '@pytest.fixture def my_fixture(): ...',
+                            options: [
+                                { flag: 'Setup', desc: 'Avant chaque test' },
+                                { flag: 'Teardown', desc: 'Nettoyage apres' },
+                                { flag: 'Scope', desc: 'function, class, module, session' }
+                            ],
+                            examples: [
+                                { code: 'import pytest\n\n@pytest.fixture\ndef db_connection():\n    conn = create_connection()\n    yield conn  # fournit au test\n    conn.close()  # teardown\n\n@pytest.fixture\ndef sample_user(db_connection):\n    user = User(name="Test")\n    db_connection.save(user)\n    return user\n\ndef test_user_update(sample_user):\n    sample_user.name = "Updated"\n    assert sample_user.name == "Updated"', desc: 'Fixtures pytest' }
+                            ],
+                            tips: ['Composer les fixtures', 'Eviter les effets de bord']
+                        }
+                    },
+                    {
+                        cmd: 'Test Parametrization',
+                        desc: 'Tester plusieurs cas',
+                        details: {
+                            explanation: 'Executer le meme test avec differentes donnees.',
+                            syntax: '@pytest.mark.parametrize("input,expected", [...])',
+                            options: [
+                                { flag: 'Data-driven', desc: 'Liste de cas de test' },
+                                { flag: 'Edge cases', desc: 'Valeurs limites' },
+                                { flag: 'Combinations', desc: 'Produit cartesien' }
+                            ],
+                            examples: [
+                                { code: 'import pytest\n\n@pytest.mark.parametrize("input,expected", [\n    (1, 1),\n    (2, 4),\n    (3, 9),\n    (-1, 1),\n    (0, 0),\n])\ndef test_square(input, expected):\n    assert square(input) == expected', desc: 'Tests parametres' }
+                            ],
+                            tips: ['Couvrir les edge cases', 'Table-driven tests']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

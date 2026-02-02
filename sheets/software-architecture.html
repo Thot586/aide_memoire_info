@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Architecture Logicielle : SOLID, Clean Architecture, microservices, API design.">
+    <title>Architecture Logicielle - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-teal-500/20 mb-4 icon-glow">
+                    <i class="fas fa-building text-3xl text-teal-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Architecture Logicielle</h1>
+                <p class="text-slate-400">SOLID, Clean Architecture, microservices, API design</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: SOLID, microservices, REST)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: PRINCIPES SOLID
+            // ===============================================================
+            {
+                id: 'solid',
+                title: 'Principes SOLID',
+                icon: 'fa-gem',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'S - Single Responsibility',
+                        desc: 'Une classe = une responsabilite',
+                        details: {
+                            explanation: 'Une classe ne devrait avoir qu\'une seule raison de changer.',
+                            syntax: 'class X { /* une seule responsabilite */ }',
+                            options: [
+                                { flag: 'Cohesion', desc: 'Methodes liees entre elles' },
+                                { flag: 'Separation', desc: 'Decouper si plusieurs raisons de changer' },
+                                { flag: 'Nommage', desc: 'Nom reflete la responsabilite' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS\nclass User:\n    def save_to_db(self): ...\n    def generate_report(self): ...\n    def send_email(self): ...\n\n# BON\nclass User: ...\nclass UserRepository:\n    def save(self, user): ...\nclass ReportGenerator:\n    def generate(self, user): ...\nclass EmailService:\n    def send(self, to, content): ...', desc: 'Separation des responsabilites' }
+                            ],
+                            tips: ['Si vous utilisez "et" pour decrire la classe, divisez-la']
+                        }
+                    },
+                    {
+                        cmd: 'O - Open/Closed',
+                        desc: 'Ouvert extension, ferme modification',
+                        details: {
+                            explanation: 'Les entites doivent etre ouvertes a l\'extension mais fermees a la modification.',
+                            syntax: 'Etendre via heritage/composition, pas modification',
+                            options: [
+                                { flag: 'Abstraction', desc: 'Utiliser des interfaces' },
+                                { flag: 'Polymorphisme', desc: 'Nouvelles implementations' },
+                                { flag: 'Strategy', desc: 'Comportements interchangeables' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS\ndef calculate_area(shape):\n    if shape.type == "circle":\n        return pi * shape.radius ** 2\n    elif shape.type == "rectangle":\n        return shape.width * shape.height\n    # Modifier pour chaque nouvelle forme!\n\n# BON\nclass Shape:\n    def area(self): pass\n\nclass Circle(Shape):\n    def area(self): return pi * self.radius ** 2\n\nclass Rectangle(Shape):\n    def area(self): return self.width * self.height', desc: 'Extension sans modification' }
+                            ],
+                            tips: ['Anticiper les variations', 'Abstraire les points d\'extension']
+                        }
+                    },
+                    {
+                        cmd: 'L - Liskov Substitution',
+                        desc: 'Sous-types substituables',
+                        details: {
+                            explanation: 'Les objets d\'une classe derivee doivent pouvoir remplacer ceux de la classe de base.',
+                            syntax: 'Si S est sous-type de T, S peut remplacer T',
+                            options: [
+                                { flag: 'Preconditions', desc: 'Pas plus strictes que parent' },
+                                { flag: 'Postconditions', desc: 'Pas plus faibles que parent' },
+                                { flag: 'Invariants', desc: 'Preserver ceux du parent' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS (viole LSP)\nclass Rectangle:\n    def set_width(self, w): self.width = w\n    def set_height(self, h): self.height = h\n\nclass Square(Rectangle):  # Probleme!\n    def set_width(self, w):\n        self.width = self.height = w  # Change aussi height!\n\n# BON: Square n\'est pas un Rectangle\nclass Shape:\n    def area(self): pass\n\nclass Rectangle(Shape): ...\nclass Square(Shape): ...', desc: 'Carre n\'est pas un Rectangle' }
+                            ],
+                            tips: ['Design by Contract', 'Tester avec la classe de base'],
+                            warnings: ['Heritage mal utilise viole souvent LSP']
+                        }
+                    },
+                    {
+                        cmd: 'I - Interface Segregation',
+                        desc: 'Interfaces specifiques',
+                        details: {
+                            explanation: 'Plusieurs interfaces specifiques valent mieux qu\'une interface generale.',
+                            syntax: 'Petites interfaces ciblees',
+                            options: [
+                                { flag: 'Cohesion', desc: 'Methodes liees' },
+                                { flag: 'Role', desc: 'Interface par role' },
+                                { flag: 'Client', desc: 'Adapter aux besoins du client' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS\nclass Worker:\n    def work(self): pass\n    def eat(self): pass\n    def sleep(self): pass\n\nclass Robot(Worker):  # Ne mange pas!\n    def eat(self): raise NotImplementedError\n\n# BON\nclass Workable:\n    def work(self): pass\n\nclass Eatable:\n    def eat(self): pass\n\nclass Human(Workable, Eatable): ...\nclass Robot(Workable): ...', desc: 'Interfaces segregees' }
+                            ],
+                            tips: ['Pas de methodes non utilisees', 'Interfaces par role']
+                        }
+                    },
+                    {
+                        cmd: 'D - Dependency Inversion',
+                        desc: 'Dependre des abstractions',
+                        details: {
+                            explanation: 'Les modules de haut niveau ne doivent pas dependre des modules de bas niveau.',
+                            syntax: 'High-level -> Abstraction <- Low-level',
+                            options: [
+                                { flag: 'Abstraction', desc: 'Interfaces entre couches' },
+                                { flag: 'Injection', desc: 'Injecter les implementations' },
+                                { flag: 'IoC Container', desc: 'Gestion automatique' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS\nclass UserService:\n    def __init__(self):\n        self.db = MySQLDatabase()  # Couplage fort\n\n# BON\nclass Database:  # Abstraction\n    def save(self, data): pass\n\nclass UserService:\n    def __init__(self, db: Database):\n        self.db = db  # Injection\n\n# Usage\nmysql_db = MySQLDatabase()\nservice = UserService(mysql_db)', desc: 'Inversion des dependances' }
+                            ],
+                            tips: ['Dependre des interfaces, pas des implementations']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: PRINCIPES GENERAUX
+            // ===============================================================
+            {
+                id: 'principles',
+                title: 'Principes Generaux',
+                icon: 'fa-lightbulb',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'DRY - Don\'t Repeat Yourself',
+                        desc: 'Eviter la duplication',
+                        details: {
+                            explanation: 'Chaque piece de connaissance doit avoir une seule representation.',
+                            syntax: 'Extraire en fonction/classe/module',
+                            options: [
+                                { flag: 'Code', desc: 'Pas de copier-coller' },
+                                { flag: 'Data', desc: 'Single source of truth' },
+                                { flag: 'Logic', desc: 'Centraliser la logique metier' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS\ndef validate_email_user(email): ...\ndef validate_email_admin(email): ...  # Meme code!\n\n# BON\ndef validate_email(email): ...\n\ndef create_user(email):\n    validate_email(email)\n    ...\n\ndef create_admin(email):\n    validate_email(email)\n    ...', desc: 'Extraire le code commun' }
+                            ],
+                            tips: ['Rule of Three: extraire au 3eme doublon']
+                        }
+                    },
+                    {
+                        cmd: 'KISS - Keep It Simple',
+                        desc: 'Rester simple',
+                        details: {
+                            explanation: 'La simplicite est la sophistication ultime.',
+                            syntax: 'Solution la plus simple qui fonctionne',
+                            options: [
+                                { flag: 'Lisibilite', desc: 'Code facile a comprendre' },
+                                { flag: 'Maintenabilite', desc: 'Facile a modifier' },
+                                { flag: 'Debugging', desc: 'Facile a debugger' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS - Over-engineered\nclass AbstractFactoryBuilderStrategyManager:\n    ...\n\n# BON - Simple et direct\ndef get_price(product):\n    return product.base_price * (1 - product.discount)', desc: 'Simplicite' }
+                            ],
+                            tips: ['Eviter l\'over-engineering', 'Le code le plus simple est le meilleur']
+                        }
+                    },
+                    {
+                        cmd: 'YAGNI - You Aren\'t Gonna Need It',
+                        desc: 'Pas de fonctionnalites speculative',
+                        details: {
+                            explanation: 'Ne pas implementer quelque chose avant d\'en avoir besoin.',
+                            syntax: 'Implementer quand necessaire, pas "au cas ou"',
+                            options: [
+                                { flag: 'Scope', desc: 'Limiter au besoin actuel' },
+                                { flag: 'Refactoring', desc: 'Ajouter plus tard si necessaire' },
+                                { flag: 'Agile', desc: 'Iterations courtes' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS - Fonctionnalites non demandees\nclass User:\n    def export_to_xml(self): ...  # Jamais demande\n    def sync_with_ldap(self): ...  # Jamais utilise\n    def generate_pdf_report(self): ...  # "Au cas ou"\n\n# BON - Seulement ce qui est necessaire\nclass User:\n    def save(self): ...\n    def get_full_name(self): ...', desc: 'Eviter le code speculatif' }
+                            ],
+                            tips: ['Build only what you need now', 'Refactor when needed'],
+                            warnings: ['Le code non utilise est de la dette']
+                        }
+                    },
+                    {
+                        cmd: 'Separation of Concerns',
+                        desc: 'Separer les preoccupations',
+                        details: {
+                            explanation: 'Diviser le programme en sections distinctes, chacune traitant une preoccupation.',
+                            syntax: 'UI | Business Logic | Data Access',
+                            options: [
+                                { flag: 'Layers', desc: 'Couches horizontales' },
+                                { flag: 'Modules', desc: 'Composants verticaux' },
+                                { flag: 'Concerns', desc: 'Logging, auth, caching separes' }
+                            ],
+                            examples: [
+                                { code: '# Separation en couches\n# presentation/\n#   views.py\n#   templates/\n# business/\n#   services.py\n#   validators.py\n# data/\n#   repositories.py\n#   models.py', desc: 'Architecture en couches' }
+                            ],
+                            tips: ['Une preoccupation par module', 'Cross-cutting via AOP/decorateurs']
+                        }
+                    },
+                    {
+                        cmd: 'Composition over Inheritance',
+                        desc: 'Preferer la composition',
+                        details: {
+                            explanation: 'Favoriser la composition d\'objets plutot que l\'heritage de classes.',
+                            syntax: 'has-a plutot que is-a',
+                            options: [
+                                { flag: 'Flexibilite', desc: 'Changer au runtime' },
+                                { flag: 'Decouplage', desc: 'Moins de dependances' },
+                                { flag: 'Testing', desc: 'Plus facile a mocker' }
+                            ],
+                            examples: [
+                                { code: '# MAUVAIS - Heritage profond\nclass Animal: ...\nclass Mammal(Animal): ...\nclass Dog(Mammal): ...\nclass FlyingDog(Dog): ...  # Probleme!\n\n# BON - Composition\nclass Dog:\n    def __init__(self, movement, sound):\n        self.movement = movement\n        self.sound = sound\n\ndog = Dog(WalkMovement(), BarkSound())\nflying_dog = Dog(FlyMovement(), BarkSound())', desc: 'Composition flexible' }
+                            ],
+                            tips: ['Heritage pour "is-a" strict', 'Composition pour "has-a" et comportements']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: CLEAN ARCHITECTURE
+            // ===============================================================
+            {
+                id: 'clean',
+                title: 'Clean Architecture',
+                icon: 'fa-layer-group',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'Dependency Rule',
+                        desc: 'Dependencies vers le centre',
+                        details: {
+                            explanation: 'Les dependances du code source pointent uniquement vers l\'interieur.',
+                            syntax: 'Outer -> Inner (jamais l\'inverse)',
+                            options: [
+                                { flag: 'Entities', desc: 'Centre - Regles metier' },
+                                { flag: 'Use Cases', desc: 'Logique applicative' },
+                                { flag: 'Adapters', desc: 'Conversion interface' },
+                                { flag: 'Frameworks', desc: 'Externe - DB, Web, UI' }
+                            ],
+                            examples: [
+                                { code: '# Structure\n# domain/          <- Centre (Entities)\n#   entities.py\n# application/     <- Use Cases\n#   use_cases.py\n# adapters/        <- Interface Adapters\n#   repositories.py\n#   controllers.py\n# infrastructure/  <- Frameworks\n#   database.py\n#   web.py', desc: 'Layers Clean Architecture' }
+                            ],
+                            tips: ['Le domaine ne connait pas l\'infrastructure']
+                        }
+                    },
+                    {
+                        cmd: 'Entities (Domain)',
+                        desc: 'Regles metier essentielles',
+                        details: {
+                            explanation: 'Objets metier encapsulant les regles critiques de l\'entreprise.',
+                            syntax: 'class Entity { business rules }',
+                            options: [
+                                { flag: 'Pure', desc: 'Pas de dependances externes' },
+                                { flag: 'Business Rules', desc: 'Logique metier invariante' },
+                                { flag: 'Value Objects', desc: 'Objets immutables' }
+                            ],
+                            examples: [
+                                { code: 'class Order:\n    def __init__(self, items):\n        self.items = items\n        self._validate()\n    \n    def _validate(self):\n        if not self.items:\n            raise ValueError("Order must have items")\n    \n    def total(self):\n        return sum(item.price for item in self.items)\n    \n    def can_be_shipped(self):\n        return self.total() > 0 and all(i.in_stock for i in self.items)', desc: 'Entity avec regles metier' }
+                            ],
+                            tips: ['Testable sans framework', 'Logique metier pure']
+                        }
+                    },
+                    {
+                        cmd: 'Use Cases',
+                        desc: 'Logique applicative',
+                        details: {
+                            explanation: 'Orchestrent les entities pour realiser les cas d\'utilisation.',
+                            syntax: 'UseCase.execute(request) -> response',
+                            options: [
+                                { flag: 'Input Port', desc: 'Interface d\'entree' },
+                                { flag: 'Output Port', desc: 'Interface de sortie' },
+                                { flag: 'Interactor', desc: 'Implementation' }
+                            ],
+                            examples: [
+                                { code: 'class CreateOrderUseCase:\n    def __init__(self, order_repo, notification):\n        self.order_repo = order_repo\n        self.notification = notification\n    \n    def execute(self, request):\n        order = Order(request.items)\n        self.order_repo.save(order)\n        self.notification.send(f"Order {order.id} created")\n        return CreateOrderResponse(order.id)', desc: 'Use Case exemple' }
+                            ],
+                            tips: ['Un use case par action', 'Injecter les dependances']
+                        }
+                    },
+                    {
+                        cmd: 'Interface Adapters',
+                        desc: 'Conversion de donnees',
+                        details: {
+                            explanation: 'Convertissent les donnees entre le format du use case et celui des frameworks.',
+                            syntax: 'Adapter converts between formats',
+                            options: [
+                                { flag: 'Controllers', desc: 'Web -> Use Case' },
+                                { flag: 'Presenters', desc: 'Use Case -> View' },
+                                { flag: 'Repositories', desc: 'Use Case -> DB' }
+                            ],
+                            examples: [
+                                { code: '# Controller (Web -> Use Case)\nclass OrderController:\n    def create(self, request):\n        use_case_request = CreateOrderRequest(\n            items=request.json["items"]\n        )\n        response = self.use_case.execute(use_case_request)\n        return {"order_id": response.order_id}, 201\n\n# Repository (Use Case -> DB)\nclass SQLOrderRepository:\n    def save(self, order):\n        db_order = OrderModel.from_entity(order)\n        self.session.add(db_order)\n        self.session.commit()', desc: 'Adapters examples' }
+                            ],
+                            tips: ['Mapper entre les mondes', 'DTOs pour le transport']
+                        }
+                    },
+                    {
+                        cmd: 'Ports and Adapters (Hexagonal)',
+                        desc: 'Architecture hexagonale',
+                        details: {
+                            explanation: 'Application au centre avec ports (interfaces) et adapters (implementations).',
+                            syntax: 'Core <- Port <- Adapter',
+                            options: [
+                                { flag: 'Driving Ports', desc: 'Entree (Primary)' },
+                                { flag: 'Driven Ports', desc: 'Sortie (Secondary)' },
+                                { flag: 'Adapters', desc: 'Implementations concretes' }
+                            ],
+                            examples: [
+                                { code: '# Port (interface)\nclass OrderRepository(ABC):\n    @abstractmethod\n    def save(self, order): pass\n    @abstractmethod\n    def find_by_id(self, id): pass\n\n# Adapter (implementation)\nclass PostgresOrderRepository(OrderRepository):\n    def save(self, order):\n        # Implementation PostgreSQL\n        ...\n\nclass InMemoryOrderRepository(OrderRepository):\n    def save(self, order):\n        # Pour les tests\n        self.orders[order.id] = order', desc: 'Port et Adapters' }
+                            ],
+                            tips: ['Testable avec fake adapters', 'Swappable infrastructure']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: ARCHITECTURES DISTRIBUEES
+            // ===============================================================
+            {
+                id: 'distributed',
+                title: 'Architectures Distribuees',
+                icon: 'fa-network-wired',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'Monolithe',
+                        desc: 'Application unique',
+                        details: {
+                            explanation: 'Toute l\'application dans un seul deployable.',
+                            syntax: 'Single deployable unit',
+                            options: [
+                                { flag: 'Simple', desc: 'Facile a developper et deployer' },
+                                { flag: 'Scaling', desc: 'Horizontal (replicas)' },
+                                { flag: 'Modular', desc: 'Peut etre bien structure' }
+                            ],
+                            examples: [
+                                { code: '# Structure monolithe modulaire\napp/\n├── users/\n│   ├── models.py\n│   ├── services.py\n│   └── views.py\n├── orders/\n│   ├── models.py\n│   ├── services.py\n│   └── views.py\n└── shared/\n    └── utils.py', desc: 'Monolithe modulaire' }
+                            ],
+                            tips: ['Bon pour commencer', 'Monolithe modulaire avant microservices']
+                        }
+                    },
+                    {
+                        cmd: 'Microservices',
+                        desc: 'Services independants',
+                        details: {
+                            explanation: 'Application composee de petits services autonomes.',
+                            syntax: 'Service A <-> Service B <-> Service C',
+                            options: [
+                                { flag: 'Autonomie', desc: 'Deploy/scale independant' },
+                                { flag: 'Bounded Context', desc: 'Un domaine par service' },
+                                { flag: 'Communication', desc: 'REST, gRPC, Events' }
+                            ],
+                            examples: [
+                                { code: '# Services separes\nuser-service/      # Port 8001\n  └── manage users\norder-service/     # Port 8002\n  └── manage orders\npayment-service/   # Port 8003\n  └── process payments\nnotification-service/  # Port 8004\n  └── send emails/sms', desc: 'Decomposition en microservices' }
+                            ],
+                            tips: ['Commencer monolithe, migrer si necessaire', 'Attention a la complexite'],
+                            warnings: ['Distributed system fallacies']
+                        }
+                    },
+                    {
+                        cmd: 'Event-Driven Architecture',
+                        desc: 'Communication par evenements',
+                        details: {
+                            explanation: 'Services communiquent via des evenements asynchrones.',
+                            syntax: 'Producer -> Event Bus -> Consumers',
+                            options: [
+                                { flag: 'Event Bus', desc: 'Kafka, RabbitMQ, Redis' },
+                                { flag: 'Pub/Sub', desc: 'Publish-Subscribe pattern' },
+                                { flag: 'Event Sourcing', desc: 'Events comme source de verite' }
+                            ],
+                            examples: [
+                                { code: '# Order Service publie\nevent = OrderCreatedEvent(\n    order_id=order.id,\n    user_id=order.user_id,\n    total=order.total\n)\nevent_bus.publish("orders", event)\n\n# Payment Service consomme\n@event_bus.subscribe("orders")\ndef handle_order_created(event):\n    if isinstance(event, OrderCreatedEvent):\n        process_payment(event.order_id)', desc: 'Event-driven communication' }
+                            ],
+                            tips: ['Decouplage temporel', 'Eventual consistency']
+                        }
+                    },
+                    {
+                        cmd: 'Service Mesh',
+                        desc: 'Infrastructure de communication',
+                        details: {
+                            explanation: 'Couche d\'infrastructure pour la communication inter-services.',
+                            syntax: 'Sidecar proxy per service',
+                            options: [
+                                { flag: 'Istio', desc: 'Service mesh populaire' },
+                                { flag: 'Linkerd', desc: 'Alternative legere' },
+                                { flag: 'Features', desc: 'mTLS, retry, circuit breaker' }
+                            ],
+                            examples: [
+                                { code: '# Istio VirtualService\napiVersion: networking.istio.io/v1alpha3\nkind: VirtualService\nspec:\n  hosts:\n  - order-service\n  http:\n  - route:\n    - destination:\n        host: order-service\n        subset: v1\n      weight: 90\n    - destination:\n        host: order-service\n        subset: v2\n      weight: 10', desc: 'Canary deployment avec Istio' }
+                            ],
+                            tips: ['Observabilite built-in', 'Complexite supplementaire']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: API DESIGN
+            // ===============================================================
+            {
+                id: 'api',
+                title: 'API Design',
+                icon: 'fa-plug',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'REST API',
+                        desc: 'Representational State Transfer',
+                        details: {
+                            explanation: 'Style architectural base sur HTTP et les ressources.',
+                            syntax: 'GET/POST/PUT/DELETE /resources/{id}',
+                            options: [
+                                { flag: 'Resources', desc: 'Noms au pluriel' },
+                                { flag: 'Verbs', desc: 'HTTP methods' },
+                                { flag: 'Status Codes', desc: '2xx, 4xx, 5xx' }
+                            ],
+                            examples: [
+                                { code: '# Endpoints REST\nGET    /users          # List users\nGET    /users/123      # Get user 123\nPOST   /users          # Create user\nPUT    /users/123      # Update user 123\nDELETE /users/123      # Delete user 123\n\n# Nested resources\nGET    /users/123/orders    # User\'s orders\nPOST   /users/123/orders    # Create order for user', desc: 'REST endpoints' }
+                            ],
+                            tips: ['HATEOAS pour discoverability', 'Versionner l\'API']
+                        }
+                    },
+                    {
+                        cmd: 'GraphQL',
+                        desc: 'Query language pour APIs',
+                        details: {
+                            explanation: 'Les clients specifient exactement les donnees dont ils ont besoin.',
+                            syntax: 'query { user(id: 1) { name, email } }',
+                            options: [
+                                { flag: 'Query', desc: 'Lecture de donnees' },
+                                { flag: 'Mutation', desc: 'Modification de donnees' },
+                                { flag: 'Subscription', desc: 'Temps reel' }
+                            ],
+                            examples: [
+                                { code: '# Schema\ntype User {\n  id: ID!\n  name: String!\n  email: String!\n  orders: [Order!]!\n}\n\ntype Query {\n  user(id: ID!): User\n  users: [User!]!\n}\n\n# Query\nquery {\n  user(id: "123") {\n    name\n    orders {\n      id\n      total\n    }\n  }\n}', desc: 'GraphQL schema et query' }
+                            ],
+                            tips: ['Evite over/under-fetching', 'Attention aux N+1 queries']
+                        }
+                    },
+                    {
+                        cmd: 'gRPC',
+                        desc: 'Remote Procedure Call',
+                        details: {
+                            explanation: 'Framework RPC haute performance avec Protocol Buffers.',
+                            syntax: 'service.Method(Request) -> Response',
+                            options: [
+                                { flag: 'Proto', desc: 'Definition du contrat' },
+                                { flag: 'Binary', desc: 'Serialisation efficace' },
+                                { flag: 'Streaming', desc: 'Unary, Server, Client, Bidirectional' }
+                            ],
+                            examples: [
+                                { code: '// user.proto\nsyntax = "proto3";\n\nservice UserService {\n  rpc GetUser(GetUserRequest) returns (User);\n  rpc ListUsers(ListUsersRequest) returns (stream User);\n}\n\nmessage GetUserRequest {\n  string id = 1;\n}\n\nmessage User {\n  string id = 1;\n  string name = 2;\n  string email = 3;\n}', desc: 'gRPC proto definition' }
+                            ],
+                            tips: ['Ideal pour microservices internes', 'Plus rapide que REST/JSON']
+                        }
+                    },
+                    {
+                        cmd: 'API Versioning',
+                        desc: 'Gerer les versions d\'API',
+                        details: {
+                            explanation: 'Strategies pour evoluer l\'API sans casser les clients.',
+                            syntax: '/v1/resource, /v2/resource',
+                            options: [
+                                { flag: 'URL Path', desc: '/api/v1/users' },
+                                { flag: 'Header', desc: 'Accept: application/vnd.api.v1+json' },
+                                { flag: 'Query', desc: '?version=1' }
+                            ],
+                            examples: [
+                                { code: '# URL versioning (recommande)\nGET /api/v1/users\nGET /api/v2/users\n\n# Header versioning\nGET /api/users\nAccept: application/vnd.myapi.v2+json\n\n# Deprecation header\nHTTP/1.1 200 OK\nDeprecation: true\nSunset: Sat, 31 Dec 2024 23:59:59 GMT', desc: 'Strategies de versioning' }
+                            ],
+                            tips: ['Deprecation gracieuse', 'Documenter les breaking changes']
+                        }
+                    },
+                    {
+                        cmd: 'OpenAPI / Swagger',
+                        desc: 'Documentation API',
+                        details: {
+                            explanation: 'Specification standard pour documenter les APIs REST.',
+                            syntax: 'openapi: 3.0.0',
+                            options: [
+                                { flag: 'Spec', desc: 'YAML/JSON description' },
+                                { flag: 'UI', desc: 'Swagger UI interactive' },
+                                { flag: 'Codegen', desc: 'Generer clients/serveurs' }
+                            ],
+                            examples: [
+                                { code: 'openapi: 3.0.0\ninfo:\n  title: User API\n  version: 1.0.0\npaths:\n  /users/{id}:\n    get:\n      summary: Get user by ID\n      parameters:\n        - name: id\n          in: path\n          required: true\n          schema:\n            type: string\n      responses:\n        200:\n          description: User found\n          content:\n            application/json:\n              schema:\n                $ref: "#/components/schemas/User"', desc: 'OpenAPI specification' }
+                            ],
+                            tips: ['Contract-first design', 'Generer la doc automatiquement']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: MESSAGING & EVENTS
+            // ===============================================================
+            {
+                id: 'messaging',
+                title: 'Messaging & Events',
+                icon: 'fa-envelope',
+                color: 'border-l-4 border-orange-500',
+                commands: [
+                    {
+                        cmd: 'Message Queue',
+                        desc: 'File de messages asynchrone',
+                        details: {
+                            explanation: 'Communication asynchrone via files de messages.',
+                            syntax: 'Producer -> Queue -> Consumer',
+                            options: [
+                                { flag: 'RabbitMQ', desc: 'AMQP, routing flexible' },
+                                { flag: 'Redis', desc: 'Simple, rapide' },
+                                { flag: 'SQS', desc: 'AWS managed' }
+                            ],
+                            examples: [
+                                { code: '# RabbitMQ avec pika\nimport pika\n\n# Producer\nconnection = pika.BlockingConnection()\nchannel = connection.channel()\nchannel.queue_declare(queue="tasks")\nchannel.basic_publish(\n    exchange="",\n    routing_key="tasks",\n    body="process_order:123"\n)\n\n# Consumer\ndef callback(ch, method, properties, body):\n    process(body)\n    ch.basic_ack(delivery_tag=method.delivery_tag)\n\nchannel.basic_consume(queue="tasks", on_message_callback=callback)', desc: 'Message queue basique' }
+                            ],
+                            tips: ['Acknowledgments pour fiabilite', 'Dead letter queue pour erreurs']
+                        }
+                    },
+                    {
+                        cmd: 'Pub/Sub',
+                        desc: 'Publish-Subscribe pattern',
+                        details: {
+                            explanation: 'Un message envoye a tous les abonnes.',
+                            syntax: 'Publisher -> Topic -> Subscribers',
+                            options: [
+                                { flag: 'Topic', desc: 'Canal de diffusion' },
+                                { flag: 'Fan-out', desc: 'Un vers plusieurs' },
+                                { flag: 'Filtering', desc: 'Abonnement selectif' }
+                            ],
+                            examples: [
+                                { code: '# Redis Pub/Sub\nimport redis\n\nr = redis.Redis()\n\n# Publisher\nr.publish("orders", json.dumps({"event": "created", "id": 123}))\n\n# Subscriber\npubsub = r.pubsub()\npubsub.subscribe("orders")\n\nfor message in pubsub.listen():\n    if message["type"] == "message":\n        handle_event(json.loads(message["data"]))', desc: 'Redis Pub/Sub' }
+                            ],
+                            tips: ['Decouplage fort', 'Pas de garantie de livraison (selon impl)']
+                        }
+                    },
+                    {
+                        cmd: 'Event Sourcing',
+                        desc: 'Events comme source de verite',
+                        details: {
+                            explanation: 'Stocker tous les changements comme sequence d\'evenements.',
+                            syntax: 'State = replay(events)',
+                            options: [
+                                { flag: 'Event Store', desc: 'Stockage des evenements' },
+                                { flag: 'Replay', desc: 'Reconstruire l\'etat' },
+                                { flag: 'Projection', desc: 'Vues materialisees' }
+                            ],
+                            examples: [
+                                { code: '# Events\nevents = [\n    AccountCreated(id="123", balance=0),\n    MoneyDeposited(id="123", amount=100),\n    MoneyWithdrawn(id="123", amount=30),\n]\n\n# Rebuild state\ndef get_balance(events):\n    balance = 0\n    for event in events:\n        if isinstance(event, MoneyDeposited):\n            balance += event.amount\n        elif isinstance(event, MoneyWithdrawn):\n            balance -= event.amount\n    return balance  # 70', desc: 'Event sourcing basique' }
+                            ],
+                            tips: ['Audit trail complet', 'Time travel debugging'],
+                            warnings: ['Complexite accrue', 'Event schema evolution']
+                        }
+                    },
+                    {
+                        cmd: 'CQRS',
+                        desc: 'Command Query Responsibility Segregation',
+                        details: {
+                            explanation: 'Separer les modeles de lecture et d\'ecriture.',
+                            syntax: 'Commands -> Write Model | Queries -> Read Model',
+                            options: [
+                                { flag: 'Commands', desc: 'Modifient l\'etat' },
+                                { flag: 'Queries', desc: 'Lisent l\'etat' },
+                                { flag: 'Sync', desc: 'Eventual consistency' }
+                            ],
+                            examples: [
+                                { code: '# Write side (Commands)\nclass CreateOrderCommand:\n    def execute(self, data):\n        order = Order.create(data)\n        self.event_store.append(OrderCreated(order))\n\n# Read side (Queries)\nclass OrderQuery:\n    def get_orders_by_user(self, user_id):\n        # Optimized read model\n        return self.read_db.query(\n            "SELECT * FROM order_view WHERE user_id = ?",\n            user_id\n        )', desc: 'CQRS separation' }
+                            ],
+                            tips: ['Optimiser lecture et ecriture separement', 'Souvent avec Event Sourcing']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: SCALABILITE
+            // ===============================================================
+            {
+                id: 'scalability',
+                title: 'Scalabilite',
+                icon: 'fa-expand-arrows-alt',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'Horizontal vs Vertical Scaling',
+                        desc: 'Scale out vs Scale up',
+                        details: {
+                            explanation: 'Deux approches pour augmenter la capacite.',
+                            syntax: 'Add machines vs Bigger machine',
+                            options: [
+                                { flag: 'Horizontal', desc: 'Plus de serveurs (scale out)' },
+                                { flag: 'Vertical', desc: 'Serveur plus puissant (scale up)' },
+                                { flag: 'Limites', desc: 'Vertical a des limites physiques' }
+                            ],
+                            examples: [
+                                { code: '# Horizontal scaling avec Docker\ndocker-compose scale web=5\n\n# Kubernetes replicas\napiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 10\n  template:\n    spec:\n      containers:\n      - name: web\n        image: myapp:latest', desc: 'Horizontal scaling' }
+                            ],
+                            tips: ['Stateless pour horizontal', 'Horizontal plus resilient']
+                        }
+                    },
+                    {
+                        cmd: 'Load Balancing',
+                        desc: 'Distribution de charge',
+                        details: {
+                            explanation: 'Repartir le trafic entre plusieurs serveurs.',
+                            syntax: 'Client -> LB -> Server Pool',
+                            options: [
+                                { flag: 'Round Robin', desc: 'Tour a tour' },
+                                { flag: 'Least Connections', desc: 'Moins de connexions actives' },
+                                { flag: 'Weighted', desc: 'Selon capacite' },
+                                { flag: 'Sticky Sessions', desc: 'Meme serveur par client' }
+                            ],
+                            examples: [
+                                { code: '# Nginx load balancer\nupstream backend {\n    least_conn;\n    server backend1:8080 weight=3;\n    server backend2:8080;\n    server backend3:8080;\n}\n\nserver {\n    listen 80;\n    location / {\n        proxy_pass http://backend;\n    }\n}', desc: 'Nginx load balancing' }
+                            ],
+                            tips: ['Health checks essentiels', 'L7 pour routing intelligent']
+                        }
+                    },
+                    {
+                        cmd: 'Caching',
+                        desc: 'Mise en cache',
+                        details: {
+                            explanation: 'Stocker temporairement les donnees frequemment accedees.',
+                            syntax: 'Check cache -> Miss -> Fetch -> Store',
+                            options: [
+                                { flag: 'Redis', desc: 'Cache distribue' },
+                                { flag: 'CDN', desc: 'Cache geographique' },
+                                { flag: 'Browser', desc: 'Cache client' },
+                                { flag: 'App', desc: 'Cache applicatif' }
+                            ],
+                            examples: [
+                                { code: '# Cache-aside pattern\ndef get_user(user_id):\n    # Try cache first\n    cached = redis.get(f"user:{user_id}")\n    if cached:\n        return json.loads(cached)\n    \n    # Cache miss - fetch from DB\n    user = db.query(User).get(user_id)\n    \n    # Store in cache\n    redis.setex(\n        f"user:{user_id}",\n        3600,  # TTL 1 hour\n        json.dumps(user.to_dict())\n    )\n    return user', desc: 'Cache-aside pattern' }
+                            ],
+                            tips: ['TTL pour invalidation', 'Cache invalidation is hard']
+                        }
+                    },
+                    {
+                        cmd: 'Database Scaling',
+                        desc: 'Scalabilite de la DB',
+                        details: {
+                            explanation: 'Techniques pour scaler les bases de donnees.',
+                            syntax: 'Read replicas, Sharding, Partitioning',
+                            options: [
+                                { flag: 'Replication', desc: 'Master-slave, read replicas' },
+                                { flag: 'Sharding', desc: 'Partitionnement horizontal' },
+                                { flag: 'Partitioning', desc: 'Par date, region, etc.' }
+                            ],
+                            examples: [
+                                { code: '# Read/Write split\nclass DatabaseRouter:\n    def db_for_read(self, model):\n        return "replica"\n    \n    def db_for_write(self, model):\n        return "primary"\n\n# Sharding by user_id\ndef get_shard(user_id):\n    shard_count = 4\n    return f"shard_{user_id % shard_count}"', desc: 'Database scaling patterns' }
+                            ],
+                            tips: ['Read replicas pour read-heavy', 'Sharding complexe a implementer']
+                        }
+                    },
+                    {
+                        cmd: 'Circuit Breaker',
+                        desc: 'Protection contre les cascades',
+                        details: {
+                            explanation: 'Empecher les echecs en cascade dans les systemes distribues.',
+                            syntax: 'Closed -> Open -> Half-Open',
+                            options: [
+                                { flag: 'Closed', desc: 'Normal, requests passent' },
+                                { flag: 'Open', desc: 'Echec, requests bloquees' },
+                                { flag: 'Half-Open', desc: 'Test de recovery' }
+                            ],
+                            examples: [
+                                { code: 'from circuitbreaker import circuit\n\n@circuit(failure_threshold=5, recovery_timeout=30)\ndef call_external_service():\n    response = requests.get("http://external-api/data")\n    response.raise_for_status()\n    return response.json()\n\n# Usage\ntry:\n    data = call_external_service()\nexcept CircuitBreakerError:\n    data = get_fallback_data()', desc: 'Circuit breaker pattern' }
+                            ],
+                            tips: ['Fallback pour degradation gracieuse', 'Retry avec backoff']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: DOCUMENTATION
+            // ===============================================================
+            {
+                id: 'documentation',
+                title: 'Documentation',
+                icon: 'fa-file-alt',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'ADR (Architecture Decision Records)',
+                        desc: 'Documenter les decisions',
+                        details: {
+                            explanation: 'Enregistrer les decisions architecturales importantes.',
+                            syntax: 'Title, Status, Context, Decision, Consequences',
+                            options: [
+                                { flag: 'Context', desc: 'Pourquoi cette decision' },
+                                { flag: 'Decision', desc: 'Ce qui a ete decide' },
+                                { flag: 'Consequences', desc: 'Impact de la decision' }
+                            ],
+                            examples: [
+                                { code: '# ADR-001: Use PostgreSQL for primary database\n\n## Status\nAccepted\n\n## Context\nWe need a reliable RDBMS for our core data.\n\n## Decision\nUse PostgreSQL 14+ for:\n- ACID compliance\n- JSON support\n- Full-text search\n\n## Consequences\n- Team needs PostgreSQL expertise\n- Hosting costs for managed service\n- Migration from SQLite needed', desc: 'ADR exemple' }
+                            ],
+                            tips: ['Un ADR par decision majeure', 'Immutable une fois accepted']
+                        }
+                    },
+                    {
+                        cmd: 'C4 Model',
+                        desc: 'Diagrammes a 4 niveaux',
+                        details: {
+                            explanation: 'Modele de visualisation de l\'architecture logicielle.',
+                            syntax: 'Context -> Container -> Component -> Code',
+                            options: [
+                                { flag: 'Context', desc: 'Systeme et acteurs externes' },
+                                { flag: 'Container', desc: 'Applications et stores' },
+                                { flag: 'Component', desc: 'Composants internes' },
+                                { flag: 'Code', desc: 'Classes (optionnel)' }
+                            ],
+                            examples: [
+                                { code: '# C4 avec Structurizr DSL\nworkspace {\n    model {\n        user = person "User"\n        system = softwareSystem "E-commerce" {\n            webapp = container "Web App" "React"\n            api = container "API" "Python/FastAPI"\n            db = container "Database" "PostgreSQL"\n        }\n        user -> webapp "Uses"\n        webapp -> api "API calls"\n        api -> db "Reads/Writes"\n    }\n}', desc: 'C4 model en DSL' }
+                            ],
+                            tips: ['Zoom progressif', 'Audience differente par niveau']
+                        }
+                    },
+                    {
+                        cmd: 'README.md',
+                        desc: 'Documentation projet',
+                        details: {
+                            explanation: 'Documentation d\'entree pour tout projet.',
+                            syntax: 'Title, Description, Install, Usage, Contributing',
+                            options: [
+                                { flag: 'Quick Start', desc: 'Demarrer rapidement' },
+                                { flag: 'Installation', desc: 'Setup du projet' },
+                                { flag: 'Usage', desc: 'Comment utiliser' },
+                                { flag: 'Contributing', desc: 'Comment contribuer' }
+                            ],
+                            examples: [
+                                { code: '# Project Name\n\nBrief description of what this project does.\n\n## Quick Start\n\n```bash\ngit clone https://github.com/user/project\ncd project\npip install -r requirements.txt\npython main.py\n```\n\n## Features\n\n- Feature 1\n- Feature 2\n\n## Contributing\n\nSee CONTRIBUTING.md', desc: 'README template' }
+                            ],
+                            tips: ['Toujours a jour', 'Premier point de contact']
+                        }
+                    },
+                    {
+                        cmd: 'Runbooks',
+                        desc: 'Procedures operationnelles',
+                        details: {
+                            explanation: 'Documentation pour les operations et incidents.',
+                            syntax: 'Problem, Diagnosis, Resolution, Escalation',
+                            options: [
+                                { flag: 'Symptoms', desc: 'Comment identifier le probleme' },
+                                { flag: 'Steps', desc: 'Actions a effectuer' },
+                                { flag: 'Verification', desc: 'Comment verifier la resolution' }
+                            ],
+                            examples: [
+                                { code: '# Runbook: Database Connection Failures\n\n## Symptoms\n- HTTP 500 errors\n- Log message: "Connection refused"\n\n## Diagnosis\n1. Check DB status: `systemctl status postgresql`\n2. Check connections: `SELECT count(*) FROM pg_stat_activity;`\n\n## Resolution\n1. If DB down: `systemctl restart postgresql`\n2. If max connections: Kill idle connections\n\n## Escalation\nIf unresolved after 15min, page DBA team.', desc: 'Runbook exemple' }
+                            ],
+                            tips: ['Tester les runbooks', 'Mettre a jour apres incidents']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

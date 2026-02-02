@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aide-memoire Cryptographie : chiffrement symetrique et asymetrique, hashing, signatures, TLS.">
+    <title>Cryptographie - IT Cheatsheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="dark-theme text-slate-200">
+
+    <!-- Header -->
+    <header class="bg-slate-900/50 border-b border-white/5 py-8 px-4 relative overflow-hidden header-glow">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="flex items-center justify-between mb-4">
+                <a href="../index.html" class="nav-back inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour
+                </a>
+                <a href="../index.html" class="inline-flex items-center text-slate-400 hover:text-sky-400 transition">
+                    <i class="fas fa-home mr-2"></i>
+                    Accueil
+                </a>
+            </div>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-yellow-500/20 mb-4 icon-glow">
+                    <i class="fas fa-lock text-3xl text-yellow-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2 gradient-text">Cryptographie</h1>
+                <p class="text-slate-400">Chiffrement, hashing, signatures, certificats, TLS</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4 relative z-10">
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" placeholder="Rechercher (ex: AES, RSA, SHA, TLS)..."
+                   class="search-dark w-full p-4 pl-12 rounded-lg outline-none transition">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="categoriesGrid"></div>
+    </main>
+
+    <!-- Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4 modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content-dark rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-content" onclick="event.stopPropagation()">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 relative z-10">
+        <div class="text-center text-slate-500 py-8 text-sm">
+            <p>&copy; 2026 - Dr FENOHASINA Toto Jean Felicien</p>
+        </div>
+    </footer>
+
+    <script>
+        const cheatsheetData = [
+            // ===============================================================
+            // CATEGORIE 1: CHIFFREMENT SYMETRIQUE
+            // ===============================================================
+            {
+                id: 'symmetric',
+                title: 'Chiffrement Symetrique',
+                icon: 'fa-key',
+                color: 'border-l-4 border-blue-500',
+                commands: [
+                    {
+                        cmd: 'AES (Advanced Encryption Standard)',
+                        desc: 'Standard de chiffrement moderne',
+                        details: {
+                            explanation: 'Algorithme de chiffrement par blocs, standard actuel pour le chiffrement symetrique.',
+                            syntax: 'ciphertext = AES_encrypt(plaintext, key)',
+                            options: [
+                                { flag: 'AES-128', desc: 'Cle de 128 bits (16 octets)' },
+                                { flag: 'AES-192', desc: 'Cle de 192 bits (24 octets)' },
+                                { flag: 'AES-256', desc: 'Cle de 256 bits (32 octets) - Recommande' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes\nfrom cryptography.hazmat.backends import default_backend\nimport os\n\nkey = os.urandom(32)  # AES-256\niv = os.urandom(16)\n\ncipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())\nencryptor = cipher.encryptor()\nciphertext = encryptor.update(padded_data) + encryptor.finalize()', desc: 'AES-256-CBC en Python' }
+                            ],
+                            tips: ['AES-256 pour donnees sensibles', 'Toujours utiliser un IV aleatoire']
+                        }
+                    },
+                    {
+                        cmd: 'Modes de chiffrement',
+                        desc: 'Comment appliquer le chiffrement par blocs',
+                        details: {
+                            explanation: 'Differentes facons d\'appliquer un algorithme de chiffrement par blocs.',
+                            syntax: 'mode(plaintext, key, IV)',
+                            options: [
+                                { flag: 'ECB', desc: 'Electronic Codebook - DANGEREUX, patterns visibles' },
+                                { flag: 'CBC', desc: 'Cipher Block Chaining - Necessite IV' },
+                                { flag: 'CTR', desc: 'Counter Mode - Parallelisable' },
+                                { flag: 'GCM', desc: 'Galois/Counter Mode - Authentifie (AEAD)' }
+                            ],
+                            examples: [
+                                { code: '# AES-GCM (recommande - chiffrement + authentification)\nfrom cryptography.hazmat.primitives.ciphers.aead import AESGCM\n\nkey = AESGCM.generate_key(bit_length=256)\naesgcm = AESGCM(key)\nnonce = os.urandom(12)\nciphertext = aesgcm.encrypt(nonce, plaintext, associated_data)\nplaintext = aesgcm.decrypt(nonce, ciphertext, associated_data)', desc: 'AES-GCM avec authentification' }
+                            ],
+                            tips: ['Toujours GCM ou CCM pour AEAD', 'Jamais ECB en production'],
+                            warnings: ['ECB revele les patterns dans les donnees']
+                        }
+                    },
+                    {
+                        cmd: 'ChaCha20-Poly1305',
+                        desc: 'Alternative moderne a AES-GCM',
+                        details: {
+                            explanation: 'Chiffrement de flux avec authentification, performant en software.',
+                            syntax: 'ciphertext, tag = ChaCha20Poly1305(key, nonce, plaintext)',
+                            options: [
+                                { flag: 'ChaCha20', desc: 'Chiffrement de flux' },
+                                { flag: 'Poly1305', desc: 'MAC pour authentification' },
+                                { flag: 'AEAD', desc: 'Authenticated Encryption' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305\n\nkey = ChaCha20Poly1305.generate_key()\nchacha = ChaCha20Poly1305(key)\nnonce = os.urandom(12)\nciphertext = chacha.encrypt(nonce, plaintext, aad)\nplaintext = chacha.decrypt(nonce, ciphertext, aad)', desc: 'ChaCha20-Poly1305' }
+                            ],
+                            tips: ['Prefere sur mobile (pas d\'AES hardware)', 'Utilise par TLS 1.3, WireGuard']
+                        }
+                    },
+                    {
+                        cmd: 'Padding',
+                        desc: 'Remplissage pour aligner les blocs',
+                        details: {
+                            explanation: 'Les donnees doivent etre multiples de la taille du bloc.',
+                            syntax: 'padded = data + padding',
+                            options: [
+                                { flag: 'PKCS7', desc: 'Standard, ajoute N octets de valeur N' },
+                                { flag: 'Zero padding', desc: 'Ajoute des zeros (problematique)' },
+                                { flag: 'ISO 10126', desc: 'Octets aleatoires + longueur' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives import padding\n\n# Padding PKCS7\npadder = padding.PKCS7(128).padder()  # 128 bits = 16 bytes block\npadded_data = padder.update(data) + padder.finalize()\n\n# Unpadding\nunpadder = padding.PKCS7(128).unpadder()\noriginal_data = unpadder.update(padded_data) + unpadder.finalize()', desc: 'PKCS7 padding' }
+                            ],
+                            tips: ['PKCS7 est le standard', 'Pas necessaire avec CTR/GCM']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 2: CHIFFREMENT ASYMETRIQUE
+            // ===============================================================
+            {
+                id: 'asymmetric',
+                title: 'Chiffrement Asymetrique',
+                icon: 'fa-unlock-alt',
+                color: 'border-l-4 border-green-500',
+                commands: [
+                    {
+                        cmd: 'RSA',
+                        desc: 'Rivest-Shamir-Adleman',
+                        details: {
+                            explanation: 'Algorithme asymetrique base sur la factorisation de grands nombres.',
+                            syntax: 'ciphertext = RSA_encrypt(plaintext, public_key)',
+                            options: [
+                                { flag: 'RSA-2048', desc: 'Minimum recommande' },
+                                { flag: 'RSA-4096', desc: 'Plus securise' },
+                                { flag: 'OAEP', desc: 'Padding recommande pour chiffrement' },
+                                { flag: 'PSS', desc: 'Padding recommande pour signatures' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives.asymmetric import rsa, padding\nfrom cryptography.hazmat.primitives import hashes\n\n# Generation de cles\nprivate_key = rsa.generate_private_key(public_exponent=65537, key_size=4096)\npublic_key = private_key.public_key()\n\n# Chiffrement\nciphertext = public_key.encrypt(\n    plaintext,\n    padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),\n                 algorithm=hashes.SHA256(), label=None))\n\n# Dechiffrement\nplaintext = private_key.decrypt(ciphertext, padding.OAEP(...))', desc: 'RSA avec OAEP' }
+                            ],
+                            tips: ['Minimum 2048 bits', 'Utiliser pour echanger des cles symetriques']
+                        }
+                    },
+                    {
+                        cmd: 'ECC (Elliptic Curve Cryptography)',
+                        desc: 'Cryptographie sur courbes elliptiques',
+                        details: {
+                            explanation: 'Meme securite que RSA avec des cles plus petites.',
+                            syntax: 'ECDH pour echange, ECDSA pour signatures',
+                            options: [
+                                { flag: 'P-256', desc: 'NIST curve, equivalent RSA-3072' },
+                                { flag: 'P-384', desc: 'Securite plus elevee' },
+                                { flag: 'Curve25519', desc: 'Moderne, recommande' },
+                                { flag: 'Ed25519', desc: 'Pour signatures' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives.asymmetric import ec\n\n# Generation de cles\nprivate_key = ec.generate_private_key(ec.SECP256R1())\npublic_key = private_key.public_key()\n\n# ECDH Key Exchange\nshared_key = private_key.exchange(ec.ECDH(), peer_public_key)\n\n# Deriver une cle symetrique\nfrom cryptography.hazmat.primitives.kdf.hkdf import HKDF\nderived_key = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=b"").derive(shared_key)', desc: 'ECDH key exchange' }
+                            ],
+                            tips: ['Curve25519 pour nouveaux projets', 'Cle 256 bits ECC ~ 3072 bits RSA']
+                        }
+                    },
+                    {
+                        cmd: 'Diffie-Hellman',
+                        desc: 'Echange de cles securise',
+                        details: {
+                            explanation: 'Permet a deux parties de creer un secret partage sur un canal non securise.',
+                            syntax: 'shared_secret = DH(my_private, their_public)',
+                            options: [
+                                { flag: 'DH classique', desc: 'Base sur les groupes multiplicatifs' },
+                                { flag: 'ECDH', desc: 'Sur courbes elliptiques (prefere)' },
+                                { flag: 'X25519', desc: 'ECDH avec Curve25519' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey\n\n# Alice genere sa paire de cles\nalice_private = X25519PrivateKey.generate()\nalice_public = alice_private.public_key()\n\n# Bob genere sa paire de cles\nbob_private = X25519PrivateKey.generate()\nbob_public = bob_private.public_key()\n\n# Echange (meme resultat des deux cotes)\nalice_shared = alice_private.exchange(bob_public)\nbob_shared = bob_private.exchange(alice_public)\n# alice_shared == bob_shared', desc: 'X25519 key exchange' }
+                            ],
+                            tips: ['Base de TLS', 'Ne pas reutiliser les cles ephemeres']
+                        }
+                    },
+                    {
+                        cmd: 'Hybrid Encryption',
+                        desc: 'Combiner symetrique et asymetrique',
+                        details: {
+                            explanation: 'Utiliser asymetrique pour echanger une cle symetrique, puis symetrique pour les donnees.',
+                            syntax: 'encrypt(symmetric_key, RSA_public) + encrypt(data, symmetric_key)',
+                            options: [
+                                { flag: 'KEK', desc: 'Key Encryption Key (asymetrique)' },
+                                { flag: 'DEK', desc: 'Data Encryption Key (symetrique)' },
+                                { flag: 'Envelope', desc: 'Format standard' }
+                            ],
+                            examples: [
+                                { code: '# 1. Generer une cle symetrique aleatoire\nsymmetric_key = os.urandom(32)  # AES-256\n\n# 2. Chiffrer la cle avec RSA public\nencrypted_key = rsa_public.encrypt(symmetric_key, padding.OAEP(...))\n\n# 3. Chiffrer les donnees avec AES\ncipher = AESGCM(symmetric_key)\nciphertext = cipher.encrypt(nonce, data, None)\n\n# 4. Envoyer encrypted_key + nonce + ciphertext', desc: 'Chiffrement hybride' }
+                            ],
+                            tips: ['Standard pour emails (PGP)', 'Utilise par TLS']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 3: FONCTIONS DE HACHAGE
+            // ===============================================================
+            {
+                id: 'hashing',
+                title: 'Fonctions de Hachage',
+                icon: 'fa-fingerprint',
+                color: 'border-l-4 border-purple-500',
+                commands: [
+                    {
+                        cmd: 'SHA-256 / SHA-3',
+                        desc: 'Secure Hash Algorithms',
+                        details: {
+                            explanation: 'Fonctions de hachage cryptographiques produisant une empreinte fixe.',
+                            syntax: 'hash = SHA256(data)',
+                            options: [
+                                { flag: 'SHA-256', desc: '256 bits, famille SHA-2' },
+                                { flag: 'SHA-384', desc: '384 bits' },
+                                { flag: 'SHA-512', desc: '512 bits' },
+                                { flag: 'SHA-3', desc: 'Nouvelle famille, different de SHA-2' }
+                            ],
+                            examples: [
+                                { code: 'import hashlib\n\n# SHA-256\nhash_sha256 = hashlib.sha256(b"Hello World").hexdigest()\n# a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e\n\n# SHA-3-256\nhash_sha3 = hashlib.sha3_256(b"Hello World").hexdigest()\n\n# Hachage de fichier\nwith open("file.txt", "rb") as f:\n    file_hash = hashlib.sha256(f.read()).hexdigest()', desc: 'SHA-256 et SHA-3' }
+                            ],
+                            tips: ['SHA-256 pour la plupart des usages', 'SHA-3 si SHA-2 compromis']
+                        }
+                    },
+                    {
+                        cmd: 'MD5 (Obsolete)',
+                        desc: 'Message Digest 5 - NE PAS UTILISER',
+                        details: {
+                            explanation: 'Fonction de hachage obsolete, vulnerable aux collisions.',
+                            syntax: 'hash = MD5(data) // DANGEREUX',
+                            options: [
+                                { flag: 'Collisions', desc: 'Trouvees en 2004' },
+                                { flag: 'Usage OK', desc: 'Checksums non-securitaires uniquement' },
+                                { flag: 'Remplacement', desc: 'SHA-256 ou BLAKE2' }
+                            ],
+                            examples: [
+                                { code: '# NE PAS UTILISER POUR LA SECURITE\nimport hashlib\n\n# Seulement pour checksums non-securitaires\nmd5_checksum = hashlib.md5(file_data).hexdigest()\n\n# UTILISER PLUTOT:\nsha256_hash = hashlib.sha256(file_data).hexdigest()', desc: 'MD5 - usage limite' }
+                            ],
+                            warnings: ['JAMAIS pour mots de passe', 'JAMAIS pour signatures', 'Vulnerable aux collisions']
+                        }
+                    },
+                    {
+                        cmd: 'HMAC',
+                        desc: 'Hash-based Message Authentication Code',
+                        details: {
+                            explanation: 'Verification d\'integrite et d\'authenticite avec une cle secrete.',
+                            syntax: 'mac = HMAC(key, message, hash_function)',
+                            options: [
+                                { flag: 'HMAC-SHA256', desc: 'Standard actuel' },
+                                { flag: 'Secret key', desc: 'Partagee entre les parties' },
+                                { flag: 'Verification', desc: 'compare_digest() pour timing-safe' }
+                            ],
+                            examples: [
+                                { code: 'import hmac\nimport hashlib\n\nkey = b"secret_key"\nmessage = b"Important message"\n\n# Creer HMAC\nmac = hmac.new(key, message, hashlib.sha256).hexdigest()\n\n# Verifier (timing-safe)\ndef verify_hmac(key, message, received_mac):\n    expected = hmac.new(key, message, hashlib.sha256).hexdigest()\n    return hmac.compare_digest(expected, received_mac)', desc: 'HMAC-SHA256' }
+                            ],
+                            tips: ['Toujours compare_digest() pour eviter timing attacks', 'Base des JWT']
+                        }
+                    },
+                    {
+                        cmd: 'BLAKE2',
+                        desc: 'Hash moderne et rapide',
+                        details: {
+                            explanation: 'Alternative moderne a SHA, plus rapide et aussi sure.',
+                            syntax: 'hash = BLAKE2b(data)',
+                            options: [
+                                { flag: 'BLAKE2b', desc: '64-bit optimized, jusqu\'a 64 bytes' },
+                                { flag: 'BLAKE2s', desc: '32-bit optimized, jusqu\'a 32 bytes' },
+                                { flag: 'Keyed', desc: 'Peut servir de MAC' }
+                            ],
+                            examples: [
+                                { code: 'import hashlib\n\n# BLAKE2b (plus rapide que SHA-256)\nhash_b2 = hashlib.blake2b(b"Hello World").hexdigest()\n\n# BLAKE2b avec cle (comme HMAC)\nhash_keyed = hashlib.blake2b(b"data", key=b"secret").hexdigest()\n\n# Taille personnalisee\nhash_short = hashlib.blake2b(b"data", digest_size=16).hexdigest()', desc: 'BLAKE2 hashing' }
+                            ],
+                            tips: ['Plus rapide que SHA-256', 'Utilise par Argon2']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 4: SIGNATURES NUMERIQUES
+            // ===============================================================
+            {
+                id: 'signatures',
+                title: 'Signatures Numeriques',
+                icon: 'fa-signature',
+                color: 'border-l-4 border-amber-500',
+                commands: [
+                    {
+                        cmd: 'RSA-PSS',
+                        desc: 'RSA Probabilistic Signature Scheme',
+                        details: {
+                            explanation: 'Schema de signature RSA recommande avec padding probabiliste.',
+                            syntax: 'signature = RSA_sign(hash(message), private_key)',
+                            options: [
+                                { flag: 'PSS', desc: 'Padding securise (prefere)' },
+                                { flag: 'PKCS1v15', desc: 'Legacy, eviter' },
+                                { flag: 'Hash', desc: 'SHA-256 ou SHA-384' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives import hashes\nfrom cryptography.hazmat.primitives.asymmetric import padding\n\n# Signer\nsignature = private_key.sign(\n    message,\n    padding.PSS(\n        mgf=padding.MGF1(hashes.SHA256()),\n        salt_length=padding.PSS.MAX_LENGTH\n    ),\n    hashes.SHA256()\n)\n\n# Verifier\ntry:\n    public_key.verify(signature, message, padding.PSS(...), hashes.SHA256())\n    print("Signature valide")\nexcept InvalidSignature:\n    print("Signature invalide")', desc: 'RSA-PSS signature' }
+                            ],
+                            tips: ['Toujours PSS pour nouvelles implementations', 'Signer le hash, pas les donnees brutes']
+                        }
+                    },
+                    {
+                        cmd: 'ECDSA / Ed25519',
+                        desc: 'Signatures sur courbes elliptiques',
+                        details: {
+                            explanation: 'Signatures compactes et rapides basees sur les courbes elliptiques.',
+                            syntax: 'signature = ECDSA_sign(message, private_key)',
+                            options: [
+                                { flag: 'ECDSA', desc: 'Standard, utilise avec P-256' },
+                                { flag: 'Ed25519', desc: 'Moderne, plus simple, plus sur' },
+                                { flag: 'Deterministe', desc: 'Ed25519 n\'a pas besoin de random' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey\n\n# Generation de cles\nprivate_key = Ed25519PrivateKey.generate()\npublic_key = private_key.public_key()\n\n# Signer\nsignature = private_key.sign(message)\n\n# Verifier\ntry:\n    public_key.verify(signature, message)\n    print("Signature valide")\nexcept InvalidSignature:\n    print("Signature invalide")', desc: 'Ed25519 signature' }
+                            ],
+                            tips: ['Ed25519 pour nouveaux projets', 'Signature 64 bytes']
+                        }
+                    },
+                    {
+                        cmd: 'Verification d\'integrite',
+                        desc: 'Verifier que les donnees n\'ont pas ete modifiees',
+                        details: {
+                            explanation: 'Combiner hachage et signature pour garantir l\'integrite.',
+                            syntax: 'sign(hash(data)) puis verify(signature, hash(data))',
+                            options: [
+                                { flag: 'Hash', desc: 'Empreinte des donnees' },
+                                { flag: 'Signature', desc: 'Preuve d\'origine' },
+                                { flag: 'Timestamp', desc: 'Preuve temporelle optionnelle' }
+                            ],
+                            examples: [
+                                { code: '# Cote emetteur\nimport hashlib\n\ndata = b"Document important"\nhash_value = hashlib.sha256(data).digest()\nsignature = private_key.sign(hash_value, padding.PSS(...), hashes.SHA256())\n\n# Envoyer: data + signature\n\n# Cote recepteur\nreceived_hash = hashlib.sha256(received_data).digest()\ntry:\n    public_key.verify(signature, received_hash, padding.PSS(...), hashes.SHA256())\n    print("Donnees integres et authentiques")\nexcept:\n    print("Donnees modifiees ou signature invalide")', desc: 'Verification complete' }
+                            ],
+                            tips: ['Toujours verifier avant de faire confiance', 'Inclure metadata si necessaire']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 5: CERTIFICATS & PKI
+            // ===============================================================
+            {
+                id: 'pki',
+                title: 'Certificats & PKI',
+                icon: 'fa-certificate',
+                color: 'border-l-4 border-cyan-500',
+                commands: [
+                    {
+                        cmd: 'X.509 Certificats',
+                        desc: 'Standard des certificats numeriques',
+                        details: {
+                            explanation: 'Format standard liant une cle publique a une identite.',
+                            syntax: 'cert = { subject, issuer, public_key, validity, signature }',
+                            options: [
+                                { flag: 'Subject', desc: 'Identite du proprietaire' },
+                                { flag: 'Issuer', desc: 'CA qui a signe' },
+                                { flag: 'Validity', desc: 'Dates debut/fin' },
+                                { flag: 'Extensions', desc: 'SAN, Key Usage, etc.' }
+                            ],
+                            examples: [
+                                { code: '# Lire un certificat\nfrom cryptography import x509\n\nwith open("cert.pem", "rb") as f:\n    cert = x509.load_pem_x509_certificate(f.read())\n\nprint(f"Subject: {cert.subject}")\nprint(f"Issuer: {cert.issuer}")\nprint(f"Valid until: {cert.not_valid_after}")\nprint(f"Serial: {cert.serial_number}")', desc: 'Lecture de certificat X.509' }
+                            ],
+                            tips: ['Verifier la chaine complete', 'Verifier la revocation']
+                        }
+                    },
+                    {
+                        cmd: 'Certificate Authority (CA)',
+                        desc: 'Autorite de certification',
+                        details: {
+                            explanation: 'Entite de confiance qui signe les certificats.',
+                            syntax: 'CA signs certificate -> trusted',
+                            options: [
+                                { flag: 'Root CA', desc: 'Racine de confiance' },
+                                { flag: 'Intermediate CA', desc: 'CA intermediaire' },
+                                { flag: 'Chain', desc: 'Cert -> Intermediate -> Root' }
+                            ],
+                            examples: [
+                                { code: '# Verifier la chaine de certificats\nfrom cryptography.x509 import load_pem_x509_certificate\nfrom cryptography.x509.verification import PolicyBuilder, Store\n\n# Charger les CA de confiance\nstore = Store([root_ca_cert, intermediate_cert])\n\n# Verifier\nbuilder = PolicyBuilder().store(store)\nverifier = builder.build_server_verifier(dns_name)\nchain = verifier.verify(server_cert, intermediates)', desc: 'Verification de chaine' }
+                            ],
+                            tips: ['Let\'s Encrypt pour certs gratuits', 'Ne jamais exposer la cle privee CA']
+                        }
+                    },
+                    {
+                        cmd: 'Revocation (CRL/OCSP)',
+                        desc: 'Invalider des certificats',
+                        details: {
+                            explanation: 'Mecanismes pour revoquer des certificats avant expiration.',
+                            syntax: 'Check CRL or query OCSP responder',
+                            options: [
+                                { flag: 'CRL', desc: 'Liste de revocation (pull)' },
+                                { flag: 'OCSP', desc: 'Verification en temps reel (push)' },
+                                { flag: 'OCSP Stapling', desc: 'Serveur inclut la preuve' }
+                            ],
+                            examples: [
+                                { code: '# Verifier OCSP\nimport requests\nfrom cryptography.x509 import ocsp\n\n# Creer requete OCSP\nbuilder = ocsp.OCSPRequestBuilder()\nbuilder = builder.add_certificate(cert, issuer, hashes.SHA256())\nreq = builder.build()\n\n# Envoyer a l\'OCSP responder\nresponse = requests.post(\n    ocsp_url,\n    data=req.public_bytes(serialization.Encoding.DER),\n    headers={"Content-Type": "application/ocsp-request"}\n)', desc: 'Verification OCSP' }
+                            ],
+                            tips: ['OCSP Stapling prefere', 'CRL peut etre volumineux']
+                        }
+                    },
+                    {
+                        cmd: 'CSR (Certificate Signing Request)',
+                        desc: 'Demande de certificat',
+                        details: {
+                            explanation: 'Demande envoyee a une CA pour obtenir un certificat.',
+                            syntax: 'CSR = { public_key, subject, signature }',
+                            options: [
+                                { flag: 'Generate key', desc: 'Creer la paire de cles' },
+                                { flag: 'Create CSR', desc: 'Inclure subject et cle publique' },
+                                { flag: 'Submit', desc: 'Envoyer a la CA' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography import x509\nfrom cryptography.x509.oid import NameOID\n\n# Generer cle privee\nprivate_key = rsa.generate_private_key(65537, 2048)\n\n# Creer CSR\ncsr = x509.CertificateSigningRequestBuilder().subject_name(\n    x509.Name([\n        x509.NameAttribute(NameOID.COUNTRY_NAME, "FR"),\n        x509.NameAttribute(NameOID.COMMON_NAME, "example.com"),\n    ])\n).sign(private_key, hashes.SHA256())\n\n# Exporter en PEM\ncsr_pem = csr.public_bytes(serialization.Encoding.PEM)', desc: 'Creer un CSR' }
+                            ],
+                            tips: ['Garder la cle privee secrete', 'Verifier le subject avant envoi']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 6: PROTOCOLES SECURISES
+            // ===============================================================
+            {
+                id: 'protocols',
+                title: 'Protocoles Securises',
+                icon: 'fa-shield-alt',
+                color: 'border-l-4 border-rose-500',
+                commands: [
+                    {
+                        cmd: 'TLS 1.3',
+                        desc: 'Transport Layer Security',
+                        details: {
+                            explanation: 'Protocole de securisation des communications reseau.',
+                            syntax: 'Client <-> TLS Handshake <-> Server',
+                            options: [
+                                { flag: 'TLS 1.3', desc: 'Version actuelle, plus rapide, plus sure' },
+                                { flag: 'TLS 1.2', desc: 'Encore accepte si bien configure' },
+                                { flag: '0-RTT', desc: 'Resumption rapide (TLS 1.3)' }
+                            ],
+                            examples: [
+                                { code: 'import ssl\nimport socket\n\ncontext = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)\ncontext.minimum_version = ssl.TLSVersion.TLSv1_3\ncontext.load_verify_locations("ca-bundle.crt")\n\nwith socket.create_connection(("example.com", 443)) as sock:\n    with context.wrap_socket(sock, server_hostname="example.com") as ssock:\n        print(f"TLS version: {ssock.version()}")\n        ssock.send(b"GET / HTTP/1.1\\r\\n\\r\\n")', desc: 'TLS 1.3 client Python' }
+                            ],
+                            tips: ['Toujours TLS 1.3 si possible', 'Desactiver TLS 1.0 et 1.1']
+                        }
+                    },
+                    {
+                        cmd: 'TLS Handshake',
+                        desc: 'Negociation de connexion',
+                        details: {
+                            explanation: 'Etablissement de la connexion securisee.',
+                            syntax: 'ClientHello -> ServerHello -> KeyExchange -> Finished',
+                            options: [
+                                { flag: 'ClientHello', desc: 'Cipher suites supportees' },
+                                { flag: 'ServerHello', desc: 'Suite choisie + certificat' },
+                                { flag: 'Key Exchange', desc: 'ECDHE pour PFS' },
+                                { flag: 'Finished', desc: 'Verification mutuelle' }
+                            ],
+                            examples: [
+                                { code: '# TLS 1.3 Handshake simplifie (1-RTT)\n# Client -> Server: ClientHello (supported ciphers, key share)\n# Server -> Client: ServerHello + EncryptedExtensions + Certificate + Finished\n# Client -> Server: Finished\n# Application Data peut commencer\n\n# Cipher suite exemple TLS 1.3:\n# TLS_AES_256_GCM_SHA384\n# TLS_CHACHA20_POLY1305_SHA256', desc: 'TLS 1.3 handshake' }
+                            ],
+                            tips: ['TLS 1.3 = 1-RTT (plus rapide)', 'ECDHE pour Perfect Forward Secrecy']
+                        }
+                    },
+                    {
+                        cmd: 'HTTPS',
+                        desc: 'HTTP over TLS',
+                        details: {
+                            explanation: 'HTTP securise via TLS.',
+                            syntax: 'https://domain.com (port 443)',
+                            options: [
+                                { flag: 'HSTS', desc: 'Force HTTPS' },
+                                { flag: 'Certificate', desc: 'Verifie l\'identite' },
+                                { flag: 'Mixed content', desc: 'Eviter HTTP dans HTTPS' }
+                            ],
+                            examples: [
+                                { code: '# Python requests avec verification\nimport requests\n\n# Verification automatique\nresponse = requests.get("https://example.com", verify=True)\n\n# Avec certificat client\nresponse = requests.get(\n    "https://api.example.com",\n    cert=("client.crt", "client.key"),\n    verify="ca-bundle.crt"\n)', desc: 'HTTPS avec Python requests' }
+                            ],
+                            tips: ['Toujours verifier les certificats', 'HSTS avec preload']
+                        }
+                    },
+                    {
+                        cmd: 'mTLS (Mutual TLS)',
+                        desc: 'Authentification mutuelle',
+                        details: {
+                            explanation: 'Client et serveur presentent tous deux un certificat.',
+                            syntax: 'Client cert <-> Server cert',
+                            options: [
+                                { flag: 'Client cert', desc: 'Authentifie le client' },
+                                { flag: 'Server cert', desc: 'Authentifie le serveur' },
+                                { flag: 'Zero trust', desc: 'Base pour service mesh' }
+                            ],
+                            examples: [
+                                { code: '# Serveur Python avec mTLS\nimport ssl\n\ncontext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)\ncontext.load_cert_chain("server.crt", "server.key")\ncontext.load_verify_locations("ca.crt")\ncontext.verify_mode = ssl.CERT_REQUIRED  # Exige cert client\n\n# Client avec certificat\nclient_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)\nclient_context.load_cert_chain("client.crt", "client.key")\nclient_context.load_verify_locations("ca.crt")', desc: 'mTLS configuration' }
+                            ],
+                            tips: ['Standard pour microservices', 'Gestion des certificats critique']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 7: STOCKAGE SECURISE
+            // ===============================================================
+            {
+                id: 'storage',
+                title: 'Stockage Securise',
+                icon: 'fa-database',
+                color: 'border-l-4 border-indigo-500',
+                commands: [
+                    {
+                        cmd: 'Password Hashing',
+                        desc: 'Hacher les mots de passe',
+                        details: {
+                            explanation: 'Fonctions lentes conçues pour stocker des mots de passe.',
+                            syntax: 'hash = slow_hash(password, salt, params)',
+                            options: [
+                                { flag: 'Argon2', desc: 'Recommande, gagnant PHC 2015' },
+                                { flag: 'bcrypt', desc: 'Mature, largement supporte' },
+                                { flag: 'scrypt', desc: 'Memory-hard' }
+                            ],
+                            examples: [
+                                { code: '# Argon2 (recommande)\nfrom argon2 import PasswordHasher\n\nph = PasswordHasher()\nhash = ph.hash("my_password")\n\n# Verification\ntry:\n    ph.verify(hash, "my_password")\n    print("Mot de passe correct")\nexcept:\n    print("Mot de passe incorrect")\n\n# bcrypt alternative\nimport bcrypt\nhash = bcrypt.hashpw(b"password", bcrypt.gensalt(rounds=12))\nbcrypt.checkpw(b"password", hash)', desc: 'Password hashing' }
+                            ],
+                            tips: ['JAMAIS SHA/MD5 pour mots de passe', 'Argon2id prefere'],
+                            warnings: ['Les hash rapides sont DANGEREUX pour les passwords']
+                        }
+                    },
+                    {
+                        cmd: 'Salt',
+                        desc: 'Valeur aleatoire unique',
+                        details: {
+                            explanation: 'Valeur aleatoire ajoutee avant hachage pour empecher rainbow tables.',
+                            syntax: 'hash(password + salt)',
+                            options: [
+                                { flag: 'Unique', desc: 'Different pour chaque mot de passe' },
+                                { flag: 'Random', desc: 'Cryptographiquement aleatoire' },
+                                { flag: 'Stored', desc: 'Stocke avec le hash' }
+                            ],
+                            examples: [
+                                { code: 'import os\nimport hashlib\n\n# Generer un salt\nsalt = os.urandom(32)\n\n# Hacher avec salt (NE PAS faire ainsi pour passwords!)\n# Ceci est pour illustration - utiliser Argon2/bcrypt\nhash_value = hashlib.sha256(salt + password.encode()).hexdigest()\n\n# Stocker: salt + hash\nstored = salt.hex() + ":" + hash_value', desc: 'Salt basique (illustration)' }
+                            ],
+                            tips: ['Argon2/bcrypt gerent le salt automatiquement', 'Minimum 16 bytes']
+                        }
+                    },
+                    {
+                        cmd: 'Key Derivation (KDF)',
+                        desc: 'Deriver des cles a partir de secrets',
+                        details: {
+                            explanation: 'Transformer un secret (mot de passe) en cle cryptographique.',
+                            syntax: 'key = KDF(password, salt, iterations)',
+                            options: [
+                                { flag: 'PBKDF2', desc: 'Standard, configurable iterations' },
+                                { flag: 'HKDF', desc: 'Pour deriver plusieurs cles' },
+                                { flag: 'Argon2', desc: 'Memory-hard, moderne' }
+                            ],
+                            examples: [
+                                { code: 'from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC\nfrom cryptography.hazmat.primitives import hashes\n\n# PBKDF2 pour deriver une cle de chiffrement\nkdf = PBKDF2HMAC(\n    algorithm=hashes.SHA256(),\n    length=32,\n    salt=salt,\n    iterations=600000,  # OWASP recommande 600k+\n)\nkey = kdf.derive(password.encode())\n\n# HKDF pour deriver plusieurs cles\nfrom cryptography.hazmat.primitives.kdf.hkdf import HKDF\nhkdf = HKDF(algorithm=hashes.SHA256(), length=64, salt=salt, info=b"context")\nderived = hkdf.derive(shared_secret)\nenc_key, mac_key = derived[:32], derived[32:]', desc: 'Key derivation' }
+                            ],
+                            tips: ['PBKDF2: minimum 600k iterations (2024)', 'Argon2 prefere pour passwords']
+                        }
+                    },
+                    {
+                        cmd: 'Secrets Management',
+                        desc: 'Gerer les secrets en production',
+                        details: {
+                            explanation: 'Stocker et acceder aux secrets de maniere securisee.',
+                            syntax: 'secret = vault.get("api_key")',
+                            options: [
+                                { flag: 'HashiCorp Vault', desc: 'Solution entreprise' },
+                                { flag: 'AWS Secrets Manager', desc: 'Cloud AWS' },
+                                { flag: 'Env vars', desc: 'Simple mais limite' }
+                            ],
+                            examples: [
+                                { code: '# HashiCorp Vault\nimport hvac\n\nclient = hvac.Client(url="https://vault.example.com")\nclient.token = os.environ["VAULT_TOKEN"]\n\n# Lire un secret\nsecret = client.secrets.kv.read_secret_version(path="myapp/db")\ndb_password = secret["data"]["data"]["password"]\n\n# AWS Secrets Manager\nimport boto3\n\nclient = boto3.client("secretsmanager")\nresponse = client.get_secret_value(SecretId="myapp/db")\nsecret = json.loads(response["SecretString"])', desc: 'Secrets management' }
+                            ],
+                            tips: ['Jamais de secrets dans le code', 'Rotation automatique']
+                        }
+                    }
+                ]
+            },
+            // ===============================================================
+            // CATEGORIE 8: CRYPTOGRAPHIE MODERNE
+            // ===============================================================
+            {
+                id: 'modern',
+                title: 'Cryptographie Moderne',
+                icon: 'fa-atom',
+                color: 'border-l-4 border-teal-500',
+                commands: [
+                    {
+                        cmd: 'Zero-Knowledge Proofs',
+                        desc: 'Prouver sans reveler',
+                        details: {
+                            explanation: 'Prouver la connaissance d\'un secret sans le reveler.',
+                            syntax: 'Prover -> Proof -> Verifier (learns nothing)',
+                            options: [
+                                { flag: 'zk-SNARKs', desc: 'Succinct, non-interactif' },
+                                { flag: 'zk-STARKs', desc: 'Transparent, post-quantum' },
+                                { flag: 'Bulletproofs', desc: 'Range proofs efficaces' }
+                            ],
+                            examples: [
+                                { code: '# Exemple conceptuel de ZKP\n# Alice prouve qu\'elle connait x tel que hash(x) = H\n# sans reveler x\n\n# Utilisation: prouver l\'age sans reveler la date de naissance\n# prouver la solvabilite sans reveler le solde exact\n# votes electroniques anonymes\n\n# Librairies:\n# - circom/snarkjs (JavaScript)\n# - arkworks (Rust)\n# - py_ecc (Python)', desc: 'ZKP conceptuel' }
+                            ],
+                            tips: ['Base de la blockchain privacy', 'Calculs couteux']
+                        }
+                    },
+                    {
+                        cmd: 'Homomorphic Encryption',
+                        desc: 'Calculs sur donnees chiffrees',
+                        details: {
+                            explanation: 'Effectuer des operations sur des donnees chiffrees sans les dechiffrer.',
+                            syntax: 'E(a) op E(b) = E(a op b)',
+                            options: [
+                                { flag: 'Partially HE', desc: 'Une operation (+ ou *)' },
+                                { flag: 'Somewhat HE', desc: 'Operations limitees' },
+                                { flag: 'Fully HE', desc: 'Toutes operations (lent)' }
+                            ],
+                            examples: [
+                                { code: '# Exemple avec Microsoft SEAL (via tenseal)\nimport tenseal as ts\n\n# Creer contexte\ncontext = ts.context(ts.SCHEME_TYPE.CKKS, poly_modulus_degree=8192, coeff_mod_bit_sizes=[60, 40, 40, 60])\ncontext.global_scale = 2**40\ncontext.generate_galois_keys()\n\n# Chiffrer\nv1 = ts.ckks_vector(context, [1.0, 2.0, 3.0])\nv2 = ts.ckks_vector(context, [4.0, 5.0, 6.0])\n\n# Operations sur donnees chiffrees\nresult_encrypted = v1 + v2  # Addition homomorphe\nresult = result_encrypted.decrypt()  # [5.0, 7.0, 9.0]', desc: 'Chiffrement homomorphe' }
+                            ],
+                            tips: ['Cloud computing prive', 'Encore lent pour FHE']
+                        }
+                    },
+                    {
+                        cmd: 'Post-Quantum Cryptography',
+                        desc: 'Resistant aux ordinateurs quantiques',
+                        details: {
+                            explanation: 'Algorithmes resistant aux attaques par ordinateurs quantiques.',
+                            syntax: 'Lattice-based, Hash-based, Code-based',
+                            options: [
+                                { flag: 'CRYSTALS-Kyber', desc: 'KEM (echange de cles)' },
+                                { flag: 'CRYSTALS-Dilithium', desc: 'Signatures' },
+                                { flag: 'SPHINCS+', desc: 'Signatures hash-based' }
+                            ],
+                            examples: [
+                                { code: '# Post-quantum avec liboqs\nfrom oqs import KeyEncapsulation, Signature\n\n# Key encapsulation (Kyber)\nkem = KeyEncapsulation("Kyber1024")\npublic_key = kem.generate_keypair()\nciphertext, shared_secret_enc = kem.encap_secret(public_key)\nshared_secret_dec = kem.decap_secret(ciphertext)\n\n# Signature (Dilithium)\nsig = Signature("Dilithium5")\npublic_key = sig.generate_keypair()\nsignature = sig.sign(message)\nis_valid = sig.verify(message, signature, public_key)', desc: 'Post-quantum crypto' }
+                            ],
+                            tips: ['NIST a standardise Kyber et Dilithium', 'Migrer progressivement']
+                        }
+                    },
+                    {
+                        cmd: 'Secure Multi-Party Computation',
+                        desc: 'Calcul distribue prive',
+                        details: {
+                            explanation: 'Plusieurs parties calculent ensemble sans reveler leurs donnees.',
+                            syntax: 'f(x1, x2, ...) without revealing xi',
+                            options: [
+                                { flag: 'Secret Sharing', desc: 'Shamir, additive' },
+                                { flag: 'Garbled Circuits', desc: 'Evaluation de circuits' },
+                                { flag: 'Oblivious Transfer', desc: 'Transfert sans savoir quoi' }
+                            ],
+                            examples: [
+                                { code: '# Shamir Secret Sharing (t-of-n)\nfrom Crypto.Protocol.SecretSharing import Shamir\n\n# Partager un secret entre 5 parties, 3 necessaires\nsecret = b"my_secret_key_32bytes_long!!!!"\nshares = Shamir.split(3, 5, secret)\n\n# Reconstruire avec 3 parts quelconques\nrecovered = Shamir.combine(shares[:3])\nassert recovered == secret', desc: 'Secret sharing' }
+                            ],
+                            tips: ['Privacy-preserving ML', 'Calcul collaboratif sur donnees sensibles']
+                        }
+                    }
+                ]
+            }
+        ];
+    </script>
+
+    <script src="../js/cheatsheet.js"></script>
+</body>
+</html>

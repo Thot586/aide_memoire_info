@@ -139,7 +139,7 @@ function showDetails(categoryId, cmdIndex) {
     }
 
     content.innerHTML = `
-        <div class="sticky top-0 bg-slate-800 border-b border-white/10 p-4 flex items-center justify-between">
+        <div class="sticky top-0 z-10 bg-slate-800 border-b border-white/10 p-4 flex items-center justify-between">
             <h3 class="font-bold text-lg text-slate-100 flex items-center">
                 <i class="fas ${category.icon} mr-2 text-sky-400"></i>
                 Détails de la commande
@@ -169,8 +169,8 @@ function showDetails(categoryId, cmdIndex) {
                 <h4 class="font-semibold text-slate-200 mb-3 flex items-center">
                     <i class="fas fa-terminal mr-2 text-sky-400"></i>Syntaxe
                 </h4>
-                <div class="bg-slate-800/50 rounded-lg p-3 border border-white/5">
-                    <code class="text-slate-300 font-mono text-sm">${escapeHtml(command.details.syntax)}</code>
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-white/5 syntax-content">
+                    <div class="text-slate-300 text-sm">${command.details.syntax.includes('$') ? command.details.syntax : escapeHtml(command.details.syntax)}</div>
                 </div>
             </div>
 

@@ -315,13 +315,63 @@ const appData = [
     },
     {
         id: 'optimization',
-        title: 'Recherche & Optimisation',
+        title: 'Optimisation',
         desc: 'Gradient descent, métaheuristiques, algorithmes génétiques.',
         type: 'Concepts',
         icon: 'fas fa-bullseye',
         color: 'text-green-400',
         bgGlow: 'bg-green-500/20',
         link: 'sheets/optimization.html'
+    },
+    {
+        id: 'ml-theory',
+        title: 'Théorie ML/DL',
+        desc: 'Bias-variance, régularisation, validation, ensemble methods.',
+        type: 'Concepts',
+        icon: 'fas fa-brain',
+        color: 'text-pink-400',
+        bgGlow: 'bg-pink-500/20',
+        link: 'sheets/ml-theory.html'
+    },
+    {
+        id: 'design-patterns',
+        title: 'Design Patterns',
+        desc: 'Patterns créationnels, structurels, comportementaux.',
+        type: 'Concepts',
+        icon: 'fas fa-cubes',
+        color: 'text-indigo-400',
+        bgGlow: 'bg-indigo-500/20',
+        link: 'sheets/design-patterns.html'
+    },
+    {
+        id: 'software-architecture',
+        title: 'Architecture Logicielle',
+        desc: 'SOLID, Clean Architecture, microservices, API design.',
+        type: 'Concepts',
+        icon: 'fas fa-building',
+        color: 'text-teal-400',
+        bgGlow: 'bg-teal-500/20',
+        link: 'sheets/software-architecture.html'
+    },
+    {
+        id: 'cryptography',
+        title: 'Cryptographie',
+        desc: 'Chiffrement, hashing, signatures, certificats, TLS.',
+        type: 'Concepts',
+        icon: 'fas fa-lock',
+        color: 'text-yellow-400',
+        bgGlow: 'bg-yellow-500/20',
+        link: 'sheets/cryptography.html'
+    },
+    {
+        id: 'it-security',
+        title: 'Sécurité Informatique',
+        desc: 'CIA triad, authentification, OWASP, threat modeling.',
+        type: 'Concepts',
+        icon: 'fas fa-shield-alt',
+        color: 'text-red-400',
+        bgGlow: 'bg-red-500/20',
+        link: 'sheets/it-security.html'
     }
 ];
 

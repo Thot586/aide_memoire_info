@@ -1120,10 +1120,10 @@ print(f"P(|Xbar - mu| >= {t}) <= {bound:.4f}")  # 0.27`, desc: 'Inegalites' }
             }
         });
 
-        const originalShowModal = window.showModal;
-        if (originalShowModal) {
-            window.showModal = function(categoryId, commandIndex) {
-                originalShowModal(categoryId, commandIndex);
+        const originalShowDetails = window.showDetails;
+        if (originalShowDetails) {
+            window.showDetails = function(categoryId, commandIndex) {
+                originalShowDetails(categoryId, commandIndex);
                 setTimeout(() => {
                     if (typeof renderMathInElement !== 'undefined') {
                         renderMathInElement(document.getElementById('modalContent'), {
